@@ -10,18 +10,19 @@ const messageTemplates = [
 function App() {
   const [title, setTitle] = useState('Ugur Yorulmaz')
   const [message, setMessage] = useState('Hoş geldin! Burada herkese yer var.')
+  const [templates, setTemplates] = useState(messageTemplates)
   const [selectedTemplate, setSelectedTemplate] = useState(messageTemplates[0].label)
   const [items, setItems] = useState([])
 
   const activeTemplate = useMemo(
-    () => messageTemplates.find((tpl) => tpl.label === selectedTemplate),
-    [selectedTemplate],
+    () => templates.find((tpl) => tpl.label === selectedTemplate),
+    [selectedTemplate, templates],
   )
 
   const handleTemplateChange = (event) => {
     const nextTemplate = event.target.value
     setSelectedTemplate(nextTemplate)
-    const tpl = messageTemplates.find((item) => item.label === nextTemplate)
+    const tpl = templates.find((item) => item.label === nextTemplate)
     if (tpl) setMessage(tpl.value)
   }
 
@@ -37,7 +38,17 @@ function App() {
 
   const handleAdd = () => {
     if (!title.trim() && !message.trim()) return
-    setItems((prev) => [...prev, { title: title.trim(), message: message.trim() }])
+    const safeTitle = title.trim() || `Mesaj ${templates.length + 1}`
+    const safeMessage = message.trim()
+
+    setItems((prev) => [...prev, { title: safeTitle, message: safeMessage }])
+
+    const exists = templates.some((tpl) => tpl.label === safeTitle)
+    if (!exists) {
+      const nextTemplates = [...templates, { label: safeTitle, value: safeMessage }]
+      setTemplates(nextTemplates)
+    }
+    setSelectedTemplate(safeTitle)
   }
 
   return (
@@ -63,7 +74,7 @@ function App() {
           <label htmlFor="template">Şablon</label>
           <div className="field__inline">
             <select id="template" value={selectedTemplate} onChange={handleTemplateChange}>
-              {messageTemplates.map((tpl) => (
+              {templates.map((tpl) => (
                 <option key={tpl.label} value={tpl.label}>
                   {tpl.label}
                 </option>
