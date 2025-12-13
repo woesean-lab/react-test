@@ -12,7 +12,6 @@ function App() {
   const [message, setMessage] = useState('Hoş geldin! Burada herkese yer var.')
   const [templates, setTemplates] = useState(messageTemplates)
   const [selectedTemplate, setSelectedTemplate] = useState(messageTemplates[0].label)
-  const [items, setItems] = useState([])
 
   const activeTemplate = useMemo(
     () => templates.find((tpl) => tpl.label === selectedTemplate),
@@ -40,8 +39,6 @@ function App() {
     if (!title.trim() && !message.trim()) return
     const safeTitle = title.trim() || `Mesaj ${templates.length + 1}`
     const safeMessage = message.trim()
-
-    setItems((prev) => [...prev, { title: safeTitle, message: safeMessage }])
 
     const exists = templates.some((tpl) => tpl.label === safeTitle)
     if (!exists) {
@@ -107,16 +104,6 @@ function App() {
             </span>
           )}
         </div>
-      </section>
-
-      <section className="messages">
-        {items.length === 0 && <p className="empty">Henüz eklenmiş mesaj yok.</p>}
-        {items.map((item, index) => (
-          <article key={`${item.title}-${index}`} className="message-card">
-            <div className="message-card__title">{item.title || 'Başlıksız'}</div>
-            <p className="message-card__body">{item.message || 'Mesaj yok'}</p>
-          </article>
-        ))}
       </section>
     </div>
   )
