@@ -9,7 +9,7 @@ const messageTemplates = [
 
 function App() {
   const [title, setTitle] = useState('Ugur Yorulmaz')
-  const [message, setMessage] = useState('Hoş geldin! Burada herkese yer var.')
+  const [message, setMessage] = useState(messageTemplates[0].value)
   const [templates, setTemplates] = useState(messageTemplates)
   const [selectedTemplate, setSelectedTemplate] = useState(messageTemplates[0].label)
 
@@ -17,6 +17,8 @@ function App() {
     () => templates.find((tpl) => tpl.label === selectedTemplate),
     [selectedTemplate, templates],
   )
+
+  const messageLength = message.trim().length
 
   const handleTemplateChange = (event) => {
     const nextTemplate = event.target.value
@@ -51,58 +53,71 @@ function App() {
   return (
     <div className="page">
       <header className="page__header">
+        <p className="page__eyebrow">Mesaj panosu</p>
         <h1>{title || 'Ugur Yorulmaz'}</h1>
-        <p className="page__subtitle">Mesaj oluştur, seç ve kopyala.</p>
+        <p className="page__subtitle">Başlık belirle, şablonu seç, metni düzenle ve kopyala.</p>
+        <div className="metrics">
+          <span className="metric">Şablon: {templates.length}</span>
+          <span className="metric">Karakter: {messageLength}</span>
+        </div>
       </header>
 
       <section className="panel">
-        <div className="field">
-          <label htmlFor="title">Başlık</label>
-          <input
-            id="title"
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Başlık gir"
-          />
-        </div>
+        <div className="panel__grid">
+          <div className="stack">
+            <div className="field">
+              <label htmlFor="title">Başlık</label>
+              <input
+                id="title"
+                type="text"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                placeholder="Örn: Karşılama"
+              />
+            </div>
 
-        <div className="field">
-          <label htmlFor="template">Şablon</label>
-          <div className="field__inline">
-            <select id="template" value={selectedTemplate} onChange={handleTemplateChange}>
-              {templates.map((tpl) => (
-                <option key={tpl.label} value={tpl.label}>
-                  {tpl.label}
-                </option>
-              ))}
-            </select>
-            <button type="button" className="ghost" onClick={handleCopy}>
-              Kopyala
-            </button>
+            <div className="field">
+              <label htmlFor="template">Şablon</label>
+              <div className="field__inline">
+                <select id="template" value={selectedTemplate} onChange={handleTemplateChange}>
+                  {templates.map((tpl) => (
+                    <option key={tpl.label} value={tpl.label}>
+                      {tpl.label}
+                    </option>
+                  ))}
+                </select>
+                <button type="button" className="ghost" onClick={handleCopy}>
+                  Kopyala
+                </button>
+              </div>
+            </div>
           </div>
-        </div>
 
-        <div className="field">
-          <label htmlFor="message">Mesaj</label>
-          <textarea
-            id="message"
-            value={message}
-            onChange={(e) => setMessage(e.target.value)}
-            rows={4}
-            placeholder="Mesaj içeriği"
-          />
-        </div>
+          <div className="stack">
+            <div className="field">
+              <label htmlFor="message">Mesaj</label>
+              <textarea
+                id="message"
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                rows={6}
+                placeholder="Mesaj içeriği"
+              />
+              <div className="helper">
+                <span>Seçili şablon: {activeTemplate?.label || 'Yok'}</span>
+                <span>{messageLength} karakter</span>
+              </div>
+            </div>
 
-        <div className="field field--actions">
-          <button type="button" onClick={handleAdd}>
-            Ekle
-          </button>
-          {activeTemplate && (
-            <span className="note">
-              Seçili: <strong>{activeTemplate.label}</strong>
-            </span>
-          )}
+            <div className="field field--actions">
+              <button type="button" onClick={handleAdd}>
+                Ekle
+              </button>
+              <button type="button" className="ghost" onClick={() => setMessage('')}>
+                Temizle
+              </button>
+            </div>
+          </div>
         </div>
       </section>
     </div>
