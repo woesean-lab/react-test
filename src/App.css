@@ -150,13 +150,13 @@ textarea {
 
 button {
   border-radius: 10px;
-  border: 1px solid #293240;
-  padding: 11px 14px;
+  border: 1px solid #2a3240;
+  padding: 11px 15px;
   font-size: 14px;
   font-weight: 700;
   font-family: inherit;
-  background-color: #131a26;
-  color: #e8ecf3;
+  background-color: #141a26;
+  color: #e9edf4;
   cursor: pointer;
   transition: border-color 140ms ease, background-color 140ms ease, color 140ms ease,
     transform 120ms ease;
@@ -164,9 +164,8 @@ button {
 
 button:hover,
 button:focus-visible {
-  border-color: var(--accent);
-  background-color: #1c2432;
-  box-shadow: 0 8px 22px rgba(110, 168, 255, 0.2);
+  border-color: #3a4657;
+  background-color: #1b2230;
   transform: translateY(-1px);
   color: #ffffff;
 }
@@ -176,14 +175,21 @@ button:active {
 }
 
 button.ghost {
-  background-color: #131a26;
-  border-color: #293240;
-  color: #e8ecf3;
+  background-color: #141a26;
+  border-color: #2a3240;
+  color: #e9edf4;
 }
 
 button.danger {
-  border-color: #3a2d2d;
-  color: #f29a9a;
+  border-color: #3a2f32;
+  color: #f19a9a;
+}
+
+button.danger:hover,
+button.danger:focus-visible {
+  background: #1d1a1a;
+  border-color: #e07d7d;
+  color: #ffb3b3;
 }
 
 
