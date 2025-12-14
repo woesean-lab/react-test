@@ -8,7 +8,7 @@ const initialTemplates = [
 ]
 
 function App() {
-  const [title, setTitle] = useState('Ugur Yorulmaz')
+  const [title, setTitle] = useState('Pulcip Message')
   const [message, setMessage] = useState(initialTemplates[0].value)
   const [templates, setTemplates] = useState(initialTemplates)
   const [selectedTemplate, setSelectedTemplate] = useState(initialTemplates[0].label)
@@ -66,7 +66,7 @@ function App() {
     <div className="page">
       <header className="page__header">
         <p className="page__eyebrow">Mesaj paneli</p>
-        <h1>{title || 'Ugur Yorulmaz'}</h1>
+        <h1>{title || 'Pulcip Message'}</h1>
         <p className="page__subtitle">Baslik belirle, sablon sec, metni duzenle ve kopyala.</p>
         <div className="metrics">
           <span className="metric">Sablon: {templates.length}</span>
