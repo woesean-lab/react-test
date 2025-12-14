@@ -183,6 +183,12 @@ button.danger {
   color: #f3c0c0;
 }
 
+.actions-inline button,
+.field--actions button {
+  flex: 1;
+  min-width: 120px;
+}
+
 button.danger:hover,
 button.danger:focus-visible {
   background: #1d1a1a;
