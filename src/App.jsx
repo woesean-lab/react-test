@@ -74,66 +74,63 @@ function App() {
         </div>
       </header>
 
-      <section className="panel">
-        <div className="panel__grid">
-          <div className="stack">
-            <div className="field">
-              <label htmlFor="title">Baslik</label>
-              <input
-                id="title"
-                type="text"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Orn: Karsilama"
-              />
-            </div>
-
-            <div className="field">
-              <label htmlFor="template">Sablon</label>
-              <div className="field__inline">
-                <select id="template" value={selectedTemplate} onChange={handleTemplateChange}>
-                  {templates.map((tpl) => (
-                    <option key={tpl.label} value={tpl.label}>
-                      {tpl.label}
-                    </option>
-                  ))}
-                </select>
-                <div className="actions-inline">
-                  <button type="button" className="ghost" onClick={handleCopy}>
-                    Kopyala
-                  </button>
-                  <button type="button" className="ghost danger" onClick={handleDeleteTemplate}>
-                    Sil
-                  </button>
-                </div>
+      <section className="cards">
+        <div className="card">
+          <div className="field">
+            <label htmlFor="template">Sablon</label>
+            <div className="field__inline">
+              <select id="template" value={selectedTemplate} onChange={handleTemplateChange}>
+                {templates.map((tpl) => (
+                  <option key={tpl.label} value={tpl.label}>
+                    {tpl.label}
+                  </option>
+                ))}
+              </select>
+              <div className="actions-inline">
+                <button type="button" className="ghost" onClick={handleCopy}>
+                  Kopyala
+                </button>
+                <button type="button" className="ghost danger" onClick={handleDeleteTemplate}>
+                  Sil
+                </button>
               </div>
             </div>
           </div>
+          <p className="hint">
+            Secili sablon: <strong>{activeTemplate?.label || 'Yok'}</strong> • {messageLength} karakter
+          </p>
+        </div>
 
-          <div className="stack">
-            <div className="field">
-              <label htmlFor="message">Mesaj</label>
-              <textarea
-                id="message"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                rows={6}
-                placeholder="Mesaj icerigi"
-              />
-              <div className="helper">
-                <span>Secili sablon: {activeTemplate?.label || 'Yok'}</span>
-                <span>{messageLength} karakter</span>
-              </div>
-            </div>
+        <div className="card">
+          <div className="field">
+            <label htmlFor="title">Baslik</label>
+            <input
+              id="title"
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Orn: Karsilama"
+            />
+          </div>
 
-            <div className="field field--actions">
-              <button type="button" onClick={handleAdd}>
-                Ekle
-              </button>
-              <button type="button" className="ghost" onClick={() => setMessage('')}>
-                Temizle
-              </button>
-            </div>
+          <div className="field">
+            <label htmlFor="message">Mesaj</label>
+            <textarea
+              id="message"
+              value={message}
+              onChange={(e) => setMessage(e.target.value)}
+              rows={6}
+              placeholder="Mesaj icerigi"
+            />
+          </div>
+
+          <div className="field field--actions">
+            <button type="button" onClick={handleAdd}>
+              Ekle
+            </button>
+            <button type="button" className="ghost" onClick={() => setMessage('')}>
+              Temizle
+            </button>
           </div>
         </div>
       </section>

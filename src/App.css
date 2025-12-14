@@ -77,26 +77,20 @@ body {
   font-weight: 700;
 }
 
-.panel {
-  width: 100%;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 24px;
+.cards {
   display: grid;
-  gap: 20px;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
-}
-
-.panel__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 20px;
-}
-
-.stack {
-  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 16px;
+}
+
+.card {
+  background: linear-gradient(140deg, #181d27, #121722);
+  border: 1px solid #1f2633;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.28);
+  display: grid;
+  gap: 14px;
 }
 
 .field {
@@ -156,7 +150,7 @@ textarea {
 
 button {
   border-radius: 12px;
-  border: 1px solid var(--border);
+  border: 1px solid #2c3545;
   padding: 12px 14px;
   font-size: 15px;
   font-weight: 700;
@@ -164,13 +158,14 @@ button {
   background-color: #1b202a;
   color: var(--text);
   cursor: pointer;
-  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease,
-    transform 120ms ease;
+  transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease,
+    color 120ms ease, box-shadow 120ms ease;
 }
 
 button:hover {
   border-color: var(--accent);
-  background-color: rgba(110, 168, 255, 0.12);
+  background-color: #202734;
+  box-shadow: 0 10px 24px rgba(110, 168, 255, 0.18);
   transform: translateY(-1px);
 }
 
@@ -205,6 +200,12 @@ button.danger:hover {
   color: var(--muted);
   font-size: 14px;
   margin-top: 6px;
+}
+
+.hint {
+  margin: 0;
+  color: var(--muted);
+  font-size: 13px;
 }
 
 @media (max-width: 900px) {
