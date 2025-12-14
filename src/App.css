@@ -149,23 +149,22 @@ textarea {
 }
 
 button {
-  border-radius: 12px;
-  border: 1px solid #2c3545;
-  padding: 12px 14px;
-  font-size: 15px;
+  border-radius: 10px;
+  border: 1px solid #2b3444;
+  padding: 11px 14px;
+  font-size: 14px;
   font-weight: 700;
   font-family: inherit;
-  background-color: #1b202a;
-  color: var(--text);
+  background-color: #111723;
+  color: #e8ecf3;
   cursor: pointer;
-  transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease,
-    color 120ms ease, box-shadow 120ms ease;
+  transition: border-color 140ms ease, background-color 140ms ease, color 140ms ease,
+    transform 120ms ease;
 }
 
 button:hover {
   border-color: var(--accent);
-  background-color: #202734;
-  box-shadow: 0 10px 24px rgba(110, 168, 255, 0.18);
+  background-color: #182132;
   transform: translateY(-1px);
 }
 
@@ -174,7 +173,8 @@ button:active {
 }
 
 button.ghost {
-  background: #1b202a;
+  background: transparent;
+  border-color: #2b3444;
 }
 
 button.danger {
@@ -221,11 +221,6 @@ button.danger:hover {
 
   button {
     width: 100%;
-  }
-
-  .field--actions {
-    flex-direction: column;
-    align-items: stretch;
   }
 
   .actions-inline {
