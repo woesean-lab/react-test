@@ -230,6 +230,11 @@ button.danger:hover {
     align-items: stretch;
   }
 
+  .actions-inline {
+    width: 100%;
+    flex-direction: column;
+  }
+
   .helper {
     flex-direction: column;
     align-items: flex-start;
