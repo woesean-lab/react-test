@@ -135,7 +135,7 @@ function App() {
             <button type="button" onClick={handleAdd}>
               Ekle
             </button>
-            <button type="button" className="ghost" onClick={() => setMessage('')}>
+            <button type="button" className="ghost danger" onClick={() => setMessage('')}>
               Temizle
             </button>
           </div>
