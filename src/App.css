@@ -162,10 +162,13 @@ button {
     transform 120ms ease;
 }
 
-button:hover {
-  border-color: #3a4657;
-  background-color: #182132;
+button:hover,
+button:focus-visible {
+  border-color: var(--accent);
+  background-color: #1c2432;
+  box-shadow: 0 8px 22px rgba(110, 168, 255, 0.2);
   transform: translateY(-1px);
+  color: #ffffff;
 }
 
 button:active {
@@ -183,10 +186,6 @@ button.danger {
   color: #f29a9a;
 }
 
-button.danger:hover {
-  background: #1c1b1b;
-  border-color: #4a3a3a;
-}
 
 .field--actions {
   display: grid;
