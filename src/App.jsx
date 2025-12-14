@@ -30,10 +30,8 @@ function App() {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(message)
-      alert('Mesaj kopyalandi')
     } catch (error) {
       console.error('Copy failed', error)
-      alert('Kopyalama basarisiz oldu')
     }
   }
 
