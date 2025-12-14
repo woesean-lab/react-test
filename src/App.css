@@ -251,21 +251,29 @@ button.danger::after {
   align-items: center;
   gap: 10px;
   padding: 0;
-  background: #1f282f;
-  color: #e8f6ff;
+  background: #161d26;
+  color: #e8ecf3;
   border-radius: 12px;
-  border: 1px solid #31404c;
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  border: 1px solid #2f3a46;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   text-transform: none;
   letter-spacing: 0;
 }
 
 .copy-btn::after {
-  display: none;
+  content: '';
+  position: absolute;
+  left: 14px;
+  top: 10px;
+  width: 14px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid #3a4755;
+  box-shadow: 3px 3px 0 0 #0f141c;
 }
 
 .copy-btn__label {
-  padding: 12px 16px 12px 18px;
+  padding: 12px 16px 12px 34px;
   font-size: 14px;
   font-weight: 800;
 }
@@ -274,23 +282,23 @@ button.danger::after {
   display: grid;
   place-items: center;
   padding: 12px 16px;
-  background: rgba(255, 255, 255, 0.04);
-  border-left: 1px solid rgba(255, 255, 255, 0.08);
-  color: #e8f6ff;
+  background: #0f141c;
+  border-left: 1px solid #2f3a46;
+  color: #e8ecf3;
 }
 
 .copy-btn:hover,
 .copy-btn:focus-visible {
   transform: translateY(-1px);
-  background: #232e36;
-  border-color: #3c4a56;
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  background: #1a212b;
+  border-color: #3a4654;
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .copy-btn:active {
   transform: translateY(0);
-  background: #1d252c;
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  background: #151b23;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.06);
 }
 
 
