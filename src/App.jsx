@@ -1,17 +1,17 @@
 import { useMemo, useState } from 'react'
 import './App.css'
 
-const messageTemplates = [
-  { label: 'Hoş geldin', value: 'Hoş geldin! Burada herkese yer var.' },
-  { label: 'Bilgilendirme', value: 'Son durum: Görev planlandığı gibi ilerliyor.' },
-  { label: 'Hatırlatma', value: 'Unutma: Akşam 6:00 toplantısına hazır ol.' },
+const initialTemplates = [
+  { label: 'Hos geldin', value: 'Hos geldin! Burada herkese yer var.' },
+  { label: 'Bilgilendirme', value: 'Son durum: Gorev planlandigi gibi ilerliyor.' },
+  { label: 'Hatirlatma', value: 'Unutma: Aksam 6:00 toplantisina hazir ol.' },
 ]
 
 function App() {
   const [title, setTitle] = useState('Ugur Yorulmaz')
-  const [message, setMessage] = useState(messageTemplates[0].value)
-  const [templates, setTemplates] = useState(messageTemplates)
-  const [selectedTemplate, setSelectedTemplate] = useState(messageTemplates[0].label)
+  const [message, setMessage] = useState(initialTemplates[0].value)
+  const [templates, setTemplates] = useState(initialTemplates)
+  const [selectedTemplate, setSelectedTemplate] = useState(initialTemplates[0].label)
 
   const activeTemplate = useMemo(
     () => templates.find((tpl) => tpl.label === selectedTemplate),
@@ -30,10 +30,10 @@ function App() {
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(message)
-      alert('Mesaj kopyalandı')
+      alert('Mesaj kopyalandi')
     } catch (error) {
       console.error('Copy failed', error)
-      alert('Kopyalama başarısız oldu')
+      alert('Kopyalama basarisiz oldu')
     }
   }
 
@@ -52,7 +52,7 @@ function App() {
 
   const handleDeleteTemplate = () => {
     if (templates.length <= 1) {
-      alert('En az bir şablon kalmalı.')
+      alert('En az bir sablon kalmali.')
       return
     }
     const nextTemplates = templates.filter((tpl) => tpl.label !== selectedTemplate)
@@ -65,11 +65,11 @@ function App() {
   return (
     <div className="page">
       <header className="page__header">
-        <p className="page__eyebrow">Mesaj panosu</p>
+        <p className="page__eyebrow">Mesaj paneli</p>
         <h1>{title || 'Ugur Yorulmaz'}</h1>
-        <p className="page__subtitle">Başlık belirle, şablonu seç, metni düzenle ve kopyala.</p>
+        <p className="page__subtitle">Baslik belirle, sablon sec, metni duzenle ve kopyala.</p>
         <div className="metrics">
-          <span className="metric">Şablon: {templates.length}</span>
+          <span className="metric">Sablon: {templates.length}</span>
           <span className="metric">Karakter: {messageLength}</span>
         </div>
       </header>
@@ -78,18 +78,18 @@ function App() {
         <div className="panel__grid">
           <div className="stack">
             <div className="field">
-              <label htmlFor="title">Başlık</label>
+              <label htmlFor="title">Baslik</label>
               <input
                 id="title"
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
-                placeholder="Örn: Karşılama"
+                placeholder="Orn: Karsilama"
               />
             </div>
 
             <div className="field">
-              <label htmlFor="template">Şablon</label>
+              <label htmlFor="template">Sablon</label>
               <div className="field__inline">
                 <select id="template" value={selectedTemplate} onChange={handleTemplateChange}>
                   {templates.map((tpl) => (
@@ -118,10 +118,10 @@ function App() {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 rows={6}
-                placeholder="Mesaj içeriği"
+                placeholder="Mesaj icerigi"
               />
               <div className="helper">
-                <span>Seçili şablon: {activeTemplate?.label || 'Yok'}</span>
+                <span>Secili sablon: {activeTemplate?.label || 'Yok'}</span>
                 <span>{messageLength} karakter</span>
               </div>
             </div>

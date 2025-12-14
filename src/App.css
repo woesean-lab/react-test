@@ -1,15 +1,14 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700&display=swap');
 
 :root {
-  --bg: #070b13;
-  --panel: #0d1523;
-  --panel-border: #1c2535;
-  --input: #0a111d;
-  --text: #e8ecf3;
-  --muted: #9cabc0;
-  --accent: #78a8ff;
-  --accent-strong: #93baff;
-  --shadow: 0 22px 60px rgba(0, 0, 0, 0.35);
+  --bg: #f6f7fb;
+  --panel: #ffffff;
+  --border: #e2e7f0;
+  --text: #0f172a;
+  --muted: #606b85;
+  --accent: #0f6fec;
+  --accent-soft: rgba(15, 111, 236, 0.08);
+  --danger: #e54848;
 }
 
 * {
@@ -18,112 +17,111 @@
 
 body {
   margin: 0;
-  min-height: 100vh;
-  background: radial-gradient(circle at 20% 20%, rgba(120, 168, 255, 0.08), transparent 30%),
-    radial-gradient(circle at 80% 0%, rgba(111, 81, 255, 0.08), transparent 28%),
-    var(--bg);
+  background: var(--bg);
   color: var(--text);
   font-family: 'Manrope', system-ui, -apple-system, sans-serif;
 }
 
 #root {
-  max-width: min(1800px, 100%);
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 3rem 2.5rem 3.5rem;
+  padding: 48px 24px 56px;
 }
 
 .page {
   display: flex;
   flex-direction: column;
-  gap: 1.75rem;
+  gap: 24px;
 }
 
 .page__header {
   display: grid;
-  gap: 0.4rem;
+  gap: 6px;
 }
 
 .page__eyebrow {
-  color: var(--accent-strong);
+  margin: 0;
+  font-size: 12px;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  color: var(--muted);
   font-weight: 700;
-  font-size: 0.8rem;
-  margin: 0;
 }
 
 .page__header h1 {
   margin: 0;
-  font-size: 2.6rem;
-  letter-spacing: 0.01em;
+  font-size: 28px;
+  letter-spacing: -0.01em;
 }
 
 .page__subtitle {
   margin: 0;
   color: var(--muted);
-  font-size: 1rem;
+  font-size: 16px;
 }
 
 .metrics {
   display: flex;
-  gap: 0.75rem;
-  margin-top: 0.35rem;
+  gap: 8px;
+  margin-top: 6px;
   flex-wrap: wrap;
 }
 
 .metric {
-  background: rgba(120, 168, 255, 0.1);
-  color: var(--accent-strong);
-  border: 1px solid rgba(120, 168, 255, 0.25);
+  padding: 6px 10px;
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
   border-radius: 999px;
-  padding: 0.4rem 0.75rem;
-  font-weight: 600;
-  font-size: 0.95rem;
+  font-size: 14px;
+  color: var(--accent);
+  font-weight: 700;
 }
 
 .panel {
   width: 100%;
   background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: 22px;
-  padding: 2.25rem;
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(6px);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 24px;
+  display: grid;
+  gap: 20px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.06);
 }
 
 .panel__grid {
   display: grid;
-  grid-template-columns: 1.05fr 1fr;
-  gap: 1.4rem;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
 }
 
 .stack {
   display: grid;
-  gap: 1rem;
+  gap: 16px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
-  gap: 0.4rem;
+  gap: 6px;
 }
 
 label {
   font-weight: 700;
   color: var(--text);
+  font-size: 14px;
 }
 
 input,
 textarea,
 select {
   width: 100%;
-  background: var(--input);
-  border: 1px solid var(--panel-border);
-  border-radius: 14px;
+  background: #f9fbff;
+  border: 1px solid var(--border);
+  border-radius: 12px;
   color: var(--text);
-  padding: 0.95rem 1.05rem;
-  font-size: 1rem;
-  transition: border-color 150ms ease, box-shadow 150ms ease, background 150ms ease;
+  padding: 12px 14px;
+  font-size: 15px;
+  transition: border-color 120ms ease, background-color 120ms ease;
 }
 
 input:focus,
@@ -131,8 +129,7 @@ textarea:focus,
 select:focus {
   outline: none;
   border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(120, 168, 255, 0.18);
-  background: #111a29;
+  background: #ffffff;
 }
 
 textarea {
@@ -143,26 +140,26 @@ textarea {
 .field__inline {
   display: grid;
   grid-template-columns: 1fr auto;
-  gap: 0.65rem;
+  gap: 10px;
 }
 
 button {
-  border-radius: 14px;
-  border: 1px solid var(--panel-border);
-  padding: 0.95rem 1.3rem;
-  font-size: 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  padding: 12px 14px;
+  font-size: 15px;
   font-weight: 700;
   font-family: inherit;
-  background-color: rgba(120, 168, 255, 0.12);
+  background-color: #ffffff;
   color: var(--text);
   cursor: pointer;
-  transition: transform 120ms ease, border-color 120ms ease, background-color 120ms ease, color 120ms ease;
+  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease,
+    transform 120ms ease;
 }
 
 button:hover {
-  background-color: rgba(120, 168, 255, 0.18);
   border-color: var(--accent);
-  color: #fff;
+  background-color: #eef4ff;
   transform: translateY(-1px);
 }
 
@@ -171,36 +168,28 @@ button:active {
 }
 
 button.ghost {
-  background: rgba(255, 255, 255, 0.02);
-  color: var(--text);
-  border: 1px solid var(--panel-border);
+  background: #ffffff;
 }
 
-button.ghost:hover {
-  border-color: var(--accent);
-  background: rgba(120, 168, 255, 0.12);
+button.danger {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+button.danger:hover {
+  background: rgba(229, 72, 72, 0.08);
 }
 
 .actions-inline {
   display: flex;
-  gap: 0.4rem;
+  gap: 8px;
   flex-wrap: wrap;
-}
-
-button.danger {
-  border-color: rgba(255, 92, 92, 0.45);
-  color: #ff8f8f;
-}
-
-button.danger:hover {
-  border-color: rgba(255, 118, 118, 0.8);
-  background: rgba(255, 118, 118, 0.12);
 }
 
 .field--actions {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 10px;
   flex-wrap: wrap;
 }
 
@@ -209,13 +198,13 @@ button.danger:hover {
   justify-content: space-between;
   align-items: center;
   color: var(--muted);
-  font-size: 0.95rem;
-  margin-top: 0.35rem;
+  font-size: 14px;
+  margin-top: 6px;
 }
 
-@media (max-width: 960px) {
+@media (max-width: 900px) {
   #root {
-    padding: 2.5rem 1.5rem;
+    padding: 36px 18px 44px;
   }
 
   .panel__grid {
@@ -223,9 +212,9 @@ button.danger:hover {
   }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 600px) {
   #root {
-    padding: 2rem 1.1rem;
+    padding: 28px 14px 36px;
   }
 
   .field__inline {
@@ -244,6 +233,6 @@ button.danger:hover {
   .helper {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.35rem;
+    gap: 6px;
   }
 }
