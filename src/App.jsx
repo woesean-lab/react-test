@@ -1,4 +1,4 @@
-﻿import { useMemo, useState } from "react"
+﻿import { useEffect, useMemo, useState } from "react"
 import { Toaster, toast } from "react-hot-toast"
 
 const initialTemplates = [
@@ -28,6 +28,9 @@ function App() {
   const [categories, setCategories] = useState(initialCategories)
   const [templates, setTemplates] = useState(initialTemplates)
   const [selectedTemplate, setSelectedTemplate] = useState(initialTemplates[0].label)
+  const [openCategories, setOpenCategories] = useState(() =>
+    categories.reduce((acc, cat) => ({ ...acc, [cat]: true }), {}),
+  )
 
   const activeTemplate = useMemo(
     () => templates.find((tpl) => tpl.label === selectedTemplate),
@@ -35,6 +38,28 @@ function App() {
   )
 
   const messageLength = message.trim().length
+
+  const groupedTemplates = useMemo(() => {
+    return templates.reduce((acc, tpl) => {
+      const cat = tpl.category || "Genel"
+      if (!acc[cat]) acc[cat] = []
+      acc[cat].push(tpl)
+      return acc
+    }, {})
+  }, [templates])
+
+  useEffect(() => {
+    setOpenCategories((prev) => {
+      const next = { ...prev }
+      categories.forEach((cat) => {
+        if (!(cat in next)) next[cat] = true
+      })
+      Object.keys(next).forEach((cat) => {
+        if (!categories.includes(cat)) delete next[cat]
+      })
+      return next
+    })
+  }, [categories])
 
   const handleTemplateChange = async (nextTemplate, options = {}) => {
     setSelectedTemplate(nextTemplate)
@@ -227,26 +252,65 @@ function App() {
                 </span>
               </div>
               <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {templates.map((tpl) => (
-                  <button
-                    key={tpl.label}
-                    type="button"
-                    onClick={() => handleTemplateChange(tpl.label, { shouldCopy: true })}
-                    className={`h-full rounded-xl border px-4 py-3 text-left transition ${
-                      tpl.label === selectedTemplate
-                        ? "border-accent-400 bg-accent-500/10 text-accent-100 shadow-glow"
-                        : "border-white/10 bg-ink-900 text-slate-200 hover:border-accent-500/60 hover:text-accent-100"
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <p className="font-display text-lg">{tpl.label}</p>
-                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold text-slate-300">
-                        {tpl.category || "Genel"}
-                      </span>
-                    </div>
-                    <p className="mt-1 h-[54px] overflow-hidden text-sm text-slate-400">{tpl.value}</p>
-                  </button>
-                ))}
+                <div className="space-y-3 sm:col-span-2 lg:col-span-3">
+                  {categories.map((cat) => {
+                    const list = groupedTemplates[cat] || []
+                    const isOpen = openCategories[cat] ?? true
+                    return (
+                      <div
+                        key={cat}
+                        className="rounded-2xl border border-white/10 bg-ink-900/60 p-3 shadow-inner"
+                      >
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setOpenCategories((prev) => ({ ...prev, [cat]: !(prev[cat] ?? true) }))
+                          }
+                          className="flex w-full items-center justify-between rounded-xl px-2 py-1 text-left text-sm font-semibold text-slate-100"
+                        >
+                          <span className="inline-flex items-center gap-2">
+                            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-slate-200">
+                              {cat}
+                            </span>
+                            <span className="text-xs text-slate-400">{list.length} şablon</span>
+                          </span>
+                          <span
+                            className={`transition ${
+                              isOpen ? "rotate-180" : ""
+                            } text-slate-300`}
+                          >
+                            ▼
+                          </span>
+                        </button>
+
+                        {isOpen && (
+                          <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                            {list.length === 0 && (
+                              <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
+                                Bu kategoride şablon yok.
+                              </div>
+                            )}
+                            {list.map((tpl) => (
+                              <button
+                                key={tpl.label}
+                                type="button"
+                                onClick={() => handleTemplateChange(tpl.label, { shouldCopy: true })}
+                                className={`h-full rounded-xl border px-4 py-3 text-left transition ${
+                                  tpl.label === selectedTemplate
+                                    ? "border-accent-400 bg-accent-500/10 text-accent-100 shadow-glow"
+                                    : "border-white/10 bg-ink-900 text-slate-200 hover:border-accent-500/60 hover:text-accent-100"
+                                }`}
+                              >
+                                <p className="font-display text-lg">{tpl.label}</p>
+                                <p className="mt-1 h-[54px] overflow-hidden text-sm text-slate-400">{tpl.value}</p>
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
             </div>
 
