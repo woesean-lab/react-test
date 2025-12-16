@@ -138,16 +138,27 @@ function App() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
             <div className={`${panelClass} bg-ink-800/60`}>
-              <div className="flex items-start justify-between gap-4">
+              <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
                     Mesaj Alanı
                   </p>
                   <p className="text-sm text-slate-400">Başlığı seç, metni güncelle, ekle ya da temizi çek.</p>
                 </div>
-                <span className="rounded-full bg-accent-500/20 px-3 py-1 text-xs font-semibold text-accent-100">
-                  Canlı
-                </span>
+                <div className="flex flex-wrap items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className="inline-flex items-center gap-2 rounded-xl border border-accent-400 bg-accent-500/15 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-accent-100 shadow-glow transition hover:bg-accent-500/25"
+                    aria-label="Mesajı kopyala"
+                  >
+                    <span className="h-2 w-2 rounded-full bg-accent-300" />
+                    Hızlı Kopyala
+                  </button>
+                  <span className="rounded-full bg-accent-500/20 px-3 py-1 text-xs font-semibold text-accent-100">
+                    Canlı
+                  </span>
+                </div>
               </div>
 
               <div className="mt-6 space-y-5">
@@ -178,6 +189,12 @@ function App() {
                     placeholder="Mesaj içeriği..."
                     className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-3 text-base text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/40"
                   />
+                  <div className="flex flex-wrap items-center justify-between text-xs text-slate-500">
+                    <span>Kopyalamak için üstteki hızlı butonu kullan.</span>
+                    <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] text-slate-300">
+                      Kısayol: Ctrl/Cmd + C
+                    </span>
+                  </div>
                 </div>
 
                 <div className="flex flex-wrap gap-3">
@@ -293,7 +310,7 @@ function App() {
 
             <div className={`${panelClass} bg-ink-800/60`}>
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
-                Hızlı İpuçları
+                Hızlı ipuçları
               </p>
               <ul className="mt-3 space-y-2 text-sm text-slate-300">
                 <li>• Başlığı boş bırakırsan otomatik bir isimle kaydedilir.</li>
