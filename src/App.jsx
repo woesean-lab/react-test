@@ -128,6 +128,23 @@ function App() {
     toast.success("Kategori eklendi")
   }
 
+  const handleCategoryDelete = (cat) => {
+    if (cat === "Genel") {
+      toast.error("Genel kategorisi silinemez.")
+      return
+    }
+    const nextCategories = categories.filter((item) => item !== cat)
+    const safeCategories = nextCategories.length ? nextCategories : ["Genel"]
+    setCategories(safeCategories)
+    setTemplates((prev) =>
+      prev.map((tpl) => (tpl.category === cat ? { ...tpl, category: "Genel" } : tpl)),
+    )
+    if (selectedCategory === cat) {
+      setSelectedCategory(safeCategories[0])
+    }
+    toast.success("Kategori silindi")
+  }
+
   return (
     <div className="min-h-screen px-4 pb-16 pt-10 text-slate-50">
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
@@ -350,6 +367,25 @@ function App() {
                 >
                   Ekle
                 </button>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {categories.map((cat) => (
+                  <span
+                    key={cat}
+                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-200"
+                  >
+                    <span className="font-semibold">{cat}</span>
+                    {cat !== "Genel" && (
+                      <button
+                        type="button"
+                        onClick={() => handleCategoryDelete(cat)}
+                        className="rounded-full border border-rose-400/60 bg-rose-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-rose-100 transition hover:border-rose-300 hover:bg-rose-500/20"
+                      >
+                        Sil
+                      </button>
+                    )}
+                  </span>
+                ))}
               </div>
             </div>
 
