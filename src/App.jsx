@@ -2,9 +2,13 @@
 import { Toaster, toast } from "react-hot-toast"
 
 const initialTemplates = [
-  { label: "Hoş geldin", value: "Hoş geldin! Burada herkese yer var." },
-  { label: "Bilgilendirme", value: "Son durum: Görev planlandığı gibi ilerliyor." },
-  { label: "Hatırlatma", value: "Unutma: Akşam 18:00 toplantısına hazır ol." },
+  { label: "Hoş geldin", value: "Hoş geldin! Burada herkese yer var.", category: "Karşılama" },
+  {
+    label: "Bilgilendirme",
+    value: "Son durum: Görev planlandığı gibi ilerliyor.",
+    category: "Bilgilendirme",
+  },
+  { label: "Hatırlatma", value: "Unutma: Akşam 18:00 toplantısına hazır ol.", category: "Hatırlatma" },
 ]
 
 const panelClass =
@@ -13,6 +17,7 @@ const panelClass =
 function App() {
   const [title, setTitle] = useState("Pulcip Message")
   const [message, setMessage] = useState(initialTemplates[0].value)
+  const [category, setCategory] = useState(initialTemplates[0].category || "Genel")
   const [templates, setTemplates] = useState(initialTemplates)
   const [selectedTemplate, setSelectedTemplate] = useState(initialTemplates[0].label)
 
@@ -28,6 +33,7 @@ function App() {
     const tpl = templates.find((item) => item.label === nextTemplate)
     if (tpl) {
       setMessage(tpl.value)
+      setCategory(tpl.category || "Genel")
       if (options.shouldCopy) {
         try {
           await navigator.clipboard.writeText(tpl.value)
@@ -64,16 +70,18 @@ function App() {
 
     const safeTitle = title.trim() || `Mesaj ${templates.length + 1}`
     const safeMessage = message.trim()
+    const safeCategory = category.trim() || "Genel"
 
     const exists = templates.some((tpl) => tpl.label === safeTitle)
     if (!exists) {
-      const nextTemplates = [...templates, { label: safeTitle, value: safeMessage }]
+      const nextTemplates = [...templates, { label: safeTitle, value: safeMessage, category: safeCategory }]
       setTemplates(nextTemplates)
       toast.success("Yeni şablon eklendi")
     } else {
       toast("Var olan şablon aktif edildi", { position: "top-right" })
     }
     setSelectedTemplate(safeTitle)
+    setCategory(safeCategory)
   }
 
   const handleDeleteTemplate = () => {
@@ -86,6 +94,7 @@ function App() {
     setTemplates(nextTemplates)
     setSelectedTemplate(fallback.label)
     setMessage(fallback.value)
+    setCategory(fallback.category || "Genel")
     toast.success("Şablon silindi")
   }
 
@@ -119,6 +128,10 @@ function App() {
                   <span className="h-2 w-2 rounded-full bg-fuchsia-300" />
                   Başlık: {title.trim() ? title : "Pulcip Message"}
                 </span>
+                <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-accent-200">
+                  <span className="h-2 w-2 rounded-full bg-amber-300" />
+                  Kategori: {category.trim() || "Genel"}
+                </span>
               </div>
             </div>
 
@@ -128,9 +141,14 @@ function App() {
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-200/70">
                   Aktif şablon
                 </p>
-                <h3 className="mt-3 font-display text-2xl font-semibold text-white">
-                  {activeTemplate?.label || "Yeni şablon"}
-                </h3>
+                <div className="mt-3 flex items-center gap-3">
+                  <h3 className="font-display text-2xl font-semibold text-white">
+                    {activeTemplate?.label || "Yeni şablon"}
+                  </h3>
+                  <span className="rounded-full border border-accent-300/60 bg-accent-500/15 px-3 py-1 text-xs font-semibold text-accent-50">
+                    {activeTemplate?.category || category || "Genel"}
+                  </span>
+                </div>
                 <p className="mt-3 text-sm leading-relaxed text-slate-200/90">
                   {activeTemplate?.value || "Mesajını düzenleyip kaydetmeye başla."}
                 </p>
@@ -173,7 +191,12 @@ function App() {
                         : "border-white/10 bg-ink-900 text-slate-200 hover:border-accent-500/60 hover:text-accent-100"
                     }`}
                   >
-                    <p className="font-display text-lg">{tpl.label}</p>
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="font-display text-lg">{tpl.label}</p>
+                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold text-slate-300">
+                        {tpl.category || "Genel"}
+                      </span>
+                    </div>
                     <p className="mt-1 h-[54px] overflow-hidden text-sm text-slate-400">{tpl.value}</p>
                   </button>
                 ))}
@@ -204,6 +227,20 @@ function App() {
                     value={title}
                     onChange={(e) => setTitle(e.target.value)}
                     placeholder="Örn: Karşılama notu"
+                    className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/40"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-100" htmlFor="category">
+                    Kategori
+                  </label>
+                  <input
+                    id="category"
+                    type="text"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    placeholder="Örn: Hatırlatma"
                     className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/40"
                   />
                 </div>
@@ -311,6 +348,9 @@ function App() {
                           >
                             {isActive ? "Aktif" : "Seç"}
                           </span>
+                          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-slate-300">
+                            {tpl.category || "Genel"}
+                          </span>
                         </button>
                       )
                     })}
@@ -323,6 +363,9 @@ function App() {
                       <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Önizleme</p>
                       <p className="font-display text-lg text-slate-100">
                         {activeTemplate?.label || "Yeni şablon"}
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        {activeTemplate?.category || category || "Genel"}
                       </p>
                     </div>
                     <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-slate-200">
@@ -359,6 +402,9 @@ function App() {
                     Önizleme
                   </span>
                 </div>
+                <p className="text-xs text-slate-400">
+                  {activeTemplate?.category || category || "Genel"}
+                </p>
                 <p className="mt-2 text-slate-300">{message || activeTemplate?.value}</p>
               </div>
             </div>
