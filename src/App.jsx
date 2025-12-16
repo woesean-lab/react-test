@@ -1,12 +1,14 @@
 import { useMemo, useState } from 'react'
 import { Toaster, toast } from 'react-hot-toast'
-import './App.css'
 
 const initialTemplates = [
-  { label: 'Hos geldin', value: 'Hos geldin! Burada herkese yer var.' },
-  { label: 'Bilgilendirme', value: 'Son durum: Gorev planlandigi gibi ilerliyor.' },
-  { label: 'Hatirlatma', value: 'Unutma: Aksam 6:00 toplantisina hazir ol.' },
+  { label: 'Hoş geldin', value: 'Hoş geldin! Burada herkese yer var.' },
+  { label: 'Bilgilendirme', value: 'Son durum: Görev planlandığı gibi ilerliyor.' },
+  { label: 'Hatırlatma', value: 'Unutma: Akşam 18:00 toplantısına hazır ol.' },
 ]
+
+const panelClass =
+  'rounded-2xl border border-white/10 bg-white/5 px-6 py-6 shadow-card backdrop-blur-sm'
 
 function App() {
   const [title, setTitle] = useState('Pulcip Message')
@@ -45,7 +47,11 @@ function App() {
   }
 
   const handleAdd = () => {
-    if (!title.trim() && !message.trim()) return
+    if (!title.trim() && !message.trim()) {
+      toast.error('Başlık veya mesaj ekleyin.')
+      return
+    }
+
     const safeTitle = title.trim() || `Mesaj ${templates.length + 1}`
     const safeMessage = message.trim()
 
@@ -53,13 +59,16 @@ function App() {
     if (!exists) {
       const nextTemplates = [...templates, { label: safeTitle, value: safeMessage }]
       setTemplates(nextTemplates)
+      toast.success('Yeni şablon eklendi')
+    } else {
+      toast('Var olan şablon aktif edildi', { position: 'top-right' })
     }
     setSelectedTemplate(safeTitle)
   }
 
   const handleDeleteTemplate = () => {
     if (templates.length <= 1) {
-      alert('En az bir sablon kalmali.')
+      toast.error('En az bir şablon kalmalı.')
       return
     }
     const nextTemplates = templates.filter((tpl) => tpl.label !== selectedTemplate)
@@ -67,81 +76,250 @@ function App() {
     setTemplates(nextTemplates)
     setSelectedTemplate(fallback.label)
     setMessage(fallback.value)
+    toast.success('Şablon silindi')
   }
 
   return (
-    <div className="page">
-      <header className="page__header">
-        <p className="page__eyebrow">Mesaj paneli</p>
-        <h1>{title || 'Pulcip Message'}</h1>
-        <p className="page__subtitle">Baslik belirle, sablon sec, metni duzenle ve kopyala.</p>
-        <div className="metrics">
-          <span className="metric">Sablon: {templates.length}</span>
-          <span className="metric">Karakter: {messageLength}</span>
-        </div>
-      </header>
+    <div className="min-h-screen px-4 pb-16 pt-10 text-slate-50">
+      <div className="mx-auto flex max-w-6xl flex-col gap-8">
+        <header className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-8 shadow-card">
+          <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
+            <div className="space-y-4">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
+                Pulcip Studio
+              </span>
+              <div className="space-y-2">
+                <h1 className="font-display text-4xl font-semibold leading-tight text-white md:text-5xl">
+                  Mesaj Stüdyosu
+                </h1>
+                <p className="max-w-2xl text-base text-slate-200/80">
+                  Kendi tonunu bul, hazır şablonları hızlıca düzenle ve tek tıkla ekibinle paylaş.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-3">
+                <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-accent-200">
+                  <span className="h-2 w-2 rounded-full bg-accent-400" />
+                  Şablon: {templates.length}
+                </span>
+                <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-accent-200">
+                  <span className="h-2 w-2 rounded-full bg-emerald-300" />
+                  Karakter: {messageLength}
+                </span>
+                <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-accent-200">
+                  <span className="h-2 w-2 rounded-full bg-fuchsia-300" />
+                  Başlık: {title.trim() ? title : 'Pulcip Message'}
+                </span>
+              </div>
+            </div>
 
-      <section className="cards">
-        <div className="card">
-          <div className="field">
-            <label htmlFor="template">Sablon</label>
-            <div className="field__inline">
-              <select id="template" value={selectedTemplate} onChange={handleTemplateChange}>
-                {templates.map((tpl) => (
-                  <option key={tpl.label} value={tpl.label}>
-                    {tpl.label}
-                  </option>
-                ))}
-              </select>
-              <div className="actions-inline">
-                <button type="button" className="copy-btn" onClick={handleCopy}>
-                  <span className="copy-btn__label">Kopyala</span>
-                </button>
-                <button type="button" className="ghost danger" onClick={handleDeleteTemplate}>
-                  Sil
-                </button>
+            <div className="relative w-full max-w-sm">
+              <div className="absolute inset-x-6 -bottom-16 h-40 rounded-full bg-accent-400/30 blur-3xl" />
+              <div className="relative rounded-2xl border border-white/10 bg-white/10 p-6 shadow-glow backdrop-blur-md">
+                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-200/70">
+                  Aktif Şablon
+                </p>
+                <h3 className="mt-3 font-display text-2xl font-semibold text-white">
+                  {activeTemplate?.label || 'Yeni şablon'}
+                </h3>
+                <p className="mt-3 text-sm leading-relaxed text-slate-200/90">
+                  {activeTemplate?.value || 'Mesajını düzenleyip kaydetmeye başla.'}
+                </p>
+                <div className="mt-4 flex items-center justify-between text-xs text-slate-300/80">
+                  <span>{messageLength} karakter</span>
+                  <span className="rounded-full bg-white/10 px-3 py-1 font-semibold text-accent-100">
+                    Hazır
+                  </span>
+                </div>
               </div>
             </div>
           </div>
-          <p className="hint">
-            Secili sablon: <strong>{activeTemplate?.label || 'Yok'}</strong> • {messageLength} karakter
-          </p>
+        </header>
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="space-y-6 lg:col-span-2">
+            <div className={`${panelClass} bg-ink-800/60`}>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
+                    Mesaj Alanı
+                  </p>
+                  <p className="text-sm text-slate-400">Başlığı seç, metni güncelle, ekle ya da temizi çek.</p>
+                </div>
+                <span className="rounded-full bg-accent-500/20 px-3 py-1 text-xs font-semibold text-accent-100">
+                  Canlı
+                </span>
+              </div>
+
+              <div className="mt-6 space-y-5">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-100" htmlFor="title">
+                    Başlık
+                  </label>
+                  <input
+                    id="title"
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="Örn: Karşılama notu"
+                    className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/40"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-sm font-medium text-slate-100">
+                    <label htmlFor="message">Mesaj</label>
+                    <span className="text-xs text-slate-400">Anlık karakter: {messageLength}</span>
+                  </div>
+                  <textarea
+                    id="message"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    rows={8}
+                    placeholder="Mesaj içeriği..."
+                    className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-3 text-base text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/40"
+                  />
+                </div>
+
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleAdd}
+                    className="flex-1 min-w-[180px] rounded-xl bg-gradient-to-r from-accent-500 via-sky-500 to-fuchsia-500 px-5 py-3 text-center text-sm font-semibold uppercase tracking-wide text-white shadow-glow transition hover:-translate-y-0.5 hover:shadow-lg"
+                  >
+                    Şablona Ekle
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setMessage('')}
+                    className="min-w-[140px] rounded-xl border border-white/10 px-5 py-3 text-sm font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
+                  >
+                    Temizle
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className={`${panelClass} bg-ink-800/60`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
+                    Şablon listesi
+                  </p>
+                  <p className="text-sm text-slate-400">Başlıklarına dokunarak düzenlemek istediğini seç.</p>
+                </div>
+                <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
+                  {templates.length} seçenek
+                </span>
+              </div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {templates.map((tpl) => (
+                  <button
+                    key={tpl.label}
+                    type="button"
+                    onClick={() => handleTemplateChange({ target: { value: tpl.label } })}
+                    className={`h-full rounded-xl border px-4 py-3 text-left transition ${
+                      tpl.label === selectedTemplate
+                        ? 'border-accent-400 bg-accent-500/10 text-accent-100 shadow-glow'
+                        : 'border-white/10 bg-ink-900 text-slate-200 hover:border-accent-500/60 hover:text-accent-100'
+                    }`}
+                  >
+                    <p className="font-display text-lg">{tpl.label}</p>
+                    <p className="mt-1 h-[54px] overflow-hidden text-sm text-slate-400">{tpl.value}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-6">
+            <div className={`${panelClass} bg-ink-800/60`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
+                    Şablon Seç &amp; Kopyala
+                  </p>
+                  <p className="text-sm text-slate-400">Aktif şablonu kopyala ya da sil.</p>
+                </div>
+                <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
+                  {messageLength} karakter
+                </span>
+              </div>
+
+              <div className="mt-4 space-y-4">
+                <label className="text-sm font-medium text-slate-100" htmlFor="template">
+                  Şablon seç
+                </label>
+                <select
+                  id="template"
+                  value={selectedTemplate}
+                  onChange={handleTemplateChange}
+                  className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-3 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/40"
+                >
+                  {templates.map((tpl) => (
+                    <option key={tpl.label} value={tpl.label}>
+                      {tpl.label}
+                    </option>
+                  ))}
+                </select>
+
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={handleCopy}
+                    className="flex-1 min-w-[140px] rounded-xl border border-accent-400 bg-gradient-to-r from-accent-500 to-accent-600 px-4 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-glow transition hover:-translate-y-0.5"
+                  >
+                    Kopyala
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleDeleteTemplate}
+                    className="min-w-[120px] rounded-xl border border-rose-500/60 bg-rose-500/10 px-4 py-3 text-sm font-semibold uppercase tracking-wide text-rose-100 transition hover:border-rose-400 hover:bg-rose-500/20"
+                  >
+                    Sil
+                  </button>
+                </div>
+              </div>
+
+              <div className="mt-6 rounded-xl border border-white/10 bg-ink-900/60 px-4 py-4 text-sm text-slate-300">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-slate-100">{activeTemplate?.label}</span>
+                  <span className="rounded-full bg-white/10 px-3 py-1 text-xs uppercase tracking-wide text-slate-200">
+                    Önizleme
+                  </span>
+                </div>
+                <p className="mt-2 text-slate-300">{message || activeTemplate?.value}</p>
+              </div>
+            </div>
+
+            <div className={`${panelClass} bg-ink-800/60`}>
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
+                Hızlı İpuçları
+              </p>
+              <ul className="mt-3 space-y-2 text-sm text-slate-300">
+                <li>• Başlığı boş bırakırsan otomatik bir isimle kaydedilir.</li>
+                <li>• Kopyala tuşu güncel metni panoya gönderir.</li>
+                <li>• Tüm alanlar canlı; değiştirince hemen önizlenir.</li>
+              </ul>
+            </div>
+          </div>
         </div>
-
-        <div className="card">
-          <div className="field">
-            <label htmlFor="title">Baslik</label>
-            <input
-              id="title"
-              type="text"
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
-              placeholder="Orn: Karsilama"
-            />
-          </div>
-
-          <div className="field">
-            <label htmlFor="message">Mesaj</label>
-            <textarea
-              id="message"
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              rows={6}
-              placeholder="Mesaj icerigi"
-            />
-          </div>
-
-          <div className="field field--actions">
-            <button type="button" onClick={handleAdd}>
-              Ekle
-            </button>
-            <button type="button" className="ghost danger" onClick={() => setMessage('')}>
-              Temizle
-            </button>
-          </div>
-        </div>
-      </section>
-      <Toaster position="top-right" />
+      </div>
+      <Toaster
+        position="top-right"
+        toastOptions={{
+          style: {
+            background: '#0f1625',
+            color: '#e5ecff',
+            border: '1px solid #1d2534',
+          },
+          success: {
+            iconTheme: {
+              primary: '#3ac7ff',
+              secondary: '#0f1625',
+            },
+          },
+        }}
+      />
     </div>
   )
 }
