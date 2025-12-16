@@ -266,28 +266,44 @@ function App() {
               <div className="mt-4 space-y-4">
                 <div className="flex items-center justify-between text-sm font-medium text-slate-100">
                   <span>Şablon seç</span>
-                  <span className="text-xs text-accent-200">Kart düzeni</span>
+                  <span className="text-xs text-accent-200">Satır görünümü</span>
                 </div>
-                <div role="radiogroup" aria-label="Şablon seç" className="grid gap-3 sm:grid-cols-2">
-                  {templates.map((tpl) => {
-                    const isActive = tpl.label === selectedTemplate
-                    return (
-                      <button
-                        key={tpl.label}
-                        type="button"
-                        role="radio"
-                        aria-checked={isActive}
-                        onClick={() => handleTemplateChange(tpl.label)}
-                        className={`group relative h-full rounded-xl border px-4 py-4 text-left transition ${
-                          isActive
-                            ? "border-accent-400/80 bg-accent-500/10 text-accent-50 shadow-glow"
-                            : "border-white/10 bg-white/5 text-slate-100 hover:border-accent-300/80 hover:bg-white/10"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <p className="font-display text-base leading-tight">{tpl.label}</p>
+                <div
+                  role="radiogroup"
+                  aria-label="Şablon seç"
+                  className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60 p-2"
+                >
+                  <div className="flex flex-col gap-2">
+                    {templates.map((tpl, index) => {
+                      const isActive = tpl.label === selectedTemplate
+                      return (
+                        <button
+                          key={tpl.label}
+                          type="button"
+                          role="radio"
+                          aria-checked={isActive}
+                          onClick={() => handleTemplateChange(tpl.label)}
+                          className={`group relative flex items-center gap-4 rounded-xl border px-4 py-3 text-left transition ${
+                            isActive
+                              ? "border-accent-400/80 bg-accent-500/10 text-accent-50 shadow-glow"
+                              : "border-white/10 bg-white/5 text-slate-100 hover:border-accent-300/80 hover:bg-white/10"
+                          }`}
+                        >
+                          <div
+                            className={`flex h-10 w-10 items-center justify-center rounded-xl border text-sm font-semibold ${
+                              isActive
+                                ? "border-accent-300/70 bg-accent-500/20 text-accent-50"
+                                : "border-white/10 bg-ink-900/70 text-slate-300"
+                            }`}
+                          >
+                            {index + 1}
+                          </div>
+                          <div className="space-y-1">
+                            <p className="font-display text-base leading-tight">{tpl.label}</p>
+                            <p className="line-clamp-2 text-sm text-slate-400">{tpl.value}</p>
+                          </div>
                           <span
-                            className={`inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold tracking-wide ${
+                            className={`ml-auto inline-flex items-center rounded-full border px-3 py-1 text-[11px] font-semibold tracking-wide ${
                               isActive
                                 ? "border-accent-300/70 bg-accent-400/20 text-accent-50"
                                 : "border-white/10 bg-white/5 text-slate-300 group-hover:border-accent-300/70 group-hover:text-accent-50"
@@ -295,12 +311,10 @@ function App() {
                           >
                             {isActive ? "Aktif" : "Seç"}
                           </span>
-                        </div>
-                        <p className="mt-2 line-clamp-3 text-sm text-slate-400">{tpl.value}</p>
-                        <div className="pointer-events-none absolute inset-x-0 -bottom-2 h-1 rounded-b-xl bg-gradient-to-r from-accent-500/0 via-accent-400/40 to-accent-500/0 opacity-0 transition group-hover:opacity-100" />
-                      </button>
-                    )
-                  })}
+                        </button>
+                      )
+                    })}
+                  </div>
                 </div>
 
                 <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-4 shadow-inner">
