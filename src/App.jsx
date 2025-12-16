@@ -19,7 +19,7 @@ const panelClass =
 function App() {
   const [title, setTitle] = useState("Pulcip Message Copy")
   const [message, setMessage] = useState("")
-  const [selectedCategory, setSelectedCategory] = useState(initialTemplates[0].category || "Genel")
+  const [selectedCategory, setSelectedCategory] = useState("Genel")
   const [newCategory, setNewCategory] = useState("")
   const [categories, setCategories] = useState(initialCategories)
   const [templates, setTemplates] = useState(initialTemplates)
@@ -63,7 +63,6 @@ function App() {
     setSelectedTemplate(nextTemplate)
     const tpl = templates.find((item) => item.label === nextTemplate)
     if (tpl) {
-      setSelectedCategory(tpl.category || "Genel")
       if (options.shouldCopy) {
         try {
           await navigator.clipboard.writeText(tpl.value)
