@@ -327,7 +327,7 @@ function App() {
             <div className={`${panelClass} bg-ink-800/60`}>
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Mesaj Alanı</p>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Şablon oluştur</p>
                   <p className="text-sm text-slate-400">Başlığını seç, metni güncelle, ekle ya da temizle.</p>
                 </div>
                 <span className="rounded-full bg-accent-500/20 px-3 py-1 text-xs font-semibold text-accent-100">
