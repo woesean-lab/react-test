@@ -23,11 +23,21 @@ function App() {
 
   const messageLength = message.trim().length
 
-  const handleTemplateChange = (event) => {
-    const nextTemplate = event.target.value
+  const handleTemplateChange = async (nextTemplate, options = {}) => {
     setSelectedTemplate(nextTemplate)
     const tpl = templates.find((item) => item.label === nextTemplate)
-    if (tpl) setMessage(tpl.value)
+    if (tpl) {
+      setMessage(tpl.value)
+      if (options.shouldCopy) {
+        try {
+          await navigator.clipboard.writeText(tpl.value)
+          toast.success('Şablon kopyalandı', { duration: 1400, position: 'top-right' })
+        } catch (error) {
+          console.error('Copy failed', error)
+          toast.error('Kopyalanamadı', { duration: 1600, position: 'top-right' })
+        }
+      }
+    }
   }
 
   const handleCopy = async () => {
@@ -138,6 +148,42 @@ function App() {
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
             <div className={`${panelClass} bg-ink-800/60`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
+                    Şablon listesi
+                  </p>
+                  <p className="text-sm text-slate-400">
+                    Başlıklarına dokunarak düzenlemek istediğini seç ve kopyala.
+                  </p>
+                </div>
+                <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
+                  {templates.length} seçenek
+                </span>
+              </div>
+              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {templates.map((tpl) => (
+                  <button
+                    key={tpl.label}
+                    type="button"
+                    onClick={() => handleTemplateChange(tpl.label, { shouldCopy: true })}
+                    className={`h-full rounded-xl border px-4 py-3 text-left transition ${
+                      tpl.label === selectedTemplate
+                        ? 'border-accent-400 bg-accent-500/10 text-accent-100 shadow-glow'
+                        : 'border-white/10 bg-ink-900 text-slate-200 hover:border-accent-500/60 hover:text-accent-100'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-display text-lg">{tpl.label}</p>
+                      <span className="text-[11px] uppercase tracking-wide text-accent-100">Tıkla &amp; Kopyala</span>
+                    </div>
+                    <p className="mt-1 h-[54px] overflow-hidden text-sm text-slate-400">{tpl.value}</p>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className={`${panelClass} bg-ink-800/60`}>
               <div className="flex flex-wrap items-center justify-between gap-4">
                 <div>
                   <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
@@ -145,20 +191,9 @@ function App() {
                   </p>
                   <p className="text-sm text-slate-400">Başlığı seç, metni güncelle, ekle ya da temizi çek.</p>
                 </div>
-                <div className="flex flex-wrap items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={handleCopy}
-                    className="inline-flex items-center gap-2 rounded-xl border border-accent-400 bg-accent-500/15 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-accent-100 shadow-glow transition hover:bg-accent-500/25"
-                    aria-label="Mesajı kopyala"
-                  >
-                    <span className="h-2 w-2 rounded-full bg-accent-300" />
-                    Hızlı Kopyala
-                  </button>
-                  <span className="rounded-full bg-accent-500/20 px-3 py-1 text-xs font-semibold text-accent-100">
-                    Canlı
-                  </span>
-                </div>
+                <span className="rounded-full bg-accent-500/20 px-3 py-1 text-xs font-semibold text-accent-100">
+                  Canlı
+                </span>
               </div>
 
               <div className="mt-6 space-y-5">
@@ -190,7 +225,7 @@ function App() {
                     className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-3 text-base text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/40"
                   />
                   <div className="flex flex-wrap items-center justify-between text-xs text-slate-500">
-                    <span>Kopyalamak için üstteki hızlı butonu kullan.</span>
+                    <span>Listeden tıkladığında otomatik kopyalanır.</span>
                     <span className="rounded-full border border-white/10 px-3 py-1 text-[11px] text-slate-300">
                       Kısayol: Ctrl/Cmd + C
                     </span>
@@ -213,37 +248,6 @@ function App() {
                     Temizle
                   </button>
                 </div>
-              </div>
-            </div>
-
-            <div className={`${panelClass} bg-ink-800/60`}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
-                    Şablon listesi
-                  </p>
-                  <p className="text-sm text-slate-400">Başlıklarına dokunarak düzenlemek istediğini seç.</p>
-                </div>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                  {templates.length} seçenek
-                </span>
-              </div>
-              <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {templates.map((tpl) => (
-                  <button
-                    key={tpl.label}
-                    type="button"
-                    onClick={() => handleTemplateChange({ target: { value: tpl.label } })}
-                    className={`h-full rounded-xl border px-4 py-3 text-left transition ${
-                      tpl.label === selectedTemplate
-                        ? 'border-accent-400 bg-accent-500/10 text-accent-100 shadow-glow'
-                        : 'border-white/10 bg-ink-900 text-slate-200 hover:border-accent-500/60 hover:text-accent-100'
-                    }`}
-                  >
-                    <p className="font-display text-lg">{tpl.label}</p>
-                    <p className="mt-1 h-[54px] overflow-hidden text-sm text-slate-400">{tpl.value}</p>
-                  </button>
-                ))}
               </div>
             </div>
           </div>
@@ -269,7 +273,7 @@ function App() {
                 <select
                   id="template"
                   value={selectedTemplate}
-                  onChange={handleTemplateChange}
+                  onChange={(event) => handleTemplateChange(event.target.value)}
                   className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-3 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/40"
                 >
                   {templates.map((tpl) => (
