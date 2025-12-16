@@ -295,22 +295,26 @@ function App() {
                                     : "border-white/10 bg-ink-900 text-slate-200 hover:border-accent-500/60 hover:text-accent-100"
                                 }`}
                               >
-                                <p className="font-display text-lg">{tpl.label}</p>
-                                <p className="mt-1 h-[54px] overflow-hidden text-sm text-slate-400">{tpl.value}</p>
-                              </button>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleDeleteWithConfirm(tpl.label)
-                                }}
-                                className={`absolute right-3 top-3 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition ${
-                                  confirmTarget === tpl.label
-                                    ? "border-rose-300 bg-rose-500/25 text-rose-50"
-                                    : "border-rose-500/60 bg-rose-500/15 text-rose-100 hover:border-rose-300 hover:bg-rose-500/25"
-                                }`}
-                              >
-                                {confirmTarget === tpl.label ? "Emin misin?" : "Sil"}
+                                <div className="flex items-start justify-between gap-3">
+                                  <div className="min-w-0">
+                                    <p className="font-display text-lg">{tpl.label}</p>
+                                    <p className="mt-1 h-[54px] overflow-hidden text-sm text-slate-400">{tpl.value}</p>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleDeleteWithConfirm(tpl.label)
+                                    }}
+                                    className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition ${
+                                      confirmTarget === tpl.label
+                                        ? "border-rose-300 bg-rose-500/25 text-rose-50"
+                                        : "border-rose-500/60 bg-rose-500/15 text-rose-100 hover:border-rose-300 hover:bg-rose-500/25"
+                                    }`}
+                                  >
+                                    {confirmTarget === tpl.label ? "Emin misin?" : "Sil"}
+                                  </button>
+                                </div>
                               </button>
                             </div>
                           ))}
