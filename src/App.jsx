@@ -179,30 +179,30 @@ function App() {
   return (
     <div className="min-h-screen px-4 pb-16 pt-10 text-slate-50">
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <header className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-8 shadow-card">
-          <div className="flex flex-col gap-10 lg:flex-row lg:items-start lg:justify-between">
-            <div className="space-y-4">
+        <header className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-6 shadow-card">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+            <div className="space-y-3">
               <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
                 Pulcip Message Copy
               </span>
-              <div className="space-y-2">
-                <h1 className="font-display text-4xl font-semibold leading-tight text-white md:text-5xl">
+              <div className="space-y-1.5">
+                <h1 className="font-display text-3xl font-semibold leading-tight text-white md:text-4xl">
                   Pulcip Message Copy
                 </h1>
-                <p className="max-w-2xl text-base text-slate-200/80">
+                <p className="max-w-2xl text-sm text-slate-200/80 md:text-base">
                   Kendi tonunu bul, hazır şablonlarını hızla düzenle ve tek tıkla ekibinle paylaş.
                 </p>
               </div>
-              <div className="flex flex-wrap gap-3">
-                <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-accent-200">
+              <div className="flex flex-wrap gap-2.5">
+                <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-accent-200 md:text-sm">
                   <span className="h-2 w-2 rounded-full bg-accent-400" />
                   Şablon: {templates.length}
                 </span>
-                <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-accent-200">
+                <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-accent-200 md:text-sm">
                   <span className="h-2 w-2 rounded-full bg-amber-300" />
                   Kategori sayısı: {categories.length}
                 </span>
-                <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-accent-200">
+                <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-accent-200 md:text-sm">
                   <span className="h-2 w-2 rounded-full bg-amber-300" />
                   Kategori: {selectedCategory.trim() || "Genel"}
                 </span>
