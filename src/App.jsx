@@ -10,6 +10,12 @@ const initialTemplates = [
   },
   { label: "Hatırlatma", value: "Unutma: Akşam 18:00 toplantısına hazır ol.", category: "Hatırlatma" },
 ]
+const initialCategories = Array.from(
+  new Set([
+    "Genel",
+    ...initialTemplates.map((tpl) => tpl.category || "Genel"),
+  ]),
+)
 
 const panelClass =
   "rounded-2xl border border-white/10 bg-white/5 px-6 py-6 shadow-card backdrop-blur-sm"
@@ -17,7 +23,9 @@ const panelClass =
 function App() {
   const [title, setTitle] = useState("Pulcip Message")
   const [message, setMessage] = useState(initialTemplates[0].value)
-  const [category, setCategory] = useState(initialTemplates[0].category || "Genel")
+  const [selectedCategory, setSelectedCategory] = useState(initialTemplates[0].category || "Genel")
+  const [newCategory, setNewCategory] = useState("")
+  const [categories, setCategories] = useState(initialCategories)
   const [templates, setTemplates] = useState(initialTemplates)
   const [selectedTemplate, setSelectedTemplate] = useState(initialTemplates[0].label)
 
@@ -27,18 +35,13 @@ function App() {
   )
 
   const messageLength = message.trim().length
-  const categories = useMemo(() => {
-    const set = new Set(templates.map((tpl) => tpl.category || "Genel"))
-    if (category) set.add(category)
-    return Array.from(set)
-  }, [templates, category])
 
   const handleTemplateChange = async (nextTemplate, options = {}) => {
     setSelectedTemplate(nextTemplate)
     const tpl = templates.find((item) => item.label === nextTemplate)
     if (tpl) {
       setMessage(tpl.value)
-      setCategory(tpl.category || "Genel")
+      setSelectedCategory(tpl.category || "Genel")
       if (options.shouldCopy) {
         try {
           await navigator.clipboard.writeText(tpl.value)
@@ -75,18 +78,21 @@ function App() {
 
     const safeTitle = title.trim() || `Mesaj ${templates.length + 1}`
     const safeMessage = message.trim()
-    const safeCategory = category.trim() || "Genel"
+    const safeCategory = selectedCategory.trim() || "Genel"
 
     const exists = templates.some((tpl) => tpl.label === safeTitle)
     if (!exists) {
       const nextTemplates = [...templates, { label: safeTitle, value: safeMessage, category: safeCategory }]
       setTemplates(nextTemplates)
+      if (!categories.includes(safeCategory)) {
+        setCategories((prev) => [...prev, safeCategory])
+      }
       toast.success("Yeni şablon eklendi")
     } else {
       toast("Var olan şablon aktif edildi", { position: "top-right" })
     }
     setSelectedTemplate(safeTitle)
-    setCategory(safeCategory)
+    setSelectedCategory(safeCategory)
   }
 
   const handleDeleteTemplate = () => {
@@ -99,8 +105,27 @@ function App() {
     setTemplates(nextTemplates)
     setSelectedTemplate(fallback.label)
     setMessage(fallback.value)
-    setCategory(fallback.category || "Genel")
+    setSelectedCategory(fallback.category || "Genel")
     toast.success("Şablon silindi")
+  }
+
+  const handleCategoryAdd = () => {
+    const next = newCategory.trim()
+    if (!next) {
+      toast.error("Kategori girin.")
+      return
+    }
+    if (categories.includes(next)) {
+      toast("Kategori zaten mevcut", { position: "top-right" })
+      setSelectedCategory(next)
+      setNewCategory("")
+      return
+    }
+    const nextCategories = [...categories, next]
+    setCategories(nextCategories)
+    setSelectedCategory(next)
+    setNewCategory("")
+    toast.success("Kategori eklendi")
   }
 
   return (
@@ -135,7 +160,7 @@ function App() {
                 </span>
                 <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-accent-200">
                   <span className="h-2 w-2 rounded-full bg-amber-300" />
-                  Kategori: {category.trim() || "Genel"}
+                  Kategori: {selectedCategory.trim() || "Genel"}
                 </span>
               </div>
             </div>
@@ -151,7 +176,7 @@ function App() {
                     {activeTemplate?.label || "Yeni şablon"}
                   </h3>
                   <span className="rounded-full border border-accent-300/60 bg-accent-500/15 px-3 py-1 text-xs font-semibold text-accent-50">
-                    {activeTemplate?.category || category || "Genel"}
+                    {activeTemplate?.category || selectedCategory || "Genel"}
                   </span>
                 </div>
                 <p className="mt-3 text-sm leading-relaxed text-slate-200/90">
@@ -236,37 +261,22 @@ function App() {
                   />
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-100" htmlFor="category-select">
-                      Kategori seç
-                    </label>
-                    <select
-                      id="category-select"
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-3 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/40"
-                    >
-                      {categories.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-100" htmlFor="category">
-                      Yeni kategori (opsiyonel)
-                    </label>
-                    <input
-                      id="category"
-                      type="text"
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      placeholder="Örn: Hatırlatma"
-                      className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-3 text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/40"
-                    />
-                  </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-100" htmlFor="category-select">
+                    Kategori seç
+                  </label>
+                  <select
+                    id="category-select"
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-3 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/40"
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="space-y-2">
@@ -311,6 +321,38 @@ function App() {
           </div>
 
           <div className="space-y-6">
+            <div className={`${panelClass} bg-ink-800/60`}>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
+                    Kategori ekle
+                  </p>
+                  <p className="text-sm text-slate-400">Yeni kategori ekle, ardından mesaj alanından seç.</p>
+                </div>
+                <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
+                  {categories.length} kategori
+                </span>
+              </div>
+
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+                <input
+                  id="category-new"
+                  type="text"
+                  value={newCategory}
+                  onChange={(e) => setNewCategory(e.target.value)}
+                  placeholder="Örn: Duyuru"
+                  className="flex-1 rounded-xl border border-white/10 bg-ink-900 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/40"
+                />
+                <button
+                  type="button"
+                  onClick={handleCategoryAdd}
+                  className="min-w-[140px] rounded-xl border border-accent-400/70 bg-accent-500/15 px-4 py-3 text-sm font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
+                >
+                  Ekle
+                </button>
+              </div>
+            </div>
+
             <div className={`${panelClass} bg-ink-800/60`}>
               <div className="flex items-center justify-between">
                 <div>
@@ -389,7 +431,7 @@ function App() {
                         {activeTemplate?.label || "Yeni şablon"}
                       </p>
                       <p className="text-xs text-slate-400">
-                        {activeTemplate?.category || category || "Genel"}
+                        {activeTemplate?.category || selectedCategory || "Genel"}
                       </p>
                     </div>
                     <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-slate-200">
@@ -427,7 +469,7 @@ function App() {
                   </span>
                 </div>
                 <p className="text-xs text-slate-400">
-                  {activeTemplate?.category || category || "Genel"}
+                  {activeTemplate?.category || selectedCategory || "Genel"}
                 </p>
                 <p className="mt-2 text-slate-300">{message || activeTemplate?.value}</p>
               </div>
