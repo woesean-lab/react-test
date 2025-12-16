@@ -173,10 +173,7 @@ function App() {
                         : 'border-white/10 bg-ink-900 text-slate-200 hover:border-accent-500/60 hover:text-accent-100'
                     }`}
                   >
-                    <div className="flex items-center justify-between gap-2">
-                      <p className="font-display text-lg">{tpl.label}</p>
-                      <span className="text-[11px] uppercase tracking-wide text-accent-100">Tıkla &amp; Kopyala</span>
-                    </div>
+                    <p className="font-display text-lg">{tpl.label}</p>
                     <p className="mt-1 h-[54px] overflow-hidden text-sm text-slate-400">{tpl.value}</p>
                   </button>
                 ))}
@@ -236,7 +233,7 @@ function App() {
                   <button
                     type="button"
                     onClick={handleAdd}
-                    className="flex-1 min-w-[180px] rounded-xl bg-gradient-to-r from-accent-500 via-sky-500 to-fuchsia-500 px-5 py-3 text-center text-sm font-semibold uppercase tracking-wide text-white shadow-glow transition hover:-translate-y-0.5 hover:shadow-lg"
+                    className="flex-1 min-w-[180px] rounded-xl border border-accent-400/70 bg-accent-500/15 px-5 py-3 text-center text-sm font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
                   >
                     Şablona Ekle
                   </button>
@@ -287,7 +284,7 @@ function App() {
                   <button
                     type="button"
                     onClick={handleCopy}
-                    className="flex-1 min-w-[140px] rounded-xl border border-accent-400 bg-gradient-to-r from-accent-500 to-accent-600 px-4 py-3 text-sm font-semibold uppercase tracking-wide text-white shadow-glow transition hover:-translate-y-0.5"
+                    className="flex-1 min-w-[140px] rounded-xl border border-accent-400/70 bg-accent-500/15 px-4 py-3 text-sm font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
                   >
                     Kopyala
                   </button>
