@@ -407,25 +407,18 @@ function App() {
                   <label className="text-xs font-semibold text-slate-200" htmlFor="category-mini">
                     Kategori
                   </label>
-                  <div className="relative">
-                    <select
-                      id="category-mini"
-                      value={selectedCategory}
-                      onChange={(e) => setSelectedCategory(e.target.value)}
-                      className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 pr-11 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                    >
-                      {categories.map((cat) => (
-                        <option key={cat} value={cat}>
-                          {cat}
-                        </option>
-                      ))}
-                    </select>
-                    <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 flex h-5 w-5 items-center justify-center rounded-full border border-white/10 bg-white/5 text-accent-100 shadow-sm">
-                      <svg aria-hidden="true" viewBox="0 0 20 20" className="h-3.5 w-3.5" fill="currentColor">
-                        <path d="M4 7h12l-6 6z" />
-                      </svg>
-                    </span>
-                  </div>
+                  <select
+                    id="category-mini"
+                    value={selectedCategory}
+                    onChange={(e) => setSelectedCategory(e.target.value)}
+                    className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                  >
+                    {categories.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="space-y-2">
