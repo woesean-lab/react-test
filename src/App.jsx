@@ -196,11 +196,11 @@ function App() {
                             <div className="flex flex-wrap gap-3">
                 <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-accent-200">
                   <span className="h-2 w-2 rounded-full bg-accent-400" />
-                  ?ablon: {templates.length}
+                  Şablon: {templates.length}
                 </span>
                 <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-accent-200">
                   <span className="h-2 w-2 rounded-full bg-amber-300" />
-                  Kategori say?s?: {categories.length}
+                  Kategori sayısı: {categories.length}
                 </span>
                 <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-2 text-sm text-accent-200">
                   <span className="h-2 w-2 rounded-full bg-amber-300" />
