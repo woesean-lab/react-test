@@ -193,11 +193,7 @@ app.delete("/api/categories/:name", async (req, res) => {
 })
 
 app.use(express.static(distDir))
-app.get(["/", "/:path(*)"], (req, res) => {
-  if (req.path.startsWith("/api/")) {
-    res.status(404).json({ error: "Not found" })
-    return
-  }
+app.get(/^\/(?!api\/).*/, (req, res) => {
   res.sendFile(path.join(distDir, "index.html"))
 })
 
