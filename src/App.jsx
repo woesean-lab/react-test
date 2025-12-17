@@ -37,6 +37,7 @@ function App() {
   const [confirmTarget, setConfirmTarget] = useState(null)
   const [confirmCategoryTarget, setConfirmCategoryTarget] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [delayDone, setDelayDone] = useState(false)
 
   const activeTemplate = useMemo(
     () => templates.find((tpl) => tpl.label === selectedTemplate),
@@ -66,6 +67,11 @@ function App() {
       return next
     })
   }, [categories])
+
+  useEffect(() => {
+    const timer = window.setTimeout(() => setDelayDone(true), 1200)
+    return () => window.clearTimeout(timer)
+  }, [])
 
   useEffect(() => {
     const controller = new AbortController()
@@ -285,9 +291,10 @@ function App() {
     toast("Silmek için tekrar tıkla", { position: "top-right" })
   }
 
-  const templateCountText = isLoading ? <LoadingIndicator label="Yükleniyor" /> : templates.length
-  const categoryCountText = isLoading ? <LoadingIndicator label="Yükleniyor" /> : categories.length
-  const selectedCategoryText = isLoading ? <LoadingIndicator label="Yükleniyor" /> : selectedCategory.trim() || "Genel"
+  const showLoading = isLoading || !delayDone
+  const templateCountText = showLoading ? <LoadingIndicator label="Yükleniyor" /> : templates.length
+  const categoryCountText = showLoading ? <LoadingIndicator label="Yükleniyor" /> : categories.length
+  const selectedCategoryText = showLoading ? <LoadingIndicator label="Yükleniyor" /> : selectedCategory.trim() || "Genel"
 
   return (
     <div className="min-h-screen px-4 pb-16 pt-10 text-slate-50">
@@ -330,7 +337,7 @@ function App() {
                     <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200/70">Aktif şablon</p>
                     <div className="flex flex-wrap items-center gap-2">
                       <h3 className="font-display text-2xl font-semibold text-white">
-                        {activeTemplate?.label || (isLoading ? "Yükleniyor..." : "Yeni şablon")}
+                        {activeTemplate?.label || (showLoading ? "Yükleniyor..." : "Yeni şablon")}
                       </h3>
                       <span className="rounded-full border border-accent-300/60 bg-accent-500/15 px-3 py-1 text-[11px] font-semibold text-accent-50">
                         {activeTemplate?.category || selectedCategory || "Genel"}
@@ -357,7 +364,7 @@ function App() {
                 <div className="mt-4 flex items-center justify-between text-xs text-slate-300/80">
                   <span>{messageLength} karakter</span>
                   <span className="rounded-full bg-white/10 px-3 py-1 font-semibold text-accent-100">
-                    {isLoading ? "Bekle" : "Hazır"}
+                    {showLoading ? "Bekle" : "Hazır"}
                   </span>
                 </div>
               </div>
@@ -374,13 +381,13 @@ function App() {
                   <p className="text-sm text-slate-400">Başlıklarına dokunarak düzenle ve kopyala.</p>
                 </div>
                 <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                  {isLoading && <span className="h-2 w-2 animate-pulse rounded-full bg-accent-400" />}
-                  {templateCountText} {isLoading ? "" : "seçenek"}
+                  {showLoading && <span className="h-2 w-2 animate-pulse rounded-full bg-accent-400" />}
+                  {templateCountText} {showLoading ? "" : "seçenek"}
                 </span>
               </div>
 
               <div className="mt-4 space-y-3">
-                {isLoading && categories.length === 0 && (
+                {showLoading && categories.length === 0 && (
                   <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                     {Array.from({ length: 3 }).map((_, idx) => (
                       <div
