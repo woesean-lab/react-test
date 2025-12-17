@@ -16,6 +16,15 @@ const fallbackCategories = Array.from(new Set(["Genel", ...fallbackTemplates.map
 const panelClass =
   "rounded-2xl border border-white/10 bg-white/5 px-6 py-6 shadow-card backdrop-blur-sm"
 
+function LoadingIndicator({ label = "Yükleniyor..." }) {
+  return (
+    <span className="inline-flex items-center gap-2 text-xs font-semibold text-slate-200">
+      <span className="h-2 w-2 animate-pulse rounded-full bg-accent-400" />
+      {label}
+    </span>
+  )
+}
+
 function App() {
   const [title, setTitle] = useState("Pulcip Message Copy")
   const [message, setMessage] = useState("")
@@ -276,9 +285,9 @@ function App() {
     toast("Silmek için tekrar tıkla", { position: "top-right" })
   }
 
-  const templateCountText = isLoading ? "…" : templates.length
-  const categoryCountText = isLoading ? "…" : categories.length
-  const selectedCategoryText = isLoading ? "Yükleniyor" : selectedCategory.trim() || "Genel"
+  const templateCountText = isLoading ? <LoadingIndicator label="Yükleniyor" /> : templates.length
+  const categoryCountText = isLoading ? <LoadingIndicator label="Yükleniyor" /> : categories.length
+  const selectedCategoryText = isLoading ? <LoadingIndicator label="Yükleniyor" /> : selectedCategory.trim() || "Genel"
 
   return (
     <div className="min-h-screen px-4 pb-16 pt-10 text-slate-50">
@@ -364,15 +373,23 @@ function App() {
                   <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Şablon listesi</p>
                   <p className="text-sm text-slate-400">Başlıklarına dokunarak düzenle ve kopyala.</p>
                 </div>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                  {templateCountText} seçenek
+                <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
+                  {isLoading && <span className="h-2 w-2 animate-pulse rounded-full bg-accent-400" />}
+                  {templateCountText} {isLoading ? "" : "seçenek"}
                 </span>
               </div>
 
               <div className="mt-4 space-y-3">
                 {isLoading && categories.length === 0 && (
-                  <div className="rounded-2xl border border-white/10 bg-ink-900/60 p-3 text-sm text-slate-300">
-                    Yükleniyor...
+                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {Array.from({ length: 3 }).map((_, idx) => (
+                      <div
+                        key={idx}
+                        className="h-20 rounded-xl border border-white/10 bg-white/5 text-sm text-slate-300"
+                      >
+                        <div className="h-full animate-pulse rounded-xl bg-ink-800/80" />
+                      </div>
+                    ))}
                   </div>
                 )}
                 {categories.map((cat) => {
