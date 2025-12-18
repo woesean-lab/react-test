@@ -569,14 +569,13 @@ function App() {
                                           ? "border-accent-400 bg-accent-500/10 text-accent-100 shadow-glow"
                                           : "border-white/10 bg-ink-900 text-slate-200 hover:border-accent-500/60 hover:text-accent-100"
                                       }`}
-                                    >
-                                      <p className="font-display text-lg">{tpl.label}</p>
-                                      <p className="mt-1 h-[54px] overflow-hidden text-sm text-slate-400">{tpl.value}</p>
-                                    </button>
-                                  </div>
-                                ))}
+                                >
+                                  <p className="font-display text-lg">{tpl.label}</p>
+                                </button>
                               </div>
-                            )}
+                            ))}
+                          </div>
+                        )}
                           </div>
                         )
                       })
