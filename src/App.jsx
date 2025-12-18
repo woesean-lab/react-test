@@ -797,7 +797,7 @@ function App() {
                           <button
                             type="button"
                             onClick={() => handleProblemCopy(pb.username)}
-                            className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
+                            className="rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-100"
                           >
                             Kopyala
                           </button>
@@ -858,7 +858,7 @@ function App() {
                           <button
                             type="button"
                             onClick={() => handleProblemCopy(pb.username)}
-                            className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:border-emerald-200 hover:text-emerald-50"
+                            className="rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-400/10 hover:text-emerald-50"
                           >
                             Kopyala
                           </button>
