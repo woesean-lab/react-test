@@ -786,27 +786,27 @@ function App() {
                     {openProblems.map((pb) => (
                       <div
                         key={pb.id}
-                        className="flex h-full flex-col gap-3 rounded-xl border border-white/10 border-l-4 border-l-amber-300 bg-gradient-to-br from-amber-500/10 via-ink-900 to-ink-900 p-4 shadow-[0_12px_50px_-24px_rgba(0,0,0,0.8)]"
+                        className="flex h-full flex-col gap-3 rounded-xl border border-white/10 bg-ink-900/80 p-4 shadow-inner"
                       >
                         <div className="flex items-start justify-between gap-3">
-                          <div className="flex flex-col gap-1">
-                            <span className="inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border border-amber-300/50 bg-amber-500/15 px-3 py-1 text-[11px] font-semibold text-amber-50 break-all">
+                          <div className="space-y-1">
+                            <span className="inline-flex max-w-full flex-wrap items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-[11px] font-semibold text-accent-200 break-all">
                               {pb.username}
                             </span>
-                            <span className="inline-flex w-fit items-center gap-1 rounded-full border border-amber-300/40 bg-amber-500/10 px-2 py-0.5 text-[11px] font-semibold text-amber-100">
+                            <span className="inline-flex w-fit items-center gap-1 rounded-full border border-amber-300/50 bg-amber-500/15 px-2 py-0.5 text-[11px] font-semibold text-amber-100">
                               <span className="h-2 w-2 rounded-full bg-amber-300" />
                               Açık
                             </span>
                           </div>
                           <button
                             type="button"
-                            onClick={() => handleProblemCopy(pb.issue)}
+                            onClick={() => handleProblemCopy(pb.username)}
                             className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
                           >
                             Kopyala
                           </button>
                         </div>
-                        <p className="rounded-lg border border-white/10 bg-ink-900/80 px-3 py-2 text-sm text-slate-200 shadow-inner">
+                        <p className="rounded-lg border border-white/5 bg-ink-800/80 px-3 py-2 text-sm text-slate-200 shadow-inner">
                           {pb.issue}
                         </p>
                         <div className="flex flex-wrap gap-2 border-t border-white/5 pt-2">
@@ -853,7 +853,7 @@ function App() {
                     {resolvedProblems.map((pb) => (
                       <div
                         key={pb.id}
-                        className="flex h-full flex-col gap-3 rounded-xl border border-emerald-200/40 border-l-4 border-l-emerald-300 bg-gradient-to-br from-emerald-900/40 via-emerald-800/30 to-emerald-900/60 p-4 shadow-[0_12px_50px_-24px_rgba(0,0,0,0.8)]"
+                        className="flex h-full flex-col gap-3 rounded-xl border border-emerald-200/40 border-l-4 border-l-emerald-300 bg-emerald-950/50 p-4 shadow-inner"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="flex flex-col gap-1">
@@ -867,7 +867,7 @@ function App() {
                           </div>
                           <button
                             type="button"
-                            onClick={() => handleProblemCopy(pb.issue)}
+                            onClick={() => handleProblemCopy(pb.username)}
                             className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:border-emerald-200 hover:text-emerald-50"
                           >
                             Kopyala
