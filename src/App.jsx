@@ -118,7 +118,13 @@ function App() {
     if (tpl && options.shouldCopy) {
       try {
         await navigator.clipboard.writeText(tpl.value)
-        toast.success("Şablon kopyalandı", { duration: 1400, position: "top-right" })
+        toast.success(
+          <div className="space-y-1">
+            <p className="font-semibold">Şablon kopyalandı</p>
+            <p className="text-xs text-slate-200">{tpl.value}</p>
+          </div>,
+          { duration: 2200, position: "top-right" },
+        )
       } catch (error) {
         console.error("Copy failed", error)
         toast.error("Kopyalanamadı", { duration: 1600, position: "top-right" })
