@@ -84,7 +84,7 @@ function App() {
   const [confirmProblemTarget, setConfirmProblemTarget] = useState(null)
 
   const [products, setProducts] = useState(initialProducts)
-  const [productForm, setProductForm] = useState({ name: "", note: "" })
+  const [productForm, setProductForm] = useState({ name: "", note: "", deliveryTemplate: "" })
   const [stockForm, setStockForm] = useState({ productId: initialProducts[0]?.id || "", code: "" })
   const [confirmStockTarget, setConfirmStockTarget] = useState(null)
   const [productSearch, setProductSearch] = useState("")
@@ -412,6 +412,8 @@ function App() {
   const handleProductAdd = () => {
     const name = productForm.name.trim()
     const note = productForm.note.trim()
+    const deliveryTemplate = productForm.deliveryTemplate
+    const deliveryMessage = templates.find((tpl) => tpl.label === deliveryTemplate)?.value || ""
     if (!name) {
       toast.error("Ürün ismi boş olamaz.")
       return
@@ -424,10 +426,11 @@ function App() {
       id: `prd-${Date.now().toString(36)}`,
       name,
       note,
+    deliveryMessage,
       stocks: [],
     }
     setProducts((prev) => [...prev, newProduct])
-    setProductForm({ name: "", note: "" })
+    setProductForm({ name: "", note: "", deliveryTemplate: "" })
     setStockForm((prev) => ({ ...prev, productId: newProduct.id }))
     toast.success("Ürün eklendi")
   }
@@ -480,6 +483,22 @@ function App() {
     }
     setConfirmProductTarget(productId)
     toast("Silmek için tekrar tıkla", { position: "top-right" })
+  }
+
+  const handleProductCopyMessage = async (productId) => {
+    const product = products.find((p) => p.id === productId)
+    const message = product?.deliveryMessage?.trim()
+    if (!message) {
+      toast.error("Bu ürüne teslimat mesajı eklenmemiş.")
+      return
+    }
+    try {
+      await navigator.clipboard.writeText(message)
+      toast.success("Teslimat mesajı kopyalandı", { duration: 1500, position: "top-right" })
+    } catch (error) {
+      console.error(error)
+      toast.error("Kopyalanamadı")
+    }
   }
 
   const handleStockDeleteWithConfirm = (productId, stockId) => {
@@ -1042,6 +1061,27 @@ function App() {
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation()
+                                handleProductCopyMessage(product.id)
+                              }}
+                              className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
+                              aria-label="Teslimat mesajını kopyala"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                className="h-4 w-4"
+                              >
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                              </svg>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
                                 handleProductDeleteWithConfirm(product.id)
                               }}
                               className={`flex h-8 w-8 items-center justify-center rounded-full border text-[11px] font-semibold uppercase tracking-wide transition ${
@@ -1132,12 +1172,12 @@ function App() {
                     </span>
                   </div>
 
-                  <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-200" htmlFor="prd-name">
-                        Ürün adı
-                      </label>
-                      <input
+                      <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
+                        <div className="space-y-2">
+                          <label className="text-xs font-semibold text-slate-200" htmlFor="prd-name">
+                            Ürün adı
+                          </label>
+                          <input
                         id="prd-name"
                         type="text"
                         value={productForm.name}
@@ -1158,25 +1198,44 @@ function App() {
                         onChange={(e) => setProductForm((prev) => ({ ...prev, note: e.target.value }))}
                         placeholder="Kısa not ekle..."
                         className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                      />
-                    </div>
+                          />
+                        </div>
 
-                    <div className="flex flex-wrap gap-3">
-                      <button
-                        type="button"
-                        onClick={handleProductAdd}
-                        className="flex-1 min-w-[140px] rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
-                      >
-                        Ürün ekle
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setProductForm({ name: "", note: "" })}
-                        className="min-w-[110px] rounded-lg border border-white/10 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
-                      >
-                        Temizle
-                      </button>
-                    </div>
+                        <div className="space-y-2">
+                          <label className="text-xs font-semibold text-slate-200" htmlFor="prd-delivery">
+                            Teslimat mesajı (opsiyonel)
+                          </label>
+                          <select
+                            id="prd-delivery"
+                            value={productForm.deliveryTemplate}
+                            onChange={(e) => setProductForm((prev) => ({ ...prev, deliveryTemplate: e.target.value }))}
+                            className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 pr-3 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                          >
+                            <option value="">Seç (opsiyonel)</option>
+                            {templates.map((tpl) => (
+                              <option key={tpl.label} value={tpl.label}>
+                                {tpl.label}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+
+                        <div className="flex flex-wrap gap-3">
+                          <button
+                            type="button"
+                            onClick={handleProductAdd}
+                            className="flex-1 min-w-[140px] rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
+                          >
+                            Ürün ekle
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setProductForm({ name: "", note: "", deliveryTemplate: "" })}
+                            className="min-w-[110px] rounded-lg border border-white/10 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
+                          >
+                            Temizle
+                          </button>
+                        </div>
                   </div>
                 </div>
 
