@@ -18,6 +18,33 @@ const initialProblems = [
   { id: 2, username: "@ornek2", issue: "Teslimat gecikmesi şikayeti.", status: "open" },
 ]
 
+const initialStock = [
+  {
+    id: "stk-1",
+    name: "Cyber Drift DLC",
+    platform: "Steam",
+    code: "CYDR-FT67-PLCP-2025",
+    status: "available",
+    note: "Yeni promosyon, hemen teslim",
+  },
+  {
+    id: "stk-2",
+    name: "Galaxy Pass",
+    platform: "Xbox",
+    code: "XBGP-3M-TRIAL-KEY",
+    status: "used",
+    note: "Demo hesabında kullanıldı",
+  },
+  {
+    id: "stk-3",
+    name: "Indie Bundle",
+    platform: "Steam",
+    code: "INDI-BNDL-PLCP-4432",
+    status: "available",
+    note: "Hediye kuponu",
+  },
+]
+
 const panelClass =
   "rounded-2xl border border-white/10 bg-white/5 px-6 py-6 shadow-card backdrop-blur-sm"
 
@@ -59,6 +86,12 @@ function App() {
   const [problemIssue, setProblemIssue] = useState("")
   const [confirmProblemTarget, setConfirmProblemTarget] = useState(null)
 
+  const [stockItems, setStockItems] = useState(initialStock)
+  const [stockForm, setStockForm] = useState({ name: "", platform: "", code: "", note: "", status: "available" })
+  const [stockSearch, setStockSearch] = useState("")
+  const [stockStatusFilter, setStockStatusFilter] = useState("all")
+  const [confirmStockTarget, setConfirmStockTarget] = useState(null)
+
   const activeTemplate = useMemo(
     () => templates.find((tpl) => tpl.label === selectedTemplate),
     [selectedTemplate, templates],
@@ -74,6 +107,25 @@ function App() {
       return acc
     }, {})
   }, [templates])
+
+  const filteredStock = useMemo(() => {
+    const text = stockSearch.trim().toLowerCase()
+    return stockItems.filter((item) => {
+      const matchesText =
+        !text ||
+        [item.name, item.platform, item.code, item.note].some((field) =>
+          (field || "").toLowerCase().includes(text),
+        )
+      const matchesStatus = stockStatusFilter === "all" || item.status === stockStatusFilter
+      return matchesText && matchesStatus
+    })
+  }, [stockItems, stockSearch, stockStatusFilter])
+
+  const stockSummary = useMemo(() => {
+    const available = stockItems.filter((item) => item.status === "available").length
+    const used = stockItems.filter((item) => item.status === "used").length
+    return { available, used, total: stockItems.length }
+  }, [stockItems])
 
   useEffect(() => {
     setOpenCategories((prev) => {
@@ -346,6 +398,74 @@ function App() {
   }, [categories])
 
   const getCategoryClass = (cat) => categoryColors[cat] || "border-white/10 bg-white/5 text-slate-200"
+  const getStockStatusClass = (status) =>
+    status === "used"
+      ? "border-amber-300/70 bg-amber-500/15 text-amber-50"
+      : "border-emerald-300/60 bg-emerald-500/15 text-emerald-50"
+
+  const resetStockForm = () =>
+    setStockForm({ name: "", platform: "", code: "", note: "", status: "available" })
+
+  const handleStockAdd = () => {
+    const name = stockForm.name.trim()
+    const platform = stockForm.platform.trim() || "Belirtilmedi"
+    const code = stockForm.code.trim()
+    const note = stockForm.note.trim()
+    const status = stockForm.status || "available"
+
+    if (!name || !code) {
+      toast.error("İsim ve anahtar boş bırakılamaz.")
+      return
+    }
+
+    const newItem = {
+      id: `stk-${Date.now().toString(36)}-${Math.random().toString(16).slice(2, 6)}`,
+      name,
+      platform,
+      code,
+      note,
+      status,
+    }
+
+    setStockItems((prev) => [...prev, newItem])
+    resetStockForm()
+    toast.success("Anahtar eklendi")
+  }
+
+  const handleStockDeleteWithConfirm = (id) => {
+    if (confirmStockTarget === id) {
+      setStockItems((prev) => prev.filter((item) => item.id !== id))
+      setConfirmStockTarget(null)
+      toast.success("Anahtar silindi")
+      return
+    }
+    setConfirmStockTarget(id)
+    toast("Silmek için tekrar tıkla", { position: "top-right" })
+  }
+
+  const handleStockCopy = async (code) => {
+    try {
+      await navigator.clipboard.writeText(code)
+      toast.success("Anahtar kopyalandı", { duration: 1500, position: "top-right" })
+    } catch (error) {
+      console.error(error)
+      toast.error("Kopyalanamadı", { duration: 1500, position: "top-right" })
+    }
+  }
+
+  const handleStockToggleStatus = (id) => {
+    let nextStatus = null
+    setStockItems((prev) =>
+      prev.map((item) => {
+        if (item.id !== id) return item
+        nextStatus = item.status === "available" ? "used" : "available"
+        return { ...item, status: nextStatus }
+      }),
+    )
+    if (nextStatus) {
+      toast.success(nextStatus === "used" ? "Kullanıldı olarak işaretlendi" : "Tekrar müsait")
+    }
+  }
 
   const handleProblemAdd = async () => {
     const user = problemUsername.trim()
@@ -464,6 +584,17 @@ function App() {
             }`}
           >
             Problemli Müşteriler
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("stock")}
+            className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+              activeTab === "stock"
+                ? "bg-accent-500/20 text-accent-50 shadow-glow"
+                : "bg-white/5 text-slate-200 hover:bg-white/10"
+            }`}
+          >
+            Stok
           </button>
         </div>
 
@@ -783,6 +914,258 @@ function App() {
               </div>
             </div>
           </>
+        )}
+
+        {activeTab === "stock" && (
+          <div className="space-y-6">
+            <header className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-6 shadow-card">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="space-y-2">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
+                    Stok
+                  </span>
+                  <h1 className="font-display text-3xl font-semibold text-white">Dijital Anahtar Stoku</h1>
+                  <p className="max-w-2xl text-sm text-slate-200/80">
+                    Anahtarları görsel olarak tut, kopyala, ekle ve sil. Bu bölüm tamamen görsel, veri tabanı yok.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/60 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-50">
+                    Müsait: {stockSummary.available}
+                  </span>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-amber-300/70 bg-amber-500/10 px-3 py-1 text-xs text-amber-50">
+                    Kullanıldı: {stockSummary.used}
+                  </span>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
+                    Toplam: {stockSummary.total}
+                  </span>
+                </div>
+              </div>
+            </header>
+
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+              <div className="space-y-6 lg:col-span-2">
+                <div className={`${panelClass} bg-ink-800/60`}>
+                  <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
+                        Anahtar listesi
+                      </p>
+                      <p className="text-sm text-slate-400">Görsel yönetim, tıklayınca kopyala ve statü güncelle.</p>
+                    </div>
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                      <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-ink-900 px-3 py-2 shadow-inner">
+                        <span className="text-xs uppercase tracking-[0.18em] text-slate-400">Ara</span>
+                        <input
+                          type="text"
+                          value={stockSearch}
+                          onChange={(e) => setStockSearch(e.target.value)}
+                          placeholder="anahtar, platform..."
+                          className="w-44 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
+                        />
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          { key: "all", label: "Hepsi" },
+                          { key: "available", label: "Müsait" },
+                          { key: "used", label: "Kullanıldı" },
+                        ].map((item) => (
+                          <button
+                            key={item.key}
+                            type="button"
+                            onClick={() => setStockStatusFilter(item.key)}
+                            className={`rounded-full border px-3 py-1.5 text-xs font-semibold uppercase tracking-wide transition ${
+                              stockStatusFilter === item.key
+                                ? "border-accent-300 bg-accent-500/20 text-accent-50 shadow-glow"
+                                : "border-white/15 bg-white/5 text-slate-200 hover:border-accent-300/60 hover:text-accent-100"
+                            }`}
+                          >
+                            {item.label}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {filteredStock.length === 0 && (
+                      <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
+                        Gösterilecek stok yok.
+                      </div>
+                    )}
+                    {filteredStock.map((item) => (
+                      <div
+                        key={item.id}
+                        className="flex h-full flex-col gap-3 rounded-xl border border-white/10 bg-ink-900 p-4 shadow-inner"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="space-y-1">
+                            <p className="font-display text-lg text-white">{item.name}</p>
+                            <div className="flex flex-wrap gap-2">
+                              <span className="rounded-full border border-sky-300/60 bg-sky-500/10 px-3 py-1 text-[11px] font-semibold text-sky-50">
+                                {item.platform}
+                              </span>
+                              <span className={`rounded-full px-3 py-1 text-[11px] font-semibold ${getStockStatusClass(item.status)}`}>
+                                {item.status === "used" ? "Kullanıldı" : "Müsait"}
+                              </span>
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleStockCopy(item.code)}
+                            className="rounded-lg border border-white/15 bg-white/5 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/10 hover:text-indigo-50"
+                          >
+                            Kopyala
+                          </button>
+                        </div>
+                        <div className="rounded-lg border border-white/10 bg-ink-800/70 px-3 py-2 font-mono text-sm text-slate-100 shadow-inner">
+                          {item.code}
+                        </div>
+                        {item.note && (
+                          <p className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-300">
+                            {item.note}
+                          </p>
+                        )}
+                        <div className="flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() => handleStockToggleStatus(item.id)}
+                            className="rounded-lg border border-accent-400/70 bg-accent-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-accent-50 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
+                          >
+                            {item.status === "used" ? "Müsait yap" : "Kullanıldı"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleStockDeleteWithConfirm(item.id)}
+                            className={`rounded-lg border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition ${
+                              confirmStockTarget === item.id
+                                ? "border-rose-300 bg-rose-500/25 text-rose-50"
+                                : "border-rose-400/60 bg-rose-500/10 text-rose-100 hover:border-rose-300 hover:bg-rose-500/20"
+                            }`}
+                          >
+                            {confirmStockTarget === item.id ? "Emin misin?" : "Sil"}
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6">
+                <div className={`${panelClass} bg-ink-900/60`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Anahtar ekle</p>
+                      <p className="text-sm text-slate-400">İsim, platform ve anahtarı girip görsel stokta tut.</p>
+                    </div>
+                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
+                      {stockSummary.total} kayıt
+                    </span>
+                  </div>
+
+                  <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-200" htmlFor="stock-name">
+                        Başlık
+                      </label>
+                      <input
+                        id="stock-name"
+                        type="text"
+                        value={stockForm.name}
+                        onChange={(e) => setStockForm((prev) => ({ ...prev, name: e.target.value }))}
+                        placeholder="Örn: Deluxe Edition"
+                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-200" htmlFor="stock-platform">
+                        Platform
+                      </label>
+                      <input
+                        id="stock-platform"
+                        type="text"
+                        value={stockForm.platform}
+                        onChange={(e) => setStockForm((prev) => ({ ...prev, platform: e.target.value }))}
+                        placeholder="Steam, Xbox, PS..."
+                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-200" htmlFor="stock-code">
+                        Anahtar / Kod
+                      </label>
+                      <textarea
+                        id="stock-code"
+                        rows={2}
+                        value={stockForm.code}
+                        onChange={(e) => setStockForm((prev) => ({ ...prev, code: e.target.value }))}
+                        placeholder="XXXX-XXXX-XXXX-XXXX"
+                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-200" htmlFor="stock-note">
+                        Not (isteğe bağlı)
+                      </label>
+                      <textarea
+                        id="stock-note"
+                        rows={2}
+                        value={stockForm.note}
+                        onChange={(e) => setStockForm((prev) => ({ ...prev, note: e.target.value }))}
+                        placeholder="Kısa not ekle..."
+                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-200" htmlFor="stock-status">
+                        Statü
+                      </label>
+                      <select
+                        id="stock-status"
+                        value={stockForm.status}
+                        onChange={(e) => setStockForm((prev) => ({ ...prev, status: e.target.value }))}
+                        className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 pr-3 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                      >
+                        <option value="available">Müsait</option>
+                        <option value="used">Kullanıldı</option>
+                      </select>
+                    </div>
+
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={handleStockAdd}
+                        className="flex-1 min-w-[140px] rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
+                      >
+                        Kaydet
+                      </button>
+                      <button
+                        type="button"
+                        onClick={resetStockForm}
+                        className="min-w-[110px] rounded-lg border border-white/10 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
+                      >
+                        Temizle
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`${panelClass} bg-ink-800/60`}>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Kullanım notları</p>
+                  <ul className="mt-3 space-y-2 text-sm text-slate-300">
+                    <li>- Bu alan sadece görsel: yenilemede liste başlangıç örneklerine döner.</li>
+                    <li>- Kopyala butonu anahtarı panoya alır.</li>
+                    <li>- Statüyü değiştirerek kullanılan/müsait takibi yap.</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
         )}
 
         {activeTab === "problems" && (
