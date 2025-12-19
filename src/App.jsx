@@ -466,7 +466,7 @@ function App() {
                 : "bg-white/5 text-slate-200 hover:bg-white/10"
             }`}
           >
-            Message Copy
+            Mesajlar
           </button>
           <button
             type="button"
