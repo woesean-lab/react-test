@@ -999,9 +999,7 @@ function App() {
                         >
                           <div className="space-y-1">
                             <span className="inline-flex items-center gap-2">
-                              <span className={`rounded-full border px-3 py-1 text-[12px] font-semibold uppercase tracking-wide ${getCategoryClass("Stock")}`}>
-                                {product.name}
-                              </span>
+                              <span className="text-sm font-semibold text-white">{product.name}</span>
                               <span className="text-xs text-slate-300">{product.stocks.length} stok</span>
                             </span>
                           </div>
