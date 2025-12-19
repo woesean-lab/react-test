@@ -1135,7 +1135,7 @@ function App() {
                                   <button
                                     type="button"
                                   onClick={() => handleStockCopy(stk.code)}
-                                    className="flex h-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 px-3 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
+                                    className="flex h-7 items-center justify-center rounded-md border border-white/10 bg-white/5 px-2.5 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
                                     aria-label="Stoku kopyala"
                                   >
                                     Kopyala
@@ -1146,7 +1146,7 @@ function App() {
                                       handleStockCopy(stk.code)
                                       handleStockDeleteWithConfirm(product.id, stk.id)
                                     }}
-                                    className="flex h-8 items-center justify-center rounded-lg border border-white/10 bg-white/5 px-3 text-xs font-semibold uppercase tracking-wide text-amber-50 transition hover:-translate-y-0.5 hover:border-amber-300 hover:bg-amber-500/15 hover:text-amber-50"
+                                    className="flex h-7 items-center justify-center rounded-md border border-white/10 bg-white/5 px-2.5 text-[11px] font-semibold uppercase tracking-wide text-amber-50 transition hover:-translate-y-0.5 hover:border-amber-300 hover:bg-amber-500/15 hover:text-amber-50"
                                     aria-label="Kopyala ve sil"
                                   >
                                     Kopyala & Sil
@@ -1154,7 +1154,7 @@ function App() {
                                   <button
                                     type="button"
                                     onClick={() => handleStockDeleteWithConfirm(product.id, stk.id)}
-                                    className={`flex h-8 items-center justify-center rounded-lg border px-3 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 ${
+                                    className={`flex h-7 items-center justify-center rounded-md border px-2.5 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 ${
                                       confirmStockTarget === `${product.id}-${stk.id}`
                                         ? "border-rose-300 bg-rose-500/25 text-rose-50"
                                         : "border-rose-400/60 bg-rose-500/10 hover:border-rose-300 hover:bg-rose-500/20"
