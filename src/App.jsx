@@ -1000,7 +1000,15 @@ function App() {
                           <div className="space-y-1">
                             <span className="inline-flex items-center gap-2">
                               <span className="text-sm font-semibold text-white">{product.name}</span>
-                              <span className="text-xs text-slate-300">{product.stocks.length} stok</span>
+                              <span
+                                className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
+                                  product.stocks.length === 0
+                                    ? "border border-rose-300/60 bg-rose-500/15 text-rose-50"
+                                    : "border border-emerald-300/60 bg-emerald-500/15 text-emerald-50"
+                                }`}
+                              >
+                                {product.stocks.length} stok
+                              </span>
                             </span>
                           </div>
                           <span
