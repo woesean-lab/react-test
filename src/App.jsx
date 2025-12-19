@@ -96,6 +96,11 @@ function App() {
     stock: "1",
     note: "",
   })
+  const [productNames, setProductNames] = useState(() =>
+    Array.from(new Set(initialStockItems.map((item) => item.title))).slice(0, 12),
+  )
+  const [newProduct, setNewProduct] = useState("")
+  const [confirmProductTarget, setConfirmProductTarget] = useState(null)
 
   const activeTemplate = useMemo(
     () => templates.find((tpl) => tpl.label === selectedTemplate),
@@ -405,6 +410,14 @@ function App() {
     return { totalUnits, lowStock }
   }, [stockItems])
 
+  const productCounts = useMemo(() => {
+    const counts = {}
+    stockItems.forEach((item) => {
+      counts[item.title] = (counts[item.title] || 0) + (item.stock || 0)
+    })
+    return counts
+  }, [stockItems])
+
   const handleStockCopy = async (code, title) => {
     try {
       await navigator.clipboard.writeText(code)
@@ -456,6 +469,33 @@ function App() {
       note: "",
     })
     toast.success("Stok eklendi (local)")
+  }
+
+  const handleProductAdd = () => {
+    const next = newProduct.trim()
+    if (!next) {
+      toast.error("Ürün adı girin.")
+      return
+    }
+    if (productNames.includes(next)) {
+      toast("Ürün zaten listede", { position: "top-right" })
+      setNewProduct("")
+      return
+    }
+    setProductNames((prev) => [...prev, next])
+    setNewProduct("")
+    toast.success("Ürün eklendi")
+  }
+
+  const handleProductDeleteWithConfirm = (name) => {
+    if (confirmProductTarget === name) {
+      setProductNames((prev) => prev.filter((item) => item !== name))
+      setConfirmProductTarget(null)
+      toast.success("Ürün kaldırıldı")
+      return
+    }
+    setConfirmProductTarget(name)
+    toast("Silmek için tekrar tıkla", { position: "top-right" })
   }
 
 
@@ -1015,6 +1055,65 @@ function App() {
               </div>
 
               <div className="space-y-4">
+                <div className={`${panelClass} bg-ink-800/60`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Yeni ürün ekle</p>
+                      <p className="text-sm text-slate-400">Hızlı ürün listesi oluştur; silme için tekrar tıkla.</p>
+                    </div>
+                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
+                      {productNames.length} ürün
+                    </span>
+                  </div>
+
+                  <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
+                    <div className="flex flex-col gap-3 sm:flex-row">
+                      <input
+                        type="text"
+                        value={newProduct}
+                        onChange={(e) => setNewProduct(e.target.value)}
+                        placeholder="Örn: Cyberpunk 2077 (Steam)"
+                        className="flex-1 rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleProductAdd}
+                        className="min-w-[120px] rounded-xl border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
+                      >
+                        Ekle
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {productNames.length === 0 && (
+                        <span className="text-sm text-slate-400">Liste boş. Ürün ekleyin.</span>
+                      )}
+                      {productNames.map((name) => (
+                        <span
+                          key={name}
+                          className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-100"
+                        >
+                          {name}
+                          <span className="rounded-full border border-white/10 bg-ink-900/60 px-2 py-0.5 text-[11px] text-slate-200">
+                            Stok: {productCounts[name] ?? 0}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleProductDeleteWithConfirm(name)}
+                            className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide transition ${
+                              confirmProductTarget === name
+                                ? "border-rose-300 bg-rose-500/20 text-rose-50"
+                                : "border-rose-400/60 bg-rose-500/10 text-rose-100 hover:border-rose-300 hover:bg-rose-500/20"
+                            }`}
+                          >
+                            {confirmProductTarget === name ? "Emin misin?" : "Sil"}
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
                 <div className={`${panelClass} bg-ink-900/60`}>
                   <div className="flex items-center justify-between">
                     <div>
