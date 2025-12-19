@@ -96,6 +96,7 @@ function App() {
   const [confirmProductTarget, setConfirmProductTarget] = useState(null)
   const [bulkCount, setBulkCount] = useState({})
   const [lastDeleted, setLastDeleted] = useState(null)
+  const [editingProduct, setEditingProduct] = useState({})
 
   const activeTemplate = useMemo(
     () => templates.find((tpl) => tpl.label === selectedTemplate),
@@ -515,6 +516,43 @@ function App() {
     }
     setConfirmProductTarget(productId)
     toast("Silmek için tekrar tıkla", { position: "top-right" })
+  }
+
+  const handleEditStart = (product) => {
+    setEditingProduct((prev) => ({
+      ...prev,
+      [product.id]: { name: product.name, note: product.note },
+    }))
+  }
+
+  const handleEditChange = (productId, field, value) => {
+    setEditingProduct((prev) => ({
+      ...prev,
+      [productId]: { ...(prev[productId] || {}), [field]: value },
+    }))
+  }
+
+  const handleEditCancel = (productId) => {
+    setEditingProduct((prev) => {
+      const copy = { ...prev }
+      delete copy[productId]
+      return copy
+    })
+  }
+
+  const handleEditSave = (productId) => {
+    const draft = editingProduct[productId]
+    const name = draft?.name?.trim()
+    const note = draft?.note?.trim()
+    if (!name || !note) {
+      toast.error("İsim ve not boş olamaz.")
+      return
+    }
+    setProducts((prev) =>
+      prev.map((p) => (p.id === productId ? { ...p, name, note } : p)),
+    )
+    handleEditCancel(productId)
+    toast.success("Ürün güncellendi")
   }
 
   const handleUndoDelete = () => {
@@ -1102,8 +1140,8 @@ function App() {
                               <span
                                 className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
                                   product.stocks.length === 0
-                                    ? "border border-rose-300/60 bg-rose-500/15 text-rose-50"
-                                    : "border border-emerald-300/60 bg-emerald-500/15 text-emerald-50"
+                                  ? "border border-rose-300/60 bg-rose-500/15 text-rose-50"
+                                  : "border border-emerald-300/60 bg-emerald-500/15 text-emerald-50"
                                 }`}
                               >
                                 {product.stocks.length} stok
@@ -1111,6 +1149,41 @@ function App() {
                             </span>
                           </div>
                           <div className="flex items-center gap-1.5">
+                            {editingProduct[product.id] ? (
+                              <>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleEditSave(product.id)
+                                  }}
+                                  className="flex h-7 items-center justify-center rounded-md border border-emerald-300/60 bg-emerald-500/20 px-2 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5"
+                                >
+                                  Kaydet
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation()
+                                    handleEditCancel(product.id)
+                                  }}
+                                  className="flex h-7 items-center justify-center rounded-md border border-white/10 px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-500/15 hover:text-rose-50"
+                                >
+                                  İptal
+                                </button>
+                              </>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleEditStart(product)
+                                }}
+                                className="flex h-7 items-center justify-center rounded-md border border-white/10 px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50"
+                              >
+                                Düzenle
+                              </button>
+                            )}
                             {lastDeleted?.productId === product.id && (
                               <button
                                 type="button"
@@ -1183,6 +1256,36 @@ function App() {
 
                         {openProducts[product.id] && (
                           <div className="mt-3 space-y-2">
+                            {editingProduct[product.id] && (
+                              <div className="rounded-xl border border-white/10 bg-ink-900/70 p-3 space-y-2">
+                                <div className="grid gap-2 sm:grid-cols-2">
+                                  <div className="space-y-1">
+                                    <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-300" htmlFor={`edit-name-${product.id}`}>
+                                      Ürün adı
+                                    </label>
+                                    <input
+                                      id={`edit-name-${product.id}`}
+                                      type="text"
+                                      value={editingProduct[product.id]?.name || ""}
+                                      onChange={(e) => handleEditChange(product.id, "name", e.target.value)}
+                                      className="w-full rounded-md border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-1 focus:ring-accent-500/30"
+                                    />
+                                  </div>
+                                  <div className="space-y-1">
+                                    <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-300" htmlFor={`edit-note-${product.id}`}>
+                                      Teslimat notu
+                                    </label>
+                                    <input
+                                      id={`edit-note-${product.id}`}
+                                      type="text"
+                                      value={editingProduct[product.id]?.note || ""}
+                                      onChange={(e) => handleEditChange(product.id, "note", e.target.value)}
+                                      className="w-full rounded-md border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-1 focus:ring-accent-500/30"
+                                    />
+                                  </div>
+                                </div>
+                              </div>
+                            )}
                             {product.stocks.length === 0 && (
                               <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-400">
                                 Bu üründe stok yok.
