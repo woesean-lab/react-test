@@ -182,14 +182,17 @@ function App() {
   }
 
   const handleAdd = async () => {
-    if (!title.trim() && !message.trim()) {
-      toast.error("Başlık veya mesaj ekleyin.")
+    const safeTitleInput = title.trim()
+    const safeMessage = message.trim()
+    const safeCategoryInput = selectedCategory.trim()
+
+    if (!safeMessage) {
+      toast.error("Mesaj ekleyin.")
       return
     }
 
-    const safeTitle = title.trim() || `Mesaj ${templates.length + 1}`
-    const safeMessage = message.trim()
-    const safeCategory = selectedCategory.trim() || "Genel"
+    const safeTitle = safeTitleInput || `Mesaj ${templates.length + 1}`
+    const safeCategory = safeCategoryInput || "Genel"
 
     try {
       const res = await fetch("/api/templates", {
@@ -290,17 +293,10 @@ function App() {
       setSelectedCategory(next)
       setNewCategory("")
       toast.success("Kategori eklendi")
-      return
     } catch (error) {
       console.error(error)
       toast.error("Kategori eklenemedi (API/DB kontrol edin).")
     }
-
-    const nextCategories = [...categories, next]
-    setCategories(nextCategories)
-    setSelectedCategory(next)
-    setNewCategory("")
-    toast.success("Kategori eklendi")
   }
 
   const handleCategoryDelete = async (cat) => {
@@ -320,20 +316,10 @@ function App() {
         setSelectedCategory(safeCategories[0])
       }
       toast.success("Kategori silindi")
-      return
     } catch (error) {
       console.error(error)
       toast.error("Kategori silinemedi (API/DB kontrol edin).")
     }
-
-    const nextCategories = categories.filter((item) => item !== cat)
-    const safeCategories = nextCategories.length ? nextCategories : ["Genel"]
-    setCategories(safeCategories)
-    setTemplates((prev) => prev.map((tpl) => (tpl.category === cat ? { ...tpl, category: "Genel" } : tpl)))
-    if (selectedCategory === cat) {
-      setSelectedCategory(safeCategories[0])
-    }
-    toast.success("Kategori silindi")
   }
 
   const handleCategoryDeleteWithConfirm = (cat) => {
