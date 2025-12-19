@@ -10,54 +10,14 @@ const fallbackTemplates = [
   },
   { label: "Hatırlatma", value: "Unutma: Akşam 18:00 toplantısına hazır ol.", category: "Hatırlatma" },
 ]
+
 const fallbackCategories = Array.from(new Set(["Genel", ...fallbackTemplates.map((tpl) => tpl.category || "Genel")]))
 
 const initialProblems = [
   { id: 1, username: "@ornek1", issue: "Ödeme ekranda takıldı, 2 kez kart denemiş.", status: "open" },
   { id: 2, username: "@ornek2", issue: "Teslimat gecikmesi şikayeti.", status: "open" },
 ]
-const initialStockItems = [
-  {
-    id: 1,
-    title: "Elden Ring: Shadow of the Erdtree",
-    platform: "Steam",
-    region: "Global",
-    code: "ELDN-RNG-SHDE-GLBL-2025",
-    stock: 6,
-    price: "59.99 USD",
-    note: "DLC + base bundle, 2025 aktivasyon.",
-  },
-  {
-    id: 2,
-    title: "FC 25 Ultimate Edition",
-    platform: "Origin",
-    region: "Global",
-    code: "FC25-ULTM-GLBL-KEY-4488",
-    stock: 12,
-    price: "2.799 TL",
-    note: "Team of the week bonuslu.",
-  },
-  {
-    id: 3,
-    title: "Red Dead Redemption 2",
-    platform: "Rockstar",
-    region: "EU",
-    code: "RDR2-RCKS-EU-9921",
-    stock: 3,
-    price: "24.99 USD",
-    note: "EU bölge, indirimli seri.",
-  },
-  {
-    id: 4,
-    title: "Helldivers 2",
-    platform: "Steam",
-    region: "Global",
-    code: "HLD2-GLBL-5561-X",
-    stock: 9,
-    price: "1.099 TL",
-    note: "Anlık teslimat, ko-op.",
-  },
-]
+
 const panelClass =
   "rounded-2xl border border-white/10 bg-white/5 px-6 py-6 shadow-card backdrop-blur-sm"
 
@@ -99,17 +59,6 @@ function App() {
   const [problemIssue, setProblemIssue] = useState("")
   const [confirmProblemTarget, setConfirmProblemTarget] = useState(null)
 
-  const [stockItems, setStockItems] = useState(initialStockItems)
-  const [stockDraft, setStockDraft] = useState({
-    title: "",
-    platform: "Steam",
-    region: "Global",
-    code: "",
-    stock: "1",
-    price: "",
-    note: "",
-  })
-
   const activeTemplate = useMemo(
     () => templates.find((tpl) => tpl.label === selectedTemplate),
     [selectedTemplate, templates],
@@ -147,9 +96,9 @@ function App() {
         const res = await fetch("/api/problems", { signal: controller.signal })
         if (!res.ok) throw new Error("api_error")
         const data = await res.json()
-        setProblems(data || [])
+        setProblems(data ?? [])
       } catch (error) {
-        if (error.name === "AbortError") return
+        if (error?.name === "AbortError") return
         setProblems(initialProblems)
         toast.error("Problem listesi alınamadı (API/DB kontrol edin)")
       }
@@ -182,19 +131,19 @@ function App() {
         const serverCategories = await catsRes.json()
         const serverTemplates = await templatesRes.json()
 
-        const safeCategories = Array.from(new Set(["Genel", ...(serverCategories || [])]))
+        const safeCategories = Array.from(new Set(["Genel", ...(serverCategories ?? [])]))
         setCategories(safeCategories)
-        setTemplates(serverTemplates || [])
+        setTemplates(serverTemplates ?? [])
 
         const firstTemplate = serverTemplates?.[0]
         setSelectedTemplate(firstTemplate?.label ?? null)
-        if (firstTemplate.category) setSelectedCategory(firstTemplate.category)
+        if (firstTemplate?.category) setSelectedCategory(firstTemplate.category)
       } catch (error) {
-        if (error.name === "AbortError") return
+        if (error?.name === "AbortError") return
         setCategories(fallbackCategories)
         setTemplates(fallbackTemplates)
         setSelectedTemplate(fallbackTemplates[0]?.label ?? null)
-        setSelectedCategory(fallbackTemplates[0]?.category || "Genel")
+        setSelectedCategory(fallbackTemplates[0]?.category ?? "Genel")
         toast.error("Sunucuya bağlanılamadı. (API/DB kontrol edin)")
       } finally {
         const elapsed = Date.now() - startedAt
@@ -209,7 +158,6 @@ function App() {
     }
   }, [])
 
-
   const handleTemplateChange = async (nextTemplate, options = {}) => {
     setSelectedTemplate(nextTemplate)
     const tpl = templates.find((item) => item.label === nextTemplate)
@@ -219,7 +167,9 @@ function App() {
         toast.success("Şablon kopyalandı", { duration: 1600, position: "top-right" })
         toast(
           <div className="space-y-1">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-200">Kopyalanan mesaj</p>
+            <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-200">
+              Kopyalanan mesaj
+            </p>
             <p className="text-sm text-slate-50/90 whitespace-pre-wrap">{tpl.value}</p>
           </div>,
           { duration: 3200, position: "top-right" },
@@ -237,7 +187,7 @@ function App() {
       return
     }
 
-    const safeTitle = title.trim() || 'Mesaj ' + (templates.length + 1)
+    const safeTitle = title.trim() || `Mesaj ${templates.length + 1}`
     const safeMessage = message.trim()
     const safeCategory = selectedCategory.trim() || "Genel"
 
@@ -249,7 +199,7 @@ function App() {
       })
 
       if (res.status === 409) {
-        toast("Var olan Şablon aktif edildi", { position: "top-right" })
+        toast("Var olan şablon aktif edildi", { position: "top-right" })
         setSelectedTemplate(safeTitle)
         setSelectedCategory(safeCategory)
         return
@@ -264,7 +214,7 @@ function App() {
       }
       setSelectedTemplate(created.label)
       setSelectedCategory(created.category || safeCategory)
-      toast.success("Yeni Şablon eklendi")
+      toast.success("Yeni şablon eklendi")
     } catch (error) {
       console.error(error)
       toast.error("Kaydedilemedi (API/DB kontrol edin).")
@@ -273,7 +223,7 @@ function App() {
 
   const handleDeleteTemplate = async (targetLabel = selectedTemplate) => {
     if (templates.length <= 1) {
-      toast.error("En az bir Şablon kalmalı.")
+      toast.error("En az bir şablon kalmalı.")
       return
     }
     const target = templates.find((tpl) => tpl.label === targetLabel)
@@ -284,13 +234,13 @@ function App() {
     }
 
     try {
-      const res = await fetch("/api/templates/" + targetId, { method: "DELETE" })
+      const res = await fetch(`/api/templates/${targetId}`, { method: "DELETE" })
       if (!res.ok && res.status !== 404) throw new Error("delete_failed")
 
       const nextTemplates = templates.filter((tpl) => tpl.label !== targetLabel)
       const fallback = nextTemplates[0]
       setTemplates(nextTemplates)
-      const nextSelected = selectedTemplate === targetLabel ? fallback?.label ?? null : selectedTemplate
+      const nextSelected = selectedTemplate === targetLabel ? fallback?.label ?? selectedTemplate : selectedTemplate
       if (nextSelected) {
         setSelectedTemplate(nextSelected)
         const nextTpl = nextTemplates.find((tpl) => tpl.label === nextSelected)
@@ -359,7 +309,7 @@ function App() {
       return
     }
     try {
-      const res = await fetch("/api/categories/" + encodeURIComponent(cat), { method: "DELETE" })
+      const res = await fetch(`/api/categories/${encodeURIComponent(cat)}`, { method: "DELETE" })
       if (!res.ok && res.status !== 404) throw new Error("category_delete_failed")
 
       const nextCategories = categories.filter((item) => item !== cat)
@@ -401,7 +351,6 @@ function App() {
   const categoryCountText = showLoading ? <LoadingIndicator label="Yükleniyor" /> : categories.length
   const selectedCategoryText = showLoading ? <LoadingIndicator label="Yükleniyor" /> : selectedCategory.trim() || "Genel"
 
-
   const categoryColors = useMemo(() => {
     const map = {}
     categories.forEach((cat, idx) => {
@@ -411,73 +360,6 @@ function App() {
   }, [categories])
 
   const getCategoryClass = (cat) => categoryColors[cat] || "border-white/10 bg-white/5 text-slate-200"
-
-  const stockStats = useMemo(() => {
-    const totalUnits = stockItems.reduce((acc, item) => acc + (item.stock || 0), 0)
-    const lowStock = stockItems.filter((item) => item.stock <= 3).length
-    const platforms = Array.from(new Set(stockItems.map((item) => item.platform || "Bilinmiyor")))
-    return { totalUnits, lowStock, platforms }
-  }, [stockItems])
-
-  const handleStockCopy = async (code, title) => {
-    try {
-      await navigator.clipboard.writeText(code)
-      toast.success("Anahtar kopyaland", { duration: 1500, position: "top-right" })
-      toast(
-        <div className="space-y-1">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-200">Kopyalanan kod</p>
-          <p className="text-sm text-slate-50/90 whitespace-pre-wrap">{title}</p>
-          <code className="block rounded-lg border border-white/10 bg-ink-800 px-3 py-2 text-xs text-accent-100">{code}</code>
-        </div>,
-        { duration: 3000, position: "top-right" },
-      )
-    } catch (error) {
-      console.error(error)
-      toast.error("Kopyalanamad", { duration: 1600, position: "top-right" })
-    }
-  }
-
-  const handleStockUse = (id) => {
-    setStockItems((prev) =>
-      prev.map((item) => (item.id === id  { ...item, stock: Math.max(0, (item.stock || 0) - 1) } : item)),
-    )
-  }
-
-  const handleStockArchive = (id) => {
-    setStockItems((prev) => prev.filter((item) => item.id !== id))
-    toast("Katalogdan karld (local)", { position: "top-right" })
-  }
-
-  const handleStockAdd = () => {
-    const title = stockDraft.title.trim()
-    const code = stockDraft.code.trim()
-    if (!title || !code) {
-      toast.error("Balk ve kod girin.")
-      return
-    }
-    const nextItem = {
-      id: Date.now(),
-      title,
-      platform: stockDraft.platform.trim() || "Steam",
-      region: stockDraft.region.trim() || "Global",
-      code,
-      stock: Math.max(1, Number.parseInt(stockDraft.stock, 10) || 1),
-      price: stockDraft.price.trim() || "TBD",
-      note: stockDraft.note.trim(),
-    }
-    setStockItems((prev) => [...prev, nextItem])
-    setStockDraft({
-      title: "",
-      platform: stockDraft.platform,
-      region: stockDraft.region,
-      code: "",
-      stock: "1",
-      price: "",
-      note: "",
-    })
-    toast.success("Stok eklendi (local)")
-  }
-
 
   const handleProblemAdd = async () => {
     const user = problemUsername.trim()
@@ -513,7 +395,7 @@ function App() {
       })
       if (!res.ok) throw new Error("problem_update_failed")
       const updated = await res.json()
-      setProblems((prev) => prev.map((p) => (p.id === id  updated : p)))
+      setProblems((prev) => prev.map((p) => (p.id === id ? updated : p)))
       toast.success("Problem çözüldü")
     } catch (error) {
       console.error(error)
@@ -530,7 +412,7 @@ function App() {
       })
       if (!res.ok) throw new Error("problem_reopen_failed")
       const updated = await res.json()
-      setProblems((prev) => prev.map((p) => (p.id === id  updated : p)))
+      setProblems((prev) => prev.map((p) => (p.id === id ? updated : p)))
       toast.success("Aktif probleme taşındı")
     } catch (error) {
       console.error(error)
@@ -580,7 +462,7 @@ function App() {
             onClick={() => setActiveTab("messages")}
             className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
               activeTab === "messages"
-                 "bg-accent-500/20 text-accent-50 shadow-glow"
+                ? "bg-accent-500/20 text-accent-50 shadow-glow"
                 : "bg-white/5 text-slate-200 hover:bg-white/10"
             }`}
           >
@@ -588,21 +470,10 @@ function App() {
           </button>
           <button
             type="button"
-            onClick={() => setActiveTab("stock")}
-            className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-              activeTab === "stock"
-                 "bg-accent-500/20 text-accent-50 shadow-glow"
-                : "bg-white/5 text-slate-200 hover:bg-white/10"
-            }`}
-          >
-            Stok
-          </button>
-          <button
-            type="button"
             onClick={() => setActiveTab("problems")}
             className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
               activeTab === "problems"
-                 "bg-accent-500/20 text-accent-50 shadow-glow"
+                ? "bg-accent-500/20 text-accent-50 shadow-glow"
                 : "bg-white/5 text-slate-200 hover:bg-white/10"
             }`}
           >
@@ -652,14 +523,14 @@ function App() {
                         </p>
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="font-display text-2xl font-semibold text-white">
-                            {activeTemplate.label || (showLoading ? "Yükleniyor..." : "Yeni şablon")}
+                            {activeTemplate?.label || (showLoading ? "Yükleniyor..." : "Yeni şablon")}
                           </h3>
                           <span
                             className={`rounded-full px-3 py-1 text-[11px] font-semibold ${getCategoryClass(
-                              activeTemplate.category || selectedCategory || "Genel",
+                              activeTemplate?.category || selectedCategory || "Genel",
                             )}`}
                           >
-                            {activeTemplate.category || selectedCategory || "Genel"}
+                            {activeTemplate?.category || selectedCategory || "Genel"}
                           </span>
                         </div>
                       </div>
@@ -667,15 +538,17 @@ function App() {
                         type="button"
                         onClick={() => handleDeleteWithConfirm(selectedTemplate)}
                         className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition ${
-                          confirmTarget === selectedTemplate ? "border-rose-300 bg-rose-500/25 text-rose-50" : "border-rose-500/60 bg-rose-500/15 text-rose-100 hover:border-rose-300 hover:bg-rose-500/25"
+                          confirmTarget === selectedTemplate
+                            ? "border-rose-300 bg-rose-500/25 text-rose-50"
+                            : "border-rose-500/60 bg-rose-500/15 text-rose-100 hover:border-rose-300 hover:bg-rose-500/25"
                         }`}
                         disabled={!selectedTemplate}
                       >
-                        {confirmTarget === selectedTemplate ? "Emin misin" : "Sil"}
+                        {confirmTarget === selectedTemplate ? "Emin misin?" : "Sil"}
                       </button>
                     </div>
                     <p className="mt-3 text-sm leading-relaxed text-slate-200/90">
-                      {activeTemplate.value ||
+                      {activeTemplate?.value ||
                         (showLoading ? "Veriler yükleniyor..." : "Mesajını düzenleyip kaydetmeye başla.")}
                     </p>
                     <div className="mt-4 flex items-center justify-between text-xs text-slate-300/80">
@@ -829,7 +702,7 @@ function App() {
                                 : "border-rose-400/60 bg-rose-500/10 text-rose-100 hover:border-rose-300 hover:bg-rose-500/20"
                             }`}
                           >
-                            {confirmCategoryTarget === cat ? "Emin misin" : "Sil"}
+                            {confirmCategoryTarget === cat ? "Emin misin?" : "Sil"}
                           </button>
                         )}
                       </span>
@@ -918,280 +791,12 @@ function App() {
                   <ul className="mt-3 space-y-2 text-sm text-slate-300">
                     <li>- Başlık boş kalırsa otomatik bir isimle kaydedilir.</li>
                     <li>- Şablona tıklamak metni panoya kopyalar.</li>
-                    <li>- Kategori silince şablonlar "Genel"e taşınır.</li>
+                    <li>- Kategori silince şablonlar “Genel”e taşınır.</li>
                   </ul>
                 </div>
               </div>
             </div>
           </>
-        )}
-
-        {activeTab === "stock" && (
-          <div className="space-y-6">
-            <header className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-6 shadow-card">
-              <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-                <div className="space-y-2">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-accent-200">
-                    Dijital Stok
-                  </span>
-                  <h1 className="font-display text-3xl font-semibold text-white">Oyun Anahtar Stoku</h1>
-                  <p className="max-w-2xl text-sm text-slate-200/80">
-                    Platforma gre ayr, stok adedini gr, anahtar kopyala ve yeni satr ekle. u an veriler local
-                    state; API/DB balantsn sonraya brakyoruz.
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-                      Toplam kalem: {stockItems.length}
-                    </span>
-                    <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-                      Toplam stok: {stockStats.totalUnits}
-                    </span>
-                    <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-amber-200">
-                      Dk stok: {stockStats.lowStock}
-                    </span>
-                  </div>
-                </div>
-                <div className="w-full max-w-sm space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-inner">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300">Platformlar</p>
-                  <div className="flex flex-wrap gap-2">
-                    {stockStats.platforms.map((platform) => (
-                      <span
-                        key={platform}
-                        className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-ink-900/70 px-3 py-1 text-xs font-semibold text-slate-100">
-                        <span className="h-2 w-2 rounded-full bg-accent-400" />
-                        {platform}
-                      </span>
-                    ))}
-                  </div>
-                  <div className="rounded-xl border border-white/10 bg-ink-900/60 p-3 text-sm text-slate-300">
-                    API/DB iin TODO: Prisma model + CRUD ucu (stok, platform, blge, kod). u an yalnzca UI/UX.
-                  </div>
-                </div>
-              </div>
-            </header>
-
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-              <div className="space-y-4 lg:col-span-2">
-                <div className={`${panelClass} bg-ink-800/60`}>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Stoktaki anahtarlar</p>
-                      <p className="text-sm text-slate-400">Kopyala, stok dr veya katalogdan kar.</p>
-                    </div>
-                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                      {stockItems.length} kalem
-                    </span>
-                  </div>
-
-                  <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
-                    {stockItems.map((item) => (
-                      <div
-                        key={item.id}
-                        className="flex h-full flex-col gap-3 rounded-xl border border-white/10 bg-ink-900 p-4 shadow-inner">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="space-y-1">
-                            <p className="text-sm font-semibold text-white">{item.title}</p>
-                            <div className="flex flex-wrap gap-1.5 text-[11px] font-semibold text-slate-300">
-                              <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5">{item.platform}</span>
-                              <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5">Blge: {item.region}</span>
-                              <span
-                                className={`rounded-full border px-2 py-0.5 ${
-                                  item.stock <= 3
-                                     "border-amber-300/70 bg-amber-500/15 text-amber-100"
-                                    : "border-emerald-300/70 bg-emerald-500/10 text-emerald-100"
-                                }`}
-                              >
-                                Stok: {item.stock}
-                              </span>
-                            </div>
-                          </div>
-                          <span className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs font-semibold text-accent-100">
-                            {item.price || "TBD"}
-                          </span>
-                        </div>
-
-                        <p className="rounded-lg border border-white/10 bg-ink-800/70 px-3 py-2 text-xs text-slate-200 shadow-inner">
-                          {item.note || "Not eklenmedi."}
-                        </p>
-
-                        <code className="block rounded-lg border border-white/10 bg-ink-950/60 px-3 py-2 text-xs text-accent-100">
-                          {item.code}
-                        </code>
-
-                        <div className="flex flex-wrap gap-2">
-                          <button
-                            type="button"
-                            onClick={() => handleStockCopy(item.code, item.title)}
-                            className="rounded-lg border border-accent-400/70 bg-accent-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-accent-50 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25">
-                            Kopyala
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleStockUse(item.id)}
-                            className="rounded-lg border border-amber-300/70 bg-amber-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-amber-50 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25">
-                            1 adet kar
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleStockArchive(item.id)}
-                            className="rounded-lg border border-rose-300/70 bg-rose-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-rose-50 transition hover:-translate-y-0.5 hover:border-rose-200 hover:bg-rose-500/25">
-                            Kaldr
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                    {stockItems.length === 0 && (
-                      <div className="col-span-full rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-300">
-                        Henz stok kart yok. Sadaki formdan bir anahtar ekleyerek balayabilirsin.
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="space-y-4">
-                <div className={`${panelClass} bg-ink-900/60`}>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Yeni anahtar ekle</p>
-                      <p className="text-sm text-slate-400">u an yalnzca local state; DB/Prisma admn ayr.</p>
-                    </div>
-                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                      Demo
-                    </span>
-                  </div>
-
-                  <div className="mt-4 space-y-3 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-200" htmlFor="stock-title">
-                        Balk
-                      </label>
-                      <input
-                        id="stock-title"
-                        type="text"
-                        value={stockDraft.title}
-                        onChange={(e) => setStockDraft((prev) => ({ ...prev, title: e.target.value }))}
-                        placeholder="rn: Steam - Helldivers 2"
-                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-200" htmlFor="stock-platform">
-                          Platform
-                        </label>
-                        <input
-                          id="stock-platform"
-                          type="text"
-                          value={stockDraft.platform}
-                          onChange={(e) => setStockDraft((prev) => ({ ...prev, platform: e.target.value }))}
-                          placeholder="Steam / Origin / Rockstar"
-                          className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-200" htmlFor="stock-region">
-                          Blge
-                        </label>
-                        <input
-                          id="stock-region"
-                          type="text"
-                          value={stockDraft.region}
-                          onChange={(e) => setStockDraft((prev) => ({ ...prev, region: e.target.value }))}
-                          placeholder="Global / EU / TR"
-                          className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between text-xs font-semibold text-slate-200">
-                        <label htmlFor="stock-code">Anahtar</label>
-                        <span className="text-[11px] text-slate-400">Kopyalanabilir metin</span>
-                      </div>
-                      <textarea
-                        id="stock-code"
-                        value={stockDraft.code}
-                        onChange={(e) => setStockDraft((prev) => ({ ...prev, code: e.target.value }))}
-                        rows={3}
-                        placeholder="XXXX-XXXX-XXXX"
-                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-200" htmlFor="stock-count">
-                          Adet
-                        </label>
-                        <input
-                          id="stock-count"
-                          type="number"
-                          min="1"
-                          value={stockDraft.stock}
-                          onChange={(e) => setStockDraft((prev) => ({ ...prev, stock: e.target.value }))}
-                          className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                        />
-                      </div>
-                      <div className="col-span-2 space-y-2">
-                        <label className="text-xs font-semibold text-slate-200" htmlFor="stock-price">
-                          Fiyat (not)
-                        </label>
-                        <input
-                          id="stock-price"
-                          type="text"
-                          value={stockDraft.price}
-                          onChange={(e) => setStockDraft((prev) => ({ ...prev, price: e.target.value }))}
-                          placeholder="rn: 59.99 USD / 2.799 TL"
-                          className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-200" htmlFor="stock-note">
-                        Not
-                      </label>
-                      <textarea
-                        id="stock-note"
-                        value={stockDraft.note}
-                        onChange={(e) => setStockDraft((prev) => ({ ...prev, note: e.target.value }))}
-                        rows={3}
-                        placeholder="Ek bilgi, DRM, teslimat sresi..."
-                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                      />
-                    </div>
-
-                    <div className="flex flex-wrap gap-3">
-                      <button
-                        type="button"
-                        onClick={handleStockAdd}
-                        className="flex-1 min-w-[140px] rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25">
-                        Kaydet
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setStockDraft({
-                            title: "",
-                            platform: "Steam",
-                            region: "Global",
-                            code: "",
-                            stock: "1",
-                            price: "",
-                            note: "",
-                          })
-                        }
-                        className="min-w-[110px] rounded-lg border border-white/10 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100">
-                        Temizle
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
         )}
 
         {activeTab === "problems" && (
@@ -1204,7 +809,7 @@ function App() {
                   </span>
                   <h1 className="font-display text-3xl font-semibold text-white">Problemli Müşteriler</h1>
                   <p className="max-w-2xl text-sm text-slate-200/80">
-                    Müşteri kullanıcı adı ve sorununu kaydet; çözülünce "Problem çözüldü" ile kapat veya sil.
+                    Müşteri kullanıcı adı ve sorununu kaydet; çözülünce “Problem çözüldü” ile kapat veya sil.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -1275,11 +880,11 @@ function App() {
                             onClick={() => handleProblemDeleteWithConfirm(pb.id)}
                             className={`rounded-lg border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition ${
                               confirmProblemTarget === pb.id
-                                 "border-rose-300 bg-rose-500/25 text-rose-50"
+                                ? "border-rose-300 bg-rose-500/25 text-rose-50"
                                 : "border-rose-400/60 bg-rose-500/10 text-rose-100 hover:border-rose-300 hover:bg-rose-500/20"
                             }`}
                           >
-                            {confirmProblemTarget === pb.id  "Emin misin" : "Sil"}
+                            {confirmProblemTarget === pb.id ? "Emin misin?" : "Sil"}
                           </button>
                         </div>
                       </div>
@@ -1338,11 +943,11 @@ function App() {
                           onClick={() => handleProblemDeleteWithConfirm(pb.id)}
                           className={`w-fit rounded-lg border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition ${
                             confirmProblemTarget === pb.id
-                               "border-rose-200 bg-rose-500/25 text-rose-50"
+                              ? "border-rose-200 bg-rose-500/25 text-rose-50"
                               : "border-rose-200/80 bg-rose-500/10 text-rose-50 hover:border-rose-100 hover:bg-rose-500/20"
                           }`}
                         >
-                          {confirmProblemTarget === pb.id  "Emin misin" : "Sil"}
+                          {confirmProblemTarget === pb.id ? "Emin misin?" : "Sil"}
                         </button>
                         </div>
                       </div>
@@ -1439,9 +1044,3 @@ function App() {
 }
 
 export default App
-
-
-
-
-
-
