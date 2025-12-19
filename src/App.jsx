@@ -406,7 +406,7 @@ function App() {
   const handleProblemCopy = async (text) => {
     try {
       await navigator.clipboard.writeText(text)
-      toast.success("Sorun kopyalandı", { duration: 1400, position: "top-right" })
+      toast.success("Kullanıcı adı kopyalandı", { duration: 1400, position: "top-right" })
     } catch (error) {
       console.error(error)
       toast.error("Kopyalanamadı", { duration: 1600, position: "top-right" })
