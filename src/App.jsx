@@ -1004,7 +1004,6 @@ function App() {
                               </span>
                               <span className="text-xs text-slate-400">{product.stocks.length} stok</span>
                             </span>
-                            {product.note && <p className="text-xs text-slate-300">{product.note}</p>}
                           </div>
                           <span
                             className={`inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-slate-200 transition ${
