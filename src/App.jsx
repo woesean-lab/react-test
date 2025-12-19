@@ -1072,11 +1072,12 @@ function App() {
                                 fill="none"
                                 stroke="currentColor"
                                 strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
                                 className="h-4 w-4"
                               >
-                                <path d="M21 12c0 4-3.5 7-9 7-.8 0-1.6-.1-2.4-.3L3 20l1.4-3.1C3.5 16 3 14.8 3 13c0-4 3.5-7 9-7s9 3 9 7Z" />
-                                <path d="M9 13h6" />
-                                <path d="M8 10h8" />
+                                <rect x="9" y="9" width="11" height="11" rx="2" ry="2" />
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                               </svg>
                             </button>
                             <button
