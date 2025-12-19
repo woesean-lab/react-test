@@ -1056,14 +1056,14 @@ function App() {
                               </span>
                             </span>
                           </div>
-                          <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1.5">
                             <button
                               type="button"
                               onClick={(e) => {
                                 e.stopPropagation()
                                 handleProductCopyMessage(product.id)
                               }}
-                              className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
+                              className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 text-slate-200 transition hover:border-indigo-300 hover:bg-indigo-500/10 hover:text-indigo-50"
                               aria-label="Teslimat mesajını kopyala"
                             >
                               <svg
@@ -1084,10 +1084,10 @@ function App() {
                                 e.stopPropagation()
                                 handleProductDeleteWithConfirm(product.id)
                               }}
-                              className={`flex h-8 w-8 items-center justify-center rounded-full border text-[11px] font-semibold uppercase tracking-wide transition ${
+                              className={`flex h-7 w-7 items-center justify-center rounded-full border text-slate-200 transition ${
                                 confirmProductTarget === product.id
                                   ? "border-rose-300 bg-rose-500/20 text-rose-50"
-                                  : "border-white/10 bg-white/5 text-slate-200 hover:border-rose-300 hover:bg-rose-500/15 hover:text-rose-50"
+                                  : "border-white/10 hover:border-rose-300 hover:bg-rose-500/15 hover:text-rose-50"
                               }`}
                               aria-label="Ürünü sil"
                             >
