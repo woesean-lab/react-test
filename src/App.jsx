@@ -95,6 +95,7 @@ function App() {
   })
   const [confirmProductTarget, setConfirmProductTarget] = useState(null)
   const [bulkCount, setBulkCount] = useState({})
+  const [lastDeleted, setLastDeleted] = useState(null)
 
   const activeTemplate = useMemo(
     () => templates.find((tpl) => tpl.label === selectedTemplate),
@@ -466,6 +467,7 @@ function App() {
     const product = products.find((p) => p.id === productId)
     if (!product) return
     const codes = product.stocks.slice(0, count).map((stk) => stk.code)
+    const removed = product.stocks.slice(0, count)
     if (codes.length === 0) {
       toast.error("Bu üründe kopyalanacak stok yok.")
       return
@@ -474,6 +476,7 @@ function App() {
     navigator.clipboard
       .writeText(joined)
       .then(() => {
+        setLastDeleted({ productId, stocks: removed })
         setProducts((prev) =>
           prev.map((p) =>
             p.id === productId ? { ...p, stocks: p.stocks.slice(codes.length) } : p,
@@ -509,6 +512,21 @@ function App() {
     toast("Silmek için tekrar tıkla", { position: "top-right" })
   }
 
+  const handleUndoDelete = () => {
+    if (!lastDeleted) {
+      toast.error("Geri alınacak kayıt yok.")
+      return
+    }
+    const { productId, stocks } = lastDeleted
+    setProducts((prev) =>
+      prev.map((p) =>
+        p.id === productId ? { ...p, stocks: [...stocks, ...p.stocks] } : p,
+      ),
+    )
+    setLastDeleted(null)
+    toast.success("Silinen kayıt geri alındı", { duration: 1400, position: "top-right" })
+  }
+
   const handleProductCopyMessage = async (productId) => {
     const product = products.find((p) => p.id === productId)
     const message = product?.deliveryMessage?.trim()
@@ -528,6 +546,9 @@ function App() {
   const handleStockDeleteWithConfirm = (productId, stockId) => {
     const key = `${productId}-${stockId}`
     if (confirmStockTarget === key) {
+      const targetProduct = products.find((p) => p.id === productId)
+      const removed = targetProduct?.stocks.find((stk) => stk.id === stockId)
+
       setProducts((prev) =>
         prev.map((product) =>
           product.id === productId
@@ -535,6 +556,10 @@ function App() {
             : product,
         ),
       )
+      if (removed) {
+        setLastDeleted({ productId, stocks: [removed] })
+      }
+
       setConfirmStockTarget(null)
       toast.success("Anahtar silindi")
       return
@@ -1081,6 +1106,18 @@ function App() {
                             </span>
                           </div>
                           <div className="flex items-center gap-1.5">
+                            {lastDeleted?.productId === product.id && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleUndoDelete()
+                                }}
+                                className="flex h-7 items-center justify-center rounded-md border border-white/10 px-2 text-[11px] font-semibold uppercase tracking-wide text-emerald-100 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/15"
+                              >
+                                Geri al
+                              </button>
+                            )}
                             <button
                               type="button"
                               onClick={(e) => {
