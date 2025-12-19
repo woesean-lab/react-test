@@ -1197,7 +1197,7 @@ function App() {
                                       [product.id]: e.target.value,
                                     }))
                                   }
-                                  className="w-16 rounded-md border border-white/10 bg-ink-900 px-2 py-1 text-xs text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-1 focus:ring-accent-500/30"
+                                  className="w-16 appearance-none rounded-md border border-white/10 bg-ink-900 px-2 py-1 text-xs text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-1 focus:ring-accent-500/30"
                                 />
                                 <span className="text-[11px] text-slate-500">/ {product.stocks.length}</span>
                                 <button
