@@ -88,6 +88,11 @@ function App() {
   const [stockForm, setStockForm] = useState({ productId: initialProducts[0]?.id || "", code: "" })
   const [confirmStockTarget, setConfirmStockTarget] = useState(null)
   const [productSearch, setProductSearch] = useState("")
+  const [openProducts, setOpenProducts] = useState(() => {
+    const map = {}
+    if (initialProducts[0]?.id) map[initialProducts[0].id] = true
+    return map
+  })
 
   const activeTemplate = useMemo(
     () => templates.find((tpl) => tpl.label === selectedTemplate),
@@ -125,6 +130,10 @@ function App() {
         prd.stocks.some((stk) => stk.code.toLowerCase().includes(text)),
     )
   }, [productSearch, products])
+
+  const toggleProductOpen = (productId) => {
+    setOpenProducts((prev) => ({ ...prev, [productId]: !(prev[productId] ?? false) }))
+  }
 
   useEffect(() => {
     setOpenCategories((prev) => {
@@ -979,7 +988,11 @@ function App() {
                         key={product.id}
                         className="rounded-2xl border border-white/10 bg-ink-900 p-4 shadow-inner"
                       >
-                        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+                        <button
+                          type="button"
+                          onClick={() => toggleProductOpen(product.id)}
+                          className="flex w-full items-center justify-between gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-left transition hover:border-accent-300/70 hover:bg-white/10"
+                        >
                           <div className="space-y-1">
                             <p className="font-display text-xl text-white">{product.name}</p>
                             <div className="flex flex-wrap gap-2">
@@ -987,49 +1000,56 @@ function App() {
                                 {product.stocks.length} stok
                               </span>
                             </div>
-                            {product.note && (
-                              <p className="text-sm text-slate-300">{product.note}</p>
-                            )}
+                            {product.note && <p className="text-sm text-slate-300">{product.note}</p>}
                           </div>
-                        </div>
+                          <span
+                            className={`inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-ink-800 text-sm text-slate-200 transition ${
+                              openProducts[product.id] ? "rotate-180 border-accent-300/60 text-accent-100" : ""
+                            }`}
+                          >
+                            ^
+                          </span>
+                        </button>
 
-                        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-                          {product.stocks.length === 0 && (
-                            <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-400">
-                              Bu üründe stok yok.
-                            </div>
-                          )}
-                          {product.stocks.map((stk) => (
-                            <div
-                              key={stk.id}
-                              className="flex h-full flex-col gap-2 rounded-xl border border-white/10 bg-ink-800/70 p-3"
-                            >
-                              <button
-                                type="button"
-                                onClick={() => handleStockCopy(stk.code)}
-                                className="self-end rounded-lg border border-white/15 bg-white/5 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/10 hover:text-indigo-50"
+                        {openProducts[product.id] && (
+                          <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                            {product.stocks.length === 0 && (
+                              <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-400">
+                                Bu üründe stok yok.
+                              </div>
+                            )}
+                            {product.stocks.map((stk) => (
+                              <div
+                                key={stk.id}
+                                className="flex h-full flex-col gap-2 rounded-xl border border-white/10 bg-ink-800/70 p-3"
                               >
-                                Kopyala
-                              </button>
-                              <p className="rounded-lg border border-white/10 bg-ink-900 px-3 py-2 font-mono text-sm text-slate-100">
-                                {stk.code}
-                              </p>
-                              <div className="flex flex-wrap gap-2">
                                 <button
                                   type="button"
-                                  onClick={() => handleStockDeleteWithConfirm(product.id, stk.id)}
-                              className={`rounded-lg border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition ${
-                                confirmStockTarget === `${product.id}-${stk.id}`
-                                  ? "border-rose-300 bg-rose-500/25 text-rose-50"
-                                  : "border-rose-400/60 bg-rose-500/10 text-rose-100 hover:border-rose-300 hover:bg-rose-500/20"
-                              }`}
+                                  onClick={() => handleStockCopy(stk.code)}
+                                  className="self-end rounded-lg border border-white/15 bg-white/5 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/10 hover:text-indigo-50"
                                 >
-                                  {confirmStockTarget === `${product.id}-${stk.id}` ? "Emin misin?" : "Sil"}
+                                  Kopyala
                                 </button>
+                                <p className="rounded-lg border border-white/10 bg-ink-900 px-3 py-2 font-mono text-sm text-slate-100">
+                                  {stk.code}
+                                </p>
+                                <div className="flex flex-wrap gap-2">
+                                  <button
+                                    type="button"
+                                    onClick={() => handleStockDeleteWithConfirm(product.id, stk.id)}
+                                    className={`rounded-lg border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition ${
+                                      confirmStockTarget === `${product.id}-${stk.id}`
+                                        ? "border-rose-300 bg-rose-500/25 text-rose-50"
+                                        : "border-rose-400/60 bg-rose-500/10 text-rose-100 hover:border-rose-300 hover:bg-rose-500/20"
+                                    }`}
+                                  >
+                                    {confirmStockTarget === `${product.id}-${stk.id}` ? "Emin misin?" : "Sil"}
+                                  </button>
+                                </div>
                               </div>
-                            </div>
-                          ))}
-                        </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     ))}
                   </div>
