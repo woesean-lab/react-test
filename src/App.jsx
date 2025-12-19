@@ -22,26 +22,23 @@ const initialProducts = [
   {
     id: "prd-1",
     name: "Cyber Drift DLC",
-    platform: "Steam",
     note: "Yeni promosyon, hemen teslim",
     stocks: [
-      { id: "stk-1", code: "CYDR-FT67-PLCP-2025", status: "available" },
-      { id: "stk-2", code: "CYDR-FT67-PLCP-2026", status: "available" },
+      { id: "stk-1", code: "CYDR-FT67-PLCP-2025" },
+      { id: "stk-2", code: "CYDR-FT67-PLCP-2026" },
     ],
   },
   {
     id: "prd-2",
     name: "Galaxy Pass",
-    platform: "Xbox",
     note: "Deneme sürümü için",
-    stocks: [{ id: "stk-3", code: "XBGP-3M-TRIAL-KEY", status: "used" }],
+    stocks: [{ id: "stk-3", code: "XBGP-3M-TRIAL-KEY" }],
   },
   {
     id: "prd-3",
     name: "Indie Bundle",
-    platform: "Steam",
     note: "Hediye kuponu",
-    stocks: [{ id: "stk-4", code: "INDI-BNDL-PLCP-4432", status: "available" }],
+    stocks: [{ id: "stk-4", code: "INDI-BNDL-PLCP-4432" }],
   },
 ]
 
@@ -87,8 +84,8 @@ function App() {
   const [confirmProblemTarget, setConfirmProblemTarget] = useState(null)
 
   const [products, setProducts] = useState(initialProducts)
-  const [productForm, setProductForm] = useState({ name: "", platform: "", note: "" })
-  const [stockForm, setStockForm] = useState({ productId: initialProducts[0]?.id || "", code: "", status: "available" })
+  const [productForm, setProductForm] = useState({ name: "", note: "" })
+  const [stockForm, setStockForm] = useState({ productId: initialProducts[0]?.id || "", code: "" })
   const [confirmStockTarget, setConfirmStockTarget] = useState(null)
 
   const activeTemplate = useMemo(
@@ -108,17 +105,13 @@ function App() {
   }, [templates])
 
   const stockSummary = useMemo(() => {
-    let available = 0
-    let used = 0
     let total = 0
     products.forEach((product) => {
-      product.stocks.forEach((stk) => {
+      product.stocks.forEach(() => {
         total += 1
-        if (stk.status === "used") used += 1
-        else available += 1
       })
     })
-    return { available, used, total }
+    return { total }
   }, [products])
 
   useEffect(() => {
@@ -392,17 +385,10 @@ function App() {
   }, [categories])
 
   const getCategoryClass = (cat) => categoryColors[cat] || "border-white/10 bg-white/5 text-slate-200"
-  const getStockStatusClass = (status) =>
-    status === "used"
-      ? "border-amber-300/70 bg-amber-500/15 text-amber-50"
-      : "border-emerald-300/60 bg-emerald-500/15 text-emerald-50"
-
-  const resetStockForm = () =>
-    setStockForm((prev) => ({ productId: prev.productId, code: "", status: "available" }))
+  const resetStockForm = () => setStockForm((prev) => ({ productId: prev.productId, code: "" }))
 
   const handleProductAdd = () => {
     const name = productForm.name.trim()
-    const platform = productForm.platform.trim() || "Belirtilmedi"
     const note = productForm.note.trim()
     if (!name) {
       toast.error("Ürün ismi boş olamaz.")
@@ -411,12 +397,11 @@ function App() {
     const newProduct = {
       id: `prd-${Date.now().toString(36)}`,
       name,
-      platform,
       note,
       stocks: [],
     }
     setProducts((prev) => [...prev, newProduct])
-    setProductForm({ name: "", platform: "", note: "" })
+    setProductForm({ name: "", note: "" })
     setStockForm((prev) => ({ ...prev, productId: newProduct.id }))
     toast.success("Ürün eklendi")
   }
@@ -424,7 +409,6 @@ function App() {
   const handleStockAdd = () => {
     const productId = stockForm.productId
     const code = stockForm.code.trim()
-    const status = stockForm.status || "available"
     if (!productId) {
       toast.error("Ürün seçin.")
       return
@@ -439,7 +423,6 @@ function App() {
         const newStock = {
           id: `stk-${Date.now().toString(36)}-${Math.random().toString(16).slice(2, 6)}`,
           code,
-          status,
         }
         return { ...product, stocks: [...product.stocks, newStock] }
       }),
@@ -474,23 +457,6 @@ function App() {
       console.error(error)
       toast.error("Kopyalanamadı", { duration: 1500, position: "top-right" })
     }
-  }
-
-  const handleStockToggleStatus = (productId, stockId) => {
-    setProducts((prev) =>
-      prev.map((product) => {
-        if (product.id !== productId) return product
-        return {
-          ...product,
-          stocks: product.stocks.map((stk) => {
-            if (stk.id !== stockId) return stk
-            const nextStatus = stk.status === "available" ? "used" : "available"
-            toast.success(nextStatus === "used" ? "Kullanıldı" : "Müsait")
-            return { ...stk, status: nextStatus }
-          }),
-        }
-      }),
-    )
   }
 
   const handleProblemAdd = async () => {
@@ -956,12 +922,6 @@ function App() {
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/60 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-50">
-                    Müsait: {stockSummary.available}
-                  </span>
-                  <span className="inline-flex items-center gap-2 rounded-full border border-amber-300/70 bg-amber-500/10 px-3 py-1 text-xs text-amber-50">
-                    Kullanıldı: {stockSummary.used}
-                  </span>
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
                     Toplam: {stockSummary.total}
                   </span>
@@ -977,7 +937,7 @@ function App() {
                       <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
                         Ürün ve stok listesi
                       </p>
-                      <p className="text-sm text-slate-400">Tıkla, kopyala; statüyü değiştir, gerekirse sil.</p>
+                      <p className="text-sm text-slate-400">Tıkla, kopyala ve gerekirse sil.</p>
                     </div>
                     <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
                       {products.length} ürün / {stockSummary.total} stok
@@ -999,9 +959,6 @@ function App() {
                           <div className="space-y-1">
                             <p className="font-display text-xl text-white">{product.name}</p>
                             <div className="flex flex-wrap gap-2">
-                              <span className="rounded-full border border-sky-300/60 bg-sky-500/10 px-3 py-1 text-[11px] font-semibold text-sky-50">
-                                {product.platform}
-                              </span>
                               <span className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold text-slate-200">
                                 {product.stocks.length} stok
                               </span>
@@ -1023,37 +980,25 @@ function App() {
                               key={stk.id}
                               className="flex h-full flex-col gap-2 rounded-xl border border-white/10 bg-ink-800/70 p-3"
                             >
-                              <div className="flex items-start justify-between gap-2">
-                                <span className={`rounded-full px-3 py-1 text-[11px] font-semibold ${getStockStatusClass(stk.status)}`}>
-                                  {stk.status === "used" ? "Kullanıldı" : "Müsait"}
-                                </span>
-                                <button
-                                  type="button"
-                                  onClick={() => handleStockCopy(stk.code)}
-                                  className="rounded-lg border border-white/15 bg-white/5 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/10 hover:text-indigo-50"
-                                >
-                                  Kopyala
-                                </button>
-                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleStockCopy(stk.code)}
+                                className="self-end rounded-lg border border-white/15 bg-white/5 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/10 hover:text-indigo-50"
+                              >
+                                Kopyala
+                              </button>
                               <p className="rounded-lg border border-white/10 bg-ink-900 px-3 py-2 font-mono text-sm text-slate-100">
                                 {stk.code}
                               </p>
                               <div className="flex flex-wrap gap-2">
                                 <button
                                   type="button"
-                                  onClick={() => handleStockToggleStatus(product.id, stk.id)}
-                                  className="rounded-lg border border-accent-400/70 bg-accent-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-accent-50 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
-                                >
-                                  {stk.status === "used" ? "Müsait yap" : "Kullanıldı"}
-                                </button>
-                                <button
-                                  type="button"
                                   onClick={() => handleStockDeleteWithConfirm(product.id, stk.id)}
-                                  className={`rounded-lg border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition ${
-                                    confirmStockTarget === `${product.id}-${stk.id}`
-                                      ? "border-rose-300 bg-rose-500/25 text-rose-50"
-                                      : "border-rose-400/60 bg-rose-500/10 text-rose-100 hover:border-rose-300 hover:bg-rose-500/20"
-                                  }`}
+                              className={`rounded-lg border px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide transition ${
+                                confirmStockTarget === `${product.id}-${stk.id}`
+                                  ? "border-rose-300 bg-rose-500/25 text-rose-50"
+                                  : "border-rose-400/60 bg-rose-500/10 text-rose-100 hover:border-rose-300 hover:bg-rose-500/20"
+                              }`}
                                 >
                                   {confirmStockTarget === `${product.id}-${stk.id}` ? "Emin misin?" : "Sil"}
                                 </button>
@@ -1095,20 +1040,6 @@ function App() {
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-200" htmlFor="prd-platform">
-                        Platform
-                      </label>
-                      <input
-                        id="prd-platform"
-                        type="text"
-                        value={productForm.platform}
-                        onChange={(e) => setProductForm((prev) => ({ ...prev, platform: e.target.value }))}
-                        placeholder="Steam, Xbox, PS..."
-                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
                       <label className="text-xs font-semibold text-slate-200" htmlFor="prd-note">
                         Not (opsiyonel)
                       </label>
@@ -1132,7 +1063,7 @@ function App() {
                       </button>
                       <button
                         type="button"
-                        onClick={() => setProductForm({ name: "", platform: "", note: "" })}
+                        onClick={() => setProductForm({ name: "", note: "" })}
                         className="min-w-[110px] rounded-lg border border-white/10 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
                       >
                         Temizle
@@ -1183,21 +1114,6 @@ function App() {
                         placeholder="XXXX-XXXX-XXXX-XXXX"
                         className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                       />
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-200" htmlFor="stock-status">
-                        Statü
-                      </label>
-                      <select
-                        id="stock-status"
-                        value={stockForm.status}
-                        onChange={(e) => setStockForm((prev) => ({ ...prev, status: e.target.value }))}
-                        className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 pr-3 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                      >
-                        <option value="available">Müsait</option>
-                        <option value="used">Kullanıldı</option>
-                      </select>
                     </div>
 
                     <div className="flex flex-wrap gap-3">
