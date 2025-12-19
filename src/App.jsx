@@ -21,42 +21,30 @@ const initialProblems = [
 const initialStockItems = [
   {
     id: 1,
-    title: "Elden Ring: Shadow of the Erdtree",
-    platform: "Steam",
-    region: "Global",
+    title: "Elden Ring: Shadow of the Erdtree (Steam)",
     code: "ELDN-RNG-SHDE-GLBL-2025",
     stock: 6,
-    price: "59.99 USD",
     note: "DLC + base bundle, 2025 aktivasyon.",
   },
   {
     id: 2,
-    title: "FC 25 Ultimate Edition",
-    platform: "Origin",
-    region: "Global",
+    title: "FC 25 Ultimate Edition (Origin)",
     code: "FC25-ULTM-GLBL-KEY-4488",
     stock: 12,
-    price: "2.799 TL",
     note: "Team of the week bonuslu.",
   },
   {
     id: 3,
-    title: "Red Dead Redemption 2",
-    platform: "Rockstar",
-    region: "EU",
+    title: "Red Dead Redemption 2 (Rockstar)",
     code: "RDR2-RCKS-EU-9921",
     stock: 3,
-    price: "24.99 USD",
     note: "EU bölge, indirimli seri.",
   },
   {
     id: 4,
-    title: "Helldivers 2",
-    platform: "Steam",
-    region: "Global",
+    title: "Helldivers 2 (Steam)",
     code: "HLD2-GLBL-5561-X",
     stock: 9,
-    price: "1.099 TL",
     note: "Anlık teslimat, ko-op.",
   },
 ]
@@ -104,11 +92,8 @@ function App() {
   const [stockItems, setStockItems] = useState(initialStockItems)
   const [stockDraft, setStockDraft] = useState({
     title: "",
-    platform: "Steam",
-    region: "Global",
     code: "",
     stock: "1",
-    price: "",
     note: "",
   })
 
@@ -417,8 +402,7 @@ function App() {
   const stockStats = useMemo(() => {
     const totalUnits = stockItems.reduce((acc, item) => acc + (item.stock || 0), 0)
     const lowStock = stockItems.filter((item) => item.stock <= 3).length
-    const platforms = Array.from(new Set(stockItems.map((item) => item.platform || "Bilinmiyor")))
-    return { totalUnits, lowStock, platforms }
+    return { totalUnits, lowStock }
   }, [stockItems])
 
   const handleStockCopy = async (code, title) => {
@@ -460,21 +444,15 @@ function App() {
     const nextItem = {
       id: Date.now(),
       title,
-      platform: stockDraft.platform.trim() || "Steam",
-      region: stockDraft.region.trim() || "Global",
       code,
       stock: Math.max(1, Number.parseInt(stockDraft.stock, 10) || 1),
-      price: stockDraft.price.trim() || "TBD",
       note: stockDraft.note.trim(),
     }
     setStockItems((prev) => [...prev, nextItem])
     setStockDraft({
       title: "",
-      platform: stockDraft.platform,
-      region: stockDraft.region,
       code: "",
       stock: "1",
-      price: "",
       note: "",
     })
     toast.success("Stok eklendi (local)")
@@ -956,19 +934,9 @@ function App() {
                   </div>
                 </div>
                 <div className="w-full max-w-sm space-y-3 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-inner">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300">Platformlar</p>
-                  <div className="flex flex-wrap gap-2">
-                    {stockStats.platforms.map((platform) => (
-                      <span
-                        key={platform}
-                        className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-ink-900/70 px-3 py-1 text-xs font-semibold text-slate-100">
-                        <span className="h-2 w-2 rounded-full bg-accent-400" />
-                        {platform}
-                      </span>
-                    ))}
-                  </div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300">Not</p>
                   <div className="rounded-xl border border-white/10 bg-ink-900/60 p-3 text-sm text-slate-300">
-                    API/DB için TODO: Prisma model + CRUD ucu (stok, platform, bölge, kod). Şu an yalnızca UI/UX.
+                    API/DB için TODO: Prisma model + CRUD ucu. Şu an yalnızca basit UI ve local state.
                   </div>
                 </div>
               </div>
@@ -995,23 +963,16 @@ function App() {
                         <div className="flex items-start justify-between gap-2">
                           <div className="space-y-1">
                             <p className="text-sm font-semibold text-white">{item.title}</p>
-                            <div className="flex flex-wrap gap-1.5 text-[11px] font-semibold text-slate-300">
-                              <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5">{item.platform}</span>
-                              <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5">Bölge: {item.region}</span>
-                              <span
-                                className={`rounded-full border px-2 py-0.5 ${
-                                  item.stock <= 3
-                                    ? "border-amber-300/70 bg-amber-500/15 text-amber-100"
-                                    : "border-emerald-300/70 bg-emerald-500/10 text-emerald-100"
-                                }`}
-                              >
-                                Stok: {item.stock}
-                              </span>
-                            </div>
+                            <span
+                              className={`inline-flex items-center gap-2 rounded-full border px-2 py-0.5 text-[11px] font-semibold ${
+                                item.stock <= 3
+                                  ? "border-amber-300/70 bg-amber-500/15 text-amber-100"
+                                  : "border-emerald-300/70 bg-emerald-500/10 text-emerald-100"
+                              }`}
+                            >
+                              Stok: {item.stock}
+                            </span>
                           </div>
-                          <span className="rounded-lg border border-white/10 bg-white/5 px-2 py-1 text-xs font-semibold text-accent-100">
-                            {item.price || "TBD"}
-                          </span>
                         </div>
 
                         <p className="rounded-lg border border-white/10 bg-ink-800/70 px-3 py-2 text-xs text-slate-200 shadow-inner">
@@ -1082,28 +1043,28 @@ function App() {
 
                     <div className="grid grid-cols-2 gap-3">
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-200" htmlFor="stock-platform">
-                          Platform
+                        <label className="text-xs font-semibold text-slate-200" htmlFor="stock-count">
+                          Adet
                         </label>
                         <input
-                          id="stock-platform"
-                          type="text"
-                          value={stockDraft.platform}
-                          onChange={(e) => setStockDraft((prev) => ({ ...prev, platform: e.target.value }))}
-                          placeholder="Steam / Origin / Rockstar"
+                          id="stock-count"
+                          type="number"
+                          min="1"
+                          value={stockDraft.stock}
+                          onChange={(e) => setStockDraft((prev) => ({ ...prev, stock: e.target.value }))}
                           className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-200" htmlFor="stock-region">
-                          Bölge
+                        <label className="text-xs font-semibold text-slate-200" htmlFor="stock-note">
+                          Not
                         </label>
                         <input
-                          id="stock-region"
+                          id="stock-note"
                           type="text"
-                          value={stockDraft.region}
-                          onChange={(e) => setStockDraft((prev) => ({ ...prev, region: e.target.value }))}
-                          placeholder="Global / EU / TR"
+                          value={stockDraft.note}
+                          onChange={(e) => setStockDraft((prev) => ({ ...prev, note: e.target.value }))}
+                          placeholder="Ek bilgi (opsiyonel)"
                           className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                         />
                       </div>
@@ -1120,49 +1081,6 @@ function App() {
                         onChange={(e) => setStockDraft((prev) => ({ ...prev, code: e.target.value }))}
                         rows={3}
                         placeholder="XXXX-XXXX-XXXX"
-                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                      />
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-3">
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-200" htmlFor="stock-count">
-                          Adet
-                        </label>
-                        <input
-                          id="stock-count"
-                          type="number"
-                          min="1"
-                          value={stockDraft.stock}
-                          onChange={(e) => setStockDraft((prev) => ({ ...prev, stock: e.target.value }))}
-                          className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                        />
-                      </div>
-                      <div className="col-span-2 space-y-2">
-                        <label className="text-xs font-semibold text-slate-200" htmlFor="stock-price">
-                          Fiyat (not)
-                        </label>
-                        <input
-                          id="stock-price"
-                          type="text"
-                          value={stockDraft.price}
-                          onChange={(e) => setStockDraft((prev) => ({ ...prev, price: e.target.value }))}
-                          placeholder="Örn: 59.99 USD / 2.799 TL"
-                          className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                        />
-                      </div>
-                    </div>
-
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-200" htmlFor="stock-note">
-                        Not
-                      </label>
-                      <textarea
-                        id="stock-note"
-                        value={stockDraft.note}
-                        onChange={(e) => setStockDraft((prev) => ({ ...prev, note: e.target.value }))}
-                        rows={3}
-                        placeholder="Ek bilgi, DRM, teslimat süresi..."
                         className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                       />
                     </div>
