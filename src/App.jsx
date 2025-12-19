@@ -463,9 +463,14 @@ function App() {
   }
 
   const handleBulkCopyAndDelete = (productId) => {
-    const count = Math.max(1, Number(bulkCount[productId] || 0))
     const product = products.find((p) => p.id === productId)
     if (!product) return
+
+    const rawCount = bulkCount[productId]
+    const count = Math.max(
+      1,
+      Number(rawCount ?? product.stocks.length) || product.stocks.length,
+    )
     const codes = product.stocks.slice(0, count).map((stk) => stk.code)
     const removed = product.stocks.slice(0, count)
     if (codes.length === 0) {
@@ -1189,14 +1194,13 @@ function App() {
                                 <input
                                   id={`bulk-${product.id}`}
                                   type="text"
-                                  value={bulkCount[product.id] ?? ""}
+                                  value={bulkCount[product.id] ?? product.stocks.length}
                                   onChange={(e) =>
                                     setBulkCount((prev) => ({
                                       ...prev,
                                       [product.id]: e.target.value.replace(/\D/g, ""),
                                     }))
                                   }
-                                  placeholder="10"
                                   inputMode="numeric"
                                   className="w-16 appearance-none rounded-md border border-white/10 bg-ink-900 px-2 py-1 text-xs text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-1 focus:ring-accent-500/30"
                                 />
