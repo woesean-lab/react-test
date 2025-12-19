@@ -93,6 +93,7 @@ function App() {
     if (initialProducts[0]?.id) map[initialProducts[0].id] = true
     return map
   })
+  const [confirmProductTarget, setConfirmProductTarget] = useState(null)
 
   const activeTemplate = useMemo(
     () => templates.find((tpl) => tpl.label === selectedTemplate),
@@ -454,6 +455,31 @@ function App() {
     )
     resetStockForm()
     toast.success("Stok eklendi")
+  }
+
+  const handleProductDeleteWithConfirm = (productId) => {
+    if (confirmProductTarget === productId) {
+      setProducts((prev) => {
+        const next = prev.filter((p) => p.id !== productId)
+        const nextFirst = next[0]?.id || ""
+        setStockForm((prevForm) => ({
+          ...prevForm,
+          productId: prevForm.productId === productId ? nextFirst : prevForm.productId,
+        }))
+        setOpenProducts((prevOpen) => {
+          const copy = { ...prevOpen }
+          delete copy[productId]
+          if (nextFirst && !(nextFirst in copy)) copy[nextFirst] = true
+          return copy
+        })
+        return next
+      })
+      setConfirmProductTarget(null)
+      toast.success("Ürün ve stokları silindi")
+      return
+    }
+    setConfirmProductTarget(productId)
+    toast("Silmek için tekrar tıkla", { position: "top-right" })
   }
 
   const handleStockDeleteWithConfirm = (productId, stockId) => {
@@ -1016,7 +1042,42 @@ function App() {
                               openProducts[product.id] ? "rotate-180 border-accent-300/60 bg-white/10 text-accent-200" : ""
                             }`}
                           >
-                            &gt;
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation()
+                                  handleProductDeleteWithConfirm(product.id)
+                                }}
+                                className={`flex h-7 w-7 items-center justify-center rounded-full border text-[11px] font-semibold uppercase tracking-wide transition ${
+                                  confirmProductTarget === product.id
+                                    ? "border-rose-300 bg-rose-500/20 text-rose-50"
+                                    : "border-white/10 bg-white/5 text-slate-200 hover:border-rose-300 hover:bg-rose-500/15 hover:text-rose-50"
+                                }`}
+                                aria-label="Ürünü sil"
+                              >
+                                <svg
+                                  xmlns="http://www.w3.org/2000/svg"
+                                  viewBox="0 0 24 24"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  className="h-4 w-4"
+                                >
+                                  <path d="M3 6h18" />
+                                  <path d="M8 6V4h8v2" />
+                                  <path d="M19 6l-1 14H6L5 6" />
+                                  <path d="M10 11v6M14 11v6" />
+                                </svg>
+                              </button>
+                              <span
+                                className={`inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-slate-200 transition ${
+                                  openProducts[product.id] ? "rotate-180 border-accent-300/60 bg-white/10 text-accent-200" : ""
+                                }`}
+                              >
+                                &gt;
+                              </span>
+                            </div>
                           </span>
                         </button>
 
