@@ -1018,50 +1018,53 @@ function App() {
                         key={product.id}
                         className="rounded-2xl border border-white/10 bg-ink-900/60 p-3 shadow-inner"
                       >
-                        <div className="flex items-center gap-2 rounded-xl px-2 py-1">
-                          <button
-                            type="button"
-                            onClick={() => handleProductDeleteWithConfirm(product.id)}
-                            className={`flex h-8 w-8 items-center justify-center rounded-full border text-[11px] font-semibold uppercase tracking-wide transition ${
-                              confirmProductTarget === product.id
-                                ? "border-rose-300 bg-rose-500/20 text-rose-50"
-                                : "border-white/10 bg-white/5 text-slate-200 hover:border-rose-300 hover:bg-rose-500/15 hover:text-rose-50"
-                            }`}
-                            aria-label="Ürünü sil"
-                          >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth="2"
-                              className="h-4 w-4"
-                            >
-                              <path d="M3 6h18" />
-                              <path d="M8 6V4h8v2" />
-                              <path d="M19 6l-1 14H6L5 6" />
-                              <path d="M10 11v6M14 11v6" />
-                            </svg>
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => toggleProductOpen(product.id)}
-                            className="flex flex-1 items-center justify-between gap-2 rounded-lg px-2 py-1 text-left text-sm font-semibold text-slate-100 transition hover:text-accent-100"
-                          >
-                            <div className="space-y-1">
-                              <span className="inline-flex items-center gap-2">
-                                <span className="text-sm font-semibold text-white">{product.name}</span>
-                                <span
-                                  className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
-                                    product.stocks.length === 0
-                                      ? "border border-rose-300/60 bg-rose-500/15 text-rose-50"
-                                      : "border border-emerald-300/60 bg-emerald-500/15 text-emerald-50"
-                                  }`}
-                                >
-                                  {product.stocks.length} stok
-                                </span>
+                        <button
+                          type="button"
+                          onClick={() => toggleProductOpen(product.id)}
+                          className="flex w-full items-center justify-between gap-3 rounded-lg px-2 py-1 text-left text-sm font-semibold text-slate-100 transition hover:text-accent-100"
+                        >
+                          <div className="space-y-1">
+                            <span className="inline-flex items-center gap-2">
+                              <span className="text-sm font-semibold text-white">{product.name}</span>
+                              <span
+                                className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
+                                  product.stocks.length === 0
+                                    ? "border border-rose-300/60 bg-rose-500/15 text-rose-50"
+                                    : "border border-emerald-300/60 bg-emerald-500/15 text-emerald-50"
+                                }`}
+                              >
+                                {product.stocks.length} stok
                               </span>
-                            </div>
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleProductDeleteWithConfirm(product.id)
+                              }}
+                              className={`flex h-8 w-8 items-center justify-center rounded-full border text-[11px] font-semibold uppercase tracking-wide transition ${
+                                confirmProductTarget === product.id
+                                  ? "border-rose-300 bg-rose-500/20 text-rose-50"
+                                  : "border-white/10 bg-white/5 text-slate-200 hover:border-rose-300 hover:bg-rose-500/15 hover:text-rose-50"
+                              }`}
+                              aria-label="Ürünü sil"
+                            >
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                className="h-4 w-4"
+                              >
+                                <path d="M3 6h18" />
+                                <path d="M8 6V4h8v2" />
+                                <path d="M19 6l-1 14H6L5 6" />
+                                <path d="M10 11v6M14 11v6" />
+                              </svg>
+                            </button>
                             <span
                               className={`inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-slate-200 transition ${
                                 openProducts[product.id] ? "rotate-180 border-accent-300/60 bg-white/10 text-accent-200" : ""
@@ -1069,8 +1072,8 @@ function App() {
                             >
                               &gt;
                             </span>
-                          </button>
-                        </div>
+                          </div>
+                        </button>
 
                         {openProducts[product.id] && (
                           <div className="mt-3 grid gap-2 sm:grid-cols-2">
