@@ -433,32 +433,30 @@ function App() {
   }
 
   const handleStockAdd = () => {
-    const productId = stockForm.productId
-    const codes = stockForm.code
-      .split(/\\r?\\n/)
-      .map((line) => line.trim())
-      .filter(Boolean)
+    const productId = stockForm.productId;
+    const normalizedCode = stockForm.code.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+    const codes = normalizedCode.split('\n').map((line) => line.trim()).filter(Boolean);
     if (!productId) {
-      toast.error("Ürün seçin.")
-      return
+      toast.error("Ürün seçin.");
+      return;
     }
     if (codes.length === 0) {
-      toast.error("Anahtar kodu boş olamaz.")
-      return
+      toast.error("Anahtar kodu boş olamaz.");
+      return;
     }
-    const timestamp = Date.now().toString(36)
+    const timestamp = Date.now().toString(36);
     setProducts((prev) =>
       prev.map((product) => {
-        if (product.id !== productId) return product
+        if (product.id !== productId) return product;
         const newStocks = codes.map((codeLine, index) => ({
-          id: `stk-${timestamp}-${index}-${Math.random().toString(16).slice(2, 6)}`,
+          id: 'stk-' + timestamp + '-' + index + '-' + Math.random().toString(16).slice(2, 6),
           code: codeLine,
-        }))
-        return { ...product, stocks: [...product.stocks, ...newStocks] }
+        }));
+        return { ...product, stocks: [...product.stocks, ...newStocks] };
       }),
-    )
-    resetStockForm()
-    toast.success(`${codes.length} stok eklendi`)
+    );
+    resetStockForm();
+    toast.success(codes.length + ' stok eklendi');
   }
 
   const handleBulkCopyAndDelete = (productId) => {
