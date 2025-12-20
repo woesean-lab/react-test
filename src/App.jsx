@@ -1312,17 +1312,13 @@ function App() {
                                 >
                                   {product.stocks.length} stok
                                 </span>
-                                {product.note?.trim() && (
+                                {product.note?.trim() && product.note.trim().toLowerCase() !== "null" && (
                                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-slate-200">
                                     {product.note}
                                   </span>
                                 )}
                               </div>
-                              <p className="text-xs text-slate-400">
-                                {product.deliveryTemplate?.trim()
-                                  ? `Teslimat şablonu: ${product.deliveryTemplate}`
-                                  : "Teslimat şablonu yok"}
-                              </p>
+                              
                             </div>
                           </button>
                           <div className="flex items-center gap-1.5">
@@ -1481,42 +1477,40 @@ function App() {
                                     </button>
                                   </div>
                                 </div>
-                                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                                <div className="space-y-2">
                                   {product.stocks.map((stk, idx) => (
                                     <div
                                       key={stk.id}
-                                      className="group flex flex-col gap-3 rounded-xl border border-white/10 bg-ink-900/70 p-3 transition hover:border-accent-400/60 hover:bg-ink-800/80"
+                                      className="group flex items-center gap-3 rounded-xl border border-white/10 bg-ink-900/70 px-3 py-2 transition hover:border-accent-400/60 hover:bg-ink-800/80"
                                     >
-                                      <div className="flex items-center justify-between gap-3">
-                                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[11px] font-semibold text-slate-300 transition group-hover:border-accent-300 group-hover:text-accent-100">
-                                          #{idx + 1}
-                                        </span>
-                                        <div className="flex items-center gap-2">
-                                          <button
-                                            type="button"
-                                            onClick={() => handleStockCopy(stk.code)}
-                                            className="flex h-7 items-center justify-center rounded-md border border-white/10 bg-white/5 px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
-                                            aria-label="Stoku kopyala"
-                                          >
-                                            Kopyala
-                                          </button>
-                                          <button
-                                            type="button"
-                                            onClick={() => handleStockDeleteWithConfirm(product.id, stk.id)}
-                                            className={`flex h-7 items-center justify-center rounded-md border px-2.5 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 ${
-                                              confirmStockTarget === `${product.id}-${stk.id}`
-                                                ? "border-rose-300 bg-rose-500/25 text-rose-50"
-                                                : "border-rose-400/60 bg-rose-500/10 hover:border-rose-300 hover:bg-rose-500/20"
-                                            }`}
-                                            aria-label="Stoku sil"
-                                          >
-                                            Sil
-                                          </button>
-                                        </div>
-                                      </div>
-                                      <p className="break-all font-mono text-sm text-slate-100 group-hover:text-accent-50">
+                                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[11px] font-semibold text-slate-300 transition group-hover:border-accent-300 group-hover:text-accent-100">
+                                        #{idx + 1}
+                                      </span>
+                                      <p className="flex-1 break-all font-mono text-sm text-slate-100 group-hover:text-accent-50">
                                         {stk.code}
                                       </p>
+                                      <div className="flex items-center gap-2">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleStockCopy(stk.code)}
+                                          className="flex h-7 items-center justify-center rounded-md border border-white/10 bg-white/5 px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
+                                          aria-label="Stoku kopyala"
+                                        >
+                                          Kopyala
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleStockDeleteWithConfirm(product.id, stk.id)}
+                                          className={`flex h-7 items-center justify-center rounded-md border px-2.5 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 ${
+                                            confirmStockTarget === `${product.id}-${stk.id}`
+                                              ? "border-rose-300 bg-rose-500/25 text-rose-50"
+                                              : "border-rose-400/60 bg-rose-500/10 hover:border-rose-300 hover:bg-rose-500/20"
+                                          }`}
+                                          aria-label="Stoku sil"
+                                        >
+                                          Sil
+                                        </button>
+                                      </div>
                                     </div>
                                   ))}
                                 </div>
@@ -1912,6 +1906,7 @@ function App() {
 }
 
 export default App
+
 
 
 
