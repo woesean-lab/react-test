@@ -13,6 +13,8 @@ const fallbackTemplates = [
 
 const fallbackCategories = Array.from(new Set(["Genel", ...fallbackTemplates.map((tpl) => tpl.category || "Genel")]))
 
+const PRODUCT_ORDER_STORAGE_KEY = "pulcipProductOrder"
+
 const initialProblems = [
   { id: 1, username: "@ornek1", issue: "Ödeme ekranda takıldı, 2 kez kart denemiş.", status: "open" },
   { id: 2, username: "@ornek2", issue: "Teslimat gecikmesi şikayeti.", status: "open" },
@@ -92,7 +94,21 @@ function App() {
   const [confirmProductTarget, setConfirmProductTarget] = useState(null)
   const [bulkCount, setBulkCount] = useState({})
   const [lastDeleted, setLastDeleted] = useState(null)
+  const [productOrder, setProductOrder] = useState([])
+  const [dragState, setDragState] = useState({ activeId: null, overId: null })
   const [editingProduct, setEditingProduct] = useState({})
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(PRODUCT_ORDER_STORAGE_KEY)
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        if (Array.isArray(parsed)) setProductOrder(parsed)
+      }
+    } catch (error) {
+      console.warn("Could not load product order", error)
+    }
+  }, [])
 
   const activeTemplate = useMemo(
     () => templates.find((tpl) => tpl.label === selectedTemplate),
@@ -120,22 +136,105 @@ function App() {
     return { total, empty }
   }, [products])
 
+  const sortedProducts = useMemo(() => {
+    return [...products].sort((a, b) => a.name.localeCompare(b.name, "tr", { sensitivity: "base" }))
+  }, [products])
+
+  const orderedProducts = useMemo(() => {
+    if (productOrder.length === 0) return sortedProducts
+    const map = new Map(sortedProducts.map((product) => [product.id, product]))
+    const ordered = []
+    productOrder.forEach((id) => {
+      const item = map.get(id)
+      if (item) {
+        ordered.push(item)
+        map.delete(id)
+      }
+    })
+    if (map.size > 0) {
+      ordered.push(...map.values())
+    }
+    return ordered
+  }, [productOrder, sortedProducts])
+
   const filteredProducts = useMemo(() => {
     const text = productSearch.trim().toLowerCase()
     const list = text
-      ? products.filter(
+      ? orderedProducts.filter(
         (prd) =>
           prd.name.toLowerCase().includes(text) ||
           prd.stocks.some((stk) => stk.code.toLowerCase().includes(text)),
       )
-      : products
-    return [...list].sort((a, b) => a.name.localeCompare(b.name, "tr", { sensitivity: "base" }))
-  }, [productSearch, products])
+      : orderedProducts
+    return list
+  }, [productSearch, orderedProducts])
+
+
+  useEffect(() => {
+    if (products.length === 0) return
+    setProductOrder((prev) => {
+      if (prev.length === 0) {
+        return sortedProducts.map((product) => product.id)
+      }
+      const currentIds = new Set(products.map((product) => product.id))
+      const next = prev.filter((id) => currentIds.has(id))
+      const missing = sortedProducts
+        .map((product) => product.id)
+        .filter((id) => !next.includes(id))
+      if (missing.length === 0 && next.length === prev.length) return prev
+      return [...next, ...missing]
+    })
+  }, [products, sortedProducts])
+
+  useEffect(() => {
+    if (productOrder.length === 0) return
+    try {
+      localStorage.setItem(PRODUCT_ORDER_STORAGE_KEY, JSON.stringify(productOrder))
+    } catch (error) {
+      console.warn("Could not save product order", error)
+    }
+  }, [productOrder])
 
   const toggleProductOpen = (productId) => {
     setOpenProducts((prev) => ({ ...prev, [productId]: !(prev[productId] ?? false) }))
   }
 
+  const handleDragStart = (event, productId) => {
+    event.dataTransfer.effectAllowed = "move"
+    event.dataTransfer.setData("text/plain", productId)
+    setDragState({ activeId: productId, overId: null })
+  }
+
+  const handleDragOver = (event, productId) => {
+    event.preventDefault()
+    event.dataTransfer.dropEffect = "move"
+    setDragState((prev) =>
+      prev.overId === productId ? prev : { ...prev, overId: productId },
+    )
+  }
+
+  const handleDrop = (event, productId) => {
+    event.preventDefault()
+    const dragId = dragState.activeId || event.dataTransfer.getData("text/plain")
+    if (!dragId || dragId === productId) {
+      setDragState({ activeId: null, overId: null })
+      return
+    }
+    setProductOrder((prev) => {
+      const base = prev.length ? [...prev] : sortedProducts.map((product) => product.id)
+      const fromIndex = base.indexOf(dragId)
+      const toIndex = base.indexOf(productId)
+      if (fromIndex === -1 || toIndex === -1) return prev
+      base.splice(fromIndex, 1)
+      base.splice(toIndex, 0, dragId)
+      return base
+    })
+    setDragState({ activeId: null, overId: null })
+  }
+
+  const handleDragEnd = () => {
+    setDragState({ activeId: null, overId: null })
+  }
   useEffect(() => {
     setOpenCategories((prev) => {
       if (categories.length === 0) return {}
@@ -1292,7 +1391,15 @@ function App() {
                     {filteredProducts.map((product) => (
                       <div
                         key={product.id}
-                        className="rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner transition hover:border-accent-400/60 hover:bg-ink-800/80 hover:shadow-card"
+                        draggable
+                        onDragStart={(event) => handleDragStart(event, product.id)}
+                        onDragOver={(event) => handleDragOver(event, product.id)}
+                        onDrop={(event) => handleDrop(event, product.id)}
+                        onDragEnd={handleDragEnd}
+                        title="Sürükle ve sırala"
+                        className={`rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner transition hover:border-accent-400/60 hover:bg-ink-800/80 hover:shadow-card ${
+                          dragState.activeId === product.id ? "opacity-60" : ""
+                        } ${dragState.overId === product.id ? "ring-2 ring-accent-300/60" : ""} cursor-grab`}
                       >
                         <div className="flex flex-wrap items-start justify-between gap-4">
                           <button
@@ -1906,6 +2013,14 @@ function App() {
 }
 
 export default App
+
+
+
+
+
+
+
+
 
 
 
