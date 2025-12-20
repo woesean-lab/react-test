@@ -361,6 +361,18 @@ function App() {
     }
   }
 
+  const handleLogout = () => {
+    setIsAuthed(false)
+    setAuthToken("")
+    setAuthPassword("")
+    setAuthError("")
+    try {
+      localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY)
+    } catch (error) {
+      console.warn("Could not clear auth token", error)
+    }
+  }
+
   const handleThemeToggle = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"))
   }
@@ -758,6 +770,16 @@ function App() {
           <path d="M19 14.5a7.5 7.5 0 0 1-9.5-9.5A8.5 8.5 0 1 0 19 14.5Z" />
         </svg>
       )}
+    </button>
+  )
+
+  const logoutButton = (
+    <button
+      type="button"
+      onClick={handleLogout}
+      className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-rose-300/60 hover:bg-rose-500/15 hover:text-rose-50"
+    >
+      Cikis
     </button>
   )
 
@@ -1303,7 +1325,10 @@ function App() {
           >
             Stok
           </button>
-          <div className="ml-auto">{themeToggleButton}</div>
+          <div className="ml-auto flex items-center gap-2">
+            {logoutButton}
+            {themeToggleButton}
+          </div>
         </div>
 
         {activeTab === "messages" && (
