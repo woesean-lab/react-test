@@ -84,7 +84,7 @@ function App() {
   const [confirmProblemTarget, setConfirmProblemTarget] = useState(null)
 
   const [products, setProducts] = useState(initialProducts)
-  const [productForm, setProductForm] = useState({ name: "", note: "", deliveryTemplate: "" })
+  const [productForm, setProductForm] = useState({ name: "", deliveryTemplate: "" })
   const [stockForm, setStockForm] = useState({ productId: initialProducts[0]?.id || "", code: "" })
   const [confirmStockTarget, setConfirmStockTarget] = useState(null)
   const [productSearch, setProductSearch] = useState("")
@@ -130,7 +130,6 @@ function App() {
     return products.filter(
       (prd) =>
         prd.name.toLowerCase().includes(text) ||
-        (prd.note || "").toLowerCase().includes(text) ||
         prd.stocks.some((stk) => stk.code.toLowerCase().includes(text)),
     )
   }, [productSearch, products])
@@ -414,26 +413,21 @@ function App() {
 
   const handleProductAdd = () => {
     const name = productForm.name.trim()
-    const note = productForm.note.trim()
     const deliveryTemplate = productForm.deliveryTemplate
-    const deliveryMessage = templates.find((tpl) => tpl.label === deliveryTemplate)?.value || ""
     if (!name) {
       toast.error("Ürün ismi boş olamaz.")
       return
     }
-    if (!note) {
-      toast.error("Not boş olamaz.")
-      return
-    }
+    const deliveryMessage = templates.find((tpl) => tpl.label === deliveryTemplate)?.value || ""
     const newProduct = {
       id: `prd-${Date.now().toString(36)}`,
       name,
-      note,
-    deliveryMessage,
+      deliveryTemplate,
+      deliveryMessage,
       stocks: [],
     }
     setProducts((prev) => [...prev, newProduct])
-    setProductForm({ name: "", note: "", deliveryTemplate: "" })
+    setProductForm({ name: "", deliveryTemplate: "" })
     setStockForm((prev) => ({ ...prev, productId: newProduct.id }))
     toast.success("Ürün eklendi")
   }
@@ -1402,20 +1396,6 @@ function App() {
                       />
                     </div>
 
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-200" htmlFor="prd-note">
-                        Not
-                      </label>
-                      <textarea
-                        id="prd-note"
-                        rows={2}
-                        value={productForm.note}
-                        onChange={(e) => setProductForm((prev) => ({ ...prev, note: e.target.value }))}
-                        placeholder="Kısa not ekle..."
-                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                          />
-                        </div>
-
                         <div className="space-y-2">
                           <label className="text-xs font-semibold text-slate-200" htmlFor="prd-delivery">
                             Teslimat mesajı (opsiyonel)
@@ -1445,7 +1425,7 @@ function App() {
                           </button>
                           <button
                             type="button"
-                            onClick={() => setProductForm({ name: "", note: "", deliveryTemplate: "" })}
+                            onClick={() => setProductForm({ name: "", deliveryTemplate: "" })}
                             className="min-w-[110px] rounded-lg border border-white/10 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
                           >
                             Temizle
