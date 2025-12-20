@@ -1,4 +1,5 @@
 ﻿import { useEffect, useMemo, useState } from "react"
+import { useCallback } from "react"
 import { Toaster, toast } from "react-hot-toast"
 
 const fallbackTemplates = [
@@ -15,6 +16,7 @@ const fallbackCategories = Array.from(new Set(["Genel", ...fallbackTemplates.map
 
 const PRODUCT_ORDER_STORAGE_KEY = "pulcipProductOrder"
 const THEME_STORAGE_KEY = "pulcipTheme"
+const AUTH_TOKEN_STORAGE_KEY = "pulcipAuthToken"
 
 const initialProblems = [
   { id: 1, username: "@ornek1", issue: "Ödeme ekranda takıldı, 2 kez kart denemiş.", status: "open" },
@@ -81,6 +83,20 @@ function LoadingIndicator({ label = "Yükleniyor..." }) {
 function App() {
   const [activeTab, setActiveTab] = useState("messages")
   const [theme, setTheme] = useState(() => getInitialTheme())
+  const [authToken, setAuthToken] = useState(() => {
+    if (typeof window === "undefined") return ""
+    try {
+      return localStorage.getItem(AUTH_TOKEN_STORAGE_KEY) || ""
+    } catch (error) {
+      console.warn("Could not read auth token", error)
+      return ""
+    }
+  })
+  const [isAuthed, setIsAuthed] = useState(false)
+  const [isAuthChecking, setIsAuthChecking] = useState(true)
+  const [authPassword, setAuthPassword] = useState("")
+  const [authError, setAuthError] = useState("")
+  const [isAuthLoading, setIsAuthLoading] = useState(false)
   const [title, setTitle] = useState("Pulcip Manage")
   const [message, setMessage] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("Genel")
@@ -124,6 +140,62 @@ function App() {
       console.warn("Could not persist theme preference", error)
     }
   }, [theme])
+
+  useEffect(() => {
+    let isMounted = true
+
+    const verifyAuth = async () => {
+      setIsAuthChecking(true)
+      try {
+        const headers = authToken ? { Authorization: `Bearer ${authToken}` } : {}
+        const res = await fetch("/api/auth/verify", { headers })
+        if (!res.ok) throw new Error("unauthorized")
+        const data = await res.json()
+        if (!isMounted) return
+        setIsAuthed(true)
+      } catch (error) {
+        if (!isMounted) return
+        setIsAuthed(false)
+        if (authToken) {
+          try {
+            localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY)
+          } catch (removeError) {
+            console.warn("Could not clear auth token", removeError)
+          }
+          setAuthToken("")
+        }
+      } finally {
+        if (isMounted) setIsAuthChecking(false)
+      }
+    }
+
+    verifyAuth()
+
+    return () => {
+      isMounted = false
+    }
+  }, [authToken])
+
+  const apiFetch = useCallback(
+    async (input, init = {}) => {
+      const headers = new Headers(init.headers || {})
+      if (authToken) {
+        headers.set("Authorization", `Bearer ${authToken}`)
+      }
+      const res = await fetch(input, { ...init, headers })
+      if (res.status === 401) {
+        setIsAuthed(false)
+        setAuthToken("")
+        try {
+          localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY)
+        } catch (removeError) {
+          console.warn("Could not clear auth token", removeError)
+        }
+      }
+      return res
+    },
+    [authToken],
+  )
 
   useEffect(() => {
     try {
@@ -226,6 +298,58 @@ function App() {
     setOpenProducts((prev) => ({ ...prev, [productId]: !(prev[productId] ?? false) }))
   }
 
+  const handleAuthSubmit = async (event) => {
+    event.preventDefault()
+    if (isAuthChecking || isAuthLoading) return
+    const password = authPassword.trim()
+    if (!password) {
+      setAuthError("Sifre gerekli")
+      return
+    }
+
+    setAuthError("")
+    setIsAuthLoading(true)
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      })
+
+      if (!res.ok) {
+        setAuthError("Sifre hatali")
+        return
+      }
+
+      const data = await res.json()
+      if (data?.enabled === false) {
+        setIsAuthed(true)
+        setAuthPassword("")
+        return
+      }
+
+      const token = String(data?.token ?? "").trim()
+      if (!token) {
+        setAuthError("Oturum acilamadi")
+        return
+      }
+
+      try {
+        localStorage.setItem(AUTH_TOKEN_STORAGE_KEY, token)
+      } catch (error) {
+        console.warn("Could not persist auth token", error)
+      }
+      setAuthToken(token)
+      setIsAuthed(true)
+      setAuthPassword("")
+    } catch (error) {
+      console.error("Login failed", error)
+      setAuthError("Baglanti hatasi")
+    } finally {
+      setIsAuthLoading(false)
+    }
+  }
+
   const handleThemeToggle = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"))
   }
@@ -281,10 +405,11 @@ function App() {
   }, [categories])
 
   useEffect(() => {
+    if (!isAuthed) return
     const controller = new AbortController()
     ;(async () => {
       try {
-        const res = await fetch("/api/problems", { signal: controller.signal })
+        const res = await apiFetch("/api/problems", { signal: controller.signal })
         if (!res.ok) throw new Error("api_error")
         const data = await res.json()
         setProblems(data ?? [])
@@ -296,13 +421,14 @@ function App() {
     })()
 
     return () => controller.abort()
-  }, [])
+  }, [apiFetch, isAuthed])
 
   useEffect(() => {
+    if (!isAuthed) return
     const controller = new AbortController()
     ;(async () => {
       try {
-        const res = await fetch("/api/products", { signal: controller.signal })
+        const res = await apiFetch("/api/products", { signal: controller.signal })
         if (!res.ok) throw new Error("api_error")
         const data = await res.json()
         setProducts(data ?? [])
@@ -314,7 +440,7 @@ function App() {
     })()
 
     return () => controller.abort()
-  }, [])
+  }, [apiFetch, isAuthed])
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDelayDone(true), 1200)
@@ -322,6 +448,7 @@ function App() {
   }, [])
 
   useEffect(() => {
+    if (!isAuthed) return
     const controller = new AbortController()
     const startedAt = Date.now()
     let timeoutId = null
@@ -331,8 +458,8 @@ function App() {
     ;(async () => {
       try {
         const [catsRes, templatesRes] = await Promise.all([
-          fetch("/api/categories", { signal: controller.signal }),
-          fetch("/api/templates", { signal: controller.signal }),
+          apiFetch("/api/categories", { signal: controller.signal }),
+          apiFetch("/api/templates", { signal: controller.signal }),
         ])
 
         if (!catsRes.ok || !templatesRes.ok) throw new Error("api_error")
@@ -365,7 +492,7 @@ function App() {
       controller.abort()
       if (timeoutId) window.clearTimeout(timeoutId)
     }
-  }, [])
+  }, [apiFetch, isAuthed])
 
   useEffect(() => {
     setOpenProducts((prev) => {
@@ -432,7 +559,7 @@ function App() {
     const safeCategory = safeCategoryInput || "Genel"
 
     try {
-      const res = await fetch("/api/templates", {
+      const res = await apiFetch("/api/templates", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ label: safeTitle, value: safeMessage, category: safeCategory }),
@@ -474,7 +601,7 @@ function App() {
     }
 
     try {
-      const res = await fetch(`/api/templates/${targetId}`, { method: "DELETE" })
+      const res = await apiFetch(`/api/templates/${targetId}`, { method: "DELETE" })
       if (!res.ok && res.status !== 404) throw new Error("delete_failed")
 
       const nextTemplates = templates.filter((tpl) => tpl.label !== targetLabel)
@@ -518,7 +645,7 @@ function App() {
       return
     }
     try {
-      const res = await fetch("/api/categories", {
+      const res = await apiFetch("/api/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: next }),
@@ -542,7 +669,7 @@ function App() {
       return
     }
     try {
-      const res = await fetch(`/api/categories/${encodeURIComponent(cat)}`, { method: "DELETE" })
+      const res = await apiFetch(`/api/categories/${encodeURIComponent(cat)}`, { method: "DELETE" })
       if (!res.ok && res.status !== 404) throw new Error("category_delete_failed")
 
       const nextCategories = categories.filter((item) => item !== cat)
@@ -582,6 +709,47 @@ function App() {
   const categoryCountText = showLoading ? <LoadingIndicator label="Yükleniyor" /> : categories.length
   const selectedCategoryText = showLoading ? <LoadingIndicator label="Yükleniyor" /> : selectedCategory.trim() || "Genel"
 
+  const isAuthBusy = isAuthChecking || isAuthLoading
+
+  const themeToggleButton = (
+    <button
+      type="button"
+      onClick={handleThemeToggle}
+      className="inline-flex items-center justify-center rounded-2xl bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
+      aria-label="Tema degistir"
+    >
+      <span className="sr-only">Tema degistir</span>
+      {isLight ? (
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          className="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <circle cx="12" cy="12" r="4.5" />
+          <path d="M12 2.5v2.5M12 19v2.5M4.3 4.3l1.8 1.8M17.9 17.9l1.8 1.8M2.5 12h2.5M19 12h2.5M4.3 19.7l1.8-1.8M17.9 6.1l1.8-1.8" />
+        </svg>
+      ) : (
+        <svg
+          viewBox="0 0 24 24"
+          aria-hidden="true"
+          className="h-4 w-4"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.6"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M19 14.5a7.5 7.5 0 0 1-9.5-9.5A8.5 8.5 0 1 0 19 14.5Z" />
+        </svg>
+      )}
+    </button>
+  )
+
   const categoryColors = useMemo(() => {
     const map = {}
     categories.forEach((cat, idx) => {
@@ -604,7 +772,7 @@ function App() {
       templates.find((tpl) => tpl.label === deliveryTemplate)?.value || ""
 
     try {
-      const res = await fetch("/api/products", {
+      const res = await apiFetch("/api/products", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -640,7 +808,7 @@ function App() {
     }
 
     try {
-      const res = await fetch(`/api/products/${productId}/stocks`, {
+      const res = await apiFetch(`/api/products/${productId}/stocks`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ codes }),
@@ -680,7 +848,7 @@ function App() {
 
     try {
       await navigator.clipboard.writeText(joined)
-      const res = await fetch("/api/stocks/bulk-delete", {
+      const res = await apiFetch("/api/stocks/bulk-delete", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ids: removed.map((stk) => stk.id) }),
@@ -704,7 +872,7 @@ function App() {
   const handleProductDeleteWithConfirm = async (productId) => {
     if (confirmProductTarget === productId) {
       try {
-        const res = await fetch(`/api/products/${productId}`, { method: "DELETE" })
+        const res = await apiFetch(`/api/products/${productId}`, { method: "DELETE" })
         if (!res.ok && res.status !== 404) throw new Error("product_delete_failed")
 
         setProducts((prev) => {
@@ -778,7 +946,7 @@ function App() {
     }
 
     try {
-      const res = await fetch(`/api/products/${productId}`, {
+      const res = await apiFetch(`/api/products/${productId}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -811,7 +979,7 @@ function App() {
     }
 
     try {
-      const res = await fetch(`/api/products/${productId}/stocks`, {
+      const res = await apiFetch(`/api/products/${productId}/stocks`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ codes }),
@@ -851,7 +1019,7 @@ function App() {
       const removed = targetProduct?.stocks.find((stk) => stk.id === stockId)
 
       try {
-        const res = await fetch(`/api/stocks/${stockId}`, { method: "DELETE" })
+        const res = await apiFetch(`/api/stocks/${stockId}`, { method: "DELETE" })
         if (!res.ok && res.status !== 404) throw new Error("stock_delete_failed")
 
         setProducts((prev) =>
@@ -896,7 +1064,7 @@ function App() {
       return
     }
     try {
-      const res = await fetch("/api/problems", {
+      const res = await apiFetch("/api/problems", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: user, issue }),
@@ -915,7 +1083,7 @@ function App() {
 
   const handleProblemResolve = async (id) => {
     try {
-      const res = await fetch(`/api/problems/${id}`, {
+      const res = await apiFetch(`/api/problems/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "resolved" }),
@@ -932,7 +1100,7 @@ function App() {
 
   const handleProblemReopen = async (id) => {
     try {
-      const res = await fetch(`/api/problems/${id}`, {
+      const res = await apiFetch(`/api/problems/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "open" }),
@@ -960,7 +1128,7 @@ function App() {
   const handleProblemDeleteWithConfirm = async (id) => {
     if (confirmProblemTarget === id) {
       try {
-        const res = await fetch(`/api/problems/${id}`, { method: "DELETE" })
+        const res = await apiFetch(`/api/problems/${id}`, { method: "DELETE" })
         if (!res.ok && res.status !== 404) throw new Error("problem_delete_failed")
         setProblems((prev) => prev.filter((p) => p.id !== id))
         setConfirmProblemTarget(null)
@@ -979,6 +1147,74 @@ function App() {
 
   const openProblems = problems.filter((p) => p.status !== "resolved")
   const resolvedProblems = problems.filter((p) => p.status === "resolved")
+
+  if (!isAuthed) {
+    return (
+      <div className="min-h-screen px-4 pb-16 pt-10 text-slate-50">
+        <div className="mx-auto flex w-full max-w-lg flex-col gap-6">
+          <div className="flex items-center justify-between rounded-3xl border border-white/10 bg-ink-900/80 px-4 py-3 shadow-card backdrop-blur">
+            <div className="space-y-2">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-accent-200">
+                Pulcip Manage
+              </span>
+              <h1 className="font-display text-2xl font-semibold text-white">Giris paneli</h1>
+            </div>
+            {themeToggleButton}
+          </div>
+
+          <div className="rounded-3xl border border-white/10 bg-ink-900/70 p-6 shadow-card">
+            <p className="text-sm text-slate-200/80">Paneli acmak icin sifre gir.</p>
+
+            <form className="mt-4 space-y-4" onSubmit={handleAuthSubmit}>
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-slate-200" htmlFor="auth-password">
+                  Sifre
+                </label>
+                <input
+                  id="auth-password"
+                  type="password"
+                  value={authPassword}
+                  onChange={(e) => {
+                    setAuthPassword(e.target.value)
+                    if (authError) setAuthError("")
+                  }}
+                  autoComplete="current-password"
+                  disabled={isAuthBusy}
+                  className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-70"
+                />
+              </div>
+              {authError && (
+                <div className="rounded-lg border border-rose-200/60 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
+                  {authError}
+                </div>
+              )}
+              <button
+                type="submit"
+                disabled={isAuthBusy}
+                className="w-full rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                {isAuthBusy ? "Kontrol ediliyor" : "Giris yap"}
+              </button>
+            </form>
+
+            <p className="mt-4 text-xs text-slate-400">Sifren yoksa yoneticine sor.</p>
+          </div>
+        </div>
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            style: toastStyle,
+            success: {
+              iconTheme: {
+                primary: toastIconTheme.primary,
+                secondary: toastIconTheme.secondary,
+              },
+            },
+          }}
+        />
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen px-4 pb-16 pt-10 text-slate-50">
@@ -1017,42 +1253,7 @@ function App() {
           >
             Stok
           </button>
-          <button
-            type="button"
-            onClick={handleThemeToggle}
-            className="ml-auto inline-flex items-center justify-center rounded-2xl bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
-            aria-label="Tema degistir"
-          >
-            <span className="sr-only">Tema degistir</span>
-            {isLight ? (
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="12" cy="12" r="4.5" />
-                <path d="M12 2.5v2.5M12 19v2.5M4.3 4.3l1.8 1.8M17.9 17.9l1.8 1.8M2.5 12h2.5M19 12h2.5M4.3 19.7l1.8-1.8M17.9 6.1l1.8-1.8" />
-              </svg>
-            ) : (
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden="true"
-                className="h-4 w-4"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M19 14.5a7.5 7.5 0 0 1-9.5-9.5A8.5 8.5 0 1 0 19 14.5Z" />
-              </svg>
-            )}
-          </button>
+          <div className="ml-auto">{themeToggleButton}</div>
         </div>
 
         {activeTab === "messages" && (

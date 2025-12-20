@@ -1,3 +1,4 @@
+import crypto from "node:crypto"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -12,6 +13,38 @@ const __dirname = path.dirname(__filename)
 const distDir = path.resolve(__dirname, "..", "dist")
 
 const port = Number(process.env.PORT ?? 3000)
+const authPassword = String(process.env.APP_PASSWORD ?? "").trim()
+const authEnabled = authPassword.length > 0
+const authTokenTtlMsRaw = Number(process.env.AUTH_TOKEN_TTL_MS ?? 1000 * 60 * 60 * 12)
+const authTokenTtlMs =
+  Number.isFinite(authTokenTtlMsRaw) && authTokenTtlMsRaw > 0
+    ? authTokenTtlMsRaw
+    : 1000 * 60 * 60 * 12
+const authTokens = new Map()
+
+const issueAuthToken = () => {
+  const token = crypto.randomBytes(32).toString("hex")
+  authTokens.set(token, Date.now() + authTokenTtlMs)
+  return token
+}
+
+const isAuthTokenValid = (token) => {
+  if (!token) return false
+  const expiresAt = authTokens.get(token)
+  if (!expiresAt) return false
+  if (Date.now() > expiresAt) {
+    authTokens.delete(token)
+    return false
+  }
+  return true
+}
+
+const readAuthToken = (req) => {
+  const header = req.get("authorization") || ""
+  const [type, token] = header.split(" ")
+  if (type !== "Bearer") return ""
+  return token?.trim() || ""
+}
 
 const initialTemplates = [
   { label: "Hoş geldin", value: "Hoş geldin! Burada herkese yer var.", category: "Karşılama" },
@@ -41,9 +74,52 @@ app.disable("x-powered-by")
 
 app.use(express.json({ limit: "64kb" }))
 
+const requireAuth = (req, res, next) => {
+  if (!authEnabled) return next()
+  const token = readAuthToken(req)
+  if (!isAuthTokenValid(token)) {
+    res.status(401).json({ error: "unauthorized" })
+    return
+  }
+  next()
+}
+
 app.get("/api/health", (_req, res) => {
   res.json({ ok: true })
 })
+
+app.post("/api/auth/login", (req, res) => {
+  if (!authEnabled) {
+    res.json({ ok: true, enabled: false })
+    return
+  }
+
+  const password = String(req.body?.password ?? "")
+  if (!password || password !== authPassword) {
+    res.status(401).json({ ok: false, enabled: true })
+    return
+  }
+
+  const token = issueAuthToken()
+  res.json({ ok: true, enabled: true, token, expiresInMs: authTokenTtlMs })
+})
+
+app.get("/api/auth/verify", (req, res) => {
+  if (!authEnabled) {
+    res.json({ ok: true, enabled: false })
+    return
+  }
+
+  const token = readAuthToken(req)
+  if (!isAuthTokenValid(token)) {
+    res.status(401).json({ ok: false, enabled: true })
+    return
+  }
+
+  res.json({ ok: true, enabled: true })
+})
+
+app.use("/api", requireAuth)
 
 app.get("/api/templates", async (_req, res) => {
   const templates = await prisma.template.findMany({ orderBy: { id: "asc" } })
