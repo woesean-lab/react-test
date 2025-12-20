@@ -1203,54 +1203,6 @@ function App() {
                                 Geri al
                               </button>
                             )}
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleProductCopyMessage(product.id)
-                              }}
-                              className="flex h-7 w-7 items-center justify-center rounded-full border border-white/10 text-slate-200 transition hover:border-indigo-300 hover:bg-indigo-500/10 hover:text-indigo-50"
-                              aria-label="Teslimat mesajını kopyala"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                className="h-4 w-4"
-                              >
-                                <rect x="8" y="8" width="12" height="12" rx="2" ry="2" />
-                                <rect x="4" y="4" width="12" height="12" rx="2" ry="2" />
-                              </svg>
-                            </button>
-                            <button
-                              type="button"
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                handleProductDeleteWithConfirm(product.id)
-                              }}
-                              className={`flex h-7 w-7 items-center justify-center rounded-full border text-slate-200 transition ${
-                                confirmProductTarget === product.id
-                                  ? "border-rose-300 bg-rose-500/20 text-rose-50"
-                                  : "border-white/10 hover:border-rose-300 hover:bg-rose-500/15 hover:text-rose-50"
-                              }`}
-                              aria-label="Ürünü sil"
-                            >
-                              <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                viewBox="0 0 24 24"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                className="h-4 w-4"
-                              >
-                                <path d="M3 6h18" />
-                                <path d="M8 6V4h8v2" />
-                                <path d="M19 6l-1 14H6L5 6" />
-                                <path d="M10 11v6M14 11v6" />
-                              </svg>
-                            </button>
                             <span
                               className={`inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-slate-200 transition ${
                                 openProducts[product.id] ? "rotate-180 border-accent-300/60 bg-white/10 text-accent-200" : ""
@@ -1263,6 +1215,26 @@ function App() {
 
                         {openProducts[product.id] && (
                           <div className="mt-3 space-y-2">
+                            <div className="flex flex-wrap gap-3 rounded-2xl border border-white/10 bg-ink-900/60 px-3 py-2 text-sm text-slate-200">
+                              <button
+                                type="button"
+                                onClick={() => handleProductCopyMessage(product.id)}
+                                className="rounded-md border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
+                              >
+                                Teslimat mesajını kopyala
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => handleProductDeleteWithConfirm(product.id)}
+                                className={`rounded-md border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition ${
+                                  confirmProductTarget === product.id
+                                    ? "border-rose-300 bg-rose-500/20 text-rose-50"
+                                    : "border-rose-400/60 bg-rose-500/10 text-rose-50 hover:border-rose-300 hover:bg-rose-500/20"
+                                }`}
+                              >
+                                {confirmProductTarget === product.id ? "Silmek için tekrar tıkla" : "Ürünü sil"}
+                              </button>
+                            </div>
                             {editingProduct[product.id] && (
                               <div className="rounded-xl border border-white/10 bg-ink-900/70 p-3 space-y-2">
                                 <div className="grid gap-2 sm:grid-cols-2">
