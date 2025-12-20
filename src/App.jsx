@@ -845,7 +845,7 @@ function App() {
   return (
     <div className="min-h-screen px-4 pb-16 pt-10 text-slate-50">
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <div className="flex items-center gap-3 rounded-3xl border border-white/10 bg-ink-900/70 px-3 py-2">
+        <div className="sticky top-4 z-30 flex items-center gap-3 rounded-3xl border border-white/10 bg-ink-900/80 px-3 py-2 shadow-card backdrop-blur">
           <button
             type="button"
             onClick={() => setActiveTab("messages")}
