@@ -1271,7 +1271,7 @@ function App() {
                           value={productSearch}
                           onChange={(e) => setProductSearch(e.target.value)}
                           placeholder="Ürün ya da kod"
-                          className="w-40 bg-transparent text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none"
+                          className="w-56 bg-transparent text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none"
                         />
                       </div>
                       <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
