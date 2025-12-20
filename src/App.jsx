@@ -1,21 +1,21 @@
-﻿import { useEffect, useMemo, useState } from "react"
+ï»¿import { useEffect, useMemo, useState } from "react"
 import { Toaster, toast } from "react-hot-toast"
 
 const fallbackTemplates = [
-  { label: "Hoş geldin", value: "Hoş geldin! Burada herkese yer var.", category: "Karşılama" },
+  { label: "HoÅŸ geldin", value: "HoÅŸ geldin! Burada herkese yer var.", category: "KarÅŸÄ±lama" },
   {
     label: "Bilgilendirme",
-    value: "Son durum: Görev planlandığı gibi ilerliyor.",
+    value: "Son durum: GÃ¶rev planlandÄ±ÄŸÄ± gibi ilerliyor.",
     category: "Bilgilendirme",
   },
-  { label: "Hatırlatma", value: "Unutma: Akşam 18:00 toplantısına hazır ol.", category: "Hatırlatma" },
+  { label: "HatÄ±rlatma", value: "Unutma: AkÅŸam 18:00 toplantÄ±sÄ±na hazÄ±r ol.", category: "HatÄ±rlatma" },
 ]
 
 const fallbackCategories = Array.from(new Set(["Genel", ...fallbackTemplates.map((tpl) => tpl.category || "Genel")]))
 
 const initialProblems = [
-  { id: 1, username: "@ornek1", issue: "Ödeme ekranda takıldı, 2 kez kart denemiş.", status: "open" },
-  { id: 2, username: "@ornek2", issue: "Teslimat gecikmesi şikayeti.", status: "open" },
+  { id: 1, username: "@ornek1", issue: "Ã–deme ekranda takÄ±ldÄ±, 2 kez kart denemiÅŸ.", status: "open" },
+  { id: 2, username: "@ornek2", issue: "Teslimat gecikmesi ÅŸikayeti.", status: "open" },
 ]
 
 const initialProducts = [
@@ -31,7 +31,7 @@ const initialProducts = [
   {
     id: "prd-2",
     name: "Galaxy Pass",
-    note: "Deneme sürümü için",
+    note: "Deneme sÃ¼rÃ¼mÃ¼ iÃ§in",
     stocks: [{ id: "stk-3", code: "XBGP-3M-TRIAL-KEY" }],
   },
   {
@@ -54,7 +54,7 @@ const categoryPalette = [
   "border-indigo-300/50 bg-indigo-500/15 text-indigo-50",
 ]
 
-function LoadingIndicator({ label = "Yükleniyor..." }) {
+function LoadingIndicator({ label = "YÃ¼kleniyor..." }) {
   return (
     <span className="inline-flex items-center gap-2 text-xs font-semibold text-slate-200">
       <span className="h-2 w-2 animate-pulse rounded-full bg-accent-400" />
@@ -159,7 +159,7 @@ function App() {
       } catch (error) {
         if (error?.name === "AbortError") return
         setProblems(initialProblems)
-        toast.error("Problem listesi alınamadı (API/DB kontrol edin)")
+        toast.error("Problem listesi alÄ±namadÄ± (API/DB kontrol edin)")
       }
     })()
 
@@ -177,7 +177,7 @@ function App() {
       } catch (error) {
         if (error?.name === "AbortError") return
         setProducts(initialProducts)
-        toast.error("Stok listesi alınamadı (API/DB kontrol edin)")
+        toast.error("Stok listesi alÄ±namadÄ± (API/DB kontrol edin)")
       }
     })()
 
@@ -221,7 +221,7 @@ function App() {
         setTemplates(fallbackTemplates)
         setSelectedTemplate(fallbackTemplates[0]?.label ?? null)
         setSelectedCategory(fallbackTemplates[0]?.category ?? "Genel")
-        toast.error("Sunucuya bağlanılamadı. (API/DB kontrol edin)")
+        toast.error("Sunucuya baÄŸlanÄ±lamadÄ±. (API/DB kontrol edin)")
       } finally {
         const elapsed = Date.now() - startedAt
         const delay = Math.max(0, 600 - elapsed)
@@ -258,7 +258,7 @@ function App() {
     if (tpl && options.shouldCopy) {
       try {
         await navigator.clipboard.writeText(tpl.value)
-        toast.success("Şablon kopyalandı", { duration: 1600, position: "top-right" })
+        toast.success("Åablon kopyalandÄ±", { duration: 1600, position: "top-right" })
         toast(
           <div className="space-y-1">
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-200">
@@ -270,7 +270,7 @@ function App() {
         )
       } catch (error) {
         console.error("Copy failed", error)
-        toast.error("Kopyalanamadı", { duration: 1600, position: "top-right" })
+        toast.error("KopyalanamadÄ±", { duration: 1600, position: "top-right" })
       }
     }
   }
@@ -296,7 +296,7 @@ function App() {
       })
 
       if (res.status === 409) {
-        toast("Var olan şablon aktif edildi", { position: "top-right" })
+        toast("Var olan ÅŸablon aktif edildi", { position: "top-right" })
         setSelectedTemplate(safeTitle)
         setSelectedCategory(safeCategory)
         return
@@ -311,7 +311,7 @@ function App() {
       }
       setSelectedTemplate(created.label)
       setSelectedCategory(created.category || safeCategory)
-      toast.success("Yeni şablon eklendi")
+      toast.success("Yeni ÅŸablon eklendi")
     } catch (error) {
       console.error(error)
       toast.error("Kaydedilemedi (API/DB kontrol edin).")
@@ -320,13 +320,13 @@ function App() {
 
   const handleDeleteTemplate = async (targetLabel = selectedTemplate) => {
     if (templates.length <= 1) {
-      toast.error("En az bir şablon kalmalı.")
+      toast.error("En az bir ÅŸablon kalmalÄ±.")
       return
     }
     const target = templates.find((tpl) => tpl.label === targetLabel)
     const targetId = target?.id
     if (!targetId) {
-      toast.error("Silinecek şablon bulunamadı.")
+      toast.error("Silinecek ÅŸablon bulunamadÄ±.")
       return
     }
 
@@ -345,7 +345,7 @@ function App() {
           setSelectedCategory(nextTpl.category || "Genel")
         }
       }
-      toast.success("Şablon silindi")
+      toast.success("Åablon silindi")
     } catch (error) {
       console.error(error)
       toast.error("Silinemedi (API/DB kontrol edin).")
@@ -359,7 +359,7 @@ function App() {
       return
     }
     setConfirmTarget(targetLabel)
-    toast("Silmek için tekrar tıkla", { position: "top-right" })
+    toast("Silmek iÃ§in tekrar tÄ±kla", { position: "top-right" })
   }
 
   const handleCategoryAdd = async () => {
@@ -423,13 +423,13 @@ function App() {
       return
     }
     setConfirmCategoryTarget(cat)
-    toast("Silmek için tekrar tıkla", { position: "top-right" })
+    toast("Silmek iÃ§in tekrar tÄ±kla", { position: "top-right" })
   }
 
   const showLoading = isLoading || !delayDone
-  const templateCountText = showLoading ? <LoadingIndicator label="Yükleniyor" /> : templates.length
-  const categoryCountText = showLoading ? <LoadingIndicator label="Yükleniyor" /> : categories.length
-  const selectedCategoryText = showLoading ? <LoadingIndicator label="Yükleniyor" /> : selectedCategory.trim() || "Genel"
+  const templateCountText = showLoading ? <LoadingIndicator label="YÃ¼kleniyor" /> : templates.length
+  const categoryCountText = showLoading ? <LoadingIndicator label="YÃ¼kleniyor" /> : categories.length
+  const selectedCategoryText = showLoading ? <LoadingIndicator label="YÃ¼kleniyor" /> : selectedCategory.trim() || "Genel"
 
   const categoryColors = useMemo(() => {
     const map = {}
@@ -446,7 +446,7 @@ function App() {
     const name = productForm.name.trim()
     const deliveryTemplate = productForm.deliveryTemplate.trim()
     if (!name) {
-      toast.error("ÇorÇ¬n ismi boY olamaz.")
+      toast.error("Ã‡orÃ‡Â¬n ismi boÂY olamaz.")
       return
     }
     const deliveryMessage =
@@ -468,10 +468,10 @@ function App() {
       setProducts((prev) => [created, ...prev])
       setProductForm({ name: "", deliveryTemplate: "" })
       setStockForm((prev) => ({ ...prev, productId: created.id }))
-      toast.success("ÇorÇ¬n eklendi")
+      toast.success("Ã‡orÃ‡Â¬n eklendi")
     } catch (error) {
       console.error(error)
-      toast.error("ÇorÇ¬n eklenemedi (API/DB kontrol edin).")
+      toast.error("Ã‡orÃ‡Â¬n eklenemedi (API/DB kontrol edin).")
     }
   }
 
@@ -480,11 +480,11 @@ function App() {
     const normalizedCode = stockForm.code.replace(/\r\n/g, "\n").replace(/\r/g, "\n")
     const codes = normalizedCode.split("\n").map((line) => line.trim()).filter(Boolean)
     if (!productId) {
-      toast.error("ÇorÇ¬n seÇõin.")
+      toast.error("Ã‡orÃ‡Â¬n seÃ‡Ãµin.")
       return
     }
     if (codes.length === 0) {
-      toast.error("Anahtar kodu boY olamaz.")
+      toast.error("Anahtar kodu boÂY olamaz.")
       return
     }
 
@@ -520,7 +520,7 @@ function App() {
     const codes = product.stocks.slice(0, count).map((stk) => stk.code)
     const removed = product.stocks.slice(0, count)
     if (codes.length === 0) {
-      toast.error("Bu Ç¬rÇ¬nde kopyalanacak stok yok.")
+      toast.error("Bu Ã‡Â¬rÃ‡Â¬nde kopyalanacak stok yok.")
       return
     }
 
@@ -544,7 +544,7 @@ function App() {
             : p,
         ),
       )
-      toast.success(`${codes.length} stok kopyalandŽñ ve silindi`, { duration: 1800, position: "top-right" })
+      toast.success(`${codes.length} stok kopyalandÅ½Ã± ve silindi`, { duration: 1800, position: "top-right" })
     } catch (error) {
       console.error(error)
       toast.error("Stoklar silinemedi (API/DB kontrol edin).")
@@ -572,7 +572,7 @@ function App() {
           return next
         })
         setConfirmProductTarget(null)
-        toast.success("ÇorÇ¬n ve stoklarŽñ silindi")
+        toast.success("Ã‡orÃ‡Â¬n ve stoklarÅ½Ã± silindi")
         return
       } catch (error) {
         console.error(error)
@@ -582,7 +582,7 @@ function App() {
       }
     }
     setConfirmProductTarget(productId)
-    toast("Silmek iÇõin tekrar tŽñkla", { position: "top-right" })
+    toast("Silmek iÃ‡Ãµin tekrar tÅ½Ã±kla", { position: "top-right" })
   }
   const handleEditStart = (product) => {
     const matchedTemplate =
@@ -615,16 +615,16 @@ function App() {
     const name = draft?.name?.trim()
     const selectedTemplate = draft?.deliveryTemplate?.trim()
     if (!name) {
-      toast.error("Žøsim boY olamaz.")
+      toast.error("Å½Ã¸sim boÂY olamaz.")
       return
     }
     if (!selectedTemplate) {
-      toast.error("Teslimat mesajŽñ seÇõin.")
+      toast.error("Teslimat mesajÅ½Ã± seÃ‡Ãµin.")
       return
     }
     const templateValue = templates.find((tpl) => tpl.label === selectedTemplate)?.value
     if (!templateValue) {
-      toast.error("GeÇõerli teslimat mesajŽñ bulunamadŽñ.")
+      toast.error("GeÃ‡Ãµerli teslimat mesajÅ½Ã± bulunamadÅ½Ã±.")
       return
     }
 
@@ -643,21 +643,21 @@ function App() {
       const updated = await res.json()
       setProducts((prev) => prev.map((p) => (p.id === productId ? updated : p)))
       handleEditCancel(productId)
-      toast.success("ÇorÇ¬n gÇ¬ncellendi")
+      toast.success("Ã‡orÃ‡Â¬n gÃ‡Â¬ncellendi")
     } catch (error) {
       console.error(error)
-      toast.error("ÇorÇ¬n gÇ¬ncellenemedi (API/DB kontrol edin).")
+      toast.error("Ã‡orÃ‡Â¬n gÃ‡Â¬ncellenemedi (API/DB kontrol edin).")
     }
   }
   const handleUndoDelete = async () => {
     if (!lastDeleted) {
-      toast.error("Geri alŽñnacak kayŽñt yok.")
+      toast.error("Geri alÅ½Ã±nacak kayÅ½Ã±t yok.")
       return
     }
     const { productId, stocks } = lastDeleted
     const codes = stocks.map((stk) => stk.code).filter(Boolean)
     if (codes.length === 0) {
-      toast.error("Geri alŽñnacak stok bulunamadŽñ.")
+      toast.error("Geri alÅ½Ã±nacak stok bulunamadÅ½Ã±.")
       return
     }
 
@@ -673,25 +673,25 @@ function App() {
         prev.map((p) => (p.id === productId ? { ...p, stocks: updatedStocks } : p)),
       )
       setLastDeleted(null)
-      toast.success("Silinen kayŽñt geri alŽñndŽñ", { duration: 1400, position: "top-right" })
+      toast.success("Silinen kayÅ½Ã±t geri alÅ½Ã±ndÅ½Ã±", { duration: 1400, position: "top-right" })
     } catch (error) {
       console.error(error)
-      toast.error("Geri alŽñnamadŽñ (API/DB kontrol edin).")
+      toast.error("Geri alÅ½Ã±namadÅ½Ã± (API/DB kontrol edin).")
     }
   }
   const handleProductCopyMessage = async (productId) => {
     const product = products.find((p) => p.id === productId)
     const message = product?.deliveryMessage?.trim()
     if (!message) {
-      toast.error("Bu ürüne teslimat mesajı eklenmemiş.")
+      toast.error("Bu Ã¼rÃ¼ne teslimat mesajÄ± eklenmemiÅŸ.")
       return
     }
     try {
       await navigator.clipboard.writeText(message)
-      toast.success("Teslimat mesajı kopyalandı", { duration: 1500, position: "top-right" })
+      toast.success("Teslimat mesajÄ± kopyalandÄ±", { duration: 1500, position: "top-right" })
     } catch (error) {
       console.error(error)
-      toast.error("Kopyalanamadı")
+      toast.error("KopyalanamadÄ±")
     }
   }
 
@@ -727,15 +727,15 @@ function App() {
       }
     }
     setConfirmStockTarget(key)
-    toast("Silmek iÇõin tekrar tŽñkla", { position: "top-right" })
+    toast("Silmek iÃ‡Ãµin tekrar tÅ½Ã±kla", { position: "top-right" })
   }
   const handleStockCopy = async (code) => {
     try {
       await navigator.clipboard.writeText(code)
-      toast.success("Anahtar kopyalandı", { duration: 1500, position: "top-right" })
+      toast.success("Anahtar kopyalandÄ±", { duration: 1500, position: "top-right" })
     } catch (error) {
       console.error(error)
-      toast.error("Kopyalanamadı", { duration: 1500, position: "top-right" })
+      toast.error("KopyalanamadÄ±", { duration: 1500, position: "top-right" })
     }
   }
 
@@ -743,7 +743,7 @@ function App() {
     const user = problemUsername.trim()
     const issue = problemIssue.trim()
     if (!user || !issue) {
-      toast.error("Kullanıcı adı ve sorun girin.")
+      toast.error("KullanÄ±cÄ± adÄ± ve sorun girin.")
       return
     }
     try {
@@ -774,10 +774,10 @@ function App() {
       if (!res.ok) throw new Error("problem_update_failed")
       const updated = await res.json()
       setProblems((prev) => prev.map((p) => (p.id === id ? updated : p)))
-      toast.success("Problem çözüldü")
+      toast.success("Problem Ã§Ã¶zÃ¼ldÃ¼")
     } catch (error) {
       console.error(error)
-      toast.error("Güncellenemedi (API/DB kontrol edin).")
+      toast.error("GÃ¼ncellenemedi (API/DB kontrol edin).")
     }
   }
 
@@ -791,20 +791,20 @@ function App() {
       if (!res.ok) throw new Error("problem_reopen_failed")
       const updated = await res.json()
       setProblems((prev) => prev.map((p) => (p.id === id ? updated : p)))
-      toast.success("Aktif probleme taşındı")
+      toast.success("Aktif probleme taÅŸÄ±ndÄ±")
     } catch (error) {
       console.error(error)
-      toast.error("Güncellenemedi (API/DB kontrol edin).")
+      toast.error("GÃ¼ncellenemedi (API/DB kontrol edin).")
     }
   }
 
   const handleProblemCopy = async (text) => {
     try {
       await navigator.clipboard.writeText(text)
-      toast.success("Kullanıcı adı kopyalandı", { duration: 1400, position: "top-right" })
+      toast.success("KullanÄ±cÄ± adÄ± kopyalandÄ±", { duration: 1400, position: "top-right" })
     } catch (error) {
       console.error(error)
-      toast.error("Kopyalanamadı", { duration: 1600, position: "top-right" })
+      toast.error("KopyalanamadÄ±", { duration: 1600, position: "top-right" })
     }
   }
 
@@ -825,7 +825,7 @@ function App() {
       }
     }
     setConfirmProblemTarget(id)
-    toast("Silmek için tekrar tıkla", { position: "top-right" })
+    toast("Silmek iÃ§in tekrar tÄ±kla", { position: "top-right" })
   }
 
   const openProblems = problems.filter((p) => p.status !== "resolved")
@@ -855,7 +855,7 @@ function App() {
                 : "bg-white/5 text-slate-200 hover:bg-white/10"
             }`}
           >
-            Problemli Müşteriler
+            Problemli MÃ¼ÅŸteriler
           </button>
           <button
             type="button"
@@ -883,17 +883,17 @@ function App() {
                       Pulcip Message Copy
                     </h1>
                     <p className="max-w-2xl text-sm text-slate-200/80 md:text-base">
-                      Kendi tonunu bul, hazır şablonlarını hızla düzenle ve tek tıkla ekibinle paylaş.
+                      Kendi tonunu bul, hazÄ±r ÅŸablonlarÄ±nÄ± hÄ±zla dÃ¼zenle ve tek tÄ±kla ekibinle paylaÅŸ.
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2.5">
                     <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-accent-200 md:text-sm">
                       <span className="h-2 w-2 rounded-full bg-accent-400" />
-                      Şablon: {templateCountText}
+                      Åablon: {templateCountText}
                     </span>
                     <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-accent-200 md:text-sm">
                       <span className="h-2 w-2 rounded-full bg-amber-300" />
-                      Kategori sayısı: {categoryCountText}
+                      Kategori sayÄ±sÄ±: {categoryCountText}
                     </span>
                     <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-accent-200 md:text-sm">
                       <span className="h-2 w-2 rounded-full bg-amber-300" />
@@ -908,11 +908,11 @@ function App() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200/70">
-                          Aktif şablon
+                          Aktif ÅŸablon
                         </p>
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="font-display text-2xl font-semibold text-white">
-                            {activeTemplate?.label || (showLoading ? "Yükleniyor..." : "Yeni şablon")}
+                            {activeTemplate?.label || (showLoading ? "YÃ¼kleniyor..." : "Yeni ÅŸablon")}
                           </h3>
                           <span
                             className={`rounded-full px-3 py-1 text-[11px] font-semibold ${getCategoryClass(
@@ -938,12 +938,12 @@ function App() {
                     </div>
                     <p className="mt-3 text-sm leading-relaxed text-slate-200/90">
                       {activeTemplate?.value ||
-                        (showLoading ? "Veriler yükleniyor..." : "Mesajını düzenleyip kaydetmeye başla.")}
+                        (showLoading ? "Veriler yÃ¼kleniyor..." : "MesajÄ±nÄ± dÃ¼zenleyip kaydetmeye baÅŸla.")}
                     </p>
                     <div className="mt-4 flex items-center justify-between text-xs text-slate-300/80">
                       <span>{messageLength} karakter</span>
                       <span className="rounded-full bg-white/10 px-3 py-1 font-semibold text-accent-100">
-                        {showLoading ? "Bekle" : "Hazır"}
+                        {showLoading ? "Bekle" : "HazÄ±r"}
                       </span>
                     </div>
                   </div>
@@ -956,12 +956,12 @@ function App() {
                 <div className={`${panelClass} bg-ink-800/60`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Şablon listesi</p>
-                      <p className="text-sm text-slate-400">Başlıklarına dokunarak düzenle ve kopyala.</p>
+                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Åablon listesi</p>
+                      <p className="text-sm text-slate-400">BaÅŸlÄ±klarÄ±na dokunarak dÃ¼zenle ve kopyala.</p>
                     </div>
                     <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
                       {showLoading && <span className="h-2 w-2 animate-pulse rounded-full bg-accent-400" />}
-                      {templateCountText} {showLoading ? "" : "seçenek"}
+                      {templateCountText} {showLoading ? "" : "seÃ§enek"}
                     </span>
                   </div>
 
@@ -1001,7 +1001,7 @@ function App() {
                                 >
                                   {cat}
                                 </span>
-                                <span className="text-xs text-slate-400">{list.length} şablon</span>
+                                <span className="text-xs text-slate-400">{list.length} ÅŸablon</span>
                               </span>
                               <span
                                 className={`inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-slate-200 transition ${
@@ -1017,7 +1017,7 @@ function App() {
                               <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                                 {list.length === 0 && (
                                   <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
-                                    Bu kategoride şablon yok.
+                                    Bu kategoride ÅŸablon yok.
                                   </div>
                                 )}
                                 {list.map((tpl) => (
@@ -1050,7 +1050,7 @@ function App() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Kategori ekle</p>
-                      <p className="text-sm text-slate-400">Yeni kategori ekle, ardından mesaj alanından seç.</p>
+                      <p className="text-sm text-slate-400">Yeni kategori ekle, ardÄ±ndan mesaj alanÄ±ndan seÃ§.</p>
                     </div>
                     <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
                       {categoryCountText} kategori
@@ -1063,7 +1063,7 @@ function App() {
                     type="text"
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value)}
-                    placeholder="Örn: Duyuru"
+                    placeholder="Ã–rn: Duyuru"
                     className="flex-1 rounded-xl border border-white/10 bg-ink-900 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/40"
                   />
                   <button
@@ -1102,23 +1102,23 @@ function App() {
                 <div className={`${panelClass} bg-ink-900/60`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Şablon ekle</p>
-                      <p className="text-sm text-slate-400">Başlık, kategori ve mesajı ekleyip kaydet.</p>
+                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Åablon ekle</p>
+                      <p className="text-sm text-slate-400">BaÅŸlÄ±k, kategori ve mesajÄ± ekleyip kaydet.</p>
                     </div>
-                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">Hızlı ekle</span>
+                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">HÄ±zlÄ± ekle</span>
                   </div>
 
                   <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
                     <div className="space-y-2">
                       <label className="text-xs font-semibold text-slate-200" htmlFor="title-mini">
-                        Başlık
+                        BaÅŸlÄ±k
                       </label>
                       <input
                         id="title-mini"
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Örn: Karşılama notu"
+                        placeholder="Ã–rn: KarÅŸÄ±lama notu"
                         className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                       />
                     </div>
@@ -1144,14 +1144,14 @@ function App() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-xs font-semibold text-slate-200">
                         <label htmlFor="message-mini">Mesaj</label>
-                        <span className="text-[11px] text-slate-400">Anlık karakter: {messageLength}</span>
+                        <span className="text-[11px] text-slate-400">AnlÄ±k karakter: {messageLength}</span>
                       </div>
                       <textarea
                         id="message-mini"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         rows={4}
-                        placeholder="Mesaj içeriği..."
+                        placeholder="Mesaj iÃ§eriÄŸi..."
                         className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                       />
                     </div>
@@ -1176,11 +1176,11 @@ function App() {
                 </div>
 
                 <div className={`${panelClass} bg-ink-800/60`}>
-                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Hızlı ipuçları</p>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">HÄ±zlÄ± ipuÃ§larÄ±</p>
                   <ul className="mt-3 space-y-2 text-sm text-slate-300">
-                    <li>- Başlık boş kalırsa otomatik bir isimle kaydedilir.</li>
-                    <li>- Şablona tıklamak metni panoya kopyalar.</li>
-                    <li>- Kategori silince şablonlar “Genel”e taşınır.</li>
+                    <li>- BaÅŸlÄ±k boÅŸ kalÄ±rsa otomatik bir isimle kaydedilir.</li>
+                    <li>- Åablona tÄ±klamak metni panoya kopyalar.</li>
+                    <li>- Kategori silince ÅŸablonlar â€œGenelâ€e taÅŸÄ±nÄ±r.</li>
                   </ul>
                 </div>
               </div>
@@ -1198,7 +1198,7 @@ function App() {
                   </span>
                   <h1 className="font-display text-3xl font-semibold text-white">Dijital Anahtar Stoku</h1>
                   <p className="max-w-2xl text-sm text-slate-200/80">
-                    Anahtarları görsel olarak tut, kopyala, ekle ve sil. Bu bölüm veri tabanına bağlı çalışır.
+                    AnahtarlarÄ± gÃ¶rsel olarak tut, kopyala, ekle ve sil. Bu bÃ¶lÃ¼m veri tabanÄ±na baÄŸlÄ± Ã§alÄ±ÅŸÄ±r.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -1215,9 +1215,9 @@ function App() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
-                        Ürün ve stok listesi
+                        ÃœrÃ¼n ve stok listesi
                       </p>
-                      <p className="text-sm text-slate-400">Tıkla, kopyala ve gerekirse sil.</p>
+                      <p className="text-sm text-slate-400">TÄ±kla, kopyala ve gerekirse sil.</p>
                     </div>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
                       <div className="flex items-center gap-2 rounded-full border border-white/10 bg-ink-900 px-3 py-1.5 shadow-inner">
@@ -1226,12 +1226,12 @@ function App() {
                           type="text"
                           value={productSearch}
                           onChange={(e) => setProductSearch(e.target.value)}
-                          placeholder="ürün ya da kod"
+                          placeholder="Ã¼rÃ¼n ya da kod"
                           className="w-40 bg-transparent text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none"
                         />
                       </div>
                       <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                        {products.length} ürün / {stockSummary.total} stok
+                        {products.length} Ã¼rÃ¼n / {stockSummary.total} stok
                       </span>
                     </div>
                   </div>
@@ -1239,7 +1239,7 @@ function App() {
                   <div className="mt-4 grid gap-3">
                     {filteredProducts.length === 0 && (
                       <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
-                        Henüz ürün yok.
+                        HenÃ¼z Ã¼rÃ¼n yok.
                       </div>
                     )}
                     {filteredProducts.map((product) => (
@@ -1287,7 +1287,7 @@ function App() {
                                   }}
                                   className="flex h-7 items-center justify-center rounded-md border border-white/10 px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-500/15 hover:text-rose-50"
                                 >
-                                  İptal
+                                  Ä°ptal
                                 </button>
                               </>
                             ) : (
@@ -1299,7 +1299,7 @@ function App() {
                                 }}
                                 className="flex h-7 items-center justify-center rounded-md border border-white/10 px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50"
                               >
-                                Düzenle
+                                DÃ¼zenle
                               </button>
                             )}
                             {lastDeleted?.productId === product.id && (
@@ -1333,7 +1333,7 @@ function App() {
                                   onClick={() => handleProductCopyMessage(product.id)}
                                   className="rounded-md border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
                                 >
-                                  Teslimat mesajını kopyala
+                                  Teslimat mesajÄ±nÄ± kopyala
                                 </button>
                               )}
                               <button
@@ -1345,7 +1345,7 @@ function App() {
                                     : "border-rose-400/60 bg-rose-500/10 text-rose-50 hover:border-rose-300 hover:bg-rose-500/20"
                                 }`}
                               >
-                                {confirmProductTarget === product.id ? "Silmek için tekrar tıkla" : "Ürünü sil"}
+                                {confirmProductTarget === product.id ? "Silmek iÃ§in tekrar tÄ±kla" : "ÃœrÃ¼nÃ¼ sil"}
                               </button>
                             </div>
                             {editingProduct[product.id] && (
@@ -1353,7 +1353,7 @@ function App() {
                                 <div className="grid gap-2 sm:grid-cols-2">
                                   <div className="space-y-1">
                                     <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-300" htmlFor={`edit-name-${product.id}`}>
-                                      Ürün adı
+                                      ÃœrÃ¼n adÄ±
                                     </label>
                                     <input
                                       id={`edit-name-${product.id}`}
@@ -1365,7 +1365,7 @@ function App() {
                                   </div>
                                   <div className="space-y-1">
                                     <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-300" htmlFor={`edit-note-${product.id}`}>
-                                      Teslimat mesajı
+                                      Teslimat mesajÄ±
                                     </label>
                                     <select
                                       id={`edit-note-${product.id}`}
@@ -1373,7 +1373,7 @@ function App() {
                                       onChange={(e) => handleEditChange(product.id, "deliveryTemplate", e.target.value)}
                                       className="w-full rounded-md border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-1 focus:ring-accent-500/30"
                                     >
-                                      <option value="">Seçin</option>
+                                      <option value="">SeÃ§in</option>
                                       {templates.map((tpl) => (
                                         <option key={tpl.label} value={tpl.label}>
                                           {tpl.label}
@@ -1386,7 +1386,7 @@ function App() {
                             )}
                             {product.stocks.length === 0 && (
                               <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-400">
-                                Bu üründe stok yok.
+                                Bu Ã¼rÃ¼nde stok yok.
                               </div>
                             )}
                             {product.stocks.length > 0 && (
@@ -1460,32 +1460,32 @@ function App() {
                 <div className={`${panelClass} bg-ink-900/60`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Yeni ürün ekle</p>
-                      <p className="text-sm text-slate-400">Sağdan ürün yarat, solda stokları görün.</p>
+                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Yeni Ã¼rÃ¼n ekle</p>
+                      <p className="text-sm text-slate-400">SaÄŸdan Ã¼rÃ¼n yarat, solda stoklarÄ± gÃ¶rÃ¼n.</p>
                     </div>
                     <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                      {products.length} ürün
+                      {products.length} Ã¼rÃ¼n
                     </span>
                   </div>
 
                       <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
                         <div className="space-y-2">
                           <label className="text-xs font-semibold text-slate-200" htmlFor="prd-name">
-                            Ürün adı
+                            ÃœrÃ¼n adÄ±
                           </label>
                           <input
                         id="prd-name"
                         type="text"
                         value={productForm.name}
                         onChange={(e) => setProductForm((prev) => ({ ...prev, name: e.target.value }))}
-                        placeholder="Örn: Deluxe Edition"
+                        placeholder="Ã–rn: Deluxe Edition"
                         className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                       />
                     </div>
 
                         <div className="space-y-2">
                           <label className="text-xs font-semibold text-slate-200" htmlFor="prd-delivery">
-                            Teslimat mesajı (opsiyonel)
+                            Teslimat mesajÄ± (opsiyonel)
                           </label>
                           <select
                             id="prd-delivery"
@@ -1493,7 +1493,7 @@ function App() {
                             onChange={(e) => setProductForm((prev) => ({ ...prev, deliveryTemplate: e.target.value }))}
                             className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 pr-3 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                           >
-                            <option value="">Seç (opsiyonel)</option>
+                            <option value="">SeÃ§ (opsiyonel)</option>
                             {templates.map((tpl) => (
                               <option key={tpl.label} value={tpl.label}>
                                 {tpl.label}
@@ -1508,7 +1508,7 @@ function App() {
                             onClick={handleProductAdd}
                             className="flex-1 min-w-[140px] rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
                           >
-                            Ürün ekle
+                            ÃœrÃ¼n ekle
                           </button>
                           <button
                             type="button"
@@ -1525,7 +1525,7 @@ function App() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Stok ekle</p>
-                      <p className="text-sm text-slate-400">Seçilen ürüne anahtar ekle.</p>
+                      <p className="text-sm text-slate-400">SeÃ§ilen Ã¼rÃ¼ne anahtar ekle.</p>
                     </div>
                     <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
                       {stockSummary.total} stok
@@ -1535,7 +1535,7 @@ function App() {
                   <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
                     <div className="space-y-2">
                       <label className="text-xs font-semibold text-slate-200" htmlFor="stock-product">
-                        Ürün seç
+                        ÃœrÃ¼n seÃ§
                       </label>
                       <select
                         id="stock-product"
@@ -1560,7 +1560,7 @@ function App() {
                         rows={4}
                         value={stockForm.code}
                         onChange={(e) => setStockForm((prev) => ({ ...prev, code: e.target.value }))}
-                        placeholder="Her satır bir anahtar / kod, örn: XXXX-XXXX-XXXX-XXXX"
+                        placeholder="Her satÄ±r bir anahtar / kod, Ã¶rn: XXXX-XXXX-XXXX-XXXX"
                         className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                       />
                     </div>
@@ -1594,19 +1594,19 @@ function App() {
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-2">
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
-                    Problemli Müşteriler
+                    Problemli MÃ¼ÅŸteriler
                   </span>
-                  <h1 className="font-display text-3xl font-semibold text-white">Problemli Müşteriler</h1>
+                  <h1 className="font-display text-3xl font-semibold text-white">Problemli MÃ¼ÅŸteriler</h1>
                   <p className="max-w-2xl text-sm text-slate-200/80">
-                    Müşteri kullanıcı adı ve sorununu kaydet; çözülünce “Problem çözüldü” ile kapat veya sil.
+                    MÃ¼ÅŸteri kullanÄ±cÄ± adÄ± ve sorununu kaydet; Ã§Ã¶zÃ¼lÃ¼nce â€œProblem Ã§Ã¶zÃ¼ldÃ¼â€ ile kapat veya sil.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-                    Açık problem: {openProblems.length}
+                    AÃ§Ä±k problem: {openProblems.length}
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-                    Çözülen: {resolvedProblems.length}
+                    Ã‡Ã¶zÃ¼len: {resolvedProblems.length}
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
                     Toplam: {problems.length}
@@ -1620,18 +1620,18 @@ function App() {
                 <div className={`${panelClass} bg-ink-800/60`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Açık problemler</p>
-                      <p className="text-sm text-slate-400">Kullanıcı adı ve sorun bilgisi listelenir.</p>
+                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">AÃ§Ä±k problemler</p>
+                      <p className="text-sm text-slate-400">KullanÄ±cÄ± adÄ± ve sorun bilgisi listelenir.</p>
                     </div>
                     <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                      {openProblems.length} kayıt
+                      {openProblems.length} kayÄ±t
                     </span>
                   </div>
 
                   <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {openProblems.length === 0 && (
                       <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
-                        Açık problem yok.
+                        AÃ§Ä±k problem yok.
                       </div>
                     )}
                     {openProblems.map((pb) => (
@@ -1662,7 +1662,7 @@ function App() {
                             onClick={() => handleProblemResolve(pb.id)}
                             className="rounded-lg border border-emerald-300/70 bg-emerald-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/25"
                           >
-                            Çözüldü
+                            Ã‡Ã¶zÃ¼ldÃ¼
                           </button>
                           <button
                             type="button"
@@ -1684,17 +1684,17 @@ function App() {
                 <div className={`${panelClass} bg-ink-900/60`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Çözülen problemler</p>
-                      <p className="text-sm text-slate-400">Çözülmüş kayıtları sakla ya da sil.</p>
+                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Ã‡Ã¶zÃ¼len problemler</p>
+                      <p className="text-sm text-slate-400">Ã‡Ã¶zÃ¼lmÃ¼ÅŸ kayÄ±tlarÄ± sakla ya da sil.</p>
                     </div>
                     <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                      {resolvedProblems.length} kayıt
+                      {resolvedProblems.length} kayÄ±t
                     </span>
                   </div>
                   <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {resolvedProblems.length === 0 && (
                       <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
-                        Çözülen kayıt yok.
+                        Ã‡Ã¶zÃ¼len kayÄ±t yok.
                       </div>
                     )}
                     {resolvedProblems.map((pb) => (
@@ -1725,7 +1725,7 @@ function App() {
                             onClick={() => handleProblemReopen(pb.id)}
                             className="rounded-lg border border-amber-300/70 bg-amber-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-amber-50 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
                           >
-                            Çözülmedi
+                            Ã‡Ã¶zÃ¼lmedi
                           </button>
                         <button
                           type="button"
@@ -1750,7 +1750,7 @@ function App() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Problem ekle</p>
-                      <p className="text-sm text-slate-400">Kullanıcı adı ve sorunu yazıp kaydet.</p>
+                      <p className="text-sm text-slate-400">KullanÄ±cÄ± adÄ± ve sorunu yazÄ±p kaydet.</p>
                     </div>
                     <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
                       Toplam: {problems.length}
@@ -1760,7 +1760,7 @@ function App() {
                   <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
                     <div className="space-y-2">
                       <label className="text-xs font-semibold text-slate-200" htmlFor="pb-username">
-                        Kullanıcı adı
+                        KullanÄ±cÄ± adÄ±
                       </label>
                       <input
                         id="pb-username"
@@ -1781,7 +1781,7 @@ function App() {
                         value={problemIssue}
                         onChange={(e) => setProblemIssue(e.target.value)}
                         rows={4}
-                        placeholder="Sorunun kısa özeti..."
+                        placeholder="Sorunun kÄ±sa Ã¶zeti..."
                         className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                       />
                     </div>
