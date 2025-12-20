@@ -5,8 +5,27 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Pulcip Manage</title>
+    <style>
+      #app-preloader {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #0b0f19;
+        color: #e5ecff;
+        font-family: "DM Sans", system-ui, -apple-system, sans-serif;
+        z-index: 9999;
+      }
+    </style>
   </head>
   <body>
+    <div id="app-preloader">
+      <div class="app-preloader__content">
+        <span class="app-preloader__dot" aria-hidden="true"></span>
+        <span class="app-preloader__text">Yukleniyor</span>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

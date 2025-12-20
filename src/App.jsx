@@ -176,6 +176,17 @@ function App() {
     }
   }, [authToken])
 
+  useEffect(() => {
+    if (isAuthChecking) return
+    const preloader = document.getElementById("app-preloader")
+    if (!preloader) return
+    preloader.classList.add("app-preloader--hide")
+    const timer = window.setTimeout(() => {
+      preloader.remove()
+    }, 220)
+    return () => window.clearTimeout(timer)
+  }, [isAuthChecking])
+
   const apiFetch = useCallback(
     async (input, init = {}) => {
       const headers = new Headers(init.headers || {})

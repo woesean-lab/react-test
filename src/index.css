@@ -46,6 +46,59 @@
     background: var(--app-bg);
     color: var(--text-strong);
   }
+
+  #app-preloader {
+    background: var(--app-bg);
+    color: var(--text-strong);
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+  }
+
+  #app-preloader.app-preloader--hide {
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  .app-preloader__content {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-radius: 999px;
+    border: 1px solid var(--panel-border);
+    background: var(--panel-bg);
+    box-shadow: 0 14px 40px -24px rgba(0, 0, 0, 0.45);
+  }
+
+  .app-preloader__text {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+  }
+
+  .app-preloader__dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 999px;
+    background: linear-gradient(120deg, #3ac7ff, #2b9fff);
+    box-shadow: 0 0 18px rgba(58, 199, 255, 0.6);
+    animation: preloader-pulse 1.2s ease-in-out infinite;
+  }
+
+  @keyframes preloader-pulse {
+    0% {
+      transform: scale(0.8);
+      opacity: 0.6;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(0.8);
+      opacity: 0.6;
+    }
+  }
 }
 
 @layer utilities {
