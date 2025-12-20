@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+﻿import { useEffect, useMemo, useState } from "react"
 import { Toaster, toast } from "react-hot-toast"
 
 const fallbackTemplates = [
@@ -112,12 +112,12 @@ function App() {
 
   const stockSummary = useMemo(() => {
     let total = 0
+    let empty = 0
     products.forEach((product) => {
-      product.stocks.forEach(() => {
-        total += 1
-      })
+      total += product.stocks.length
+      if (product.stocks.length === 0) empty += 1
     })
-    return { total }
+    return { total, empty }
   }, [products])
 
   const filteredProducts = useMemo(() => {
@@ -1214,40 +1214,76 @@ function App() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-                    Toplam: {stockSummary.total}
+                    Toplam stok: {stockSummary.total}
+                  </span>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
+                    Ürün: {products.length}
+                  </span>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-rose-300/40 bg-rose-500/10 px-3 py-1 text-xs text-rose-100">
+                    Tükenen: {stockSummary.empty}
                   </span>
                 </div>
               </div>
             </header>
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-              <div className="space-y-6 lg:col-span-2">
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60 p-4 shadow-card">
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_120%_at_20%_0%,rgba(58,199,255,0.18),transparent)]" />
+                <div className="relative">
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Toplam ürün</p>
+                  <p className="mt-2 text-3xl font-semibold text-white">{products.length}</p>
+                  <p className="mt-1 text-xs text-slate-400">Kayıtlı ürün sayısı</p>
+                </div>
+              </div>
+              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60 p-4 shadow-card">
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_120%_at_20%_0%,rgba(58,199,255,0.12),transparent)]" />
+                <div className="relative">
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Toplam stok</p>
+                  <p className="mt-2 text-3xl font-semibold text-white">{stockSummary.total}</p>
+                  <p className="mt-1 text-xs text-slate-400">Tüm ürünlerdeki anahtar</p>
+                </div>
+              </div>
+              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60 p-4 shadow-card">
+                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_120%_at_20%_0%,rgba(244,63,94,0.18),transparent)]" />
+                <div className="relative">
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Stoksuz ürün</p>
+                  <p className="mt-2 text-3xl font-semibold text-white">{stockSummary.empty}</p>
+                  <p className="mt-1 text-xs text-slate-400">Stok bekleyen ürün</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,0.9fr)]">
+              <div className="space-y-6">
                 <div className={`${panelClass} bg-ink-800/60`}>
-                  <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap items-center justify-between gap-4">
                     <div>
                       <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
-                        Ürün ve stok listesi
+                        Ürün kataloğu
                       </p>
-                      <p className="text-sm text-slate-400">Tıkla, kopyala ve gerekirse sil.</p>
+                      <p className="text-sm text-slate-400">Stokları satır bazında yönet, toplu işlem yap.</p>
                     </div>
-                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+                    <div className="flex flex-wrap items-center gap-2">
                       <div className="flex items-center gap-2 rounded-full border border-white/10 bg-ink-900 px-3 py-1.5 shadow-inner">
                         <span className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Ara</span>
                         <input
                           type="text"
                           value={productSearch}
                           onChange={(e) => setProductSearch(e.target.value)}
-                          placeholder="ürün ya da kod"
+                          placeholder="Ürün ya da kod"
                           className="w-40 bg-transparent text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none"
                         />
                       </div>
                       <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
                         {products.length} ürün / {stockSummary.total} stok
                       </span>
+                      <span className="rounded-full border border-rose-300/40 bg-rose-500/10 px-3 py-1 text-xs font-semibold text-rose-100">
+                        Tükenen: {stockSummary.empty}
+                      </span>
                     </div>
                   </div>
 
-                  <div className="mt-4 grid gap-3">
+                  <div className="mt-4 grid gap-4">
                     {filteredProducts.length === 0 && (
                       <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
                         Henüz ürün yok.
@@ -1256,47 +1292,53 @@ function App() {
                     {filteredProducts.map((product) => (
                       <div
                         key={product.id}
-                        className="rounded-2xl border border-white/10 bg-ink-900/60 p-3 shadow-inner"
+                        className="rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner"
                       >
-                        <button
-                          type="button"
-                          onClick={() => toggleProductOpen(product.id)}
-                          className="flex w-full items-center justify-between gap-3 rounded-lg px-2 py-1 text-left text-sm font-semibold text-slate-100 transition hover:text-accent-100"
-                        >
-                          <div className="space-y-1">
-                            <span className="inline-flex items-center gap-2">
-                              <span className="text-sm font-semibold text-white">{product.name}</span>
-                              <span
-                                className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
-                                  product.stocks.length === 0
-                                  ? "border border-rose-300/60 bg-rose-500/15 text-rose-50"
-                                  : "border border-emerald-300/60 bg-emerald-500/15 text-emerald-50"
-                                }`}
-                              >
-                                {product.stocks.length} stok
-                              </span>
-                            </span>
-                          </div>
+                        <div className="flex flex-wrap items-start justify-between gap-4">
+                          <button
+                            type="button"
+                            onClick={() => toggleProductOpen(product.id)}
+                            className="group flex min-w-0 flex-1 items-start gap-3 text-left"
+                          >
+                            <div className="space-y-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="text-base font-semibold text-white">{product.name}</span>
+                                <span
+                                  className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
+                                    product.stocks.length === 0
+                                      ? "border border-rose-300/60 bg-rose-500/15 text-rose-50"
+                                      : "border border-emerald-300/60 bg-emerald-500/15 text-emerald-50"
+                                  }`}
+                                >
+                                  {product.stocks.length} stok
+                                </span>
+                                {product.note?.trim() && (
+                                  <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-slate-200">
+                                    {product.note}
+                                  </span>
+                                )}
+                              </div>
+                              <p className="text-xs text-slate-400">
+                                {product.deliveryTemplate?.trim()
+                                  ? `Teslimat şablonu: ${product.deliveryTemplate}`
+                                  : "Teslimat şablonu yok"}
+                              </p>
+                            </div>
+                          </button>
                           <div className="flex items-center gap-1.5">
                             {editingProduct[product.id] ? (
                               <>
                                 <button
                                   type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleEditSave(product.id)
-                                  }}
-                                  className="flex h-7 items-center justify-center rounded-md border border-emerald-300/60 bg-emerald-500/20 px-2 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5"
+                                  onClick={() => handleEditSave(product.id)}
+                                  className="flex h-8 items-center justify-center rounded-md border border-emerald-300/60 bg-emerald-500/20 px-2 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5"
                                 >
                                   Kaydet
                                 </button>
                                 <button
                                   type="button"
-                                  onClick={(e) => {
-                                    e.stopPropagation()
-                                    handleEditCancel(product.id)
-                                  }}
-                                  className="flex h-7 items-center justify-center rounded-md border border-white/10 px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-500/15 hover:text-rose-50"
+                                  onClick={() => handleEditCancel(product.id)}
+                                  className="flex h-8 items-center justify-center rounded-md border border-white/10 px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-500/15 hover:text-rose-50"
                                 >
                                   İptal
                                 </button>
@@ -1304,11 +1346,8 @@ function App() {
                             ) : (
                               <button
                                 type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleEditStart(product)
-                                }}
-                                className="flex h-7 items-center justify-center rounded-md border border-white/10 px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50"
+                                onClick={() => handleEditStart(product)}
+                                className="flex h-8 items-center justify-center rounded-md border border-white/10 px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50"
                               >
                                 Düzenle
                               </button>
@@ -1316,39 +1355,41 @@ function App() {
                             {lastDeleted?.productId === product.id && (
                               <button
                                 type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation()
-                                  handleUndoDelete()
-                                }}
-                                className="flex h-7 items-center justify-center rounded-md border border-white/10 px-2 text-[11px] font-semibold uppercase tracking-wide text-emerald-100 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/15"
+                                onClick={handleUndoDelete}
+                                className="flex h-8 items-center justify-center rounded-md border border-white/10 px-2 text-[11px] font-semibold uppercase tracking-wide text-emerald-100 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/15"
                               >
                                 Geri al
                               </button>
                             )}
-                            <span
-                              className={`inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-slate-200 transition ${
-                                openProducts[product.id] ? "rotate-180 border-accent-300/60 bg-white/10 text-accent-200" : ""
+                            <button
+                              type="button"
+                              onClick={() => toggleProductOpen(product.id)}
+                              className={`inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-slate-200 transition ${
+                                openProducts[product.id]
+                                  ? "rotate-180 border-accent-300/60 bg-white/10 text-accent-200"
+                                  : ""
                               }`}
+                              aria-label="Ürün detaylarını aç/kapat"
                             >
                               &gt;
-                            </span>
+                            </button>
                           </div>
-                        </button>
+                        </div>
 
                         {openProducts[product.id] && (
-                          <div className="mt-3 space-y-2">
-                            <div className="flex flex-wrap gap-3 rounded-2xl border border-white/10 bg-ink-900/60 px-3 py-2 text-sm text-slate-200">
+                          <div className="mt-4 space-y-3">
+                            <div className="flex flex-wrap items-center gap-2 rounded-xl border border-white/10 bg-ink-900/60 px-3 py-2 text-xs text-slate-300">
                               {product.deliveryTemplate?.trim() &&
                                 templates.some((tpl) => tpl.label === product.deliveryTemplate) &&
                                 product.deliveryMessage?.trim() && (
-                                <button
-                                  type="button"
-                                  onClick={() => handleProductCopyMessage(product.id)}
-                                  className="rounded-md border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
-                                >
-                                  {"Teslimat mesaj\u0131n\u0131 kopyala"}
-                                </button>
-                              )}
+                                  <button
+                                    type="button"
+                                    onClick={() => handleProductCopyMessage(product.id)}
+                                    className="rounded-md border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
+                                  >
+                                    Teslimat mesajını kopyala
+                                  </button>
+                                )}
                               <button
                                 type="button"
                                 onClick={() => handleProductDeleteWithConfirm(product.id)}
@@ -1358,14 +1399,19 @@ function App() {
                                     : "border-rose-400/60 bg-rose-500/10 text-rose-50 hover:border-rose-300 hover:bg-rose-500/20"
                                 }`}
                               >
-                                {confirmProductTarget === product.id ? "Silmek i\u00e7in tekrar t\u0131kla" : "\u00dcr\u00fcn\u00fc sil"}
+                                {confirmProductTarget === product.id ? "Silmek için tekrar tıkla" : "Ürünü sil"}
                               </button>
                             </div>
                             {editingProduct[product.id] && (
-                              <div className="rounded-xl border border-white/10 bg-ink-900/70 p-3 space-y-2">
+                              <div className="space-y-2 rounded-xl border border-white/10 bg-ink-900/70 p-3">
                                 <div className="grid gap-2 sm:grid-cols-2">
                                   <div className="space-y-1">
-                                    <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-300" htmlFor={`edit-name-${product.id}`}>{"\u00dcr\u00fcn ad\u0131"}</label>
+                                    <label
+                                      className="text-[11px] font-semibold uppercase tracking-wide text-slate-300"
+                                      htmlFor={`edit-name-${product.id}`}
+                                    >
+                                      Ürün adı
+                                    </label>
                                     <input
                                       id={`edit-name-${product.id}`}
                                       type="text"
@@ -1375,8 +1421,11 @@ function App() {
                                     />
                                   </div>
                                   <div className="space-y-1">
-                                    <label className="text-[11px] font-semibold uppercase tracking-wide text-slate-300" htmlFor={`edit-note-${product.id}`}>
-                                      Teslimat mesajı
+                                    <label
+                                      className="text-[11px] font-semibold uppercase tracking-wide text-slate-300"
+                                      htmlFor={`edit-note-${product.id}`}
+                                    >
+                                      Teslimat şablonu
                                     </label>
                                     <select
                                       id={`edit-note-${product.id}`}
@@ -1401,64 +1450,78 @@ function App() {
                               </div>
                             )}
                             {product.stocks.length > 0 && (
-                              <div className="flex flex-wrap items-center gap-2 rounded-xl border border-white/10 px-3 py-2 text-xs text-slate-300">
-                                <span className="text-[11px] uppercase tracking-[0.08em]">Toplu kopyala & sil</span>
-                                <input
-                                  id={`bulk-${product.id}`}
-                                  type="text"
-                                  value={bulkCount[product.id] ?? product.stocks.length}
-                                  onChange={(e) =>
-                                    setBulkCount((prev) => ({
-                                      ...prev,
-                                      [product.id]: e.target.value.replace(/\D/g, ""),
-                                    }))
-                                  }
-                                  inputMode="numeric"
-                                  className="w-16 appearance-none rounded-md border border-white/10 bg-ink-900 px-2 py-1 text-xs text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-1 focus:ring-accent-500/30"
-                                />
-                                <span className="text-[11px] text-slate-500">/ {product.stocks.length}</span>
-                                <button
-                                  type="button"
-                                  onClick={() => handleBulkCopyAndDelete(product.id)}
-                                  className="rounded-md border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50"
-                                >
-                                  Kopyala & sil
-                                </button>
-                              </div>
-                            )}
-                            {product.stocks.map((stk, idx) => (
-                              <div
-                                key={stk.id}
-                                className="group flex items-center gap-3 rounded-xl border border-white/10 bg-ink-900/70 px-3 py-2 transition hover:border-accent-400/60 hover:bg-ink-800/80"
-                              >
-                                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[11px] font-semibold text-slate-300 transition group-hover:border-accent-300 group-hover:text-accent-100">
-                                  #{idx + 1}
-                                </span>
-                                <p className="flex-1 break-all font-mono text-sm text-slate-100 group-hover:text-accent-50">{stk.code}</p>
-                                <div className="flex items-center gap-2">
-                                  <button
-                                    type="button"
-                                    onClick={() => handleStockCopy(stk.code)}
-                                  className="flex h-7 items-center justify-center rounded-md border border-white/10 bg-white/5 px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
-                                  aria-label="Stoku kopyala"
-                                >
-                                  Kopyala
-                                </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleStockDeleteWithConfirm(product.id, stk.id)}
-                                    className={`flex h-7 items-center justify-center rounded-md border px-2.5 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 ${
-                                      confirmStockTarget === `${product.id}-${stk.id}`
-                                        ? "border-rose-300 bg-rose-500/25 text-rose-50"
-                                        : "border-rose-400/60 bg-rose-500/10 hover:border-rose-300 hover:bg-rose-500/20"
-                                    }`}
-                                    aria-label="Stoku sil"
-                                  >
-                                    Sil
-                                  </button>
+                              <div className="space-y-3 rounded-2xl border border-white/10 bg-ink-900/60 p-3">
+                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                  <span className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                                    Toplu kopyala & sil
+                                  </span>
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <div className="flex items-center gap-2 rounded-full border border-white/10 bg-ink-900 px-2 py-1">
+                                      <input
+                                        id={`bulk-${product.id}`}
+                                        type="text"
+                                        value={bulkCount[product.id] ?? product.stocks.length}
+                                        onChange={(e) =>
+                                          setBulkCount((prev) => ({
+                                            ...prev,
+                                            [product.id]: e.target.value.replace(/\D/g, ""),
+                                          }))
+                                        }
+                                        inputMode="numeric"
+                                        className="w-16 appearance-none bg-transparent text-xs text-slate-100 focus:outline-none"
+                                      />
+                                      <span className="text-[11px] text-slate-500">/ {product.stocks.length}</span>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleBulkCopyAndDelete(product.id)}
+                                      className="rounded-md border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50"
+                                    >
+                                      Kopyala & sil
+                                    </button>
+                                  </div>
+                                </div>
+                                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                                  {product.stocks.map((stk, idx) => (
+                                    <div
+                                      key={stk.id}
+                                      className="group flex flex-col gap-3 rounded-xl border border-white/10 bg-ink-900/70 p-3 transition hover:border-accent-400/60 hover:bg-ink-800/80"
+                                    >
+                                      <div className="flex items-center justify-between gap-3">
+                                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[11px] font-semibold text-slate-300 transition group-hover:border-accent-300 group-hover:text-accent-100">
+                                          #{idx + 1}
+                                        </span>
+                                        <div className="flex items-center gap-2">
+                                          <button
+                                            type="button"
+                                            onClick={() => handleStockCopy(stk.code)}
+                                            className="flex h-7 items-center justify-center rounded-md border border-white/10 bg-white/5 px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
+                                            aria-label="Stoku kopyala"
+                                          >
+                                            Kopyala
+                                          </button>
+                                          <button
+                                            type="button"
+                                            onClick={() => handleStockDeleteWithConfirm(product.id, stk.id)}
+                                            className={`flex h-7 items-center justify-center rounded-md border px-2.5 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 ${
+                                              confirmStockTarget === `${product.id}-${stk.id}`
+                                                ? "border-rose-300 bg-rose-500/25 text-rose-50"
+                                                : "border-rose-400/60 bg-rose-500/10 hover:border-rose-300 hover:bg-rose-500/20"
+                                            }`}
+                                            aria-label="Stoku sil"
+                                          >
+                                            Sil
+                                          </button>
+                                        </div>
+                                      </div>
+                                      <p className="break-all font-mono text-sm text-slate-100 group-hover:text-accent-50">
+                                        {stk.code}
+                                      </p>
+                                    </div>
+                                  ))}
                                 </div>
                               </div>
-                            ))}
+                            )}
                           </div>
                         )}
                       </div>
@@ -1467,130 +1530,136 @@ function App() {
                 </div>
               </div>
 
-              <div className="space-y-6">
-                <div className={`${panelClass} bg-ink-900/60`}>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Yeni ürün ekle</p>
-                      <p className="text-sm text-slate-400">Sağdan ürün yarat, solda stokları görün.</p>
-                    </div>
-                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                      {products.length} ürün
-                    </span>
-                  </div>
-
-                      <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
-                        <div className="space-y-2">
-                          <label className="text-xs font-semibold text-slate-200" htmlFor="prd-name">
-                            Ürün adı
-                          </label>
-                          <input
-                        id="prd-name"
-                        type="text"
-                        value={productForm.name}
-                        onChange={(e) => setProductForm((prev) => ({ ...prev, name: e.target.value }))}
-                        placeholder="Örn: Deluxe Edition"
-                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                      />
+              <div className="space-y-6 lg:sticky lg:top-6">
+                <div className={`${panelClass} relative overflow-hidden bg-ink-900/70`}>
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_120%_at_20%_0%,rgba(58,199,255,0.12),transparent)]" />
+                  <div className="relative">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Yeni ürün ekle</p>
+                        <p className="text-sm text-slate-400">Sağdan ürün yarat, solda stokları görün.</p>
+                      </div>
+                      <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
+                        {products.length} ürün
+                      </span>
                     </div>
 
-                        <div className="space-y-2">
-                          <label className="text-xs font-semibold text-slate-200" htmlFor="prd-delivery">
-                            Teslimat mesajı (opsiyonel)
-                          </label>
-                          <select
-                            id="prd-delivery"
-                            value={productForm.deliveryTemplate}
-                            onChange={(e) => setProductForm((prev) => ({ ...prev, deliveryTemplate: e.target.value }))}
-                            className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 pr-3 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                          >
-                            <option value="">Seç (opsiyonel)</option>
-                            {templates.map((tpl) => (
-                              <option key={tpl.label} value={tpl.label}>
-                                {tpl.label}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
+                    <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-200" htmlFor="prd-name">
+                          Ürün adı
+                        </label>
+                        <input
+                          id="prd-name"
+                          type="text"
+                          value={productForm.name}
+                          onChange={(e) => setProductForm((prev) => ({ ...prev, name: e.target.value }))}
+                          placeholder="Örn: Deluxe Edition"
+                          className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                        />
+                      </div>
 
-                        <div className="flex flex-wrap gap-3">
-                          <button
-                            type="button"
-                            onClick={handleProductAdd}
-                            className="flex-1 min-w-[140px] rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
-                          >
-                            Ürün ekle
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setProductForm({ name: "", deliveryTemplate: "" })}
-                            className="min-w-[110px] rounded-lg border border-white/10 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
-                          >
-                            Temizle
-                          </button>
-                        </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-200" htmlFor="prd-delivery">
+                          Teslimat şablonu (opsiyonel)
+                        </label>
+                        <select
+                          id="prd-delivery"
+                          value={productForm.deliveryTemplate}
+                          onChange={(e) => setProductForm((prev) => ({ ...prev, deliveryTemplate: e.target.value }))}
+                          className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 pr-3 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                        >
+                          <option value="">Seç (opsiyonel)</option>
+                          {templates.map((tpl) => (
+                            <option key={tpl.label} value={tpl.label}>
+                              {tpl.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="flex flex-wrap gap-3">
+                        <button
+                          type="button"
+                          onClick={handleProductAdd}
+                          className="flex-1 min-w-[140px] rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
+                        >
+                          Ürün ekle
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setProductForm({ name: "", deliveryTemplate: "" })}
+                          className="min-w-[110px] rounded-lg border border-white/10 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
+                        >
+                          Temizle
+                        </button>
+                      </div>
+                    </div>
                   </div>
                 </div>
 
-                <div className={`${panelClass} bg-ink-900/60`}>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Stok ekle</p>
-                      <p className="text-sm text-slate-400">Seçilen ürüne anahtar ekle.</p>
-                    </div>
-                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                      {stockSummary.total} stok
-                    </span>
-                  </div>
-
-                  <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-200" htmlFor="stock-product">
-                        Ürün seç
-                      </label>
-                      <select
-                        id="stock-product"
-                        value={stockForm.productId}
-                        onChange={(e) => setStockForm((prev) => ({ ...prev, productId: e.target.value }))}
-                        className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 pr-3 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                      >
-                        {products.map((prd) => (
-                          <option key={prd.id} value={prd.id}>
-                            {prd.name}
-                          </option>
-                        ))}
-                      </select>
+                <div className={`${panelClass} relative overflow-hidden bg-ink-900/70`}>
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_120%_at_20%_0%,rgba(58,199,255,0.08),transparent)]" />
+                  <div className="relative">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Stok ekle</p>
+                        <p className="text-sm text-slate-400">Seçilen ürüne anahtar ekle.</p>
+                      </div>
+                      <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
+                        {stockSummary.total} stok
+                      </span>
                     </div>
 
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-200" htmlFor="stock-code">
-                        Anahtar / Kod
-                      </label>
-                      <textarea
-                        id="stock-code"
-                        rows={4}
-                        value={stockForm.code}
-                        onChange={(e) => setStockForm((prev) => ({ ...prev, code: e.target.value }))}
-                        placeholder="Her satır bir anahtar / kod, örn: XXXX-XXXX-XXXX-XXXX"
-                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                      />
-                    </div>
+                    <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-200" htmlFor="stock-product">
+                          Ürün seç
+                        </label>
+                        <select
+                          id="stock-product"
+                          value={stockForm.productId}
+                          onChange={(e) => setStockForm((prev) => ({ ...prev, productId: e.target.value }))}
+                          className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 pr-3 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                        >
+                          {products.map((prd) => (
+                            <option key={prd.id} value={prd.id}>
+                              {prd.name}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
-                    <div className="flex flex-wrap gap-3">
-                      <button
-                        type="button"
-                        onClick={handleStockAdd}
-                        className="flex-1 min-w-[140px] rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
-                      >
-                        Stok ekle
-                      </button>
-                      <button
-                        type="button"
-                        onClick={resetStockForm}
-                        className="min-w-[110px] rounded-lg border border-white/10 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
-                      >
-                        Temizle
-                      </button>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-200" htmlFor="stock-code">
+                          Anahtar / Kod
+                        </label>
+                        <textarea
+                          id="stock-code"
+                          rows={4}
+                          value={stockForm.code}
+                          onChange={(e) => setStockForm((prev) => ({ ...prev, code: e.target.value }))}
+                          placeholder="Her satır bir anahtar / kod, örn: XXXX-XXXX-XXXX-XXXX"
+                          className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                        />
+                      </div>
+
+                      <div className="flex flex-wrap gap-3">
+                        <button
+                          type="button"
+                          onClick={handleStockAdd}
+                          className="flex-1 min-w-[140px] rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
+                        >
+                          Stok ekle
+                        </button>
+                        <button
+                          type="button"
+                          onClick={resetStockForm}
+                          className="min-w-[110px] rounded-lg border border-white/10 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
+                        >
+                          Temizle
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -1598,7 +1667,6 @@ function App() {
             </div>
           </div>
         )}
-
         {activeTab === "problems" && (
           <div className="space-y-6">
             <header className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-6 shadow-card">
@@ -1844,6 +1912,7 @@ function App() {
 }
 
 export default App
+
 
 
 
