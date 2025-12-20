@@ -434,27 +434,31 @@ function App() {
 
   const handleStockAdd = () => {
     const productId = stockForm.productId
-    const code = stockForm.code.trim()
+    const codes = stockForm.code
+      .split(/\\r?\\n/)
+      .map((line) => line.trim())
+      .filter(Boolean)
     if (!productId) {
       toast.error("Ürün seçin.")
       return
     }
-    if (!code) {
+    if (codes.length === 0) {
       toast.error("Anahtar kodu boş olamaz.")
       return
     }
+    const timestamp = Date.now().toString(36)
     setProducts((prev) =>
       prev.map((product) => {
         if (product.id !== productId) return product
-        const newStock = {
-          id: `stk-${Date.now().toString(36)}-${Math.random().toString(16).slice(2, 6)}`,
-          code,
-        }
-        return { ...product, stocks: [...product.stocks, newStock] }
+        const newStocks = codes.map((codeLine, index) => ({
+          id: `stk-${timestamp}-${index}-${Math.random().toString(16).slice(2, 6)}`,
+          code: codeLine,
+        }))
+        return { ...product, stocks: [...product.stocks, ...newStocks] }
       }),
     )
     resetStockForm()
-    toast.success("Stok eklendi")
+    toast.success(`${codes.length} stok eklendi`)
   }
 
   const handleBulkCopyAndDelete = (productId) => {
@@ -1470,10 +1474,10 @@ function App() {
                       </label>
                       <textarea
                         id="stock-code"
-                        rows={2}
+                        rows={4}
                         value={stockForm.code}
                         onChange={(e) => setStockForm((prev) => ({ ...prev, code: e.target.value }))}
-                        placeholder="XXXX-XXXX-XXXX-XXXX"
+                        placeholder="Her satır bir anahtar / kod, örn: XXXX-XXXX-XXXX-XXXX"
                         className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                       />
                     </div>
