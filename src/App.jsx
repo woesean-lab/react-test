@@ -1,4 +1,4 @@
-﻿import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { Toaster, toast } from "react-hot-toast"
 
 const fallbackTemplates = [
@@ -620,12 +620,10 @@ function App() {
       toast.error("İsim boş olamaz.")
       return
     }
-    if (!selectedTemplate) {
-      toast.error("Teslimat mesajı seçin.")
-      return
-    }
-    const templateValue = templates.find((tpl) => tpl.label === selectedTemplate)?.value
-    if (!templateValue) {
+    const templateValue = selectedTemplate
+      ? templates.find((tpl) => tpl.label === selectedTemplate)?.value
+      : ""
+    if (selectedTemplate && !templateValue) {
       toast.error("Geçerli teslimat mesajı bulunamadı.")
       return
     }
@@ -636,9 +634,9 @@ function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
-          note: selectedTemplate,
-          deliveryTemplate: selectedTemplate,
-          deliveryMessage: templateValue,
+          note: selectedTemplate || null,
+          deliveryTemplate: selectedTemplate || null,
+          deliveryMessage: templateValue || null,
         }),
       })
       if (!res.ok) throw new Error("product_update_failed")
