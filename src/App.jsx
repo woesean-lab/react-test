@@ -1148,7 +1148,9 @@ function App() {
   const openProblems = problems.filter((p) => p.status !== "resolved")
   const resolvedProblems = problems.filter((p) => p.status === "resolved")
 
-  if (isAuthChecking) {
+  const shouldShowAuthChecking = isAuthChecking || (!!authToken && !isAuthed)
+
+  if (shouldShowAuthChecking) {
     return (
       <div className="min-h-screen px-4 pb-16 pt-10 text-slate-50">
         <div className="mx-auto flex w-full max-w-lg flex-col gap-6">
