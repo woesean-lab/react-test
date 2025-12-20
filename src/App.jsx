@@ -122,12 +122,14 @@ function App() {
 
   const filteredProducts = useMemo(() => {
     const text = productSearch.trim().toLowerCase()
-    if (!text) return products
-    return products.filter(
-      (prd) =>
-        prd.name.toLowerCase().includes(text) ||
-        prd.stocks.some((stk) => stk.code.toLowerCase().includes(text)),
-    )
+    const list = text
+      ? products.filter(
+        (prd) =>
+          prd.name.toLowerCase().includes(text) ||
+          prd.stocks.some((stk) => stk.code.toLowerCase().includes(text)),
+      )
+      : products
+    return [...list].sort((a, b) => a.name.localeCompare(b.name, "tr", { sensitivity: "base" }))
   }, [productSearch, products])
 
   const toggleProductOpen = (productId) => {
@@ -1327,7 +1329,7 @@ function App() {
                         {openProducts[product.id] && (
                           <div className="mt-3 space-y-2">
                             <div className="flex flex-wrap gap-3 rounded-2xl border border-white/10 bg-ink-900/60 px-3 py-2 text-sm text-slate-200">
-                              {product.deliveryMessage?.trim() && (
+                              {product.deliveryTemplate?.trim() && product.deliveryMessage?.trim() && (
                                 <button
                                   type="button"
                                   onClick={() => handleProductCopyMessage(product.id)}
