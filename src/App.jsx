@@ -241,8 +241,8 @@ function App() {
     setOpenProducts((prev) => {
       if (products.length === 0) return {}
       const next = {}
-      products.forEach((product, idx) => {
-        next[product.id] = prev[product.id] ?? idx === 0
+      products.forEach((product) => {
+        next[product.id] = prev[product.id] ?? false
       })
       return next
     })
@@ -253,6 +253,17 @@ function App() {
       return exists ? prev : { ...prev, productId: products[0].id }
     })
   }, [products])
+
+  useEffect(() => {
+    if (activeTab !== "stock") return
+    setOpenProducts((prev) => {
+      const next = { ...prev }
+      Object.keys(next).forEach((key) => {
+        next[key] = false
+      })
+      return next
+    })
+  }, [activeTab])
 
   const handleTemplateChange = async (nextTemplate, options = {}) => {
     setSelectedTemplate(nextTemplate)
