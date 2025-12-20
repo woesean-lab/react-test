@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+﻿import { useEffect, useMemo, useState } from "react"
 import { Toaster, toast } from "react-hot-toast"
 
 const fallbackTemplates = [
@@ -83,16 +83,12 @@ function App() {
   const [problemIssue, setProblemIssue] = useState("")
   const [confirmProblemTarget, setConfirmProblemTarget] = useState(null)
 
-  const [products, setProducts] = useState(initialProducts)
+  const [products, setProducts] = useState([])
   const [productForm, setProductForm] = useState({ name: "", deliveryTemplate: "" })
-  const [stockForm, setStockForm] = useState({ productId: initialProducts[0]?.id || "", code: "" })
+  const [stockForm, setStockForm] = useState({ productId: "", code: "" })
   const [confirmStockTarget, setConfirmStockTarget] = useState(null)
   const [productSearch, setProductSearch] = useState("")
-  const [openProducts, setOpenProducts] = useState(() => {
-    const map = {}
-    if (initialProducts[0]?.id) map[initialProducts[0].id] = true
-    return map
-  })
+  const [openProducts, setOpenProducts] = useState({})
   const [confirmProductTarget, setConfirmProductTarget] = useState(null)
   const [bulkCount, setBulkCount] = useState({})
   const [lastDeleted, setLastDeleted] = useState(null)
@@ -171,6 +167,24 @@ function App() {
   }, [])
 
   useEffect(() => {
+    const controller = new AbortController()
+    ;(async () => {
+      try {
+        const res = await fetch("/api/products", { signal: controller.signal })
+        if (!res.ok) throw new Error("api_error")
+        const data = await res.json()
+        setProducts(data ?? [])
+      } catch (error) {
+        if (error?.name === "AbortError") return
+        setProducts(initialProducts)
+        toast.error("Stok listesi alınamadı (API/DB kontrol edin)")
+      }
+    })()
+
+    return () => controller.abort()
+  }, [])
+
+  useEffect(() => {
     const timer = window.setTimeout(() => setDelayDone(true), 1200)
     return () => window.clearTimeout(timer)
   }, [])
@@ -220,6 +234,23 @@ function App() {
       if (timeoutId) window.clearTimeout(timeoutId)
     }
   }, [])
+
+  useEffect(() => {
+    setOpenProducts((prev) => {
+      if (products.length === 0) return {}
+      const next = {}
+      products.forEach((product, idx) => {
+        next[product.id] = prev[product.id] ?? idx === 0
+      })
+      return next
+    })
+
+    setStockForm((prev) => {
+      if (products.length === 0) return { ...prev, productId: "" }
+      const exists = products.some((product) => product.id === prev.productId)
+      return exists ? prev : { ...prev, productId: products[0].id }
+    })
+  }, [products])
 
   const handleTemplateChange = async (nextTemplate, options = {}) => {
     setSelectedTemplate(nextTemplate)
@@ -411,55 +442,73 @@ function App() {
   const getCategoryClass = (cat) => categoryColors[cat] || "border-white/10 bg-white/5 text-slate-200"
   const resetStockForm = () => setStockForm((prev) => ({ productId: prev.productId, code: "" }))
 
-  const handleProductAdd = () => {
+  const handleProductAdd = async () => {
     const name = productForm.name.trim()
-    const deliveryTemplate = productForm.deliveryTemplate
+    const deliveryTemplate = productForm.deliveryTemplate.trim()
     if (!name) {
-      toast.error("Ürün ismi boş olamaz.")
+      toast.error("ÇorÇ¬n ismi boY olamaz.")
       return
     }
-    const deliveryMessage = templates.find((tpl) => tpl.label === deliveryTemplate)?.value || ""
-    const newProduct = {
-      id: `prd-${Date.now().toString(36)}`,
-      name,
-      deliveryTemplate,
-      deliveryMessage,
-      stocks: [],
+    const deliveryMessage =
+      templates.find((tpl) => tpl.label === deliveryTemplate)?.value || ""
+
+    try {
+      const res = await fetch("/api/products", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          deliveryTemplate: deliveryTemplate || null,
+          deliveryMessage: deliveryMessage || null,
+          note: deliveryTemplate || null,
+        }),
+      })
+      if (!res.ok) throw new Error("product_create_failed")
+      const created = await res.json()
+      setProducts((prev) => [created, ...prev])
+      setProductForm({ name: "", deliveryTemplate: "" })
+      setStockForm((prev) => ({ ...prev, productId: created.id }))
+      toast.success("ÇorÇ¬n eklendi")
+    } catch (error) {
+      console.error(error)
+      toast.error("ÇorÇ¬n eklenemedi (API/DB kontrol edin).")
     }
-    setProducts((prev) => [...prev, newProduct])
-    setProductForm({ name: "", deliveryTemplate: "" })
-    setStockForm((prev) => ({ ...prev, productId: newProduct.id }))
-    toast.success("Ürün eklendi")
   }
 
-  const handleStockAdd = () => {
-    const productId = stockForm.productId;
-    const normalizedCode = stockForm.code.replace(/\r\n/g, '\n').replace(/\r/g, '\n');
-    const codes = normalizedCode.split('\n').map((line) => line.trim()).filter(Boolean);
+  const handleStockAdd = async () => {
+    const productId = stockForm.productId
+    const normalizedCode = stockForm.code.replace(/\r\n/g, "\n").replace(/\r/g, "\n")
+    const codes = normalizedCode.split("\n").map((line) => line.trim()).filter(Boolean)
     if (!productId) {
-      toast.error("Ürün seçin.");
-      return;
+      toast.error("ÇorÇ¬n seÇõin.")
+      return
     }
     if (codes.length === 0) {
-      toast.error("Anahtar kodu boş olamaz.");
-      return;
+      toast.error("Anahtar kodu boY olamaz.")
+      return
     }
-    const timestamp = Date.now().toString(36);
-    setProducts((prev) =>
-      prev.map((product) => {
-        if (product.id !== productId) return product;
-        const newStocks = codes.map((codeLine, index) => ({
-          id: 'stk-' + timestamp + '-' + index + '-' + Math.random().toString(16).slice(2, 6),
-          code: codeLine,
-        }));
-        return { ...product, stocks: [...product.stocks, ...newStocks] };
-      }),
-    );
-    resetStockForm();
-    toast.success(codes.length + ' stok eklendi');
-  }
 
-  const handleBulkCopyAndDelete = (productId) => {
+    try {
+      const res = await fetch(`/api/products/${productId}/stocks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ codes }),
+      })
+      if (!res.ok) throw new Error("stock_create_failed")
+      const updatedStocks = await res.json()
+      setProducts((prev) =>
+        prev.map((product) =>
+          product.id === productId ? { ...product, stocks: updatedStocks } : product,
+        ),
+      )
+      resetStockForm()
+      toast.success(codes.length + " stok eklendi")
+    } catch (error) {
+      console.error(error)
+      toast.error("Stok eklenemedi (API/DB kontrol edin).")
+    }
+  }
+  const handleBulkCopyAndDelete = async (productId) => {
     const product = products.find((p) => p.id === productId)
     if (!product) return
 
@@ -471,51 +520,75 @@ function App() {
     const codes = product.stocks.slice(0, count).map((stk) => stk.code)
     const removed = product.stocks.slice(0, count)
     if (codes.length === 0) {
-      toast.error("Bu üründe kopyalanacak stok yok.")
+      toast.error("Bu Ç¬rÇ¬nde kopyalanacak stok yok.")
       return
     }
-    const joined = codes.join("\n")
-    navigator.clipboard
-      .writeText(joined)
-      .then(() => {
-        setLastDeleted({ productId, stocks: removed })
-        setProducts((prev) =>
-          prev.map((p) =>
-            p.id === productId ? { ...p, stocks: p.stocks.slice(codes.length) } : p,
-          ),
-        )
-        toast.success(`${codes.length} stok kopyalandı ve silindi`, { duration: 1800, position: "top-right" })
-      })
-      .catch(() => toast.error("Kopyalanamadı"))
-  }
 
-  const handleProductDeleteWithConfirm = (productId) => {
-    if (confirmProductTarget === productId) {
-      setProducts((prev) => {
-        const next = prev.filter((p) => p.id !== productId)
-        const nextFirst = next[0]?.id || ""
-        setStockForm((prevForm) => ({
-          ...prevForm,
-          productId: prevForm.productId === productId ? nextFirst : prevForm.productId,
-        }))
-        setOpenProducts((prevOpen) => {
-          const copy = { ...prevOpen }
-          delete copy[productId]
-          if (nextFirst && !(nextFirst in copy)) copy[nextFirst] = true
-          return copy
-        })
-        return next
+    const joined = codes.join("\n")
+    const removedIds = new Set(removed.map((stk) => stk.id))
+
+    try {
+      await navigator.clipboard.writeText(joined)
+      const res = await fetch("/api/stocks/bulk-delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: removed.map((stk) => stk.id) }),
       })
-      setConfirmProductTarget(null)
-      toast.success("Ürün ve stokları silindi")
-      return
+      if (!res.ok) throw new Error("stock_bulk_delete_failed")
+
+      setLastDeleted({ productId, stocks: removed })
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.id === productId
+            ? { ...p, stocks: p.stocks.filter((stk) => !removedIds.has(stk.id)) }
+            : p,
+        ),
+      )
+      toast.success(`${codes.length} stok kopyalandŽñ ve silindi`, { duration: 1800, position: "top-right" })
+    } catch (error) {
+      console.error(error)
+      toast.error("Stoklar silinemedi (API/DB kontrol edin).")
+    }
+  }
+  const handleProductDeleteWithConfirm = async (productId) => {
+    if (confirmProductTarget === productId) {
+      try {
+        const res = await fetch(`/api/products/${productId}`, { method: "DELETE" })
+        if (!res.ok && res.status !== 404) throw new Error("product_delete_failed")
+
+        setProducts((prev) => {
+          const next = prev.filter((p) => p.id !== productId)
+          const nextFirst = next[0]?.id || ""
+          setStockForm((prevForm) => ({
+            ...prevForm,
+            productId: prevForm.productId === productId ? nextFirst : prevForm.productId,
+          }))
+          setOpenProducts((prevOpen) => {
+            const copy = { ...prevOpen }
+            delete copy[productId]
+            if (nextFirst && !(nextFirst in copy)) copy[nextFirst] = true
+            return copy
+          })
+          return next
+        })
+        setConfirmProductTarget(null)
+        toast.success("ÇorÇ¬n ve stoklarŽñ silindi")
+        return
+      } catch (error) {
+        console.error(error)
+        toast.error("Silinemedi (API/DB kontrol edin).")
+        setConfirmProductTarget(null)
+        return
+      }
     }
     setConfirmProductTarget(productId)
-    toast("Silmek için tekrar tıkla", { position: "top-right" })
+    toast("Silmek iÇõin tekrar tŽñkla", { position: "top-right" })
   }
-
   const handleEditStart = (product) => {
-    const matchedTemplate = templates.find((tpl) => tpl.value === product.deliveryMessage)?.label || ""
+    const matchedTemplate =
+      product.deliveryTemplate?.trim() ||
+      templates.find((tpl) => tpl.value === product.deliveryMessage)?.label ||
+      ""
     setEditingProduct((prev) => ({
       ...prev,
       [product.id]: { name: product.name, note: product.note, deliveryTemplate: matchedTemplate },
@@ -537,46 +610,75 @@ function App() {
     })
   }
 
-  const handleEditSave = (productId) => {
+  const handleEditSave = async (productId) => {
     const draft = editingProduct[productId]
     const name = draft?.name?.trim()
     const selectedTemplate = draft?.deliveryTemplate?.trim()
     if (!name) {
-      toast.error("İsim boş olamaz.")
+      toast.error("Žøsim boY olamaz.")
       return
     }
     if (!selectedTemplate) {
-      toast.error("Teslimat mesajı seçin.")
+      toast.error("Teslimat mesajŽñ seÇõin.")
       return
     }
     const templateValue = templates.find((tpl) => tpl.label === selectedTemplate)?.value
     if (!templateValue) {
-      toast.error("Geçerli teslimat mesajı bulunamadı.")
+      toast.error("GeÇõerli teslimat mesajŽñ bulunamadŽñ.")
       return
     }
-    const note = selectedTemplate
-    setProducts((prev) =>
-      prev.map((p) => (p.id === productId ? { ...p, name, note, deliveryMessage: templateValue } : p)),
-    )
-    handleEditCancel(productId)
-    toast.success("Ürün güncellendi")
-  }
 
-  const handleUndoDelete = () => {
+    try {
+      const res = await fetch(`/api/products/${productId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name,
+          note: selectedTemplate,
+          deliveryTemplate: selectedTemplate,
+          deliveryMessage: templateValue,
+        }),
+      })
+      if (!res.ok) throw new Error("product_update_failed")
+      const updated = await res.json()
+      setProducts((prev) => prev.map((p) => (p.id === productId ? updated : p)))
+      handleEditCancel(productId)
+      toast.success("ÇorÇ¬n gÇ¬ncellendi")
+    } catch (error) {
+      console.error(error)
+      toast.error("ÇorÇ¬n gÇ¬ncellenemedi (API/DB kontrol edin).")
+    }
+  }
+  const handleUndoDelete = async () => {
     if (!lastDeleted) {
-      toast.error("Geri alınacak kayıt yok.")
+      toast.error("Geri alŽñnacak kayŽñt yok.")
       return
     }
     const { productId, stocks } = lastDeleted
-    setProducts((prev) =>
-      prev.map((p) =>
-        p.id === productId ? { ...p, stocks: [...stocks, ...p.stocks] } : p,
-      ),
-    )
-    setLastDeleted(null)
-    toast.success("Silinen kayıt geri alındı", { duration: 1400, position: "top-right" })
-  }
+    const codes = stocks.map((stk) => stk.code).filter(Boolean)
+    if (codes.length === 0) {
+      toast.error("Geri alŽñnacak stok bulunamadŽñ.")
+      return
+    }
 
+    try {
+      const res = await fetch(`/api/products/${productId}/stocks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ codes }),
+      })
+      if (!res.ok) throw new Error("stock_restore_failed")
+      const updatedStocks = await res.json()
+      setProducts((prev) =>
+        prev.map((p) => (p.id === productId ? { ...p, stocks: updatedStocks } : p)),
+      )
+      setLastDeleted(null)
+      toast.success("Silinen kayŽñt geri alŽñndŽñ", { duration: 1400, position: "top-right" })
+    } catch (error) {
+      console.error(error)
+      toast.error("Geri alŽñnamadŽñ (API/DB kontrol edin).")
+    }
+  }
   const handleProductCopyMessage = async (productId) => {
     const product = products.find((p) => p.id === productId)
     const message = product?.deliveryMessage?.trim()
@@ -593,31 +695,40 @@ function App() {
     }
   }
 
-  const handleStockDeleteWithConfirm = (productId, stockId) => {
+  const handleStockDeleteWithConfirm = async (productId, stockId) => {
     const key = `${productId}-${stockId}`
     if (confirmStockTarget === key) {
       const targetProduct = products.find((p) => p.id === productId)
       const removed = targetProduct?.stocks.find((stk) => stk.id === stockId)
 
-      setProducts((prev) =>
-        prev.map((product) =>
-          product.id === productId
-            ? { ...product, stocks: product.stocks.filter((stk) => stk.id !== stockId) }
-            : product,
-        ),
-      )
-      if (removed) {
-        setLastDeleted({ productId, stocks: [removed] })
-      }
+      try {
+        const res = await fetch(`/api/stocks/${stockId}`, { method: "DELETE" })
+        if (!res.ok && res.status !== 404) throw new Error("stock_delete_failed")
 
-      setConfirmStockTarget(null)
-      toast.success("Anahtar silindi")
-      return
+        setProducts((prev) =>
+          prev.map((product) =>
+            product.id === productId
+              ? { ...product, stocks: product.stocks.filter((stk) => stk.id !== stockId) }
+              : product,
+          ),
+        )
+        if (removed) {
+          setLastDeleted({ productId, stocks: [removed] })
+        }
+
+        setConfirmStockTarget(null)
+        toast.success("Anahtar silindi")
+        return
+      } catch (error) {
+        console.error(error)
+        toast.error("Anahtar silinemedi (API/DB kontrol edin).")
+        setConfirmStockTarget(null)
+        return
+      }
     }
     setConfirmStockTarget(key)
-    toast("Silmek için tekrar tıkla", { position: "top-right" })
+    toast("Silmek iÇõin tekrar tŽñkla", { position: "top-right" })
   }
-
   const handleStockCopy = async (code) => {
     try {
       await navigator.clipboard.writeText(code)
@@ -1087,7 +1198,7 @@ function App() {
                   </span>
                   <h1 className="font-display text-3xl font-semibold text-white">Dijital Anahtar Stoku</h1>
                   <p className="max-w-2xl text-sm text-slate-200/80">
-                    Anahtarları görsel olarak tut, kopyala, ekle ve sil. Bu bölüm tamamen görsel, veri tabanı yok.
+                    Anahtarları görsel olarak tut, kopyala, ekle ve sil. Bu bölüm veri tabanına bağlı çalışır.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -1722,3 +1833,12 @@ function App() {
 }
 
 export default App
+
+
+
+
+
+
+
+
+
