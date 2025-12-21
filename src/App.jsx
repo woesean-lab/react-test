@@ -104,6 +104,9 @@ function App() {
   const [categories, setCategories] = useState([])
   const [templates, setTemplates] = useState([])
   const [selectedTemplate, setSelectedTemplate] = useState(null)
+  const [isEditingActiveTemplate, setIsEditingActiveTemplate] = useState(false)
+  const [activeTemplateDraft, setActiveTemplateDraft] = useState("")
+  const [isTemplateSaving, setIsTemplateSaving] = useState(false)
   const [openCategories, setOpenCategories] = useState({})
   const [confirmTarget, setConfirmTarget] = useState(null)
   const [confirmCategoryTarget, setConfirmCategoryTarget] = useState(null)
@@ -225,7 +228,20 @@ function App() {
     [selectedTemplate, templates],
   )
 
+  useEffect(() => {
+    if (!activeTemplate) {
+      setActiveTemplateDraft("")
+      setIsEditingActiveTemplate(false)
+      return
+    }
+    setActiveTemplateDraft(activeTemplate.value || "")
+    setIsEditingActiveTemplate(false)
+  }, [activeTemplate])
+
   const messageLength = message.trim().length
+  const activeTemplateLength = isEditingActiveTemplate
+    ? activeTemplateDraft.trim().length
+    : (activeTemplate?.value?.trim().length ?? 0)
 
   const groupedTemplates = useMemo(() => {
     return templates.reduce((acc, tpl) => {
@@ -565,6 +581,56 @@ function App() {
         console.error("Copy failed", error)
         toast.error("Kopyalanamadı", { duration: 1600, position: "top-right" })
       }
+    }
+  }
+
+  const handleActiveTemplateEditStart = () => {
+    if (!activeTemplate || showLoading) return
+    setActiveTemplateDraft(activeTemplate.value || "")
+    setIsEditingActiveTemplate(true)
+  }
+
+  const handleActiveTemplateEditCancel = () => {
+    setIsEditingActiveTemplate(false)
+    setActiveTemplateDraft(activeTemplate?.value || "")
+  }
+
+  const handleActiveTemplateEditSave = async () => {
+    if (!activeTemplate || showLoading) return
+    const nextValue = activeTemplateDraft.trim()
+    if (!nextValue) {
+      toast.error("Mesaj boş olamaz.")
+      return
+    }
+    if ((activeTemplate.value || "").trim() === nextValue) {
+      setIsEditingActiveTemplate(false)
+      return
+    }
+
+    setIsTemplateSaving(true)
+    try {
+      if (activeTemplate.id) {
+        const res = await apiFetch(`/api/templates/${activeTemplate.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ value: nextValue }),
+        })
+        if (!res.ok) throw new Error("template_update_failed")
+        const updated = await res.json()
+        setTemplates((prev) => prev.map((tpl) => (tpl.id === updated.id ? updated : tpl)))
+      } else {
+        setTemplates((prev) =>
+          prev.map((tpl) => (tpl.label === activeTemplate.label ? { ...tpl, value: nextValue } : tpl)),
+        )
+      }
+      setActiveTemplateDraft(nextValue)
+      setIsEditingActiveTemplate(false)
+      toast.success("Şablon güncellendi")
+    } catch (error) {
+      console.error(error)
+      toast.error("Şablon güncellenemedi (API/DB kontrol edin).")
+    } finally {
+      setIsTemplateSaving(false)
     }
   }
 
@@ -1349,28 +1415,77 @@ function App() {
                           </span>
                         </div>
                       </div>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteWithConfirm(selectedTemplate)}
-                        className={`shrink-0 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition ${
-                          confirmTarget === selectedTemplate
-                            ? "border-rose-300 bg-rose-500/25 text-rose-50"
-                            : "border-rose-500/60 bg-rose-500/15 text-rose-100 hover:border-rose-300 hover:bg-rose-500/25"
-                        }`}
-                        disabled={!selectedTemplate}
-                      >
-                        {confirmTarget === selectedTemplate ? "Emin misin?" : "Sil"}
-                      </button>
+                      <div className="flex shrink-0 items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={
+                            isEditingActiveTemplate ? handleActiveTemplateEditCancel : handleActiveTemplateEditStart
+                          }
+                          className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition ${
+                            isEditingActiveTemplate
+                              ? "border-emerald-300/70 bg-emerald-500/20 text-emerald-50"
+                              : "border-white/10 bg-white/5 text-slate-200 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50"
+                          }`}
+                          disabled={!activeTemplate || showLoading || isTemplateSaving}
+                        >
+                          {isEditingActiveTemplate ? "Vazgeç" : "Mesajı düzenle"}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteWithConfirm(selectedTemplate)}
+                          className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition ${
+                            confirmTarget === selectedTemplate
+                              ? "border-rose-300 bg-rose-500/25 text-rose-50"
+                              : "border-rose-500/60 bg-rose-500/15 text-rose-100 hover:border-rose-300 hover:bg-rose-500/25"
+                          }`}
+                          disabled={!selectedTemplate || isTemplateSaving}
+                        >
+                          {confirmTarget === selectedTemplate ? "Emin misin?" : "Sil"}
+                        </button>
+                      </div>
                     </div>
-                    <p className="mt-3 text-sm leading-relaxed text-slate-200/90">
-                      {activeTemplate?.value ||
-                        (showLoading ? "Veriler yükleniyor..." : "Mesajını düzenleyip kaydetmeye başla.")}
-                    </p>
-                    <div className="mt-4 flex items-center justify-between text-xs text-slate-300/80">
-                      <span>{messageLength} karakter</span>
-                      <span className="rounded-full bg-white/10 px-3 py-1 font-semibold text-accent-100">
-                        {showLoading ? "Bekle" : "Hazır"}
-                      </span>
+                    {isEditingActiveTemplate ? (
+                      <textarea
+                        value={activeTemplateDraft}
+                        onChange={(e) => setActiveTemplateDraft(e.target.value)}
+                        rows={4}
+                        autoFocus
+                        disabled={isTemplateSaving}
+                        placeholder="Mesaj içeriğini güncelle"
+                        className="mt-3 w-full rounded-lg border border-white/10 bg-ink-900/80 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                      />
+                    ) : (
+                      <p className="mt-3 text-sm leading-relaxed text-slate-200/90">
+                        {activeTemplate?.value ||
+                          (showLoading ? "Veriler yükleniyor..." : "Mesajını düzenleyip kaydetmeye başla.")}
+                      </p>
+                    )}
+                    <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-300/80">
+                      <span>{activeTemplateLength} karakter</span>
+                      {isEditingActiveTemplate ? (
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={handleActiveTemplateEditSave}
+                            disabled={isTemplateSaving}
+                            className="rounded-full border border-accent-300/70 bg-accent-500/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-accent-50 transition hover:-translate-y-0.5 hover:border-accent-200 hover:bg-accent-500/30 disabled:cursor-not-allowed disabled:opacity-70"
+                          >
+                            {isTemplateSaving ? "Kaydediliyor" : "Kaydet"}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={handleActiveTemplateEditCancel}
+                            disabled={isTemplateSaving}
+                            className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-500/15 hover:text-rose-50 disabled:cursor-not-allowed disabled:opacity-70"
+                          >
+                            Vazgeç
+                          </button>
+                        </div>
+                      ) : (
+                        <span className="rounded-full bg-white/10 px-3 py-1 font-semibold text-accent-100">
+                          {showLoading ? "Bekle" : "Hazır"}
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
