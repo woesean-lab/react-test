@@ -1468,7 +1468,7 @@ function App() {
                             type="button"
                             onClick={handleActiveTemplateEditSave}
                             disabled={isTemplateSaving}
-                            className="rounded-full border border-rose-300/70 bg-rose-500/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-rose-50 transition hover:-translate-y-0.5 hover:border-rose-200 hover:bg-rose-500/30 disabled:cursor-not-allowed disabled:opacity-70"
+                            className="rounded-full border border-emerald-300/70 bg-emerald-500/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/30 disabled:cursor-not-allowed disabled:opacity-70"
                           >
                             {isTemplateSaving ? "Kaydediliyor" : "Kaydet"}
                           </button>
