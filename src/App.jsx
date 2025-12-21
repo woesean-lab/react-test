@@ -327,6 +327,15 @@ function App() {
   const [listName, setListName] = useState("")
   const [editingListCell, setEditingListCell] = useState({ row: null, col: null })
   const [selectedListCell, setSelectedListCell] = useState({ row: null, col: null })
+  const [hoveredListRow, setHoveredListRow] = useState(null)
+  const [hoveredListColumn, setHoveredListColumn] = useState(null)
+  const [listContextMenu, setListContextMenu] = useState({
+    open: false,
+    type: null,
+    index: null,
+    x: 0,
+    y: 0,
+  })
   const [isEditingActiveTemplate, setIsEditingActiveTemplate] = useState(false)
   const [activeTemplateDraft, setActiveTemplateDraft] = useState("")
   const [isTemplateSaving, setIsTemplateSaving] = useState(false)
@@ -479,7 +488,30 @@ function App() {
   useEffect(() => {
     setEditingListCell({ row: null, col: null })
     setSelectedListCell({ row: null, col: null })
+    setHoveredListRow(null)
+    setHoveredListColumn(null)
+    setListContextMenu((prev) => (prev.open ? { ...prev, open: false } : prev))
   }, [activeListId])
+
+  useEffect(() => {
+    if (!listContextMenu.open) return
+    const handleClick = () => {
+      setListContextMenu((prev) => (prev.open ? { ...prev, open: false } : prev))
+    }
+    const handleKey = (event) => {
+      if (event.key === "Escape") {
+        setListContextMenu((prev) => (prev.open ? { ...prev, open: false } : prev))
+      }
+    }
+    window.addEventListener("click", handleClick)
+    window.addEventListener("contextmenu", handleClick)
+    window.addEventListener("keydown", handleKey)
+    return () => {
+      window.removeEventListener("click", handleClick)
+      window.removeEventListener("contextmenu", handleClick)
+      window.removeEventListener("keydown", handleKey)
+    }
+  }, [listContextMenu.open])
 
   const activeTemplate = useMemo(
     () => templates.find((tpl) => tpl.label === selectedTemplate),
@@ -1255,42 +1287,64 @@ function App() {
     )
   }
 
+  const getListColumnCount = (rows) =>
+    rows.reduce((acc, row) => Math.max(acc, row.length), 0) || DEFAULT_LIST_COLS
+
   const handleListAddRow = () => {
-    if (!activeList) return
-    setLists((prev) =>
-      prev.map((list) => {
-        if (list.id !== activeList.id) return list
-        const colCount = list.rows.reduce((acc, row) => Math.max(acc, row.length), 0) || DEFAULT_LIST_COLS
-        const nextRow = Array.from({ length: colCount }, () => "")
-        return { ...list, rows: [...list.rows, nextRow] }
-      }),
-    )
+    handleListInsertRow()
   }
 
   const handleListAddColumn = () => {
+    handleListInsertColumn()
+  }
+
+  const handleListInsertRow = (afterIndex = null) => {
     if (!activeList) return
     setLists((prev) =>
       prev.map((list) => {
         if (list.id !== activeList.id) return list
-        const colCount = list.rows.reduce((acc, row) => Math.max(acc, row.length), 0) || DEFAULT_LIST_COLS
-        const rows =
-          list.rows.length === 0
-            ? [Array.from({ length: colCount + 1 }, () => "")]
-            : list.rows.map((row) => {
-                const nextRow = [...row]
-                while (nextRow.length < colCount) nextRow.push("")
-                nextRow.push("")
-                return nextRow
-              })
+        const colCount = getListColumnCount(list.rows)
+        const nextRow = Array.from({ length: colCount }, () => "")
+        const rows = [...list.rows]
+        const insertIndex = Number.isFinite(afterIndex)
+          ? Math.min(Math.max(afterIndex + 1, 0), rows.length)
+          : rows.length
+        rows.splice(insertIndex, 0, nextRow)
         return { ...list, rows }
       }),
     )
   }
 
-  const handleListDeleteRow = () => {
+  const handleListInsertColumn = (afterIndex = null) => {
+    if (!activeList) return
+    setLists((prev) =>
+      prev.map((list) => {
+        if (list.id !== activeList.id) return list
+        const colCount = getListColumnCount(list.rows)
+        const insertIndex = Number.isFinite(afterIndex)
+          ? Math.min(Math.max(afterIndex + 1, 0), colCount)
+          : colCount
+        if (list.rows.length === 0) {
+          const row = Array.from({ length: colCount + 1 }, () => "")
+          return { ...list, rows: [row] }
+        }
+        const rows = list.rows.map((row) => {
+          const nextRow = [...row]
+          while (nextRow.length < colCount) nextRow.push("")
+          nextRow.splice(insertIndex, 0, "")
+          return nextRow
+        })
+        return { ...list, rows }
+      }),
+    )
+  }
+
+  const handleListDeleteRow = (rowIndex = null) => {
     if (!activeList || activeList.rows.length === 0) return
-    const targetRow =
-      selectedListCell.row !== null ? selectedListCell.row : activeList.rows.length - 1
+    const fallbackIndex = activeList.rows.length - 1
+    const targetRow = Number.isFinite(rowIndex)
+      ? rowIndex
+      : selectedListCell.row ?? fallbackIndex
     if (activeList.rows.length <= 1 || targetRow < 0) return
     setLists((prev) =>
       prev.map((list) => {
@@ -1303,11 +1357,11 @@ function App() {
     setSelectedListCell({ row: null, col: null })
   }
 
-  const handleListDeleteColumn = () => {
+  const handleListDeleteColumn = (colIndex = null) => {
     if (!activeList) return
-    const colCount =
-      activeList.rows.reduce((acc, row) => Math.max(acc, row.length), 0) || DEFAULT_LIST_COLS
-    const targetCol = selectedListCell.col !== null ? selectedListCell.col : colCount - 1
+    const colCount = getListColumnCount(activeList.rows)
+    const fallbackIndex = colCount - 1
+    const targetCol = Number.isFinite(colIndex) ? colIndex : selectedListCell.col ?? fallbackIndex
     if (colCount <= 1 || targetCol < 0) return
     setLists((prev) =>
       prev.map((list) => {
@@ -1322,6 +1376,28 @@ function App() {
     )
     setEditingListCell({ row: null, col: null })
     setSelectedListCell({ row: null, col: null })
+  }
+
+  const handleListContextMenu = (event, type, index) => {
+    event.preventDefault()
+    event.stopPropagation()
+    setListContextMenu({
+      open: true,
+      type,
+      index,
+      x: event.clientX,
+      y: event.clientY,
+    })
+    if (type === "row") {
+      setSelectedListCell((prev) => ({ ...prev, row: index }))
+    }
+    if (type === "column") {
+      setSelectedListCell((prev) => ({ ...prev, col: index }))
+    }
+  }
+
+  const handleListContextMenuClose = () => {
+    setListContextMenu((prev) => (prev.open ? { ...prev, open: false } : prev))
   }
 
   const showLoading = isLoading || !delayDone
@@ -2354,39 +2430,11 @@ function App() {
                       <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Liste içeriği</p>
                       <p className="text-sm text-slate-400">Hücreleri seçip düzenleyebilirsin.</p>
                     </div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={handleListAddRow}
-                        disabled={!activeList}
-                        className="rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/15 hover:text-emerald-50 disabled:cursor-not-allowed disabled:opacity-70"
-                      >
-                        Satır ekle
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleListDeleteRow}
-                        disabled={!canDeleteListRow}
-                        className="rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-500/15 hover:text-rose-50 disabled:cursor-not-allowed disabled:opacity-70"
-                      >
-                        Satır sil
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleListAddColumn}
-                        disabled={!activeList}
-                        className="rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50 disabled:cursor-not-allowed disabled:opacity-70"
-                      >
-                        Sütun ekle
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleListDeleteColumn}
-                        disabled={!canDeleteListColumn}
-                        className="rounded-lg border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-500/15 hover:text-rose-50 disabled:cursor-not-allowed disabled:opacity-70"
-                      >
-                        Sütun sil
-                      </button>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                      <span>Başlıklara sağ tıkla: ekle/sil</span>
+                      <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] uppercase tracking-wide text-slate-300">
+                        Sil: başlıktaki ×
+                      </span>
                     </div>
                   </div>
 
@@ -2402,21 +2450,74 @@ function App() {
                             <th className="w-10 border border-white/10 px-2 py-1 text-center text-[11px] font-semibold text-slate-400">
                               #
                             </th>
-                            {activeListColumnLabels.map((label) => (
-                              <th
-                                key={label}
-                                className="border border-white/10 px-2 py-1 text-center text-[11px] font-semibold"
-                              >
-                                {label}
-                              </th>
-                            ))}
+                            {activeListColumnLabels.map((label, colIndex) => {
+                              const isSelected = selectedListCell.col === colIndex
+                              return (
+                                <th
+                                  key={label}
+                                  onMouseEnter={() => setHoveredListColumn(colIndex)}
+                                  onMouseLeave={() =>
+                                    setHoveredListColumn((prev) => (prev === colIndex ? null : prev))
+                                  }
+                                  onClick={() => setSelectedListCell((prev) => ({ ...prev, col: colIndex }))}
+                                  onContextMenu={(event) =>
+                                    handleListContextMenu(event, "column", colIndex)
+                                  }
+                                  className={`cursor-pointer border border-white/10 px-2 py-1 text-center text-[11px] font-semibold ${
+                                    isSelected ? "bg-white/10 text-white" : ""
+                                  }`}
+                                >
+                                  <div className="relative flex items-center justify-center">
+                                    <span>{label}</span>
+                                    {hoveredListColumn === colIndex && canDeleteListColumn && (
+                                      <button
+                                        type="button"
+                                        onClick={(event) => {
+                                          event.stopPropagation()
+                                          handleListDeleteColumn(colIndex)
+                                        }}
+                                        className="absolute right-0 top-0 rounded-full border border-rose-300/60 bg-rose-500/20 px-1 text-[10px] font-semibold text-rose-50 shadow transition hover:bg-rose-500/40"
+                                        aria-label="Sütun sil"
+                                      >
+                                        ×
+                                      </button>
+                                    )}
+                                  </div>
+                                </th>
+                              )
+                            })}
                           </tr>
                         </thead>
                         <tbody>
                           {activeListRows.map((row, rowIndex) => (
                             <tr key={`${activeList.id}-${rowIndex}`}>
-                              <td className="border border-white/10 px-2 py-1 text-center text-[11px] text-slate-400">
-                                {rowIndex + 1}
+                              <td
+                                onMouseEnter={() => setHoveredListRow(rowIndex)}
+                                onMouseLeave={() =>
+                                  setHoveredListRow((prev) => (prev === rowIndex ? null : prev))
+                                }
+                                onClick={() => setSelectedListCell((prev) => ({ ...prev, row: rowIndex }))}
+                                onContextMenu={(event) => handleListContextMenu(event, "row", rowIndex)}
+                                className={`cursor-pointer border border-white/10 px-2 py-1 text-center text-[11px] ${
+                                  selectedListCell.row === rowIndex ? "bg-white/10 text-white" : "text-slate-400"
+                                }`}
+                              >
+                                <div className="relative flex items-center justify-center">
+                                  <span>{rowIndex + 1}</span>
+                                  {hoveredListRow === rowIndex && canDeleteListRow && (
+                                    <button
+                                      type="button"
+                                      onClick={(event) => {
+                                        event.stopPropagation()
+                                        handleListDeleteRow(rowIndex)
+                                      }}
+                                      className="absolute right-0 top-0 rounded-full border border-rose-300/60 bg-rose-500/20 px-1 text-[10px] font-semibold text-rose-50 shadow transition hover:bg-rose-500/40"
+                                      aria-label="Satır sil"
+                                    >
+                                      ×
+                                    </button>
+                                  )}
+                                </div>
                               </td>
                               {activeListColumns.map((colIndex) => {
                                 const rawValue = row?.[colIndex] ?? ""
@@ -2507,12 +2608,75 @@ function App() {
                     <li>- Satır/sütun ekleyerek tabloyu genişlet.</li>
                     <li>- Formül için "=" ile başla (örn: =SUM(A1:A5)).</li>
                     <li>- Desteklenenler: SUM, AVERAGE, MIN, MAX, COUNT.</li>
-                    <li>- Seçili hücre yoksa satır/sütun silme en sondan çalışır.</li>
+                    <li>- Satır/sütun başlığına sağ tıkla ya da × ile sil.</li>
                     <li>- Veriler tarayıcıda saklanır (DB yok).</li>
                   </ul>
                 </div>
               </div>
             </div>
+            {listContextMenu.open && (
+              <div
+                className="fixed z-50"
+                style={{ left: listContextMenu.x, top: listContextMenu.y }}
+              >
+                <div className="min-w-[180px] rounded-xl border border-white/10 bg-ink-900/95 p-2 text-xs text-slate-100 shadow-card backdrop-blur">
+                  {listContextMenu.type === "row" && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleListInsertRow(listContextMenu.index)
+                          handleListContextMenuClose()
+                        }}
+                        className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition hover:bg-white/10"
+                      >
+                        Satır ekle
+                        <span className="text-[10px] text-slate-400">Altına</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleListDeleteRow(listContextMenu.index)
+                          handleListContextMenuClose()
+                        }}
+                        disabled={!canDeleteListRow}
+                        className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-rose-100 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        Satır sil
+                        <span className="text-[10px] text-rose-200/70">Seçili</span>
+                      </button>
+                    </>
+                  )}
+                  {listContextMenu.type === "column" && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleListInsertColumn(listContextMenu.index)
+                          handleListContextMenuClose()
+                        }}
+                        className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition hover:bg-white/10"
+                      >
+                        Sütun ekle
+                        <span className="text-[10px] text-slate-400">Sağına</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          handleListDeleteColumn(listContextMenu.index)
+                          handleListContextMenuClose()
+                        }}
+                        disabled={!canDeleteListColumn}
+                        className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-rose-100 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        Sütun sil
+                        <span className="text-[10px] text-rose-200/70">Seçili</span>
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
