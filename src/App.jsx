@@ -20,6 +20,12 @@ const AUTH_TOKEN_STORAGE_KEY = "pulcipAuthToken"
 const LISTS_STORAGE_KEY = "pulcipLists"
 const DEFAULT_LIST_ROWS = 8
 const DEFAULT_LIST_COLS = 5
+const FORMULA_ERRORS = {
+  CYCLE: "#CYCLE",
+  REF: "#REF",
+  DIV0: "#DIV/0",
+  VALUE: "#ERR",
+}
 
 const initialProblems = [
   { id: 1, username: "@ornek1", issue: "Ödeme ekranda takıldı, 2 kez kart denemiş.", status: "open" },
@@ -88,6 +94,201 @@ const createEmptySheet = (rows, cols) => {
   return Array.from({ length: rows }, () => Array.from({ length: cols }, () => ""))
 }
 
+const errorValue = (code) => ({ error: code })
+const isErrorValue = (value) => Boolean(value && typeof value === "object" && "error" in value)
+
+const tokenizeFormula = (input) => {
+  const tokens = []
+  let index = 0
+  while (index < input.length) {
+    const char = input[index]
+    if (/\s/.test(char)) {
+      index += 1
+      continue
+    }
+    if (/[0-9.]/.test(char)) {
+      let start = index
+      let hasDot = false
+      while (index < input.length) {
+        const current = input[index]
+        if (current === ".") {
+          if (hasDot) break
+          hasDot = true
+          index += 1
+          continue
+        }
+        if (/[0-9]/.test(current)) {
+          index += 1
+          continue
+        }
+        break
+      }
+      const raw = input.slice(start, index)
+      const numberValue = Number(raw)
+      if (!Number.isFinite(numberValue)) {
+        return { error: "number" }
+      }
+      tokens.push({ type: "number", value: numberValue })
+      continue
+    }
+    if (/[A-Za-z]/.test(char)) {
+      let start = index
+      while (index < input.length && /[A-Za-z]/.test(input[index])) {
+        index += 1
+      }
+      const letters = input.slice(start, index)
+      let digitStart = index
+      while (index < input.length && /[0-9]/.test(input[index])) {
+        index += 1
+      }
+      const digits = input.slice(digitStart, index)
+      if (digits) {
+        tokens.push({ type: "cell", value: `${letters}${digits}` })
+      } else {
+        tokens.push({ type: "identifier", value: letters })
+      }
+      continue
+    }
+    if ("+-*/".includes(char)) {
+      tokens.push({ type: "operator", value: char })
+      index += 1
+      continue
+    }
+    if ("(),:".includes(char)) {
+      tokens.push({ type: "punct", value: char })
+      index += 1
+      continue
+    }
+    return { error: "invalid" }
+  }
+  return { tokens }
+}
+
+const parseFormula = (input) => {
+  const tokenResult = tokenizeFormula(input)
+  if (tokenResult.error) return { error: tokenResult.error }
+  const tokens = tokenResult.tokens
+  let position = 0
+
+  const peek = () => tokens[position]
+  const consume = () => tokens[position++]
+  const matchPunct = (value) => {
+    const token = peek()
+    if (token?.type === "punct" && token.value === value) {
+      position += 1
+      return true
+    }
+    return false
+  }
+  const expectPunct = (value) => {
+    if (!matchPunct(value)) throw new Error("expected")
+  }
+
+  const parseExpression = () => {
+    let node = parseTerm()
+    while (true) {
+      const token = peek()
+      if (token?.type === "operator" && (token.value === "+" || token.value === "-")) {
+        consume()
+        node = { type: "binary", op: token.value, left: node, right: parseTerm() }
+        continue
+      }
+      break
+    }
+    return node
+  }
+
+  const parseTerm = () => {
+    let node = parseFactor()
+    while (true) {
+      const token = peek()
+      if (token?.type === "operator" && (token.value === "*" || token.value === "/")) {
+        consume()
+        node = { type: "binary", op: token.value, left: node, right: parseFactor() }
+        continue
+      }
+      break
+    }
+    return node
+  }
+
+  const parseFactor = () => {
+    const token = peek()
+    if (!token) throw new Error("unexpected")
+    if (token.type === "operator" && token.value === "-") {
+      consume()
+      return { type: "unary", op: "-", value: parseFactor() }
+    }
+    if (token.type === "number") {
+      consume()
+      return { type: "number", value: token.value }
+    }
+    if (token.type === "cell") {
+      consume()
+      if (matchPunct(":")) {
+        const endToken = peek()
+        if (!endToken || endToken.type !== "cell") throw new Error("range")
+        consume()
+        return { type: "range", start: token.value, end: endToken.value }
+      }
+      return { type: "cell", value: token.value }
+    }
+    if (token.type === "identifier") {
+      consume()
+      if (matchPunct("(")) {
+        const args = []
+        if (!matchPunct(")")) {
+          while (true) {
+            args.push(parseExpression())
+            if (matchPunct(",")) continue
+            expectPunct(")")
+            break
+          }
+        }
+        return { type: "function", name: token.value, args }
+      }
+      throw new Error("identifier")
+    }
+    if (matchPunct("(")) {
+      const node = parseExpression()
+      expectPunct(")")
+      return node
+    }
+    throw new Error("token")
+  }
+
+  try {
+    const node = parseExpression()
+    if (position !== tokens.length) throw new Error("trailing")
+    return { node }
+  } catch {
+    return { error: "parse" }
+  }
+}
+
+const parseCellRef = (ref) => {
+  const match = /^([A-Za-z]+)(\d+)$/.exec(ref)
+  if (!match) return null
+  const letters = match[1].toUpperCase()
+  const row = Number.parseInt(match[2], 10) - 1
+  if (!Number.isFinite(row) || row < 0) return null
+  let col = 0
+  for (let i = 0; i < letters.length; i += 1) {
+    col = col * 26 + (letters.charCodeAt(i) - 64)
+  }
+  col -= 1
+  if (col < 0) return null
+  return { row, col }
+}
+
+const formatCellValue = (value) => {
+  if (isErrorValue(value)) return value.error
+  if (Array.isArray(value)) return FORMULA_ERRORS.VALUE
+  if (value === null || value === undefined) return ""
+  if (typeof value === "number") return Number.isFinite(value) ? String(value) : FORMULA_ERRORS.VALUE
+  return String(value)
+}
+
 function LoadingIndicator({ label = "Yükleniyor..." }) {
   return (
     <span className="inline-flex items-center gap-2 text-xs font-semibold text-slate-200">
@@ -124,6 +325,7 @@ function App() {
   const [lists, setLists] = useState([])
   const [activeListId, setActiveListId] = useState("")
   const [listName, setListName] = useState("")
+  const [editingListCell, setEditingListCell] = useState({ row: null, col: null })
   const [isEditingActiveTemplate, setIsEditingActiveTemplate] = useState(false)
   const [activeTemplateDraft, setActiveTemplateDraft] = useState("")
   const [isTemplateSaving, setIsTemplateSaving] = useState(false)
@@ -307,6 +509,163 @@ function App() {
     () => activeListColumns.map((index) => toColumnLabel(index)),
     [activeListColumns],
   )
+  const listFormulaCache = useMemo(() => new Map(), [activeListId, activeListRows])
+
+  const toNumber = (value) => {
+    if (isErrorValue(value)) return value
+    if (Array.isArray(value)) return errorValue(FORMULA_ERRORS.VALUE)
+    if (typeof value === "number") return value
+    if (typeof value === "string") {
+      const trimmed = value.trim()
+      if (!trimmed) return 0
+      const parsed = Number(trimmed)
+      return Number.isFinite(parsed) ? parsed : 0
+    }
+    return 0
+  }
+
+  const isNumericValue = (value) => {
+    if (typeof value === "number") return Number.isFinite(value)
+    if (typeof value === "string") {
+      const trimmed = value.trim()
+      if (!trimmed) return false
+      const parsed = Number(trimmed)
+      return Number.isFinite(parsed)
+    }
+    return false
+  }
+
+  const getListCellRawValue = (rowIndex, colIndex) => {
+    return activeListRows[rowIndex]?.[colIndex] ?? ""
+  }
+
+  const getListCellValue = (rowIndex, colIndex, stack) => {
+    const key = `${rowIndex}:${colIndex}`
+    if (listFormulaCache.has(key)) return listFormulaCache.get(key)
+    if (stack.has(key)) return errorValue(FORMULA_ERRORS.CYCLE)
+
+    stack.add(key)
+    const raw = getListCellRawValue(rowIndex, colIndex)
+    let result = raw
+    if (typeof raw === "string" && raw.trim().startsWith("=")) {
+      const expression = raw.trim().slice(1)
+      if (!expression) {
+        result = ""
+      } else {
+        const parsed = parseFormula(expression)
+        if (parsed.error) {
+          result = errorValue(FORMULA_ERRORS.VALUE)
+        } else {
+          result = evaluateFormulaNode(parsed.node, stack)
+        }
+      }
+    }
+    stack.delete(key)
+    listFormulaCache.set(key, result)
+    return result
+  }
+
+  const getListCellValueFromRef = (ref, stack) => {
+    const parsed = parseCellRef(ref)
+    if (!parsed) return errorValue(FORMULA_ERRORS.REF)
+    return getListCellValue(parsed.row, parsed.col, stack)
+  }
+
+  const getListRangeValues = (range, stack) => {
+    const start = parseCellRef(range.start)
+    const end = parseCellRef(range.end)
+    if (!start || !end) return errorValue(FORMULA_ERRORS.REF)
+    const rowStart = Math.min(start.row, end.row)
+    const rowEnd = Math.max(start.row, end.row)
+    const colStart = Math.min(start.col, end.col)
+    const colEnd = Math.max(start.col, end.col)
+    const values = []
+    for (let rowIndex = rowStart; rowIndex <= rowEnd; rowIndex += 1) {
+      for (let colIndex = colStart; colIndex <= colEnd; colIndex += 1) {
+        const value = getListCellValue(rowIndex, colIndex, stack)
+        if (isErrorValue(value)) return value
+        values.push(value)
+      }
+    }
+    return values
+  }
+
+  const evaluateFormulaNode = (node, stack) => {
+    if (!node) return errorValue(FORMULA_ERRORS.VALUE)
+    if (node.type === "number") return node.value
+    if (node.type === "cell") return getListCellValueFromRef(node.value, stack)
+    if (node.type === "range") return getListRangeValues(node, stack)
+    if (node.type === "unary") {
+      const value = evaluateFormulaNode(node.value, stack)
+      if (isErrorValue(value)) return value
+      const numberValue = toNumber(value)
+      if (isErrorValue(numberValue)) return numberValue
+      return -numberValue
+    }
+    if (node.type === "binary") {
+      const left = evaluateFormulaNode(node.left, stack)
+      if (isErrorValue(left)) return left
+      if (Array.isArray(left)) return errorValue(FORMULA_ERRORS.VALUE)
+      const right = evaluateFormulaNode(node.right, stack)
+      if (isErrorValue(right)) return right
+      if (Array.isArray(right)) return errorValue(FORMULA_ERRORS.VALUE)
+      const leftNumber = toNumber(left)
+      if (isErrorValue(leftNumber)) return leftNumber
+      const rightNumber = toNumber(right)
+      if (isErrorValue(rightNumber)) return rightNumber
+      if (node.op === "+") return leftNumber + rightNumber
+      if (node.op === "-") return leftNumber - rightNumber
+      if (node.op === "*") return leftNumber * rightNumber
+      if (node.op === "/") {
+        if (rightNumber === 0) return errorValue(FORMULA_ERRORS.DIV0)
+        return leftNumber / rightNumber
+      }
+      return errorValue(FORMULA_ERRORS.VALUE)
+    }
+    if (node.type === "function") {
+      const name = String(node.name || "").toUpperCase()
+      const values = []
+      for (const arg of node.args || []) {
+        const result = evaluateFormulaNode(arg, stack)
+        if (isErrorValue(result)) return result
+        if (Array.isArray(result)) {
+          values.push(...result)
+        } else {
+          values.push(result)
+        }
+      }
+      const numericValues = values
+        .filter((value) => isNumericValue(value))
+        .map((value) => toNumber(value))
+        .filter((value) => !isErrorValue(value))
+      if (name === "SUM") {
+        return numericValues.reduce((acc, value) => acc + value, 0)
+      }
+      if (name === "AVERAGE") {
+        if (numericValues.length === 0) return 0
+        const total = numericValues.reduce((acc, value) => acc + value, 0)
+        return total / numericValues.length
+      }
+      if (name === "MIN") {
+        if (numericValues.length === 0) return 0
+        return Math.min(...numericValues)
+      }
+      if (name === "MAX") {
+        if (numericValues.length === 0) return 0
+        return Math.max(...numericValues)
+      }
+      if (name === "COUNT") {
+        return numericValues.length
+      }
+      return errorValue(FORMULA_ERRORS.VALUE)
+    }
+    return errorValue(FORMULA_ERRORS.VALUE)
+  }
+
+  const getListCellDisplayValue = (rowIndex, colIndex) => {
+    const value = getListCellValue(rowIndex, colIndex, new Set())
+    return formatCellValue(value)
+  }
 
   const groupedTemplates = useMemo(() => {
     return templates.reduce((acc, tpl) => {
@@ -1998,18 +2357,34 @@ function App() {
                               <td className="border border-white/10 px-2 py-1 text-center text-[11px] text-slate-400">
                                 {rowIndex + 1}
                               </td>
-                              {activeListColumns.map((colIndex) => (
-                                <td key={`${rowIndex}-${colIndex}`} className="border border-white/10 p-0">
-                                  <input
-                                    value={row?.[colIndex] ?? ""}
-                                    onChange={(e) =>
-                                      handleListCellChange(rowIndex, colIndex, e.target.value)
-                                    }
-                                    spellCheck={false}
-                                    className="h-8 w-full bg-transparent px-2 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-accent-400/60"
-                                  />
-                                </td>
-                              ))}
+                              {activeListColumns.map((colIndex) => {
+                                const rawValue = row?.[colIndex] ?? ""
+                                const isEditingCell =
+                                  editingListCell.row === rowIndex && editingListCell.col === colIndex
+                                const displayValue = isEditingCell
+                                  ? rawValue
+                                  : getListCellDisplayValue(rowIndex, colIndex)
+                                return (
+                                  <td key={`${rowIndex}-${colIndex}`} className="border border-white/10 p-0">
+                                    <input
+                                      value={displayValue}
+                                      onFocus={() => setEditingListCell({ row: rowIndex, col: colIndex })}
+                                      onBlur={() =>
+                                        setEditingListCell((prev) =>
+                                          prev.row === rowIndex && prev.col === colIndex
+                                            ? { row: null, col: null }
+                                            : prev,
+                                        )
+                                      }
+                                      onChange={(e) =>
+                                        handleListCellChange(rowIndex, colIndex, e.target.value)
+                                      }
+                                      spellCheck={false}
+                                      className="h-8 w-full bg-transparent px-2 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-accent-400/60"
+                                    />
+                                  </td>
+                                )
+                              })}
                             </tr>
                           ))}
                         </tbody>
@@ -2066,6 +2441,8 @@ function App() {
                   <ul className="mt-3 space-y-2 text-sm text-slate-300">
                     <li>- Yeni liste varsayılan bir tabloyla başlar.</li>
                     <li>- Satır/sütun ekleyerek tabloyu genişlet.</li>
+                    <li>- Formül için "=" ile başla (örn: =SUM(A1:A5)).</li>
+                    <li>- Desteklenenler: SUM, AVERAGE, MIN, MAX, COUNT.</li>
                     <li>- Veriler tarayıcıda saklanır (DB yok).</li>
                   </ul>
                 </div>
