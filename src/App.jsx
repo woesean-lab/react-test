@@ -324,6 +324,8 @@ function App() {
   const [activeListId, setActiveListId] = useState("")
   const [listName, setListName] = useState("")
   const [isListsLoading, setIsListsLoading] = useState(true)
+  const [listRenameDraft, setListRenameDraft] = useState("")
+  const [confirmListDelete, setConfirmListDelete] = useState(null)
   const [editingListCell, setEditingListCell] = useState({ row: null, col: null })
   const [selectedListCell, setSelectedListCell] = useState({ row: null, col: null })
   const [listContextMenu, setListContextMenu] = useState({
@@ -496,6 +498,8 @@ function App() {
     setEditingListCell({ row: null, col: null })
     setSelectedListCell({ row: null, col: null })
     setListContextMenu((prev) => (prev.open ? { ...prev, open: false } : prev))
+    setConfirmListDelete(null)
+    setListRenameDraft("")
   }, [activeListId])
 
   useEffect(() => {
@@ -531,6 +535,10 @@ function App() {
     [selectedTemplate, templates],
   )
   const activeList = useMemo(() => lists.find((list) => list.id === activeListId), [lists, activeListId])
+
+  useEffect(() => {
+    setListRenameDraft(activeList?.name || "")
+  }, [activeList?.name])
 
   useEffect(() => {
     if (!activeTemplate) {
@@ -1332,6 +1340,34 @@ function App() {
     } catch (error) {
       console.error(error)
       toast.error("Liste oluşturulamadı (API/DB kontrol edin).")
+    }
+  }
+
+  const handleListRename = () => {
+    if (!activeList) return
+    const name = listRenameDraft.trim()
+    if (!name) {
+      toast.error("Liste adı boş olamaz.")
+      return
+    }
+    if (name === activeList.name) return
+    updateListById(activeList.id, (list) => ({ ...list, name }))
+    toast.success("Liste adı güncellendi")
+  }
+
+  const handleListDelete = async (listId) => {
+    if (!listId) return
+    try {
+      const res = await apiFetch(`/api/lists/${listId}`, { method: "DELETE" })
+      if (!res.ok && res.status !== 404) throw new Error("list_delete_failed")
+      setLists((prev) => prev.filter((list) => list.id !== listId))
+      if (activeListId === listId) setActiveListId("")
+      setConfirmListDelete(null)
+      toast.success("Liste silindi")
+    } catch (error) {
+      console.error(error)
+      toast.error("Liste silinemedi (API/DB kontrol edin).")
+      setConfirmListDelete(null)
     }
   }
 
@@ -2609,6 +2645,73 @@ function App() {
                     >
                       Liste oluştur
                     </button>
+                  </div>
+                </div>
+
+                <div className={`${panelClass} bg-ink-900/60`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
+                        Listeyi düzenle
+                      </p>
+                      <p className="text-sm text-slate-400">Aktif listenin adını değiştir ya da sil.</p>
+                    </div>
+                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
+                      {activeList?.name || "Seçilmedi"}
+                    </span>
+                  </div>
+
+                  <div className="mt-4 space-y-3">
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-200" htmlFor="list-rename">
+                        Liste adı
+                      </label>
+                      <input
+                        id="list-rename"
+                        type="text"
+                        value={listRenameDraft}
+                        onChange={(e) => setListRenameDraft(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter") {
+                            e.preventDefault()
+                            handleListRename()
+                          }
+                        }}
+                        placeholder="Liste adı"
+                        disabled={!activeList}
+                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                      />
+                    </div>
+                    <div className="flex flex-wrap gap-3">
+                      <button
+                        type="button"
+                        onClick={handleListRename}
+                        disabled={!activeList}
+                        className="flex-1 min-w-[140px] rounded-lg border border-emerald-300/70 bg-emerald-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-emerald-50 shadow-glow transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                      >
+                        Güncelle
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!activeList) return
+                          if (confirmListDelete === activeList.id) {
+                            handleListDelete(activeList.id)
+                            return
+                          }
+                          setConfirmListDelete(activeList.id)
+                          toast("Silmek için tekrar tıkla", { position: "top-right" })
+                        }}
+                        disabled={!activeList}
+                        className={`min-w-[140px] rounded-lg border px-4 py-2.5 text-xs font-semibold uppercase tracking-wide transition ${
+                          confirmListDelete === activeList?.id
+                            ? "border-rose-300 bg-rose-500/25 text-rose-50"
+                            : "border-rose-400/60 bg-rose-500/10 text-rose-100 hover:border-rose-300 hover:bg-rose-500/20"
+                        } disabled:cursor-not-allowed disabled:opacity-60`}
+                      >
+                        {confirmListDelete === activeList?.id ? "Emin misin?" : "Listeyi sil"}
+                      </button>
+                    </div>
                   </div>
                 </div>
 
