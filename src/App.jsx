@@ -150,6 +150,27 @@ const taskRepeatDays = [
 ]
 
 const taskRepeatDayValues = new Set(taskRepeatDays.map((day) => day.value))
+const STOCK_STATUS = {
+  available: "available",
+  used: "used",
+}
+
+const getStockStatus = (stock) =>
+  stock?.status === STOCK_STATUS.used ? STOCK_STATUS.used : STOCK_STATUS.available
+
+const splitStocks = (stocks) => {
+  const list = Array.isArray(stocks) ? stocks : []
+  const available = []
+  const used = []
+  list.forEach((stock) => {
+    if (getStockStatus(stock) === STOCK_STATUS.used) {
+      used.push(stock)
+    } else {
+      available.push(stock)
+    }
+  })
+  return { available, used }
+}
 
 
 const getInitialTheme = () => {
@@ -926,11 +947,14 @@ function App() {
   const stockSummary = useMemo(() => {
     let total = 0
     let empty = 0
+    let used = 0
     products.forEach((product) => {
-      total += product.stocks.length
-      if (product.stocks.length === 0) empty += 1
+      const { available, used: usedStocks } = splitStocks(product.stocks)
+      total += available.length
+      used += usedStocks.length
+      if (available.length === 0) empty += 1
     })
-    return { total, empty }
+    return { total, empty, used }
   }, [products])
 
   const sortedProducts = useMemo(() => {
@@ -2432,13 +2456,14 @@ function App() {
     const product = products.find((p) => p.id === productId)
     if (!product) return
 
+    const availableStocks = splitStocks(product.stocks).available
     const rawCount = bulkCount[productId]
     const count = Math.max(
       1,
-      Number(rawCount ?? product.stocks.length) || product.stocks.length,
+      Number(rawCount ?? availableStocks.length) || availableStocks.length,
     )
-    const codes = product.stocks.slice(0, count).map((stk) => stk.code)
-    const removed = product.stocks.slice(0, count)
+    const codes = availableStocks.slice(0, count).map((stk) => stk.code)
+    const removed = availableStocks.slice(0, count)
     if (codes.length === 0) {
       toast.error("Bu üründe kopyalanacak stok yok.")
       return
@@ -2610,6 +2635,39 @@ function App() {
     } catch (error) {
       console.error(error)
       toast.error("Kopyalanamadı")
+    }
+  }
+
+  const handleStockStatusUpdate = async (productId, stockId, nextStatus) => {
+    const status =
+      nextStatus === STOCK_STATUS.used ? STOCK_STATUS.used : STOCK_STATUS.available
+    try {
+      const res = await apiFetch(`/api/stocks/${stockId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status }),
+      })
+      if (!res.ok) throw new Error("stock_status_update_failed")
+      const updated = await res.json()
+      setProducts((prev) =>
+        prev.map((product) =>
+          product.id === productId
+            ? {
+              ...product,
+              stocks: product.stocks.map((stk) =>
+                stk.id === stockId ? { ...stk, ...updated } : stk,
+              ),
+            }
+            : product,
+        ),
+      )
+      toast.success(status === STOCK_STATUS.used ? "Stok kullanıldı" : "Stok geri alındı", {
+        duration: 1400,
+        position: "top-right",
+      })
+    } catch (error) {
+      console.error(error)
+      toast.error("Stok güncellenemedi (API/DB kontrol edin).")
     }
   }
 
@@ -4075,7 +4133,7 @@ function App() {
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-                    Toplam stok: {stockSummary.total}
+                    Kullanılabilir stok: {stockSummary.total}
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
                     Ürün: {products.length}
@@ -4083,6 +4141,11 @@ function App() {
                   <span className="inline-flex items-center gap-2 rounded-full border border-rose-300/40 bg-rose-500/10 px-3 py-1 text-xs text-rose-100">
                     Tükenen: {stockSummary.empty}
                   </span>
+                  {stockSummary.used > 0 && (
+                    <span className="inline-flex items-center gap-2 rounded-full border border-amber-300/40 bg-amber-500/10 px-3 py-1 text-xs text-amber-100">
+                      Kullanıldı: {stockSummary.used}
+                    </span>
+                  )}
                 </div>
               </div>
             </header>
@@ -4099,7 +4162,7 @@ function App() {
               <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60 p-4 shadow-card">
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_120%_at_20%_0%,rgba(58,199,255,0.12),transparent)]" />
                 <div className="relative">
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Toplam stok</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Kullanılabilir stok</p>
                   <p className="mt-2 text-3xl font-semibold text-white">{stockSummary.total}</p>
                   <p className="mt-1 text-xs text-slate-400">Tüm ürünlerdeki anahtar</p>
                 </div>
@@ -4150,8 +4213,12 @@ function App() {
                         Henüz ürün yok.
                       </div>
                     )}
-                    {filteredProducts.map((product) => (
-                      <div
+                    {filteredProducts.map((product) => {
+                      const { available: availableStocks, used: usedStocks } = splitStocks(product.stocks)
+                      const availableCount = availableStocks.length
+                      const usedCount = usedStocks.length
+                      return (
+                        <div
                         key={product.id}
                         draggable
                         onDragStart={(event) => handleDragStart(event, product.id)}
@@ -4174,13 +4241,18 @@ function App() {
                                 <span className="text-base font-semibold text-white">{product.name}</span>
                                 <span
                                   className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
-                                    product.stocks.length === 0
+                                    availableCount === 0
                                       ? "border border-rose-300/60 bg-rose-500/15 text-rose-50"
                                       : "border border-emerald-300/60 bg-emerald-500/15 text-emerald-50"
                                   }`}
                                 >
-                                  {product.stocks.length} stok
+                                  {availableCount} stok
                                 </span>
+                                {usedCount > 0 && (
+                                  <span className="rounded-full border border-amber-300/60 bg-amber-500/15 px-2.5 py-1 text-[11px] font-semibold text-amber-50">
+                                    Kullanıldı: {usedCount}
+                                  </span>
+                                )}
                                 {product.note?.trim() && product.note.trim().toLowerCase() !== "null" && (
                                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-slate-200">
                                     {product.note}
@@ -4309,12 +4381,12 @@ function App() {
                                 </div>
                               </div>
                             )}
-                            {product.stocks.length === 0 && (
+                            {availableCount === 0 && (
                               <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-400">
-                                Bu üründe stok yok.
+                                Bu üründe kullanılabilir stok yok.
                               </div>
                             )}
-                            {product.stocks.length > 0 && (
+                            {availableCount > 0 && (
                               <div className="space-y-3 rounded-2xl border border-white/10 bg-ink-900/60 p-3">
                                 <div className="flex flex-wrap items-center justify-between gap-3">
                                   <span className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
@@ -4325,7 +4397,7 @@ function App() {
                                       <input
                                         id={`bulk-${product.id}`}
                                         type="text"
-                                        value={bulkCount[product.id] ?? product.stocks.length}
+                                        value={bulkCount[product.id] ?? availableCount}
                                         onChange={(e) =>
                                           setBulkCount((prev) => ({
                                             ...prev,
@@ -4335,7 +4407,7 @@ function App() {
                                         inputMode="numeric"
                                         className="w-16 appearance-none bg-transparent text-xs text-slate-100 focus:outline-none"
                                       />
-                                      <span className="text-[11px] text-slate-500">/ {product.stocks.length}</span>
+                                      <span className="text-[11px] text-slate-500">/ {availableCount}</span>
                                     </div>
                                     <button
                                       type="button"
@@ -4347,7 +4419,7 @@ function App() {
                                   </div>
                                 </div>
                                 <div className="space-y-2">
-                                  {product.stocks.map((stk, idx) => (
+                                  {availableStocks.map((stk, idx) => (
                                     <div
                                       key={stk.id}
                                       className="group flex items-center gap-3 rounded-xl border border-white/10 bg-ink-900/70 px-3 py-2 transition hover:border-accent-400/60 hover:bg-ink-800/80"
@@ -4369,6 +4441,75 @@ function App() {
                                         </button>
                                         <button
                                           type="button"
+                                          onClick={() =>
+                                            handleStockStatusUpdate(product.id, stk.id, STOCK_STATUS.used)
+                                          }
+                                          className="flex h-7 items-center justify-center rounded-md border border-amber-300/60 bg-amber-500/10 px-2 text-[11px] font-semibold uppercase tracking-wide text-amber-50 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/20"
+                                          aria-label="Stoku kullanıldı yap"
+                                        >
+                                          Kullanıldı
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() => handleStockDeleteWithConfirm(product.id, stk.id)}
+                                          className={`flex h-7 items-center justify-center rounded-md border px-2.5 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 ${
+                                            confirmStockTarget === `${product.id}-${stk.id}`
+                                              ? "border-rose-300 bg-rose-500/25 text-rose-50"
+                                              : "border-rose-400/60 bg-rose-500/10 hover:border-rose-300 hover:bg-rose-500/20"
+                                          }`}
+                                          aria-label="Stoku sil"
+                                        >
+                                          Sil
+                                        </button>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {usedCount > 0 && (
+                              <div className="space-y-3 rounded-2xl border border-white/10 bg-ink-900/60 p-3">
+                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                  <span className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
+                                    Kullanılan stoklar
+                                  </span>
+                                  <span className="rounded-full border border-amber-300/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-50">
+                                    {usedCount} adet
+                                  </span>
+                                </div>
+                                <div className="space-y-2">
+                                  {usedStocks.map((stk, idx) => (
+                                    <div
+                                      key={stk.id}
+                                      className="group flex items-center gap-3 rounded-xl border border-white/10 bg-ink-900/70 px-3 py-2 transition hover:border-amber-300/60 hover:bg-ink-800/80"
+                                    >
+                                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[11px] font-semibold text-slate-300 transition group-hover:border-amber-300 group-hover:text-amber-100">
+                                        #{idx + 1}
+                                      </span>
+                                      <p className="flex-1 break-all font-mono text-sm text-slate-100 group-hover:text-amber-50">
+                                        {stk.code}
+                                      </p>
+                                      <div className="flex items-center gap-2">
+                                        <button
+                                          type="button"
+                                          onClick={() => handleStockCopy(stk.code)}
+                                          className="flex h-7 items-center justify-center rounded-md border border-white/10 bg-white/5 px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
+                                          aria-label="Stoku kopyala"
+                                        >
+                                          Kopyala
+                                        </button>
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            handleStockStatusUpdate(product.id, stk.id, STOCK_STATUS.available)
+                                          }
+                                          className="flex h-7 items-center justify-center rounded-md border border-emerald-300/60 bg-emerald-500/10 px-2 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/20"
+                                          aria-label="Stoku geri al"
+                                        >
+                                          Geri al
+                                        </button>
+                                        <button
+                                          type="button"
                                           onClick={() => handleStockDeleteWithConfirm(product.id, stk.id)}
                                           className={`flex h-7 items-center justify-center rounded-md border px-2.5 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 ${
                                             confirmStockTarget === `${product.id}-${stk.id}`
@@ -4387,8 +4528,9 @@ function App() {
                             )}
                           </div>
                         )}
-                      </div>
-                    ))}
+                        </div>
+                      )
+                    })}
                   </div>
                 </div>
               </div>
@@ -4470,7 +4612,7 @@ function App() {
                         <p className="text-sm text-slate-400">Seçilen ürüne anahtar ekle.</p>
                       </div>
                       <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                        {stockSummary.total} stok
+                        Kullanılabilir: {stockSummary.total}
                       </span>
                     </div>
 

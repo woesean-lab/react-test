@@ -267,6 +267,7 @@ const allowedProblemStatus = new Set(["open", "resolved"])
 const allowedTaskStatus = new Set(["todo", "doing", "done"])
 const allowedTaskDueTypes = new Set(["today", "repeat", "date"])
 const allowedTaskRepeatDays = new Set(["0", "1", "2", "3", "4", "5", "6"])
+const allowedStockStatus = new Set(["available", "used"])
 
 const parseRepeatDays = (value) => {
   if (value === null || value === undefined) return []
@@ -708,6 +709,40 @@ app.post("/api/products/:id/stocks", async (req, res) => {
   })
 
   res.status(201).json(stocks)
+})
+
+app.put("/api/stocks/:id", async (req, res) => {
+  const id = String(req.params.id ?? "").trim()
+  if (!id) {
+    res.status(400).json({ error: "invalid id" })
+    return
+  }
+
+  const statusRaw = req.body?.status
+  if (statusRaw === undefined) {
+    res.status(400).json({ error: "status is required" })
+    return
+  }
+
+  const status = String(statusRaw).trim()
+  if (!allowedStockStatus.has(status)) {
+    res.status(400).json({ error: "invalid status" })
+    return
+  }
+
+  try {
+    const updated = await prisma.stock.update({
+      where: { id },
+      data: { status },
+    })
+    res.json(updated)
+  } catch (error) {
+    if (error?.code === "P2025") {
+      res.status(404).json({ error: "Stock not found" })
+      return
+    }
+    throw error
+  }
 })
 
 app.delete("/api/stocks/:id", async (req, res) => {
