@@ -53,6 +53,14 @@ const TASK_PRIORITY_OPTIONS = [
   { id: "medium", label: "Orta" },
   { id: "high", label: "Yuksek" },
 ]
+const TASK_RECURRENCE_OPTIONS = [
+  { id: "daily", label: "Hergun" },
+  { id: "monday", label: "Pazartesi" },
+  { id: "wednesday", label: "Carsamba" },
+  { id: "thursday", label: "Persembe" },
+  { id: "friday", label: "Cuma" },
+  { id: "custom", label: "Ozel" },
+]
 const TASK_PRIORITY_STYLES = {
   low: "border-emerald-300/60 bg-emerald-500/10 text-emerald-50",
   medium: "border-amber-300/60 bg-amber-500/10 text-amber-50",
@@ -64,6 +72,7 @@ const TASK_STATUS_STYLES = {
   done: "border-emerald-300/50 bg-emerald-500/10 text-emerald-50",
 }
 const TASK_STATUS_ORDER = TASK_STATUS_OPTIONS.map((option) => option.id)
+const TASK_RECURRENCE_ORDER = TASK_RECURRENCE_OPTIONS.map((option) => option.id)
 
 const createTaskId = () => {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {
@@ -80,6 +89,14 @@ const getSafeTaskPriority = (priority) => {
   return ids.includes(priority) ? priority : "medium"
 }
 
+const getSafeTaskRecurrence = (recurrence) =>
+  TASK_RECURRENCE_ORDER.includes(recurrence) ? recurrence : "daily"
+
+const getTaskRecurrenceLabel = (recurrence) => {
+  const option = TASK_RECURRENCE_OPTIONS.find((item) => item.id === recurrence)
+  return option ? option.label : "Hergun"
+}
+
 const getTaskPriorityLabel = (priority) => {
   const option = TASK_PRIORITY_OPTIONS.find((item) => item.id === priority)
   return option ? option.label : "Orta"
@@ -87,23 +104,36 @@ const getTaskPriorityLabel = (priority) => {
 
 const normalizeTask = (task) => {
   if (!task || typeof task !== "object") return null
+  const legacyDue = task.due ?? ""
+  const legacyNote = task.note ?? ""
+  const rawRecurrence = task.recurrence ?? (legacyDue ? "custom" : "daily")
+  const recurrence = getSafeTaskRecurrence(rawRecurrence)
+  const customDate = recurrence === "custom" ? task.customDate ?? legacyDue ?? "" : ""
   return {
     id: task.id ?? createTaskId(),
     title: String(task.title ?? "").trim(),
     owner: String(task.owner ?? "").trim(),
-    due: task.due ?? "",
+    recurrence,
+    customDate,
     status: getSafeTaskStatus(task.status),
     priority: getSafeTaskPriority(task.priority),
-    note: String(task.note ?? "").trim(),
+    details: String(task.details ?? legacyNote ?? "").trim(),
     createdAt: typeof task.createdAt === "number" ? task.createdAt : Date.now(),
   }
 }
 
-const formatTaskDue = (due) => {
-  if (!due) return ""
-  const date = new Date(due)
+const formatTaskDate = (value) => {
+  if (!value) return ""
+  const date = new Date(value)
   if (Number.isNaN(date.getTime())) return ""
   return LIST_DATE_FORMATTER.format(date)
+}
+
+const formatTaskRecurrence = (task) => {
+  if (!task) return ""
+  if (task.recurrence !== "custom") return getTaskRecurrenceLabel(task.recurrence)
+  const dateLabel = formatTaskDate(task.customDate)
+  return dateLabel ? `Ozel: ${dateLabel}` : "Ozel"
 }
 
 const initialProblems = [
@@ -458,10 +488,11 @@ function App() {
   const [taskDraft, setTaskDraft] = useState({
     title: "",
     owner: "",
-    due: "",
     priority: "medium",
     status: "todo",
-    note: "",
+    recurrence: "daily",
+    customDate: "",
+    details: "",
   })
   const [taskQuery, setTaskQuery] = useState("")
   const listSaveTimers = useRef(new Map())
@@ -714,11 +745,11 @@ function App() {
     return tasks.filter((task) => {
       const title = String(task.title ?? "").toLowerCase()
       const owner = String(task.owner ?? "").toLowerCase()
-      const note = String(task.note ?? "").toLowerCase()
+      const details = String(task.details ?? "").toLowerCase()
       return (
         title.includes(text) ||
         owner.includes(text) ||
-        note.includes(text)
+        details.includes(text)
       )
     })
   }, [tasks, taskQuery])
@@ -1795,7 +1826,12 @@ function App() {
   }
 
   const handleTaskDraftChange = (field, value) => {
-    setTaskDraft((prev) => ({ ...prev, [field]: value }))
+    setTaskDraft((prev) => {
+      if (field === "recurrence" && value !== "custom") {
+        return { ...prev, recurrence: value, customDate: "" }
+      }
+      return { ...prev, [field]: value }
+    })
   }
 
   const handleTaskAdd = () => {
@@ -1804,19 +1840,24 @@ function App() {
       toast.error("Gorev basligi girin.")
       return
     }
+    if (taskDraft.recurrence === "custom" && !taskDraft.customDate) {
+      toast.error("Ozel tarih secin.")
+      return
+    }
     const nextTask = normalizeTask({
       id: createTaskId(),
       title,
       owner: taskDraft.owner.trim(),
-      due: taskDraft.due || "",
+      recurrence: taskDraft.recurrence,
+      customDate: taskDraft.customDate || "",
       priority: taskDraft.priority,
       status: taskDraft.status,
-      note: taskDraft.note.trim(),
+      details: taskDraft.details.trim(),
       createdAt: Date.now(),
     })
     if (!nextTask) return
     setTasks((prev) => [nextTask, ...prev])
-    setTaskDraft((prev) => ({ ...prev, title: "", note: "" }))
+    setTaskDraft((prev) => ({ ...prev, title: "", details: "" }))
     toast.success("Gorev eklendi")
   }
 
@@ -3160,7 +3201,7 @@ function App() {
                     </span>
                   </div>
 
-                  <div className="mt-4 space-y-3">
+                  <div className="mt-4 space-y-2">
                     <div className="space-y-2">
                       <label className="text-xs font-semibold text-slate-200" htmlFor="list-name">
                         Liste adı
@@ -3438,18 +3479,37 @@ function App() {
                         />
                       </div>
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-200" htmlFor="task-due">
-                          Termin
+                        <label className="text-xs font-semibold text-slate-200" htmlFor="task-recurrence">
+                          Tekrarlama
+                        </label>
+                        <select
+                          id="task-recurrence"
+                          value={taskDraft.recurrence}
+                          onChange={(e) => handleTaskDraftChange("recurrence", e.target.value)}
+                          className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                        >
+                          {TASK_RECURRENCE_OPTIONS.map((option) => (
+                            <option key={option.id} value={option.id}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    {taskDraft.recurrence === "custom" && (
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-200" htmlFor="task-custom-date">
+                          Ozel tarih
                         </label>
                         <input
-                          id="task-due"
+                          id="task-custom-date"
                           type="date"
-                          value={taskDraft.due}
-                          onChange={(e) => handleTaskDraftChange("due", e.target.value)}
+                          value={taskDraft.customDate}
+                          onChange={(e) => handleTaskDraftChange("customDate", e.target.value)}
                           className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                         />
                       </div>
-                    </div>
+                    )}
                     <div className="grid gap-3 sm:grid-cols-2">
                       <div className="space-y-2">
                         <label className="text-xs font-semibold text-slate-200" htmlFor="task-priority">
@@ -3487,22 +3547,22 @@ function App() {
                       </div>
                     </div>
                     <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-200" htmlFor="task-note">
-                        Not
+                      <label className="text-xs font-semibold text-slate-200" htmlFor="task-details">
+                        Gorev ayrintilari
                       </label>
                       <textarea
-                        id="task-note"
-                        value={taskDraft.note}
-                        onChange={(e) => handleTaskDraftChange("note", e.target.value)}
-                        rows={3}
-                        placeholder="Kisa not ekleyin"
-                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                        id="task-details"
+                        value={taskDraft.details}
+                        onChange={(e) => handleTaskDraftChange("details", e.target.value)}
+                        rows={4}
+                        placeholder="Gorev ayrintilarini yaz"
+                        className="min-h-[96px] w-full resize-y rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                       />
                     </div>
                     <button
                       type="button"
                       onClick={handleTaskAdd}
-                      className="w-full rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
+                      className="w-full rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
                     >
                       Gorev ekle
                     </button>
@@ -3534,19 +3594,19 @@ function App() {
                         type="text"
                         value={taskQuery}
                         onChange={(e) => setTaskQuery(e.target.value)}
-                        placeholder="Baslik, sorumlu, not"
+                        placeholder="Baslik, sorumlu, ayrinti"
                         className="w-56 bg-transparent text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none"
                       />
                     </div>
                   </div>
 
-                  <div className="mt-4 grid gap-4 md:grid-cols-3">
+                  <div className="mt-3 grid gap-4 md:grid-cols-3">
                     {TASK_STATUS_OPTIONS.map((status) => {
                       const items = tasksByStatus[status.id]
                       return (
                         <div
                           key={status.id}
-                          className="rounded-2xl border border-white/10 bg-ink-900/50 p-4"
+                          className="rounded-2xl border border-white/10 bg-ink-900/50 p-3"
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div>
@@ -3561,7 +3621,7 @@ function App() {
                               {items.length}
                             </span>
                           </div>
-                          <div className="mt-3 space-y-3">
+                          <div className="mt-3 space-y-2">
                             {items.length === 0 && (
                               <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-400">
                                 Henuz gorev yok.
@@ -3571,12 +3631,12 @@ function App() {
                               const priorityClass =
                                 TASK_PRIORITY_STYLES[task.priority] || TASK_PRIORITY_STYLES.medium
                               const priorityLabel = getTaskPriorityLabel(task.priority)
-                              const dueLabel = formatTaskDue(task.due)
+                              const recurrenceLabel = formatTaskRecurrence(task)
                               const statusIndex = TASK_STATUS_ORDER.indexOf(task.status)
                               return (
                                 <div
                                   key={task.id}
-                                  className="rounded-xl border border-white/10 bg-white/5 p-3"
+                                  className="rounded-xl border border-white/10 bg-white/5 p-2.5"
                                 >
                                   <div className="flex items-start justify-between gap-2">
                                     <p className="text-sm font-semibold text-slate-100">
@@ -3588,8 +3648,10 @@ function App() {
                                       {priorityLabel}
                                     </span>
                                   </div>
-                                  {task.note && (
-                                    <p className="mt-2 text-xs text-slate-300">{task.note}</p>
+                                  {task.details && (
+                                    <p className="mt-2 text-xs text-slate-300 whitespace-pre-wrap">
+                                      {task.details}
+                                    </p>
                                   )}
                                   <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] text-slate-400">
                                     {task.owner && (
@@ -3597,9 +3659,9 @@ function App() {
                                         Sahip: {task.owner}
                                       </span>
                                     )}
-                                    {dueLabel && (
+                                    {recurrenceLabel && (
                                       <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5">
-                                        Termin: {dueLabel}
+                                        Tekrar: {recurrenceLabel}
                                       </span>
                                     )}
                                   </div>
