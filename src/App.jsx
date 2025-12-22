@@ -4573,7 +4573,7 @@ function App() {
           onClick={handleNoteModalClose}
         >
           <div
-            className="w-full max-w-2xl overflow-hidden rounded-2xl border border-white/10 bg-ink-900 shadow-card"
+            className="w-full max-w-3xl overflow-hidden rounded-2xl border border-white/10 bg-ink-900 shadow-card"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-center justify-between border-b border-white/10 bg-ink-800 px-4 py-3">
@@ -4592,7 +4592,7 @@ function App() {
               </button>
             </div>
 
-            <div className="flex max-h-[320px] overflow-hidden">
+            <div className="flex max-h-[420px] overflow-hidden">
               <div
                 ref={noteLineRef}
                 className="w-12 shrink-0 overflow-hidden border-r border-white/10 bg-ink-800 px-2 py-3 text-right font-mono text-[11px] leading-6 text-slate-500"
