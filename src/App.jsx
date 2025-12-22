@@ -3013,8 +3013,11 @@ function App() {
                                 draggable
                                 onDragStart={(event) => handleTaskDragStart(event, task.id)}
                                 onDragEnd={handleTaskDragEnd}
-                                className="flex flex-col gap-3 rounded-xl border border-white/10 bg-ink-800/70 p-3 shadow-inner"
+                                className="group relative flex flex-col gap-3 rounded-xl border border-white/10 bg-ink-800/70 p-3 shadow-inner transition hover:border-accent-300/40 hover:bg-ink-800/80 hover:shadow-glow cursor-grab"
                               >
+                                <span className="pointer-events-none absolute right-3 top-3 rounded-full border border-white/15 bg-white/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-200/80 opacity-0 transition group-hover:opacity-100">
+                                  Surukle
+                                </span>
                                 <div className="flex items-start justify-between gap-2">
                                   <div className="space-y-1">
                                     <p className="text-sm font-semibold text-slate-100">{task.title}</p>
