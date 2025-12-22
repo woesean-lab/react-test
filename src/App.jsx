@@ -2573,39 +2573,8 @@ function App() {
                       <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Liste içeriği</p>
                       <p className="text-sm text-slate-400">Hücreleri seçip düzenleyebilirsin.</p>
                     </div>
-                    <div className="flex flex-wrap items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={handleListSaveNow}
-                        disabled={!activeList || isListSaving || isListsLoading}
-                        className="inline-flex items-center gap-2 rounded-full border border-accent-300/70 bg-gradient-to-br from-accent-500/20 via-accent-400/10 to-accent-500/20 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-200 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {isListSaving ? (
-                          <span className="h-2 w-2 animate-pulse rounded-full bg-accent-200" />
-                        ) : (
-                          <svg
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                            className="h-3.5 w-3.5"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="1.6"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <path d="M19 21H5a2 2 0 0 1-2-2V7l5-5h8l5 5v12a2 2 0 0 1-2 2Z" />
-                            <path d="M7 21v-7h10v7" />
-                            <path d="M7 3v4h8" />
-                          </svg>
-                        )}
-                        {isListSaving ? "Kaydediliyor" : "Kaydet"}
-                      </button>
-                      {listSavedAt ? (
-                        <span className="text-[11px] font-semibold text-emerald-200">Kaydedildi</span>
-                      ) : (
-                        <span className="text-[11px] text-slate-400">Otomatik kaydetme aktif</span>
-                      )}
-                      <span className="text-xs text-slate-400">Başlıklara sağ tıkla: ekle/sil</span>
+                    <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
+                      <span>Başlıklara sağ tıkla: ekle/sil</span>
                     </div>
                   </div>
 
@@ -2614,80 +2583,120 @@ function App() {
                       Bir liste seçin veya yeni liste oluşturun.
                     </div>
                   ) : (
-                    <div className="mt-4 overflow-auto rounded-xl border border-white/10 bg-ink-900/80">
-                      <table className="min-w-[640px] w-full border-collapse text-xs text-slate-200">
-                        <thead className="bg-white/5 text-slate-300">
-                          <tr>
-                            <th className="w-10 border border-white/10 px-2 py-1 text-center text-[11px] font-semibold text-slate-400">
-                              #
-                            </th>
-                            {activeListColumnLabels.map((label, colIndex) => {
-                              const isSelected = selectedListCell.col === colIndex
-                              return (
-                                <th
-                                  key={label}
-                                  onClick={() => setSelectedListCell((prev) => ({ ...prev, col: colIndex }))}
-                                  onContextMenu={(event) =>
-                                    handleListContextMenu(event, "column", colIndex)
-                                  }
-                                  className={`cursor-pointer border border-white/10 px-2 py-1 text-center text-[11px] font-semibold ${
-                                    isSelected ? "bg-white/10 text-white" : ""
-                                  }`}
-                                >
-                                  {label}
-                                </th>
-                              )
-                            })}
-                          </tr>
-                        </thead>
-                        <tbody>
-                          {activeListRows.map((row, rowIndex) => (
-                            <tr key={`${activeList.id}-${rowIndex}`}>
-                              <td
-                                onClick={() => setSelectedListCell((prev) => ({ ...prev, row: rowIndex }))}
-                                onContextMenu={(event) => handleListContextMenu(event, "row", rowIndex)}
-                                className={`cursor-pointer border border-white/10 px-2 py-1 text-center text-[11px] ${
-                                  selectedListCell.row === rowIndex ? "bg-white/10 text-white" : "text-slate-400"
-                                }`}
-                              >
-                                {rowIndex + 1}
-                              </td>
-                              {activeListColumns.map((colIndex) => {
-                                const rawValue = row?.[colIndex] ?? ""
-                                const isEditingCell =
-                                  editingListCell.row === rowIndex && editingListCell.col === colIndex
-                                const displayValue = isEditingCell
-                                  ? rawValue
-                                  : getListCellDisplayValue(rowIndex, colIndex)
+                    <>
+                      <div className="mt-4 overflow-auto rounded-xl border border-white/10 bg-ink-900/80">
+                        <table className="min-w-[640px] w-full border-collapse text-xs text-slate-200">
+                          <thead className="bg-white/5 text-slate-300">
+                            <tr>
+                              <th className="w-10 border border-white/10 px-2 py-1 text-center text-[11px] font-semibold text-slate-400">
+                                #
+                              </th>
+                              {activeListColumnLabels.map((label, colIndex) => {
+                                const isSelected = selectedListCell.col === colIndex
                                 return (
-                                  <td key={`${rowIndex}-${colIndex}`} className="border border-white/10 p-0">
-                                    <input
-                                      value={displayValue}
-                                      onFocus={() => {
-                                        setEditingListCell({ row: rowIndex, col: colIndex })
-                                        setSelectedListCell({ row: rowIndex, col: colIndex })
-                                      }}
-                                      onBlur={() =>
-                                        setEditingListCell((prev) =>
-                                          prev.row === rowIndex && prev.col === colIndex
-                                            ? { row: null, col: null }
-                                            : prev,
-                                        )
-                                      }
-                                      onChange={(e) =>
-                                        handleListCellChange(rowIndex, colIndex, e.target.value)
-                                      }
-                                      spellCheck={false}
-                                      className="h-8 w-full bg-transparent px-2 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-accent-400/60"
-                                    />
-                                  </td>
+                                  <th
+                                    key={label}
+                                    onClick={() => setSelectedListCell((prev) => ({ ...prev, col: colIndex }))}
+                                    onContextMenu={(event) =>
+                                      handleListContextMenu(event, "column", colIndex)
+                                    }
+                                    className={`cursor-pointer border border-white/10 px-2 py-1 text-center text-[11px] font-semibold ${
+                                      isSelected ? "bg-white/10 text-white" : ""
+                                    }`}
+                                  >
+                                    {label}
+                                  </th>
                                 )
                               })}
                             </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
+                          </thead>
+                          <tbody>
+                            {activeListRows.map((row, rowIndex) => (
+                              <tr key={`${activeList.id}-${rowIndex}`}>
+                                <td
+                                  onClick={() => setSelectedListCell((prev) => ({ ...prev, row: rowIndex }))}
+                                  onContextMenu={(event) => handleListContextMenu(event, "row", rowIndex)}
+                                  className={`cursor-pointer border border-white/10 px-2 py-1 text-center text-[11px] ${
+                                    selectedListCell.row === rowIndex ? "bg-white/10 text-white" : "text-slate-400"
+                                  }`}
+                                >
+                                  {rowIndex + 1}
+                                </td>
+                                {activeListColumns.map((colIndex) => {
+                                  const rawValue = row?.[colIndex] ?? ""
+                                  const isEditingCell =
+                                    editingListCell.row === rowIndex && editingListCell.col === colIndex
+                                  const displayValue = isEditingCell
+                                    ? rawValue
+                                    : getListCellDisplayValue(rowIndex, colIndex)
+                                  return (
+                                    <td key={`${rowIndex}-${colIndex}`} className="border border-white/10 p-0">
+                                      <input
+                                        value={displayValue}
+                                        onFocus={() => {
+                                          setEditingListCell({ row: rowIndex, col: colIndex })
+                                          setSelectedListCell({ row: rowIndex, col: colIndex })
+                                        }}
+                                        onBlur={() =>
+                                          setEditingListCell((prev) =>
+                                            prev.row === rowIndex && prev.col === colIndex
+                                              ? { row: null, col: null }
+                                              : prev,
+                                          )
+                                        }
+                                        onChange={(e) =>
+                                          handleListCellChange(rowIndex, colIndex, e.target.value)
+                                        }
+                                        spellCheck={false}
+                                        className="h-8 w-full bg-transparent px-2 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-accent-400/60"
+                                      />
+                                    </td>
+                                  )
+                                })}
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                      <div className="mt-3 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-white/10 bg-ink-900/80 px-4 py-2 text-xs text-slate-300">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Durum</span>
+                          {listSavedAt ? (
+                            <span className="rounded-full border border-emerald-300/50 bg-emerald-500/15 px-2 py-0.5 text-[11px] font-semibold text-emerald-100">
+                              Kaydedildi
+                            </span>
+                          ) : (
+                            <span className="text-[11px] text-slate-400">Otomatik kaydetme aktif</span>
+                          )}
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleListSaveNow}
+                          disabled={!activeList || isListSaving || isListsLoading}
+                          className="inline-flex items-center gap-2 rounded-full border border-accent-300/70 bg-gradient-to-br from-accent-500/20 via-accent-400/10 to-accent-500/20 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-200 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          {isListSaving ? (
+                            <span className="h-2 w-2 animate-pulse rounded-full bg-accent-200" />
+                          ) : (
+                            <svg
+                              viewBox="0 0 24 24"
+                              aria-hidden="true"
+                              className="h-3.5 w-3.5"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.6"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M19 21H5a2 2 0 0 1-2-2V7l5-5h8l5 5v12a2 2 0 0 1-2 2Z" />
+                              <path d="M7 21v-7h10v7" />
+                              <path d="M7 3v4h8" />
+                            </svg>
+                          )}
+                          {isListSaving ? "Kaydediliyor" : "Kaydet"}
+                        </button>
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
