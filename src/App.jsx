@@ -77,6 +77,7 @@ const initialTasks = [
     id: "tsk-1",
     title: "Haftalik oncelik listesini guncelle",
     note: "Kritik musteriler + teslim sureleri",
+    owner: "Burak",
     status: "todo",
     due: "2025-12-29",
   },
@@ -84,6 +85,7 @@ const initialTasks = [
     id: "tsk-2",
     title: "Sablon kategorilerini toparla",
     note: "Genel, satis, destek",
+    owner: "Ece",
     status: "doing",
     due: "",
   },
@@ -91,6 +93,7 @@ const initialTasks = [
     id: "tsk-3",
     title: "Haftalik raporu paylas",
     note: "Cuma 17:00",
+    owner: "Tuna",
     status: "done",
     due: "2025-12-27",
   },
@@ -474,6 +477,7 @@ function App() {
   const [taskForm, setTaskForm] = useState({
     title: "",
     note: "",
+    owner: "",
     due: "",
   })
   const [confirmTaskDelete, setConfirmTaskDelete] = useState(null)
@@ -1017,7 +1021,7 @@ function App() {
   }
 
   const resetTaskForm = () => {
-    setTaskForm({ title: "", note: "", due: "" })
+    setTaskForm({ title: "", note: "", owner: "", due: "" })
   }
 
   const handleTaskAdd = () => {
@@ -1030,6 +1034,7 @@ function App() {
       id: createTaskId(),
       title: titleValue,
       note: taskForm.note.trim(),
+      owner: taskForm.owner.trim(),
       status: "todo",
       due: taskForm.due,
       createdAt: new Date().toISOString(),
@@ -3024,6 +3029,11 @@ function App() {
                                     {task.note && (
                                       <p className="text-xs text-slate-400">{task.note}</p>
                                     )}
+                                    {task.owner && (
+                                      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                                        {task.owner}
+                                      </p>
+                                    )}
                                   </div>
                                 </div>
                                 {task.due && (
@@ -3109,6 +3119,20 @@ function App() {
                         value={taskForm.note}
                         onChange={(e) => setTaskForm((prev) => ({ ...prev, note: e.target.value }))}
                         placeholder="Kisa not veya kontrol listesi"
+                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-200" htmlFor="task-owner">
+                        Sorumlu
+                      </label>
+                      <input
+                        id="task-owner"
+                        type="text"
+                        value={taskForm.owner}
+                        onChange={(e) => setTaskForm((prev) => ({ ...prev, owner: e.target.value }))}
+                        placeholder="Orn: Ayse"
                         className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                       />
                     </div>
