@@ -514,6 +514,8 @@ function App() {
   })
   const [confirmTaskDelete, setConfirmTaskDelete] = useState(null)
   const [taskDragState, setTaskDragState] = useState({ activeId: null, overStatus: null })
+  const [isNoteModalOpen, setIsNoteModalOpen] = useState(false)
+  const [noteModalDraft, setNoteModalDraft] = useState("")
 
   const isLight = theme === "light"
 
@@ -1059,6 +1061,17 @@ function App() {
     return () => window.clearInterval(intervalId)
   }, [])
 
+  useEffect(() => {
+    if (!isNoteModalOpen) return
+    const handleKey = (event) => {
+      if (event.key === "Escape") {
+        setIsNoteModalOpen(false)
+      }
+    }
+    window.addEventListener("keydown", handleKey)
+    return () => window.removeEventListener("keydown", handleKey)
+  }, [isNoteModalOpen])
+
   const toggleProductOpen = (productId) => {
     setOpenProducts((prev) => ({ ...prev, [productId]: !(prev[productId] ?? false)}))
   }
@@ -1108,6 +1121,20 @@ function App() {
     if (task.dueType === "date") return task.dueDate === today
     if (task.dueType === "repeat") return String(new Date().getDay()) === String(task.repeatDay)
     return false
+  }
+
+  const openNoteModal = () => {
+    setNoteModalDraft(taskForm.note)
+    setIsNoteModalOpen(true)
+  }
+
+  const handleNoteModalSave = () => {
+    setTaskForm((prev) => ({ ...prev, note: noteModalDraft }))
+    setIsNoteModalOpen(false)
+  }
+
+  const handleNoteModalClose = () => {
+    setIsNoteModalOpen(false)
   }
 
   const resetTaskForm = () => {
@@ -3225,9 +3252,16 @@ function App() {
                     </div>
 
                     <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-200" htmlFor="task-note">
-                        Not
-                      </label>
+                      <div className="flex items-center justify-between text-xs font-semibold text-slate-200">
+                        <label htmlFor="task-note">Not</label>
+                        <button
+                          type="button"
+                          onClick={openNoteModal}
+                          className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] uppercase tracking-[0.2em] text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
+                        >
+                          Genislet
+                        </button>
+                      </div>
                       <textarea
                         id="task-note"
                         rows={3}
@@ -4494,6 +4528,59 @@ function App() {
           </div>
         )}
       </div>
+      {isNoteModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+          onClick={handleNoteModalClose}
+        >
+          <div
+            className="w-full max-w-2xl rounded-3xl border border-white/10 bg-ink-900/95 p-6 shadow-card backdrop-blur"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-300/80">
+                  Not editoru
+                </p>
+                <p className="text-sm text-slate-400">Uzun notunu burada duzenle.</p>
+              </div>
+              <button
+                type="button"
+                onClick={handleNoteModalClose}
+                className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
+              >
+                Kapat
+              </button>
+            </div>
+
+            <textarea
+              id="task-note-modal"
+              rows={12}
+              value={noteModalDraft}
+              onChange={(e) => setNoteModalDraft(e.target.value)}
+              placeholder="Detayli notunu buraya yaz..."
+              className="mt-4 w-full rounded-2xl border border-white/10 bg-ink-900 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+            />
+
+            <div className="mt-4 flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={handleNoteModalSave}
+                className="min-w-[140px] rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
+              >
+                Kaydet
+              </button>
+              <button
+                type="button"
+                onClick={handleNoteModalClose}
+                className="min-w-[120px] rounded-lg border border-white/10 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
+              >
+                Iptal
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <Toaster
         position="top-right"
         toastOptions={{
