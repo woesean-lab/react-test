@@ -16,6 +16,7 @@ const fallbackCategories = Array.from(new Set(["Genel", ...fallbackTemplates.map
 const PRODUCT_ORDER_STORAGE_KEY = "pulcipProductOrder"
 const THEME_STORAGE_KEY = "pulcipTheme"
 const AUTH_TOKEN_STORAGE_KEY = "pulcipAuthToken"
+const TASKS_STORAGE_KEY = "pulcipTasks"
 const DEFAULT_LIST_ROWS = 8
 const DEFAULT_LIST_COLS = 5
 const FORMULA_ERRORS = {
@@ -42,6 +43,68 @@ const LIST_CURRENCY_FORMATTER = new Intl.NumberFormat("tr-TR", {
   maximumFractionDigits: 2,
 })
 const LIST_DATE_FORMATTER = new Intl.DateTimeFormat("tr-TR")
+const TASK_STATUS_OPTIONS = [
+  { id: "todo", label: "Yapilacak", description: "Planla" },
+  { id: "doing", label: "Devam", description: "Uzerinde" },
+  { id: "done", label: "Tamam", description: "Bitti" },
+]
+const TASK_PRIORITY_OPTIONS = [
+  { id: "low", label: "Dusuk" },
+  { id: "medium", label: "Orta" },
+  { id: "high", label: "Yuksek" },
+]
+const TASK_PRIORITY_STYLES = {
+  low: "border-emerald-300/60 bg-emerald-500/10 text-emerald-50",
+  medium: "border-amber-300/60 bg-amber-500/10 text-amber-50",
+  high: "border-rose-300/60 bg-rose-500/10 text-rose-50",
+}
+const TASK_STATUS_STYLES = {
+  todo: "border-amber-300/50 bg-amber-500/10 text-amber-50",
+  doing: "border-sky-300/50 bg-sky-500/10 text-sky-50",
+  done: "border-emerald-300/50 bg-emerald-500/10 text-emerald-50",
+}
+const TASK_STATUS_ORDER = TASK_STATUS_OPTIONS.map((option) => option.id)
+
+const createTaskId = () => {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID()
+  }
+  return `task-${Date.now()}-${Math.random().toString(16).slice(2)}`
+}
+
+const getSafeTaskStatus = (status) =>
+  TASK_STATUS_ORDER.includes(status) ? status : TASK_STATUS_ORDER[0]
+
+const getSafeTaskPriority = (priority) => {
+  const ids = TASK_PRIORITY_OPTIONS.map((option) => option.id)
+  return ids.includes(priority) ? priority : "medium"
+}
+
+const getTaskPriorityLabel = (priority) => {
+  const option = TASK_PRIORITY_OPTIONS.find((item) => item.id === priority)
+  return option ? option.label : "Orta"
+}
+
+const normalizeTask = (task) => {
+  if (!task || typeof task !== "object") return null
+  return {
+    id: task.id ?? createTaskId(),
+    title: String(task.title ?? "").trim(),
+    owner: String(task.owner ?? "").trim(),
+    due: task.due ?? "",
+    status: getSafeTaskStatus(task.status),
+    priority: getSafeTaskPriority(task.priority),
+    note: String(task.note ?? "").trim(),
+    createdAt: typeof task.createdAt === "number" ? task.createdAt : Date.now(),
+  }
+}
+
+const formatTaskDue = (due) => {
+  if (!due) return ""
+  const date = new Date(due)
+  if (Number.isNaN(date.getTime())) return ""
+  return LIST_DATE_FORMATTER.format(date)
+}
 
 const initialProblems = [
   { id: 1, username: "@ornek1", issue: "Ödeme ekranda takıldı, 2 kez kart denemiş.", status: "open" },
@@ -380,6 +443,27 @@ function App() {
     x: 0,
     y: 0,
   })
+  const [tasks, setTasks] = useState(() => {
+    if (typeof window === "undefined") return []
+    try {
+      const stored = localStorage.getItem(TASKS_STORAGE_KEY)
+      const parsed = stored ? JSON.parse(stored) : []
+      if (!Array.isArray(parsed)) return []
+      return parsed.map((task) => normalizeTask(task)).filter(Boolean)
+    } catch (error) {
+      console.warn("Could not load tasks", error)
+      return []
+    }
+  })
+  const [taskDraft, setTaskDraft] = useState({
+    title: "",
+    owner: "",
+    due: "",
+    priority: "medium",
+    status: "todo",
+    note: "",
+  })
+  const [taskQuery, setTaskQuery] = useState("")
   const listSaveTimers = useRef(new Map())
   const listSaveQueue = useRef(new Map())
   const listSavedTimer = useRef(null)
@@ -624,6 +708,36 @@ function App() {
   const listFormulaCache = useMemo(() => new Map(), [activeListId, activeListRows])
   const canDeleteListRow = Boolean(activeList && activeListRows.length > 1)
   const canDeleteListColumn = Boolean(activeList && activeListColumnCount > 1)
+  const filteredTasks = useMemo(() => {
+    const text = taskQuery.trim().toLowerCase()
+    if (!text) return tasks
+    return tasks.filter((task) => {
+      const title = String(task.title ?? "").toLowerCase()
+      const owner = String(task.owner ?? "").toLowerCase()
+      const note = String(task.note ?? "").toLowerCase()
+      return (
+        title.includes(text) ||
+        owner.includes(text) ||
+        note.includes(text)
+      )
+    })
+  }, [tasks, taskQuery])
+  const taskStats = useMemo(() => {
+    const counts = { total: tasks.length, todo: 0, doing: 0, done: 0 }
+    tasks.forEach((task) => {
+      const status = getSafeTaskStatus(task.status)
+      if (status in counts) counts[status] += 1
+    })
+    return counts
+  }, [tasks])
+  const tasksByStatus = useMemo(() => {
+    const grouped = { todo: [], doing: [], done: [] }
+    filteredTasks.forEach((task) => {
+      const status = getSafeTaskStatus(task.status)
+      grouped[status].push(task)
+    })
+    return grouped
+  }, [filteredTasks])
 
   const toNumber = (value) => {
     if (isErrorValue(value)) return value
@@ -900,6 +1014,14 @@ function App() {
       console.warn("Could not save product order", error)
     }
   }, [productOrder])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify(tasks))
+    } catch (error) {
+      console.warn("Could not persist tasks", error)
+    }
+  }, [tasks])
 
   const toggleProductOpen = (productId) => {
     setOpenProducts((prev) => ({ ...prev, [productId]: !(prev[productId] ?? false)}))
@@ -1672,6 +1794,57 @@ function App() {
     setLastListColSelect(null)
   }
 
+  const handleTaskDraftChange = (field, value) => {
+    setTaskDraft((prev) => ({ ...prev, [field]: value }))
+  }
+
+  const handleTaskAdd = () => {
+    const title = taskDraft.title.trim()
+    if (!title) {
+      toast.error("Gorev basligi girin.")
+      return
+    }
+    const nextTask = normalizeTask({
+      id: createTaskId(),
+      title,
+      owner: taskDraft.owner.trim(),
+      due: taskDraft.due || "",
+      priority: taskDraft.priority,
+      status: taskDraft.status,
+      note: taskDraft.note.trim(),
+      createdAt: Date.now(),
+    })
+    if (!nextTask) return
+    setTasks((prev) => [nextTask, ...prev])
+    setTaskDraft((prev) => ({ ...prev, title: "", note: "" }))
+    toast.success("Gorev eklendi")
+  }
+
+  const handleTaskUpdate = (taskId, updates) => {
+    setTasks((prev) =>
+      prev.map((task) => (task.id === taskId ? { ...task, ...updates } : task)),
+    )
+  }
+
+  const handleTaskDelete = (taskId) => {
+    setTasks((prev) => prev.filter((task) => task.id !== taskId))
+    toast.success("Gorev silindi")
+  }
+
+  const handleTaskStatusChange = (taskId, nextStatus) => {
+    const status = getSafeTaskStatus(nextStatus)
+    handleTaskUpdate(taskId, { status })
+  }
+
+  const handleTaskMove = (taskId, direction) => {
+    const task = tasks.find((item) => item.id === taskId)
+    if (!task) return
+    const currentIndex = TASK_STATUS_ORDER.indexOf(getSafeTaskStatus(task.status))
+    const nextIndex = currentIndex + direction
+    if (nextIndex < 0 || nextIndex >= TASK_STATUS_ORDER.length) return
+    handleTaskStatusChange(taskId, TASK_STATUS_ORDER[nextIndex])
+  }
+
   const handleListInsertRow = (afterIndex = null) => {
     if (!activeList) return
     updateListById(activeList.id, (list) => {
@@ -2345,6 +2518,17 @@ function App() {
             }`}
           >
             Listeler
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("tasks")}
+            className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+              activeTab === "tasks"
+                ? "bg-accent-500/20 text-accent-50 shadow-glow"
+                : "bg-white/5 text-slate-200 hover:bg-white/10"
+            }`}
+          >
+            Gorevler
           </button>
           <button
             type="button"
@@ -3177,6 +3361,297 @@ function App() {
                 </div>
               </div>
             )}
+          </div>
+        )}
+
+        {activeTab === "tasks" && (
+          <div className="space-y-6">
+            <header className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-6 shadow-card">
+              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                <div className="space-y-2">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
+                    Gorevler
+                  </span>
+                  <h1 className="font-display text-3xl font-semibold text-white">Gorev Panosu</h1>
+                  <p className="max-w-2xl text-sm text-slate-200/80">
+                    Basliklari ekle, oncelik ver ve adim adim tamama tasiyin.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
+                    Toplam: {taskStats.total}
+                  </span>
+                  <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs ${TASK_STATUS_STYLES.todo}`}>
+                    Yapilacak: {taskStats.todo}
+                  </span>
+                  <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs ${TASK_STATUS_STYLES.doing}`}>
+                    Devam: {taskStats.doing}
+                  </span>
+                  <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs ${TASK_STATUS_STYLES.done}`}>
+                    Tamam: {taskStats.done}
+                  </span>
+                </div>
+              </div>
+            </header>
+
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+              <div className="space-y-6">
+                <div className={`${panelClass} bg-ink-900/60`}>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
+                        Yeni gorev
+                      </p>
+                      <p className="text-sm text-slate-400">Veriler tarayicida saklanir.</p>
+                    </div>
+                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
+                      {taskStats.total} gorev
+                    </span>
+                  </div>
+
+                  <div className="mt-4 space-y-3">
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-200" htmlFor="task-title">
+                        Baslik
+                      </label>
+                      <input
+                        id="task-title"
+                        type="text"
+                        value={taskDraft.title}
+                        onChange={(e) => handleTaskDraftChange("title", e.target.value)}
+                        placeholder="Orn: Haftalik raporu toparla"
+                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                      />
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-200" htmlFor="task-owner">
+                          Sorumlu
+                        </label>
+                        <input
+                          id="task-owner"
+                          type="text"
+                          value={taskDraft.owner}
+                          onChange={(e) => handleTaskDraftChange("owner", e.target.value)}
+                          placeholder="Orn: Efe"
+                          className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-200" htmlFor="task-due">
+                          Termin
+                        </label>
+                        <input
+                          id="task-due"
+                          type="date"
+                          value={taskDraft.due}
+                          onChange={(e) => handleTaskDraftChange("due", e.target.value)}
+                          className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-200" htmlFor="task-priority">
+                          Oncelik
+                        </label>
+                        <select
+                          id="task-priority"
+                          value={taskDraft.priority}
+                          onChange={(e) => handleTaskDraftChange("priority", e.target.value)}
+                          className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                        >
+                          {TASK_PRIORITY_OPTIONS.map((option) => (
+                            <option key={option.id} value={option.id}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="space-y-2">
+                        <label className="text-xs font-semibold text-slate-200" htmlFor="task-status">
+                          Durum
+                        </label>
+                        <select
+                          id="task-status"
+                          value={taskDraft.status}
+                          onChange={(e) => handleTaskDraftChange("status", e.target.value)}
+                          className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                        >
+                          {TASK_STATUS_OPTIONS.map((option) => (
+                            <option key={option.id} value={option.id}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-200" htmlFor="task-note">
+                        Not
+                      </label>
+                      <textarea
+                        id="task-note"
+                        value={taskDraft.note}
+                        onChange={(e) => handleTaskDraftChange("note", e.target.value)}
+                        rows={3}
+                        placeholder="Kisa not ekleyin"
+                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                      />
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleTaskAdd}
+                      className="w-full rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
+                    >
+                      Gorev ekle
+                    </button>
+                  </div>
+                </div>
+
+                <div className={`${panelClass} bg-ink-800/60`}>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Durum ozeti</p>
+                  <ul className="mt-3 space-y-2 text-sm text-slate-300">
+                    <li>- Yapilacak: {taskStats.todo}</li>
+                    <li>- Devam: {taskStats.doing}</li>
+                    <li>- Tamam: {taskStats.done}</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="space-y-6 lg:col-span-2">
+                <div className={`${panelClass} bg-ink-900/60`}>
+                  <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
+                        Gorev panosu
+                      </p>
+                      <p className="text-sm text-slate-400">Gorevleri suruklemeden guncelle.</p>
+                    </div>
+                    <div className="flex items-center gap-2 rounded-full border border-white/10 bg-ink-900 px-3 py-1.5 shadow-inner">
+                      <span className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Ara</span>
+                      <input
+                        type="text"
+                        value={taskQuery}
+                        onChange={(e) => setTaskQuery(e.target.value)}
+                        placeholder="Baslik, sorumlu, not"
+                        className="w-56 bg-transparent text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mt-4 grid gap-4 md:grid-cols-3">
+                    {TASK_STATUS_OPTIONS.map((status) => {
+                      const items = tasksByStatus[status.id]
+                      return (
+                        <div
+                          key={status.id}
+                          className="rounded-2xl border border-white/10 bg-ink-900/50 p-4"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-300/80">
+                                {status.label}
+                              </p>
+                              <p className="text-xs text-slate-400">{status.description}</p>
+                            </div>
+                            <span
+                              className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${TASK_STATUS_STYLES[status.id]}`}
+                            >
+                              {items.length}
+                            </span>
+                          </div>
+                          <div className="mt-3 space-y-3">
+                            {items.length === 0 && (
+                              <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-400">
+                                Henuz gorev yok.
+                              </div>
+                            )}
+                            {items.map((task) => {
+                              const priorityClass =
+                                TASK_PRIORITY_STYLES[task.priority] || TASK_PRIORITY_STYLES.medium
+                              const priorityLabel = getTaskPriorityLabel(task.priority)
+                              const dueLabel = formatTaskDue(task.due)
+                              const statusIndex = TASK_STATUS_ORDER.indexOf(task.status)
+                              return (
+                                <div
+                                  key={task.id}
+                                  className="rounded-xl border border-white/10 bg-white/5 p-3"
+                                >
+                                  <div className="flex items-start justify-between gap-2">
+                                    <p className="text-sm font-semibold text-slate-100">
+                                      {task.title || "Basliksiz gorev"}
+                                    </p>
+                                    <span
+                                      className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${priorityClass}`}
+                                    >
+                                      {priorityLabel}
+                                    </span>
+                                  </div>
+                                  {task.note && (
+                                    <p className="mt-2 text-xs text-slate-300">{task.note}</p>
+                                  )}
+                                  <div className="mt-3 flex flex-wrap items-center gap-2 text-[10px] text-slate-400">
+                                    {task.owner && (
+                                      <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5">
+                                        Sahip: {task.owner}
+                                      </span>
+                                    )}
+                                    {dueLabel && (
+                                      <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5">
+                                        Termin: {dueLabel}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
+                                    <select
+                                      value={task.status}
+                                      onChange={(e) => handleTaskStatusChange(task.id, e.target.value)}
+                                      className="rounded-lg border border-white/10 bg-ink-900 px-2 py-1 text-[11px] text-slate-100 focus:border-accent-400 focus:outline-none"
+                                    >
+                                      {TASK_STATUS_OPTIONS.map((option) => (
+                                        <option key={option.id} value={option.id}>
+                                          {option.label}
+                                        </option>
+                                      ))}
+                                    </select>
+                                    <div className="flex items-center gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleTaskMove(task.id, -1)}
+                                        disabled={statusIndex <= 0}
+                                        className="rounded-lg border border-white/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400/60 hover:text-accent-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                      >
+                                        Geri
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleTaskMove(task.id, 1)}
+                                        disabled={statusIndex >= TASK_STATUS_ORDER.length - 1}
+                                        className="rounded-lg border border-white/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400/60 hover:text-accent-100 disabled:cursor-not-allowed disabled:opacity-60"
+                                      >
+                                        Ileri
+                                      </button>
+                                      <button
+                                        type="button"
+                                        onClick={() => handleTaskDelete(task.id)}
+                                        className="rounded-lg border border-rose-300/60 bg-rose-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-rose-100 transition hover:border-rose-200 hover:bg-rose-500/20"
+                                      >
+                                        Sil
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
