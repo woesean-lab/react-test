@@ -516,6 +516,7 @@ function App() {
   const [taskDragState, setTaskDragState] = useState({ activeId: null, overStatus: null })
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false)
   const [noteModalDraft, setNoteModalDraft] = useState("")
+  const [taskDetailTarget, setTaskDetailTarget] = useState(null)
 
   const isLight = theme === "light"
 
@@ -1062,15 +1063,16 @@ function App() {
   }, [])
 
   useEffect(() => {
-    if (!isNoteModalOpen) return
+    if (!isNoteModalOpen && !taskDetailTarget) return
     const handleKey = (event) => {
       if (event.key === "Escape") {
         setIsNoteModalOpen(false)
+        setTaskDetailTarget(null)
       }
     }
     window.addEventListener("keydown", handleKey)
     return () => window.removeEventListener("keydown", handleKey)
-  }, [isNoteModalOpen])
+  }, [isNoteModalOpen, taskDetailTarget])
 
   const toggleProductOpen = (productId) => {
     setOpenProducts((prev) => ({ ...prev, [productId]: !(prev[productId] ?? false)}))
@@ -1135,6 +1137,14 @@ function App() {
 
   const handleNoteModalClose = () => {
     setIsNoteModalOpen(false)
+  }
+
+  const openTaskDetail = (task) => {
+    setTaskDetailTarget(task)
+  }
+
+  const closeTaskDetail = () => {
+    setTaskDetailTarget(null)
   }
 
   const resetTaskForm = () => {
@@ -3204,6 +3214,13 @@ function App() {
                                       {status === "todo" ? "Baslat" : "Tamamla"}
                                     </button>
                                   )}
+                                  <button
+                                    type="button"
+                                    onClick={() => openTaskDetail(task)}
+                                    className="rounded-lg border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50"
+                                  >
+                                    Detay
+                                  </button>
                                   {status === "done" && (
                                     <button
                                       type="button"
@@ -4588,6 +4605,54 @@ function App() {
               >
                 Iptal
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {taskDetailTarget && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+          onClick={closeTaskDetail}
+        >
+          <div
+            className="w-full max-w-2xl rounded-3xl border border-white/10 bg-ink-900/95 p-6 shadow-card backdrop-blur"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-start justify-between gap-4">
+              <div className="space-y-1">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-300/80">
+                  Gorev detayi
+                </p>
+                <p className="text-lg font-semibold text-slate-100">{taskDetailTarget.title}</p>
+              </div>
+              <button
+                type="button"
+                onClick={closeTaskDetail}
+                className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
+              >
+                Kapat
+              </button>
+            </div>
+
+            <div className="mt-4 flex flex-wrap gap-2">
+              {taskDetailTarget.owner && (
+                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold text-slate-200">
+                  Sorumlu: {taskDetailTarget.owner}
+                </span>
+              )}
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold text-slate-200">
+                Durum: {taskStatusMeta[taskDetailTarget.status]?.label || "Yapilacak"}
+              </span>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold text-slate-200">
+                Bitis: {getTaskDueLabel(taskDetailTarget)}
+              </span>
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-white/10 bg-ink-900/70 p-4 text-sm text-slate-200 shadow-inner">
+              <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Notlar</p>
+              <div className="mt-2 max-h-[280px] overflow-auto whitespace-pre-wrap text-sm text-slate-100">
+                {taskDetailTarget.note || "Not eklenmedi."}
+              </div>
             </div>
           </div>
         </div>
