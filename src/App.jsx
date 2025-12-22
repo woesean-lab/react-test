@@ -31,20 +31,6 @@ const LIST_CELL_TONE_CLASSES = {
   emerald: "bg-emerald-500/10",
   rose: "bg-rose-500/10",
 }
-const LIST_CELL_TONE_OPTIONS = [
-  { id: "none", label: "Yok", swatchClass: "bg-transparent" },
-  { id: "amber", label: "Sari", swatchClass: "bg-amber-400/70" },
-  { id: "sky", label: "Mavi", swatchClass: "bg-sky-400/70" },
-  { id: "emerald", label: "Yesil", swatchClass: "bg-emerald-400/70" },
-  { id: "rose", label: "Pembe", swatchClass: "bg-rose-400/70" },
-]
-const LIST_FORMAT_TYPE_OPTIONS = [
-  { id: "auto", label: "Genel" },
-  { id: "number", label: "Sayi" },
-  { id: "percent", label: "Yuzde" },
-  { id: "currency", label: "Para (TRY)" },
-  { id: "date", label: "Tarih" },
-]
 const LIST_NUMBER_FORMATTER = new Intl.NumberFormat("tr-TR", { maximumFractionDigits: 2 })
 const LIST_PERCENT_FORMATTER = new Intl.NumberFormat("tr-TR", {
   style: "percent",
@@ -387,7 +373,6 @@ function App() {
   const [selectedListCols, setSelectedListCols] = useState(() => new Set())
   const [lastListRowSelect, setLastListRowSelect] = useState(null)
   const [lastListColSelect, setLastListColSelect] = useState(null)
-  const [listFormatClipboard, setListFormatClipboard] = useState(null)
   const [listContextMenu, setListContextMenu] = useState({
     open: false,
     type: null,
@@ -705,15 +690,6 @@ function App() {
     return value
   }
 
-  const updateListCellFormat = (cell, formatPatch) => {
-    const baseValue = isListCellObject(cell) ? cell.value ?? "" : cell ?? ""
-    const merged = {
-      ...(isListCellObject(cell) ? cell.format || {} : {}),
-      ...(formatPatch || {}),
-    }
-    return buildListCell(baseValue, merged)
-  }
-
   const getListCellRawValue = (rowIndex, colIndex) => {
     return getListCellData(rowIndex, colIndex).value ?? ""
   }
@@ -846,17 +822,6 @@ function App() {
     const format = getListCellData(rowIndex, colIndex).format
     return formatListCellValue(value, format)
   }
-
-  const hasActiveListCell =
-    Number.isFinite(selectedListCell.row) && Number.isFinite(selectedListCell.col)
-  const selectedListCellData = hasActiveListCell
-    ? getListCellData(selectedListCell.row, selectedListCell.col)
-    : null
-  const selectedListCellFormat = selectedListCellData?.format || {}
-  const selectedListCellTone = selectedListCellFormat.tone || "none"
-  const selectedListCellFormatType = selectedListCellFormat.type || "auto"
-  const hasListFormatClipboard =
-    listFormatClipboard && Object.keys(listFormatClipboard).length > 0
 
   const groupedTemplates = useMemo(() => {
     return templates.reduce((acc, tpl) => {
@@ -1660,43 +1625,6 @@ function App() {
       return new Set([colIndex])
     })
     setLastListColSelect(colIndex)
-  }
-
-  const applyListCellFormat = (formatPatch) => {
-    if (!activeList) return
-    const { row, col } = selectedListCell
-    if (!Number.isFinite(row) || !Number.isFinite(col)) return
-    updateListById(activeList.id, (list) => {
-      const rows = list.rows.map((rowData, rowIndex) => {
-        if (rowIndex !== row) return rowData
-        const nextRow = [...rowData]
-        while (nextRow.length <= col) nextRow.push("")
-        nextRow[col] = updateListCellFormat(nextRow[col], formatPatch)
-        return nextRow
-      })
-      return { ...list, rows }
-    })
-  }
-
-  const handleListFormatTypeChange = (event) => {
-    const nextType = event.target.value
-    const patch = { type: nextType }
-    if (nextType === "currency") {
-      patch.currency = "TRY"
-    }
-    applyListCellFormat(patch)
-  }
-
-  const handleCopyListFormat = () => {
-    if (!hasActiveListCell) return
-    setListFormatClipboard({ ...(selectedListCellFormat || {})})
-    toast.success("Hucre bicimi kopyalandi")
-  }
-
-  const handlePasteListFormat = () => {
-    if (!hasActiveListCell || !listFormatClipboard) return
-    applyListCellFormat({ ...listFormatClipboard })
-    toast.success("Hucre bicimi uygulandi")
   }
 
   const handleListDeleteSelectedRows = () => {
@@ -2927,130 +2855,6 @@ function App() {
                   </div>
 
                   
-                  {activeList && hasActiveListCell && (
-                    <div className="mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-200">
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-                        Hucre bicimi
-                      </span>
-                      <select
-                        value={selectedListCellFormatType}
-                        onChange={handleListFormatTypeChange}
-                        className="h-7 rounded-lg border border-white/10 bg-ink-900 px-2 text-[11px] text-slate-100 focus:border-accent-400 focus:outline-none"
-                      >
-                        {LIST_FORMAT_TYPE_OPTIONS.map((option) => (
-                          <option key={option.id} value={option.id}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
-                      <button
-                        type="button"
-                        onClick={() => applyListCellFormat({ bold: !selectedListCellFormat.bold })}
-                        className={`h-7 w-7 rounded-lg border text-[11px] font-semibold transition ${
-                          selectedListCellFormat.bold
-                            ? "border-accent-300/70 bg-accent-500/20 text-accent-100"
-                            : "border-white/10 text-slate-200 hover:border-accent-400/60 hover:text-accent-100"
-                        }`}
-                      >
-                        B
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => applyListCellFormat({ italic: !selectedListCellFormat.italic })}
-                        className={`h-7 w-7 rounded-lg border text-[11px] font-semibold transition ${
-                          selectedListCellFormat.italic
-                            ? "border-accent-300/70 bg-accent-500/20 text-accent-100"
-                            : "border-white/10 text-slate-200 hover:border-accent-400/60 hover:text-accent-100"
-                        }`}
-                      >
-                        I
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => applyListCellFormat({ underline: !selectedListCellFormat.underline })}
-                        className={`h-7 w-7 rounded-lg border text-[11px] font-semibold transition ${
-                          selectedListCellFormat.underline
-                            ? "border-accent-300/70 bg-accent-500/20 text-accent-100"
-                            : "border-white/10 text-slate-200 hover:border-accent-400/60 hover:text-accent-100"
-                        }`}
-                      >
-                        U
-                      </button>
-                      <div className="mx-1 h-5 w-px bg-white/10" />
-                      {[
-                        { id: "left", label: "Sola" },
-                        { id: "center", label: "Ortala" },
-                        { id: "right", label: "Saga" },
-                      ].map((option) => (
-                        <button
-                          key={option.id}
-                          type="button"
-                          onClick={() => applyListCellFormat({ align: option.id })}
-                          className={`h-7 w-7 rounded-lg border text-[11px] font-semibold transition ${
-                            (selectedListCellFormat.align || "left") === option.id
-                              ? "border-accent-300/70 bg-accent-500/20 text-accent-100"
-                              : "border-white/10 text-slate-200 hover:border-accent-400/60 hover:text-accent-100"
-                          }`}
-                          title={option.label}
-                        >
-                          {option.id === "left" ? "L" : option.id === "center" ? "C" : "R"}
-                        </button>
-                      ))}
-                      <div className="mx-1 h-5 w-px bg-white/10" />
-                      <div className="flex items-center gap-1.5">
-                        {LIST_CELL_TONE_OPTIONS.map((tone) => (
-                          <button
-                            key={tone.id}
-                            type="button"
-                            onClick={() => applyListCellFormat({ tone: tone.id })}
-                            className={`flex h-6 w-6 items-center justify-center rounded-full border transition ${
-                              selectedListCellTone === tone.id
-                                ? "border-accent-300/80 ring-2 ring-accent-400/40"
-                                : "border-white/10 hover:border-accent-400/60"
-                            }`}
-                            title={tone.label}
-                          >
-                            <span
-                              className={`h-3 w-3 rounded-full ${tone.swatchClass} ${
-                                tone.id === "none" ? "border border-white/20" : ""
-                              }`}
-                            />
-                          </button>
-                        ))}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={handleCopyListFormat}
-                        className="rounded-lg border border-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400/60 hover:text-accent-100"
-                      >
-                        Kopyala
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handlePasteListFormat}
-                        disabled={!hasListFormatClipboard}
-                        className="rounded-lg border border-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400/60 hover:text-accent-100 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        Yapistir
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() =>
-                          applyListCellFormat({
-                            bold: false,
-                            italic: false,
-                            underline: false,
-                            align: "left",
-                            tone: "none",
-                            type: "auto",
-                          })
-                        }
-                        className="ml-auto rounded-lg border border-white/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400/60 hover:text-accent-100"
-                      >
-                        Temizle
-                      </button>
-                    </div>
-                  )}
                   {!activeList ? (
                     <div className="mt-4 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
                       Bir liste seçin veya yeni liste oluşturun.
