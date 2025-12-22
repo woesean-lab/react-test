@@ -4654,7 +4654,7 @@ function App() {
           onClick={closeTaskDetail}
         >
           <div
-            className="w-full max-w-2xl rounded-3xl border border-white/10 bg-ink-900/95 p-6 shadow-card backdrop-blur"
+            className="w-full max-w-2xl rounded-2xl border border-white/10 bg-ink-900/95 p-6 shadow-card backdrop-blur"
             onClick={(event) => event.stopPropagation()}
           >
             <div className="flex items-start justify-between gap-4">
@@ -4667,7 +4667,7 @@ function App() {
               <button
                 type="button"
                 onClick={closeTaskDetail}
-                className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
+                className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
               >
                 Kapat
               </button>
