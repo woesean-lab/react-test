@@ -75,8 +75,8 @@ const initialProducts = [
 const initialTasks = [
   {
     id: "tsk-1",
-    title: "Haftalik oncelik listesini guncelle",
-    note: "Kritik musteriler + teslim sureleri",
+    title: "Haftalık öncelik listesini güncelle",
+    note: "Kritik müşteriler + teslim süreleri",
     owner: "Burak",
     dueType: "date",
     dueDate: "2025-12-29",
@@ -84,8 +84,8 @@ const initialTasks = [
   },
   {
     id: "tsk-2",
-    title: "Sablon kategorilerini toparla",
-    note: "Genel, satis, destek",
+    title: "Şablon kategorilerini toparla",
+    note: "Genel, satış, destek",
     owner: "Ece",
     dueType: "repeat",
     repeatDay: "2",
@@ -93,7 +93,7 @@ const initialTasks = [
   },
   {
     id: "tsk-3",
-    title: "Haftalik raporu paylas",
+    title: "Haftalık raporu paylaş",
     note: "Cuma 17:00",
     owner: "Tuna",
     dueType: "today",
@@ -115,7 +115,7 @@ const categoryPalette = [
 
 const taskStatusMeta = {
   todo: {
-    label: "Yapilacak",
+    label: "Yapılacak",
     helper: "Planla",
     accent: "text-amber-200",
     badge: "border-amber-300/60 bg-amber-500/15 text-amber-50",
@@ -127,7 +127,7 @@ const taskStatusMeta = {
     badge: "border-sky-300/60 bg-sky-500/15 text-sky-50",
   },
   done: {
-    label: "Tamamlandi",
+    label: "Tamamlandı",
     helper: "Bitenler",
     accent: "text-emerald-200",
     badge: "border-emerald-300/60 bg-emerald-500/15 text-emerald-50",
@@ -135,16 +135,16 @@ const taskStatusMeta = {
 }
 
 const taskDueTypeOptions = [
-  { value: "today", label: "Bugun" },
-  { value: "repeat", label: "Tekrarlanabilir gun" },
-  { value: "date", label: "Ozel tarih" },
+  { value: "today", label: "Bugün" },
+  { value: "repeat", label: "Tekrarlanabilir gün" },
+  { value: "date", label: "Özel tarih" },
 ]
 
 const taskRepeatDays = [
   { value: "1", label: "Pazartesi" },
-  { value: "2", label: "Sali" },
-  { value: "3", label: "Carsamba" },
-  { value: "4", label: "Persembe" },
+  { value: "2", label: "Salı" },
+  { value: "3", label: "Çarşamba" },
+  { value: "4", label: "Perşembe" },
   { value: "5", label: "Cuma" },
   { value: "6", label: "Cumartesi" },
   { value: "0", label: "Pazar" },
@@ -1110,13 +1110,13 @@ function App() {
   }
 
   const getTaskDueLabel = (task) => {
-    if (task.dueType === "today") return "Bugun"
+    if (task.dueType === "today") return "Bugün"
     if (task.dueType === "repeat") {
       const day = taskRepeatDays.find((item) => item.value === String(task.repeatDay))
       return day ? `Her ${day.label}` : "Tekrarlanabilir"
     }
     if (task.dueType === "date") {
-      return task.dueDate ? formatTaskDate(task.dueDate) : "Tarih secilmedi"
+      return task.dueDate ? formatTaskDate(task.dueDate) : "Tarih seçilmedi"
     }
     return ""
   }
@@ -1186,11 +1186,11 @@ function App() {
   const handleTaskAdd = () => {
     const titleValue = taskForm.title.trim()
     if (!titleValue) {
-      toast.error("Gorev adi gerekli.")
+      toast.error("Görev adı gerekli.")
       return
     }
     if (taskForm.dueType === "date" && !taskForm.dueDate) {
-      toast.error("Ozel tarih secin.")
+      toast.error("Özel tarih seçin.")
       return
     }
     const newTask = {
@@ -1206,7 +1206,7 @@ function App() {
     }
     setTasks((prev) => [newTask, ...prev])
     resetTaskForm()
-    toast.success("Gorev eklendi")
+    toast.success("Görev eklendi")
   }
 
   const handleTaskAdvance = (taskId) => {
@@ -1238,7 +1238,7 @@ function App() {
     if (confirmTaskDelete === taskId) {
       setTasks((prev) => prev.filter((task) => task.id !== taskId))
       setConfirmTaskDelete(null)
-      toast.success("Gorev silindi")
+      toast.success("Görev silindi")
       return
     }
     setConfirmTaskDelete(taskId)
@@ -2702,7 +2702,7 @@ function App() {
                 : "bg-white/5 text-slate-200 hover:bg-white/10"
             }`}
           >
-            Gorev
+            Görev
           </button>
           <button
             type="button"
@@ -3116,9 +3116,9 @@ function App() {
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-2">
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
-                    Gorevler
+                    Görevler
                   </span>
-                  <h1 className="font-display text-3xl font-semibold text-white">Gorevler</h1>
+                  <h1 className="font-display text-3xl font-semibold text-white">Görevler</h1>
                   <p className="max-w-2xl text-sm text-slate-200/80">
                     Not ve tarih ile gorevlerini takipe al. Hepsi lokal tutulur.
                   </p>
@@ -3139,7 +3139,7 @@ function App() {
                 <div className={`${panelClass} bg-ink-900/60`}>
                   <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Gorev tahtasi</p>
+                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Görev panosu</p>
                       <p className="text-sm text-slate-400">Kartlari surukleyip yeni duruma birak.</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -3226,7 +3226,7 @@ function App() {
                                       : "border-white/10 bg-white/5 text-slate-300"
                                   }`}
                                 >
-                                  Bitis: {getTaskDueLabel(task)}
+                                  Bitiş: {getTaskDueLabel(task)}
                                 </span>
                                 <div className="flex flex-wrap gap-2">
                                   {status !== "done" && (
@@ -3235,7 +3235,7 @@ function App() {
                                       onClick={() => handleTaskAdvance(task.id)}
                                       className="rounded-lg border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50"
                                     >
-                                      {status === "todo" ? "Baslat" : "Tamamla"}
+                                      {status === "todo" ? "Başlat" : "Tamamla"}
                                     </button>
                                   )}
                                   <button
@@ -3280,7 +3280,7 @@ function App() {
                 <div className={`${panelClass} bg-ink-900/70`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Gorev ekle</p>
+                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Görev ekle</p>
                       <p className="text-sm text-slate-400">Yeni isleri listeye ekle.</p>
                     </div>
                     <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
@@ -3291,7 +3291,7 @@ function App() {
                   <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
                     <div className="space-y-2">
                       <label className="text-xs font-semibold text-slate-200" htmlFor="task-title">
-                        Gorev adi
+                        Görev adı
                       </label>
                       <input
                         id="task-title"
@@ -3340,7 +3340,7 @@ function App() {
 
                     <div className="space-y-2">
                       <label className="text-xs font-semibold text-slate-200" htmlFor="task-due-type">
-                        Bitis tarihi
+                        Bitiş tarihi
                       </label>
                       <select
                         id="task-due-type"
@@ -3364,7 +3364,7 @@ function App() {
                     {taskForm.dueType === "repeat" && (
                       <div className="space-y-2">
                         <label className="text-xs font-semibold text-slate-200" htmlFor="task-repeat-day">
-                          Tekrarlanabilir gun
+                          Tekrarlanabilir gün
                         </label>
                         <select
                           id="task-repeat-day"
@@ -3384,7 +3384,7 @@ function App() {
                     {taskForm.dueType === "date" && (
                       <div className="space-y-2">
                         <label className="text-xs font-semibold text-slate-200" htmlFor="task-due-date">
-                          Ozel tarih
+                          Özel tarih
                         </label>
                         <input
                           id="task-due-date"
@@ -3402,7 +3402,7 @@ function App() {
                         onClick={handleTaskAdd}
                         className="flex-1 min-w-[140px] rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
                       >
-                        Gorev ekle
+                        Görev ekle
                       </button>
                       <button
                         type="button"
@@ -3428,7 +3428,7 @@ function App() {
                         <p className="mt-1 text-sm text-slate-100">{focusTask.title}</p>
                       </>
                     ) : (
-                      <p>Gorev kalmadi. Yeni gorev ekleyebilirsin.</p>
+                      <p>Görev kalmadı. Yeni görev ekleyebilirsin.</p>
                     )}
                   </div>
                 </div>
@@ -4592,7 +4592,7 @@ function App() {
             <div className="flex items-center justify-between border-b border-white/10 bg-ink-800 px-4 py-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-300/80">
-                  Not editoru
+                  Not editörü
                 </p>
                 <p className="text-xs text-slate-400">{noteModalDraft.length} karakter</p>
               </div>
@@ -4621,7 +4621,7 @@ function App() {
                 value={noteModalDraft}
                 onChange={(e) => setNoteModalDraft(e.target.value)}
                 onScroll={handleNoteScroll}
-                placeholder="Detayli notunu buraya yaz..."
+                placeholder="Detaylı notunu buraya yaz..."
                 className="flex-1 resize-none overflow-auto bg-ink-900 px-4 py-3 font-mono text-[13px] leading-6 text-slate-100 placeholder:text-slate-500 focus:outline-none"
               />
             </div>
@@ -4641,7 +4641,7 @@ function App() {
                   onClick={handleNoteModalClose}
                   className="min-w-[120px] rounded-lg border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
                 >
-                  Iptal
+                  İptal
                 </button>
               </div>
             </div>
@@ -4660,7 +4660,7 @@ function App() {
             <div className="flex items-start justify-between gap-4">
               <div className="space-y-1">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-300/80">
-                  Gorev detayi
+                  Görev detayı
                 </p>
                 <p className="text-lg font-semibold text-slate-100">{taskDetailTarget.title}</p>
               </div>
@@ -4680,10 +4680,10 @@ function App() {
                 </span>
               )}
               <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold text-slate-200">
-                Durum: {taskStatusMeta[taskDetailTarget.status]?.label || "Yapilacak"}
+                Durum: {taskStatusMeta[taskDetailTarget.status]?.label || "Yapılacak"}
               </span>
               <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold text-slate-200">
-                Bitis: {getTaskDueLabel(taskDetailTarget)}
+                Bitiş: {getTaskDueLabel(taskDetailTarget)}
               </span>
             </div>
 
