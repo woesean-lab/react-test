@@ -1,14 +1,14 @@
-ï»¿import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Toaster, toast } from "react-hot-toast"
 
 const fallbackTemplates = [
-  { label: "HoÅŸ geldin", value: "HoÅŸ geldin! Burada herkese yer var.", category: "KarÅŸÄ±lama" },
+  { label: "Hoş geldin", value: "Hoş geldin! Burada herkese yer var.", category: "Karşılama" },
   {
     label: "Bilgilendirme",
-    value: "Son durum: GÃ¶rev planlandÄ±ÄŸÄ± gibi ilerliyor.",
+    value: "Son durum: Görev planlandığı gibi ilerliyor.",
     category: "Bilgilendirme",
   },
-  { label: "HatÄ±rlatma", value: "Unutma: AkÅŸam 18:00 toplantÄ±sÄ±na hazÄ±r ol.", category: "HatÄ±rlatma" },
+  { label: "Hatırlatma", value: "Unutma: Akşam 18:00 toplantısına hazır ol.", category: "Hatırlatma" },
 ]
 
 const fallbackCategories = Array.from(new Set(["Genel", ...fallbackTemplates.map((tpl) => tpl.category || "Genel")]))
@@ -142,8 +142,8 @@ const formatTaskRecurrence = (task) => {
 }
 
 const initialProblems = [
-  { id: 1, username: "@ornek1", issue: "Ã–deme ekranda takÄ±ldÄ±, 2 kez kart denemiÅŸ.", status: "open" },
-  { id: 2, username: "@ornek2", issue: "Teslimat gecikmesi ÅŸikayeti.", status: "open" },
+  { id: 1, username: "@ornek1", issue: "Ödeme ekranda takıldı, 2 kez kart denemiş.", status: "open" },
+  { id: 2, username: "@ornek2", issue: "Teslimat gecikmesi şikayeti.", status: "open" },
 ]
 
 const initialProducts = [
@@ -159,7 +159,7 @@ const initialProducts = [
   {
     id: "prd-2",
     name: "Galaxy Pass",
-    note: "Deneme sÃ¼rÃ¼mÃ¼ iÃ§in",
+    note: "Deneme sürümü için",
     stocks: [{ id: "stk-3", code: "XBGP-3M-TRIAL-KEY" }],
   },
   {
@@ -424,7 +424,7 @@ const formatListCellValue = (value, format = {}) => {
   return formatCellValue(value)
 }
 
-function LoadingIndicator({ label = "YÃ¼kleniyor..." }) {
+function LoadingIndicator({ label = "Yükleniyor..." }) {
   return (
     <span className="inline-flex items-center gap-2 text-xs font-semibold text-slate-200">
       <span className="h-2 w-2 animate-pulse rounded-full bg-accent-400" />
@@ -642,7 +642,7 @@ function App() {
         setLists([])
         if (!listLoadErrorRef.current) {
           listLoadErrorRef.current = true
-          toast.error("Liste verileri alÄ±namadÄ± (API/DB kontrol edin).")
+          toast.error("Liste verileri alınamadı (API/DB kontrol edin).")
         }
       } finally {
         setIsListsLoading(false)
@@ -1195,7 +1195,7 @@ function App() {
       } catch (error) {
         if (error?.name === "AbortError") return
         setProblems(initialProblems)
-        toast.error("Problem listesi alÄ±namadÄ± (API/DB kontrol edin)")
+        toast.error("Problem listesi alınamadı (API/DB kontrol edin)")
       }
     })()
 
@@ -1214,7 +1214,7 @@ function App() {
       } catch (error) {
         if (error?.name === "AbortError") return
         setProducts(initialProducts)
-        toast.error("Stok listesi alÄ±namadÄ± (API/DB kontrol edin)")
+        toast.error("Stok listesi alınamadı (API/DB kontrol edin)")
       }
     })()
 
@@ -1259,7 +1259,7 @@ function App() {
         setTemplates(fallbackTemplates)
         setSelectedTemplate(fallbackTemplates[0]?.label ?? null)
         setSelectedCategory(fallbackTemplates[0]?.category ?? "Genel")
-        toast.error("Sunucuya baÄŸlanÄ±lamadÄ±. (API/DB kontrol edin)")
+        toast.error("Sunucuya bağlanılamadı. (API/DB kontrol edin)")
       } finally {
         const elapsed = Date.now() - startedAt
         const delay = Math.max(0, 600 - elapsed)
@@ -1307,7 +1307,7 @@ function App() {
     if (tpl && options.shouldCopy) {
       try {
         await navigator.clipboard.writeText(tpl.value)
-        toast.success("Åablon kopyalandÄ±", { duration: 1600, position: "top-right" })
+        toast.success("Şablon kopyalandı", { duration: 1600, position: "top-right" })
         toast(
           <div className="space-y-1">
             <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-200">
@@ -1319,7 +1319,7 @@ function App() {
         )
       } catch (error) {
         console.error("Copy failed", error)
-        toast.error("KopyalanamadÄ±", { duration: 1600, position: "top-right" })
+        toast.error("Kopyalanamadı", { duration: 1600, position: "top-right" })
       }
     }
   }
@@ -1339,7 +1339,7 @@ function App() {
     if (!activeTemplate || showLoading) return
     const nextValue = activeTemplateDraft.trim()
     if (!nextValue) {
-      toast.error("Mesaj boÅŸ olamaz.")
+      toast.error("Mesaj boş olamaz.")
       return
     }
     if ((activeTemplate.value || "").trim() === nextValue) {
@@ -1365,10 +1365,10 @@ function App() {
       }
       setActiveTemplateDraft(nextValue)
       setIsEditingActiveTemplate(false)
-      toast.success("Åablon gÃ¼ncellendi")
+      toast.success("Şablon güncellendi")
     } catch (error) {
       console.error(error)
-      toast.error("Åablon gÃ¼ncellenemedi (API/DB kontrol edin).")
+      toast.error("Şablon güncellenemedi (API/DB kontrol edin).")
     } finally {
       setIsTemplateSaving(false)
     }
@@ -1395,7 +1395,7 @@ function App() {
       })
 
       if (res.status === 409) {
-        toast("Var olan ÅŸablon aktif edildi", { position: "top-right" })
+        toast("Var olan şablon aktif edildi", { position: "top-right" })
         setSelectedTemplate(safeTitle)
         setSelectedCategory(safeCategory)
         return
@@ -1410,7 +1410,7 @@ function App() {
       }
       setSelectedTemplate(created.label)
       setSelectedCategory(created.category || safeCategory)
-      toast.success("Yeni ÅŸablon eklendi")
+      toast.success("Yeni şablon eklendi")
     } catch (error) {
       console.error(error)
       toast.error("Kaydedilemedi (API/DB kontrol edin).")
@@ -1419,13 +1419,13 @@ function App() {
 
   const handleDeleteTemplate = async (targetLabel = selectedTemplate) => {
     if (templates.length <= 1) {
-      toast.error("En az bir ÅŸablon kalmalÄ±.")
+      toast.error("En az bir şablon kalmalı.")
       return
     }
     const target = templates.find((tpl) => tpl.label === targetLabel)
     const targetId = target?.id
     if (!targetId) {
-      toast.error("Silinecek ÅŸablon bulunamadÄ±.")
+      toast.error("Silinecek şablon bulunamadı.")
       return
     }
 
@@ -1444,7 +1444,7 @@ function App() {
           setSelectedCategory(nextTpl.category || "Genel")
         }
       }
-      toast.success("Åablon silindi")
+      toast.success("Şablon silindi")
     } catch (error) {
       console.error(error)
       toast.error("Silinemedi (API/DB kontrol edin).")
@@ -1458,7 +1458,7 @@ function App() {
       return
     }
     setConfirmTarget(targetLabel)
-    toast("Silmek iÃ§in tekrar tÄ±kla", { position: "top-right" })
+    toast("Silmek için tekrar tıkla", { position: "top-right" })
   }
 
   const handleCategoryAdd = async () => {
@@ -1522,7 +1522,7 @@ function App() {
       return
     }
     setConfirmCategoryTarget(cat)
-    toast("Silmek iÃ§in tekrar tÄ±kla", { position: "top-right" })
+    toast("Silmek için tekrar tıkla", { position: "top-right" })
   }
 
   const queueListSave = useCallback(
@@ -1625,7 +1625,7 @@ function App() {
   const handleListCreate = async () => {
     const name = listName.trim()
     if (!name) {
-      toast.error("Liste adÄ± girin.")
+      toast.error("Liste adı girin.")
       return
     }
     const rows = createEmptySheet(DEFAULT_LIST_ROWS, DEFAULT_LIST_COLS)
@@ -1640,10 +1640,10 @@ function App() {
       setLists((prev) => [created, ...prev])
       setActiveListId(created.id)
       setListName("")
-      toast.success("Liste oluÅŸturuldu")
+      toast.success("Liste oluşturuldu")
     } catch (error) {
       console.error(error)
-      toast.error("Liste oluÅŸturulamadÄ± (API/DB kontrol edin).")
+      toast.error("Liste oluşturulamadı (API/DB kontrol edin).")
     }
   }
 
@@ -1651,12 +1651,12 @@ function App() {
     if (!activeList) return
     const name = listRenameDraft.trim()
     if (!name) {
-      toast.error("Liste adÄ± boÅŸ olamaz.")
+      toast.error("Liste adı boş olamaz.")
       return
     }
     if (name === activeList.name) return
     updateListById(activeList.id, (list) => ({ ...list, name }))
-    toast.success("Liste adÄ± gÃ¼ncellendi")
+    toast.success("Liste adı güncellendi")
   }
 
   const handleListDelete = async (listId) => {
@@ -2021,10 +2021,10 @@ function App() {
   const toastIconTheme = isLight
     ? { primary: "#2563eb", secondary: "#ffffff" }
     : { primary: "#3ac7ff", secondary: "#0f1625" }
-  const templateCountText = showLoading ? <LoadingIndicator label="YÃ¼kleniyor" /> : templates.length
-  const categoryCountText = showLoading ? <LoadingIndicator label="YÃ¼kleniyor" /> : categories.length
-  const selectedCategoryText = showLoading ? <LoadingIndicator label="YÃ¼kleniyor" /> : selectedCategory.trim() || "Genel"
-  const listCountText = isListsLoading ? <LoadingIndicator label="YÃ¼kleniyor" /> : lists.length
+  const templateCountText = showLoading ? <LoadingIndicator label="Yükleniyor" /> : templates.length
+  const categoryCountText = showLoading ? <LoadingIndicator label="Yükleniyor" /> : categories.length
+  const selectedCategoryText = showLoading ? <LoadingIndicator label="Yükleniyor" /> : selectedCategory.trim() || "Genel"
+  const listCountText = isListsLoading ? <LoadingIndicator label="Yükleniyor" /> : lists.length
 
   const isAuthBusy = isAuthChecking || isAuthLoading
 
@@ -2092,7 +2092,7 @@ function App() {
     const name = productForm.name.trim()
     const deliveryTemplate = productForm.deliveryTemplate.trim()
     if (!name) {
-      toast.error("ÃœrÃ¼n ismi boÅŸ olamaz.")
+      toast.error("Ürün ismi boş olamaz.")
       return
     }
     const deliveryMessage =
@@ -2114,10 +2114,10 @@ function App() {
       setProducts((prev) => [created, ...prev])
       setProductForm({ name: "", deliveryTemplate: "" })
       setStockForm((prev) => ({ ...prev, productId: created.id }))
-      toast.success("ÃœrÃ¼n eklendi")
+      toast.success("Ürün eklendi")
     } catch (error) {
       console.error(error)
-      toast.error("ÃœrÃ¼n eklenemedi (API/DB kontrol edin).")
+      toast.error("Ürün eklenemedi (API/DB kontrol edin).")
     }
   }
 
@@ -2126,11 +2126,11 @@ function App() {
     const normalizedCode = stockForm.code.replace(/\r\n/g, "\n").replace(/\r/g, "\n")
     const codes = normalizedCode.split("\n").map((line) => line.trim()).filter(Boolean)
     if (!productId) {
-      toast.error("ÃœrÃ¼n seÃ§in.")
+      toast.error("Ürün seçin.")
       return
     }
     if (codes.length === 0) {
-      toast.error("Anahtar kodu boÅŸ olamaz.")
+      toast.error("Anahtar kodu boş olamaz.")
       return
     }
 
@@ -2166,7 +2166,7 @@ function App() {
     const codes = product.stocks.slice(0, count).map((stk) => stk.code)
     const removed = product.stocks.slice(0, count)
     if (codes.length === 0) {
-      toast.error("Bu Ã¼rÃ¼nde kopyalanacak stok yok.")
+      toast.error("Bu üründe kopyalanacak stok yok.")
       return
     }
 
@@ -2190,7 +2190,7 @@ function App() {
             : p,
         ),
       )
-      toast.success(`${codes.length} stok kopyalandÄ± ve silindi`, { duration: 1800, position: "top-right" })
+      toast.success(`${codes.length} stok kopyalandı ve silindi`, { duration: 1800, position: "top-right" })
     } catch (error) {
       console.error(error)
       toast.error("Stoklar silinemedi (API/DB kontrol edin).")
@@ -2218,7 +2218,7 @@ function App() {
           return next
         })
         setConfirmProductTarget(null)
-        toast.success("ÃœrÃ¼n ve stoklarÄ± silindi")
+        toast.success("Ürün ve stokları silindi")
         return
       } catch (error) {
         console.error(error)
@@ -2228,7 +2228,7 @@ function App() {
       }
     }
     setConfirmProductTarget(productId)
-    toast("Silmek iÃ§in tekrar tÄ±kla", { position: "top-right" })
+    toast("Silmek için tekrar tıkla", { position: "top-right" })
   }
   const handleEditStart = (product) => {
     const matchedTemplate =
@@ -2261,14 +2261,14 @@ function App() {
     const name = draft?.name?.trim()
     const selectedTemplate = draft?.deliveryTemplate?.trim()
     if (!name) {
-      toast.error("Ä°sim boÅŸ olamaz.")
+      toast.error("İsim boş olamaz.")
       return
     }
     const templateValue = selectedTemplate
       ? templates.find((tpl) => tpl.label === selectedTemplate)?.value
       : ""
     if (selectedTemplate && !templateValue) {
-      toast.error("GeÃ§erli teslimat mesajÄ± bulunamadÄ±.")
+      toast.error("Geçerli teslimat mesajı bulunamadı.")
       return
     }
 
@@ -2287,21 +2287,21 @@ function App() {
       const updated = await res.json()
       setProducts((prev) => prev.map((p) => (p.id === productId ? updated : p)))
       handleEditCancel(productId)
-      toast.success("ÃœrÃ¼n gÃ¼ncellendi")
+      toast.success("Ürün güncellendi")
     } catch (error) {
       console.error(error)
-      toast.error("ÃœrÃ¼n gÃ¼ncellenemedi (API/DB kontrol edin).")
+      toast.error("Ürün güncellenemedi (API/DB kontrol edin).")
     }
   }
   const handleUndoDelete = async () => {
     if (!lastDeleted) {
-      toast.error("Geri alÄ±nacak kayÄ±t yok.")
+      toast.error("Geri alınacak kayıt yok.")
       return
     }
     const { productId, stocks } = lastDeleted
     const codes = stocks.map((stk) => stk.code).filter(Boolean)
     if (codes.length === 0) {
-      toast.error("Geri alÄ±nacak stok bulunamadÄ±.")
+      toast.error("Geri alınacak stok bulunamadı.")
       return
     }
 
@@ -2317,25 +2317,25 @@ function App() {
         prev.map((p) => (p.id === productId ? { ...p, stocks: updatedStocks } : p)),
       )
       setLastDeleted(null)
-      toast.success("Silinen kayÄ±t geri alÄ±ndÄ±", { duration: 1400, position: "top-right" })
+      toast.success("Silinen kayıt geri alındı", { duration: 1400, position: "top-right" })
     } catch (error) {
       console.error(error)
-      toast.error("Geri alÄ±namadÄ± (API/DB kontrol edin).")
+      toast.error("Geri alınamadı (API/DB kontrol edin).")
     }
   }
   const handleProductCopyMessage = async (productId) => {
     const product = products.find((p) => p.id === productId)
     const message = product?.deliveryMessage?.trim()
     if (!message) {
-      toast.error("Bu Ã¼rÃ¼ne teslimat mesajÄ± eklenmemiÅŸ.")
+      toast.error("Bu ürüne teslimat mesajı eklenmemiş.")
       return
     }
     try {
       await navigator.clipboard.writeText(message)
-      toast.success("Teslimat mesajÄ± kopyalandÄ±", { duration: 1500, position: "top-right" })
+      toast.success("Teslimat mesajı kopyalandı", { duration: 1500, position: "top-right" })
     } catch (error) {
       console.error(error)
-      toast.error("KopyalanamadÄ±")
+      toast.error("Kopyalanamadı")
     }
   }
 
@@ -2371,15 +2371,15 @@ function App() {
       }
     }
     setConfirmStockTarget(key)
-    toast("Silmek iÃ§in tekrar tÄ±kla", { position: "top-right" })
+    toast("Silmek için tekrar tıkla", { position: "top-right" })
   }
   const handleStockCopy = async (code) => {
     try {
       await navigator.clipboard.writeText(code)
-      toast.success("Anahtar kopyalandÄ±", { duration: 1500, position: "top-right" })
+      toast.success("Anahtar kopyalandı", { duration: 1500, position: "top-right" })
     } catch (error) {
       console.error(error)
-      toast.error("KopyalanamadÄ±", { duration: 1500, position: "top-right" })
+      toast.error("Kopyalanamadı", { duration: 1500, position: "top-right" })
     }
   }
 
@@ -2387,7 +2387,7 @@ function App() {
     const user = problemUsername.trim()
     const issue = problemIssue.trim()
     if (!user || !issue) {
-      toast.error("KullanÄ±cÄ± adÄ± ve sorun girin.")
+      toast.error("Kullanıcı adı ve sorun girin.")
       return
     }
     try {
@@ -2418,10 +2418,10 @@ function App() {
       if (!res.ok) throw new Error("problem_update_failed")
       const updated = await res.json()
       setProblems((prev) => prev.map((p) => (p.id === id ? updated : p)))
-      toast.success("Problem Ã§Ã¶zÃ¼ldÃ¼")
+      toast.success("Problem çözüldü")
     } catch (error) {
       console.error(error)
-      toast.error("GÃ¼ncellenemedi (API/DB kontrol edin).")
+      toast.error("Güncellenemedi (API/DB kontrol edin).")
     }
   }
 
@@ -2435,20 +2435,20 @@ function App() {
       if (!res.ok) throw new Error("problem_reopen_failed")
       const updated = await res.json()
       setProblems((prev) => prev.map((p) => (p.id === id ? updated : p)))
-      toast.success("Aktif probleme taÅŸÄ±ndÄ±")
+      toast.success("Aktif probleme taşındı")
     } catch (error) {
       console.error(error)
-      toast.error("GÃ¼ncellenemedi (API/DB kontrol edin).")
+      toast.error("Güncellenemedi (API/DB kontrol edin).")
     }
   }
 
   const handleProblemCopy = async (text) => {
     try {
       await navigator.clipboard.writeText(text)
-      toast.success("KullanÄ±cÄ± adÄ± kopyalandÄ±", { duration: 1400, position: "top-right" })
+      toast.success("Kullanıcı adı kopyalandı", { duration: 1400, position: "top-right" })
     } catch (error) {
       console.error(error)
-      toast.error("KopyalanamadÄ±", { duration: 1600, position: "top-right" })
+      toast.error("Kopyalanamadı", { duration: 1600, position: "top-right" })
     }
   }
 
@@ -2469,7 +2469,7 @@ function App() {
       }
     }
     setConfirmProblemTarget(id)
-    toast("Silmek iÃ§in tekrar tÄ±kla", { position: "top-right" })
+    toast("Silmek için tekrar tıkla", { position: "top-right" })
   }
 
   const openProblems = problems.filter((p) => p.status !== "resolved")
@@ -2571,7 +2571,7 @@ function App() {
                 : "bg-white/5 text-slate-200 hover:bg-white/10"
             }`}
           >
-            Problemli MÃ¼ÅŸteriler
+            Problemli Müşteriler
           </button>
           <button
             type="button"
@@ -2625,17 +2625,17 @@ function App() {
                       Pulcip Manage
                     </h1>
                     <p className="max-w-2xl text-sm text-slate-200/80 md:text-base">
-                      Kendi tonunu bul, hazÄ±r ÅŸablonlarÄ±nÄ± hÄ±zla dÃ¼zenle ve tek tÄ±kla ekibinle paylaÅŸ.
+                      Kendi tonunu bul, hazır şablonlarını hızla düzenle ve tek tıkla ekibinle paylaş.
                     </p>
                   </div>
                   <div className="flex flex-wrap gap-2.5">
                     <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-accent-200 md:text-sm">
                       <span className="h-2 w-2 rounded-full bg-accent-400" />
-                      Åablon: {templateCountText}
+                      Şablon: {templateCountText}
                     </span>
                     <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-accent-200 md:text-sm">
                       <span className="h-2 w-2 rounded-full bg-amber-300" />
-                      Kategori sayÄ±sÄ±: {categoryCountText}
+                      Kategori sayısı: {categoryCountText}
                     </span>
                     <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-accent-200 md:text-sm">
                       <span className="h-2 w-2 rounded-full bg-amber-300" />
@@ -2650,11 +2650,11 @@ function App() {
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1">
                         <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200/70">
-                          Aktif ÅŸablon
+                          Aktif şablon
                         </p>
                         <div className="flex flex-wrap items-center gap-2">
                           <h3 className="font-display text-2xl font-semibold text-white">
-                            {activeTemplate?.label || (showLoading ? "YÃ¼kleniyor..." : "Yeni ÅŸablon")}
+                            {activeTemplate?.label || (showLoading ? "Yükleniyor..." : "Yeni şablon")}
                           </h3>
                           <span
                             className={`rounded-full px-3 py-1 text-[11px] font-semibold ${getCategoryClass(
@@ -2678,7 +2678,7 @@ function App() {
                           }`}
                           disabled={!activeTemplate || showLoading || isTemplateSaving}
                         >
-                          {isEditingActiveTemplate ? "VazgeÃ§" : "MesajÄ± dÃ¼zenle"}
+                          {isEditingActiveTemplate ? "Vazgeç" : "Mesajı düzenle"}
                         </button>
                         <button
                           type="button"
@@ -2701,13 +2701,13 @@ function App() {
                         rows={4}
                         autoFocus
                         disabled={isTemplateSaving}
-                        placeholder="Mesaj iÃ§eriÄŸini gÃ¼ncelle"
+                        placeholder="Mesaj içeriğini güncelle"
                         className="mt-3 w-full rounded-lg border border-white/10 bg-ink-900/80 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                       />
                     ) : (
                       <p className="mt-3 text-sm leading-relaxed text-slate-200/90">
                         {activeTemplate?.value ||
-                          (showLoading ? "Veriler yÃ¼kleniyor..." : "MesajÄ±nÄ± dÃ¼zenleyip kaydetmeye baÅŸla.")}
+                          (showLoading ? "Veriler yükleniyor..." : "Mesajını düzenleyip kaydetmeye başla.")}
                       </p>
                     )}
                     <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-300/80">
@@ -2728,12 +2728,12 @@ function App() {
                             disabled={isTemplateSaving}
                             className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-500/15 hover:text-rose-50 disabled:cursor-not-allowed disabled:opacity-70"
                           >
-                            VazgeÃ§
+                            Vazgeç
                           </button>
                         </div>
                       ) : (
                         <span className="rounded-full bg-white/10 px-3 py-1 font-semibold text-accent-100">
-                          {showLoading ? "Bekle" : "HazÄ±r"}
+                          {showLoading ? "Bekle" : "Hazır"}
                         </span>
                       )}
                     </div>
@@ -2747,12 +2747,12 @@ function App() {
                 <div className={`${panelClass} bg-ink-800/60`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Åablon listesi</p>
-                      <p className="text-sm text-slate-400">BaÅŸlÄ±klarÄ±na dokunarak dÃ¼zenle ve kopyala.</p>
+                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Şablon listesi</p>
+                      <p className="text-sm text-slate-400">Başlıklarına dokunarak düzenle ve kopyala.</p>
                     </div>
                     <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
                       {showLoading && <span className="h-2 w-2 animate-pulse rounded-full bg-accent-400" />}
-                      {templateCountText} {showLoading ? "" : "seÃ§enek"}
+                      {templateCountText} {showLoading ? "" : "seçenek"}
                     </span>
                   </div>
 
@@ -2792,7 +2792,7 @@ function App() {
                                 >
                                   {cat}
                                 </span>
-                                <span className="text-xs text-slate-400">{list.length} ÅŸablon</span>
+                                <span className="text-xs text-slate-400">{list.length} şablon</span>
                               </span>
                               <span
                                 className={`inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-slate-200 transition ${
@@ -2808,7 +2808,7 @@ function App() {
                               <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                                 {list.length === 0 && (
                                   <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
-                                    Bu kategoride ÅŸablon yok.
+                                    Bu kategoride şablon yok.
                                   </div>
                                 )}
                                 {list.map((tpl) => (
@@ -2841,7 +2841,7 @@ function App() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Kategori ekle</p>
-                      <p className="text-sm text-slate-400">Yeni kategori ekle, ardÄ±ndan mesaj alanÄ±ndan seÃ§.</p>
+                      <p className="text-sm text-slate-400">Yeni kategori ekle, ardından mesaj alanından seç.</p>
                     </div>
                     <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
                       {categoryCountText} kategori
@@ -2854,7 +2854,7 @@ function App() {
                     type="text"
                     value={newCategory}
                     onChange={(e) => setNewCategory(e.target.value)}
-                    placeholder="Ã–rn: Duyuru"
+                    placeholder="Örn: Duyuru"
                     className="flex-1 rounded-xl border border-white/10 bg-ink-900 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/40"
                   />
                   <button
@@ -2893,23 +2893,23 @@ function App() {
                 <div className={`${panelClass} bg-ink-900/60`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Åablon ekle</p>
-                      <p className="text-sm text-slate-400">BaÅŸlÄ±k, kategori ve mesajÄ± ekleyip kaydet.</p>
+                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Şablon ekle</p>
+                      <p className="text-sm text-slate-400">Başlık, kategori ve mesajı ekleyip kaydet.</p>
                     </div>
-                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">HÄ±zlÄ± ekle</span>
+                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">Hızlı ekle</span>
                   </div>
 
                   <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
                     <div className="space-y-2">
                       <label className="text-xs font-semibold text-slate-200" htmlFor="title-mini">
-                        BaÅŸlÄ±k
+                        Başlık
                       </label>
                       <input
                         id="title-mini"
                         type="text"
                         value={title}
                         onChange={(e) => setTitle(e.target.value)}
-                        placeholder="Ã–rn: KarÅŸÄ±lama notu"
+                        placeholder="Örn: Karşılama notu"
                         className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                       />
                     </div>
@@ -2935,14 +2935,14 @@ function App() {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between text-xs font-semibold text-slate-200">
                         <label htmlFor="message-mini">Mesaj</label>
-                        <span className="text-[11px] text-slate-400">AnlÄ±k karakter: {messageLength}</span>
+                        <span className="text-[11px] text-slate-400">Anlık karakter: {messageLength}</span>
                       </div>
                       <textarea
                         id="message-mini"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         rows={4}
-                        placeholder="Mesaj iÃ§eriÄŸi..."
+                        placeholder="Mesaj içeriği..."
                         className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                       />
                     </div>
@@ -2967,11 +2967,11 @@ function App() {
                 </div>
 
                 <div className={`${panelClass} bg-ink-800/60`}>
-                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">HÄ±zlÄ± ipuÃ§larÄ±</p>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Hızlı ipuçları</p>
                   <ul className="mt-3 space-y-2 text-sm text-slate-300">
-                    <li>- BaÅŸlÄ±k boÅŸ kalÄ±rsa otomatik bir isimle kaydedilir.</li>
-                    <li>- Åablona tÄ±klamak metni panoya kopyalar.</li>
-                    <li>- Kategori silince ÅŸablonlar â€œGenelâ€e taÅŸÄ±nÄ±r.</li>
+                    <li>- Başlık boş kalırsa otomatik bir isimle kaydedilir.</li>
+                    <li>- Şablona tıklamak metni panoya kopyalar.</li>
+                    <li>- Kategori silince şablonlar “Genel”e taşınır.</li>
                   </ul>
                 </div>
               </div>
@@ -2989,7 +2989,7 @@ function App() {
                   </span>
                   <h1 className="font-display text-3xl font-semibold text-white">Listeler</h1>
                   <p className="max-w-2xl text-sm text-slate-200/80">
-                    Yeni liste oluÅŸtur, listeleri gÃ¶rÃ¼ntÃ¼le ve hÃ¼creleri Excel benzeri biÃ§imde dÃ¼zenle.
+                    Yeni liste oluştur, listeleri görüntüle ve hücreleri Excel benzeri biçimde düzenle.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -2997,7 +2997,7 @@ function App() {
                     Toplam liste: {listCountText}
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-                    Aktif: {activeList?.name || "SeÃ§ilmedi"}
+                    Aktif: {activeList?.name || "Seçilmedi"}
                   </span>
                 </div>
               </div>
@@ -3009,7 +3009,7 @@ function App() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Listeler</p>
-                      <p className="text-sm text-slate-400">Listeye tÄ±kla ve tabloyu aÃ§.</p>
+                      <p className="text-sm text-slate-400">Listeye tıkla ve tabloyu aç.</p>
                     </div>
                     <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
                       {listCountText} liste
@@ -3019,12 +3019,12 @@ function App() {
                   <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {!isListsLoading && lists.length === 0 && (
                       <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
-                        HenÃ¼z liste yok.
+                        Henüz liste yok.
                       </div>
                     )}
                     {isListsLoading && (
                       <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
-                        <LoadingIndicator label="Listeler yÃ¼kleniyor..." />
+                        <LoadingIndicator label="Listeler yükleniyor..." />
                       </div>
                     )}
                     {lists.map((list) => {
@@ -3045,7 +3045,7 @@ function App() {
                         >
                           <p className="text-sm font-semibold">{list.name}</p>
                           <p className="mt-1 text-xs text-slate-400">
-                            {rowCount} satÄ±r Â· {colCount} sÃ¼tun
+                            {rowCount} satır · {colCount} sütun
                           </p>
                         </button>
                       )
@@ -3056,12 +3056,12 @@ function App() {
                 <div className={`${panelClass} bg-ink-900/60`}>
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Liste iÃ§eriÄŸi</p>
-                      <p className="text-sm text-slate-400">HÃ¼creleri seÃ§ip dÃ¼zenleyebilirsin.</p>
+                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Liste içeriği</p>
+                      <p className="text-sm text-slate-400">Hücreleri seçip düzenleyebilirsin.</p>
                     </div>
                     <div className="flex flex-wrap items-center gap-3">
                       <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                        <span>BaÅŸlÄ±klara saÄŸ tÄ±kla: ekle/sil</span>
+                        <span>Başlıklara sağ tıkla: ekle/sil</span>
                         {listSavedAt ? (
                           <span className="rounded-full border border-emerald-300/40 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-100">
                             Kaydedildi
@@ -3106,7 +3106,7 @@ function App() {
                   
                   {!activeList ? (
                     <div className="mt-4 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
-                      Bir liste seÃ§in veya yeni liste oluÅŸturun.
+                      Bir liste seçin veya yeni liste oluşturun.
                     </div>
                   ) : (
                     <>
@@ -3218,7 +3218,7 @@ function App() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Yeni liste</p>
-                      <p className="text-sm text-slate-400">Liste adÄ±nÄ± girip oluÅŸtur.</p>
+                      <p className="text-sm text-slate-400">Liste adını girip oluştur.</p>
                     </div>
                     <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
                       {listCountText} liste
@@ -3228,7 +3228,7 @@ function App() {
                   <div className="mt-4 space-y-2">
                     <div className="space-y-2">
                       <label className="text-xs font-semibold text-slate-200" htmlFor="list-name">
-                        Liste adÄ±
+                        Liste adı
                       </label>
                       <input
                         id="list-name"
@@ -3241,7 +3241,7 @@ function App() {
                             handleListCreate()
                           }
                         }}
-                        placeholder="Ã–rn: HaftalÄ±k rapor"
+                        placeholder="Örn: Haftalık rapor"
                         className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                       />
                     </div>
@@ -3250,7 +3250,7 @@ function App() {
                       onClick={handleListCreate}
                       className="w-full rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
                     >
-                      Liste oluÅŸtur
+                      Liste oluştur
                     </button>
                   </div>
                 </div>
@@ -3259,19 +3259,19 @@ function App() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
-                        Listeyi dÃ¼zenle
+                        Listeyi düzenle
                       </p>
-                      <p className="text-sm text-slate-400">Aktif listenin adÄ±nÄ± deÄŸiÅŸtir ya da sil.</p>
+                      <p className="text-sm text-slate-400">Aktif listenin adını değiştir ya da sil.</p>
                     </div>
                     <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                      {activeList?.name || "SeÃ§ilmedi"}
+                      {activeList?.name || "Seçilmedi"}
                     </span>
                   </div>
 
                   <div className="mt-4 space-y-3">
                     <div className="space-y-2">
                       <label className="text-xs font-semibold text-slate-200" htmlFor="list-rename">
-                        Liste adÄ±
+                        Liste adı
                       </label>
                       <input
                         id="list-rename"
@@ -3284,7 +3284,7 @@ function App() {
                             handleListRename()
                           }
                         }}
-                        placeholder="Liste adÄ±"
+                        placeholder="Liste adı"
                         disabled={!activeList}
                         className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
                       />
@@ -3296,7 +3296,7 @@ function App() {
                         disabled={!activeList}
                         className="flex-1 min-w-[140px] rounded-lg border border-emerald-300/70 bg-emerald-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-emerald-50 shadow-glow transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        GÃ¼ncelle
+                        Güncelle
                       </button>
                       <button
                         type="button"
@@ -3307,7 +3307,7 @@ function App() {
                             return
                           }
                           setConfirmListDelete(activeList.id)
-                          toast("Silmek iÃ§in tekrar tÄ±kla", { position: "top-right" })
+                          toast("Silmek için tekrar tıkla", { position: "top-right" })
                         }}
                         disabled={!activeList}
                         className={`min-w-[140px] rounded-lg border px-4 py-2.5 text-xs font-semibold uppercase tracking-wide transition ${
@@ -3323,16 +3323,16 @@ function App() {
                 </div>
 
                 <div className={`${panelClass} bg-ink-800/60`}>
-                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Ä°puÃ§larÄ±</p>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">İpuçları</p>
                   <ul className="mt-3 space-y-2 text-sm text-slate-300">
-                    <li>- Yeni liste varsayÄ±lan bir tabloyla baÅŸlar.</li>
-                    <li>- SatÄ±r/sÃ¼tun ekleyerek tabloyu geniÅŸlet.</li>
+                    <li>- Yeni liste varsayılan bir tabloyla başlar.</li>
+                    <li>- Satır/sütun ekleyerek tabloyu genişlet.</li>
                     <li>- Bir hucreye cok satir yapistirinca asagiya yayilir.</li>
-                    <li>- FormÃ¼l iÃ§in "=" ile baÅŸla (Ã¶rn: =SUM(A1:A5)).</li>
+                    <li>- Formül için "=" ile başla (örn: =SUM(A1:A5)).</li>
                     <li>- Desteklenenler: SUM, AVERAGE, MIN, MAX, COUNT.</li>
-                    <li>- SatÄ±r/sÃ¼tun baÅŸlÄ±ÄŸÄ±na saÄŸ tÄ±kla: ekle/sil.</li>
+                    <li>- Satır/sütun başlığına sağ tıkla: ekle/sil.</li>
                     <li>- Satir/sutun secmek icin basliga tikla; Shift aralik, Ctrl tek tek.</li>
-                    <li>- Veriler veritabanÄ±nda saklanÄ±r.</li>
+                    <li>- Veriler veritabanında saklanır.</li>
                   </ul>
                 </div>
               </div>
@@ -3353,8 +3353,8 @@ function App() {
                         }}
                         className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition hover:bg-white/10"
                       >
-                        SatÄ±r ekle
-                        <span className="text-[10px] text-slate-400">AltÄ±na</span>
+                        Satır ekle
+                        <span className="text-[10px] text-slate-400">Altına</span>
                       </button>
                       <button
                         type="button"
@@ -3365,8 +3365,8 @@ function App() {
                         disabled={!canDeleteListRow}
                         className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-rose-100 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        SatÄ±r sil
-                        <span className="text-[10px] text-rose-200/70">SeÃ§ili</span>
+                        Satır sil
+                        <span className="text-[10px] text-rose-200/70">Seçili</span>
                       </button>
                       {selectedListRows.size > 1 && (
                         <button
@@ -3393,8 +3393,8 @@ function App() {
                         }}
                         className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition hover:bg-white/10"
                       >
-                        SÃ¼tun ekle
-                        <span className="text-[10px] text-slate-400">SaÄŸÄ±na</span>
+                        Sütun ekle
+                        <span className="text-[10px] text-slate-400">Sağına</span>
                       </button>
                       <button
                         type="button"
@@ -3405,8 +3405,8 @@ function App() {
                         disabled={!canDeleteListColumn}
                         className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-rose-100 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
                       >
-                        SÃ¼tun sil
-                        <span className="text-[10px] text-rose-200/70">SeÃ§ili</span>
+                        Sütun sil
+                        <span className="text-[10px] text-rose-200/70">Seçili</span>
                       </button>
                       {selectedListCols.size > 1 && (
                         <button
@@ -3428,348 +3428,431 @@ function App() {
             )}
           </div>
         )}
-
         {activeTab === "tasks" && (
-          <div className="space-y-6">
-            <header className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-6 shadow-card">
-              <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div className="space-y-2">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
+          <div className="space-y-7">
+            <header className="relative overflow-hidden rounded-[28px] border border-white/10 bg-ink-950/80 p-8 shadow-card">
+              <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_120%_at_12%_0%,rgba(251,191,36,0.18),transparent)]" />
+              <div className="pointer-events-none absolute -right-16 -bottom-16 h-64 w-64 rounded-full bg-emerald-400/10 blur-3xl" />
+              <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+                <div className="space-y-3">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.32em] text-amber-200">
                     Gorevler
                   </span>
-                  <h1 className="font-display text-3xl font-semibold text-white">Gorev Panosu</h1>
+                  <h1 className="font-display text-3xl font-semibold text-white md:text-4xl">
+                    Gorev Kontrol Merkezi
+                  </h1>
                   <p className="max-w-2xl text-sm text-slate-200/80">
-                    Basliklari ekle, oncelik ver ve adim adim tamama tasiyin.
+                    Hedefleri tek ekranda topla, ayrintilari dokuman gibi yaz, akislarini yonet.
                   </p>
+                  <div className="flex flex-wrap gap-2">
+                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+                      Yerel kayit
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+                      Surekli akis
+                    </span>
+                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+                      Detay odakli
+                    </span>
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-                    Toplam: {taskStats.total}
-                  </span>
-                  <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs ${TASK_STATUS_STYLES.todo}`}>
-                    Yapilacak: {taskStats.todo}
-                  </span>
-                  <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs ${TASK_STATUS_STYLES.doing}`}>
-                    Devam: {taskStats.doing}
-                  </span>
-                  <span className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs ${TASK_STATUS_STYLES.done}`}>
-                    Tamam: {taskStats.done}
-                  </span>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-2xl border border-white/10 bg-[linear-gradient(140deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-[0.32em] text-slate-400">Toplam</p>
+                    <p className="mt-2 text-2xl font-semibold text-white">{taskStats.total}</p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-[linear-gradient(140deg,rgba(14,165,233,0.18),rgba(255,255,255,0.02))] px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-[0.32em] text-slate-400">Yapilacak</p>
+                    <p className="mt-2 text-2xl font-semibold text-white">{taskStats.todo}</p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-[linear-gradient(140deg,rgba(59,130,246,0.18),rgba(255,255,255,0.02))] px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-[0.32em] text-slate-400">Devam</p>
+                    <p className="mt-2 text-2xl font-semibold text-white">{taskStats.doing}</p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-[linear-gradient(140deg,rgba(16,185,129,0.18),rgba(255,255,255,0.02))] px-4 py-3">
+                    <p className="text-[11px] uppercase tracking-[0.32em] text-slate-400">Tamam</p>
+                    <p className="mt-2 text-2xl font-semibold text-white">{taskStats.done}</p>
+                  </div>
+                  <div className="sm:col-span-2 rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3">
+                    <div className="flex items-center justify-between">
+                      <p className="text-[11px] uppercase tracking-[0.32em] text-slate-400">Hizli arama</p>
+                      <p className="text-[10px] text-slate-500">Baslik / Sorumlu / Ayrinti</p>
+                    </div>
+                    <input
+                      type="text"
+                      value={taskQuery}
+                      onChange={(e) => setTaskQuery(e.target.value)}
+                      placeholder="Orn: plan, musteri, rapor"
+                      className="mt-2 w-full rounded-xl border border-white/10 bg-ink-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-300/70 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+                    />
+                  </div>
                 </div>
               </div>
             </header>
 
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-              <div className="space-y-6">
-                <div className={`${panelClass} bg-ink-900/60`}>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
-                        Yeni gorev
-                      </p>
-                      <p className="text-sm text-slate-400">Veriler tarayicida saklanir.</p>
-                    </div>
-                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                      {taskStats.total} gorev
-                    </span>
+            <div className="grid gap-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(0,0.85fr)]">
+              <div className={`${panelClass} bg-ink-900/60`}>
+                <div className="flex flex-wrap items-start justify-between gap-4">
+                  <div>
+                    <p className="text-sm font-semibold uppercase tracking-[0.28em] text-slate-300/80">
+                      Akis kanallari
+                    </p>
+                    <p className="text-sm text-slate-400">
+                      Durumlara gore sirali kartlar. Yatay kaydir, aninda guncelle.
+                    </p>
                   </div>
-
-                  <div className="mt-4 space-y-3">
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-200" htmlFor="task-title">
-                        Baslik
-                      </label>
-                      <input
-                        id="task-title"
-                        type="text"
-                        value={taskDraft.title}
-                        onChange={(e) => handleTaskDraftChange("title", e.target.value)}
-                        placeholder="Orn: Haftalik raporu toparla"
-                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                      />
-                    </div>
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-200" htmlFor="task-owner">
-                          Sorumlu
-                        </label>
-                        <input
-                          id="task-owner"
-                          type="text"
-                          value={taskDraft.owner}
-                          onChange={(e) => handleTaskDraftChange("owner", e.target.value)}
-                          placeholder="Orn: Efe"
-                          className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                        />
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-200" htmlFor="task-recurrence">
-                          Tekrarlama
-                        </label>
-                        <select
-                          id="task-recurrence"
-                          value={taskDraft.recurrence}
-                          onChange={(e) => handleTaskDraftChange("recurrence", e.target.value)}
-                          className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                        >
-                          {TASK_RECURRENCE_OPTIONS.map((option) => (
-                            <option key={option.id} value={option.id}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                    {taskDraft.recurrence === "custom" && (
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-200" htmlFor="task-custom-date">
-                          Ozel tarih
-                        </label>
-                        <input
-                          id="task-custom-date"
-                          type="date"
-                          value={taskDraft.customDate}
-                          onChange={(e) => handleTaskDraftChange("customDate", e.target.value)}
-                          className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                        />
-                      </div>
-                    )}
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-200" htmlFor="task-priority">
-                          Oncelik
-                        </label>
-                        <select
-                          id="task-priority"
-                          value={taskDraft.priority}
-                          onChange={(e) => handleTaskDraftChange("priority", e.target.value)}
-                          className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                        >
-                          {TASK_PRIORITY_OPTIONS.map((option) => (
-                            <option key={option.id} value={option.id}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-200" htmlFor="task-status">
-                          Durum
-                        </label>
-                        <select
-                          id="task-status"
-                          value={taskDraft.status}
-                          onChange={(e) => handleTaskDraftChange("status", e.target.value)}
-                          className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                        >
-                          {TASK_STATUS_OPTIONS.map((option) => (
-                            <option key={option.id} value={option.id}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                    </div>
-                    <div className="space-y-2 rounded-xl border border-white/10 bg-ink-950/40 p-3">
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-semibold text-slate-200" htmlFor="task-details">
-                          Gorev ayrintilari
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => setIsTaskDetailsExpanded((prev) => !prev)}
-                          className="rounded-full border border-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400/60 hover:text-accent-100"
-                        >
-                          {isTaskDetailsExpanded ? "Kucult" : "Buyut"}
-                        </button>
-                      </div>
-                      <textarea
-                        id="task-details"
-                        value={taskDraft.details}
-                        onChange={(e) => handleTaskDraftChange("details", e.target.value)}
-                        rows={isTaskDetailsExpanded ? 10 : 6}
-                        placeholder="Gorev ayrintilarini yaz"
-                        className={`w-full resize-y rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 ${
-                          isTaskDetailsExpanded ? "min-h-[220px]" : "min-h-[140px]"
-                        }`}
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      onClick={handleTaskAdd}
-                      className="w-full rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
-                    >
-                      Gorev ekle
-                    </button>
-                  </div>
+                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+                    {filteredTasks.length} gosterim
+                  </span>
                 </div>
 
-                <div className={`${panelClass} bg-ink-800/60`}>
-                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Durum ozeti</p>
-                  <ul className="mt-3 space-y-2 text-sm text-slate-300">
-                    <li>- Yapilacak: {taskStats.todo}</li>
-                    <li>- Devam: {taskStats.doing}</li>
-                    <li>- Tamam: {taskStats.done}</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="space-y-6 lg:col-span-2">
-                <div className={`${panelClass} bg-ink-900/60`}>
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
-                        Gorev panosu
-                      </p>
-                      <p className="text-sm text-slate-400">Kartlari hizla guncelle, ayrintilari ac.</p>
-                    </div>
-                    <div className="flex items-center gap-2 rounded-full border border-white/10 bg-ink-900 px-3 py-1.5 shadow-inner">
-                      <span className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Ara</span>
-                      <input
-                        type="text"
-                        value={taskQuery}
-                        onChange={(e) => setTaskQuery(e.target.value)}
-                        placeholder="Baslik, sorumlu, ayrinti"
-                        className="w-56 bg-transparent text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-3 grid gap-4 md:grid-cols-3">
-                    {TASK_STATUS_OPTIONS.map((status) => {
-                      const items = tasksByStatus[status.id]
-                      return (
-                        <div
-                          key={status.id}
-                          className="rounded-2xl border border-white/10 bg-ink-900/50 p-3"
-                        >
-                          <div className="flex items-start justify-between gap-3">
+                <div className="mt-5 space-y-4">
+                  {TASK_STATUS_OPTIONS.map((status) => {
+                    const items = tasksByStatus[status.id]
+                    const barClass =
+                      status.id === "todo"
+                        ? "bg-amber-400/70"
+                        : status.id === "doing"
+                          ? "bg-sky-400/70"
+                          : "bg-emerald-400/70"
+                    return (
+                      <div
+                        key={status.id}
+                        className="rounded-3xl border border-white/10 bg-ink-950/40 p-4"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <span className={`h-10 w-2 rounded-full ${barClass}`} />
                             <div>
-                              <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-300/80">
+                              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-300/80">
                                 {status.label}
                               </p>
                               <p className="text-xs text-slate-400">{status.description}</p>
                             </div>
-                            <span
-                              className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${TASK_STATUS_STYLES[status.id]}`}
-                            >
-                              {items.length}
-                            </span>
                           </div>
-                          <div className="mt-3 space-y-2">
-                            {items.length === 0 && (
-                              <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-400">
-                                Henuz gorev yok.
-                              </div>
-                            )}
-                            {items.map((task) => {
-                              const priorityClass =
-                                TASK_PRIORITY_STYLES[task.priority] || TASK_PRIORITY_STYLES.medium
-                              const priorityBorderClass =
-                                TASK_PRIORITY_BORDERS[task.priority] || TASK_PRIORITY_BORDERS.medium
-                              const priorityLabel = getTaskPriorityLabel(task.priority)
-                              const recurrenceLabel = formatTaskRecurrence(task)
-                              const statusIndex = TASK_STATUS_ORDER.indexOf(task.status)
-                              const isExpanded = expandedTaskDetails.has(task.id)
-                              return (
-                                <div
-                                  key={task.id}
-                                  className={`rounded-xl border border-white/10 bg-white/5 p-3 shadow-sm border-l-4 ${priorityBorderClass}`}
-                                >
-                                  <div className="flex items-start justify-between gap-3">
-                                    <div className="space-y-1">
-                                      <p className="text-sm font-semibold text-slate-100">
-                                        {task.title || "Basliksiz gorev"}
-                                      </p>
-                                      <div className="flex flex-wrap items-center gap-2 text-[10px] text-slate-400">
-                                        {task.owner && (
-                                          <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5">
-                                            Sahip: {task.owner}
-                                          </span>
-                                        )}
-                                        {recurrenceLabel && (
-                                          <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5">
-                                            Tekrar: {recurrenceLabel}
-                                          </span>
-                                        )}
-                                      </div>
-                                    </div>
-                                    <span
-                                      className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${priorityClass}`}
-                                    >
-                                      {priorityLabel}
-                                    </span>
+                          <span
+                            className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${TASK_STATUS_STYLES[status.id]}`}
+                          >
+                            {items.length} kart
+                          </span>
+                        </div>
+
+                        <div className="mt-4 flex gap-3 overflow-x-auto pb-2">
+                          {items.length === 0 && (
+                            <div className="min-w-[220px] rounded-2xl border border-white/10 bg-white/5 px-3 py-3 text-xs text-slate-400">
+                              Bu kanalda henuz gorev yok.
+                            </div>
+                          )}
+                          {items.map((task) => {
+                            const priorityClass =
+                              TASK_PRIORITY_STYLES[task.priority] || TASK_PRIORITY_STYLES.medium
+                            const priorityBorderClass =
+                              TASK_PRIORITY_BORDERS[task.priority] || TASK_PRIORITY_BORDERS.medium
+                            const priorityLabel = getTaskPriorityLabel(task.priority)
+                            const recurrenceLabel = formatTaskRecurrence(task)
+                            const statusIndex = TASK_STATUS_ORDER.indexOf(task.status)
+                            const isExpanded = expandedTaskDetails.has(task.id)
+                            return (
+                              <article
+                                key={task.id}
+                                className={`flex min-w-[240px] max-w-[280px] flex-col gap-3 rounded-2xl border border-white/10 bg-gradient-to-br from-ink-950/70 via-ink-900/60 to-ink-900/40 p-3 shadow-sm border-l-4 ${priorityBorderClass}`}
+                              >
+                                <div className="flex items-start justify-between gap-2">
+                                  <div className="space-y-1">
+                                    <p className="text-sm font-semibold text-slate-100">
+                                      {task.title || "Basliksiz gorev"}
+                                    </p>
+                                    <p className="text-[11px] text-slate-400">
+                                      {task.owner ? `Sorumlu: ${task.owner}` : "Sorumlu belirlenmedi"}
+                                    </p>
                                   </div>
-                                  {task.details && (
+                                  <span
+                                    className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${priorityClass}`}
+                                  >
+                                    {priorityLabel}
+                                  </span>
+                                </div>
+
+                                {(task.owner || recurrenceLabel) && (
+                                  <div className="flex flex-wrap gap-2 text-[10px] text-slate-400">
+                                    {recurrenceLabel && (
+                                      <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5">
+                                        Tekrar: {recurrenceLabel}
+                                      </span>
+                                    )}
+                                    {task.owner && (
+                                      <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5">
+                                        Sahip: {task.owner}
+                                      </span>
+                                    )}
+                                  </div>
+                                )}
+
+                                {task.details && (
+                                  <div className="relative">
                                     <div
-                                      className={`mt-2 rounded-lg border border-white/10 bg-ink-950/40 px-3 py-2 text-xs text-slate-200/90 ${
-                                        isExpanded ? "max-h-[240px] overflow-auto" : "max-h-[110px] overflow-hidden"
+                                      className={`rounded-xl border border-white/10 bg-ink-950/50 px-3 py-2 text-xs text-slate-200/90 ${
+                                        isExpanded
+                                          ? "max-h-[260px] overflow-auto"
+                                          : "max-h-[110px] overflow-hidden"
                                       }`}
                                     >
                                       <p className="whitespace-pre-wrap leading-relaxed">{task.details}</p>
                                     </div>
-                                  )}
-                                  {task.details && (
+                                    {!isExpanded && (
+                                      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-8 rounded-b-xl bg-gradient-to-t from-ink-950/90 to-transparent" />
+                                    )}
+                                  </div>
+                                )}
+
+                                {task.details && (
+                                  <button
+                                    type="button"
+                                    onClick={() => toggleTaskDetailsExpanded(task.id)}
+                                    className="text-[10px] font-semibold uppercase tracking-wide text-amber-200 transition hover:text-amber-100"
+                                  >
+                                    {isExpanded ? "Detayi kapat" : "Detayi oku"}
+                                  </button>
+                                )}
+
+                                <div className="mt-auto flex flex-wrap items-center justify-between gap-2">
+                                  <select
+                                    value={task.status}
+                                    onChange={(e) => handleTaskStatusChange(task.id, e.target.value)}
+                                    className="rounded-lg border border-white/10 bg-ink-900 px-2 py-1 text-[11px] text-slate-100 focus:border-amber-300/70 focus:outline-none"
+                                  >
+                                    {TASK_STATUS_OPTIONS.map((option) => (
+                                      <option key={option.id} value={option.id}>
+                                        {option.label}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  <div className="flex items-center gap-2">
                                     <button
                                       type="button"
-                                      onClick={() => toggleTaskDetailsExpanded(task.id)}
-                                      className="mt-2 text-[10px] font-semibold uppercase tracking-wide text-accent-200 transition hover:text-accent-100"
+                                      onClick={() => handleTaskMove(task.id, -1)}
+                                      disabled={statusIndex <= 0}
+                                      className="rounded-lg border border-white/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-200 transition hover:border-amber-300/60 hover:text-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
                                     >
-                                      {isExpanded ? "Detayi kucult" : "Detayi ac"}
+                                      Geri
                                     </button>
-                                  )}
-                                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2">
-                                    <select
-                                      value={task.status}
-                                      onChange={(e) => handleTaskStatusChange(task.id, e.target.value)}
-                                      className="rounded-lg border border-white/10 bg-ink-900 px-2 py-1 text-[11px] text-slate-100 focus:border-accent-400 focus:outline-none"
+                                    <button
+                                      type="button"
+                                      onClick={() => handleTaskMove(task.id, 1)}
+                                      disabled={statusIndex >= TASK_STATUS_ORDER.length - 1}
+                                      className="rounded-lg border border-white/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-200 transition hover:border-amber-300/60 hover:text-amber-100 disabled:cursor-not-allowed disabled:opacity-60"
                                     >
-                                      {TASK_STATUS_OPTIONS.map((option) => (
-                                        <option key={option.id} value={option.id}>
-                                          {option.label}
-                                        </option>
-                                      ))}
-                                    </select>
-                                    <div className="flex items-center gap-2">
-                                      <button
-                                        type="button"
-                                        onClick={() => handleTaskMove(task.id, -1)}
-                                        disabled={statusIndex <= 0}
-                                        className="rounded-lg border border-white/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400/60 hover:text-accent-100 disabled:cursor-not-allowed disabled:opacity-60"
-                                      >
-                                        Geri
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleTaskMove(task.id, 1)}
-                                        disabled={statusIndex >= TASK_STATUS_ORDER.length - 1}
-                                        className="rounded-lg border border-white/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400/60 hover:text-accent-100 disabled:cursor-not-allowed disabled:opacity-60"
-                                      >
-                                        Ileri
-                                      </button>
-                                      <button
-                                        type="button"
-                                        onClick={() => handleTaskDelete(task.id)}
-                                        className="rounded-lg border border-rose-300/60 bg-rose-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-rose-100 transition hover:border-rose-200 hover:bg-rose-500/20"
-                                      >
-                                        Sil
-                                      </button>
-                                    </div>
+                                      Ileri
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleTaskDelete(task.id)}
+                                      className="rounded-lg border border-rose-300/60 bg-rose-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-rose-100 transition hover:border-rose-200 hover:bg-rose-500/20"
+                                    >
+                                      Sil
+                                    </button>
                                   </div>
                                 </div>
-                              )
-                            })}
+                              </article>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+
+              <div className="space-y-5">
+                <div className={`${panelClass} relative overflow-hidden bg-ink-950/60`}>
+                  <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(140deg,rgba(251,191,36,0.12),transparent_55%)]" />
+                  <div className="relative space-y-4">
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-300/80">
+                          Yeni gorev
+                        </p>
+                        <p className="text-sm text-slate-400">
+                          Taslagi doldur, gorevi akis kanallarina ekle.
+                        </p>
+                      </div>
+                      <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+                        {taskStats.total} kayit
+                      </span>
+                    </div>
+
+                    <div className="grid gap-3">
+                      <div className="rounded-2xl border border-white/10 bg-ink-900/70 p-3">
+                        <label className="text-xs font-semibold text-slate-200" htmlFor="task-title">
+                          Baslik
+                        </label>
+                        <input
+                          id="task-title"
+                          type="text"
+                          value={taskDraft.title}
+                          onChange={(e) => handleTaskDraftChange("title", e.target.value)}
+                          placeholder="Orn: Haftalik raporu toparla"
+                          className="mt-2 w-full rounded-xl border border-white/10 bg-ink-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-300/70 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+                        />
+                      </div>
+
+                      <div className="grid gap-3 sm:grid-cols-2">
+                        <div className="rounded-2xl border border-white/10 bg-ink-900/70 p-3">
+                          <label className="text-xs font-semibold text-slate-200" htmlFor="task-owner">
+                            Sorumlu
+                          </label>
+                          <input
+                            id="task-owner"
+                            type="text"
+                            value={taskDraft.owner}
+                            onChange={(e) => handleTaskDraftChange("owner", e.target.value)}
+                            placeholder="Orn: Efe"
+                            className="mt-2 w-full rounded-xl border border-white/10 bg-ink-950 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-300/70 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+                          />
+                        </div>
+                        <div className="rounded-2xl border border-white/10 bg-ink-900/70 p-3">
+                          <span className="text-xs font-semibold text-slate-200">Durum</span>
+                          <div className="mt-2 flex flex-wrap gap-2">
+                            {TASK_STATUS_OPTIONS.map((option) => (
+                              <button
+                                key={option.id}
+                                type="button"
+                                onClick={() => handleTaskDraftChange("status", option.id)}
+                                className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition ${
+                                  taskDraft.status === option.id
+                                    ? TASK_STATUS_STYLES[option.id]
+                                    : "border-white/10 text-slate-200 hover:border-amber-300/60 hover:text-amber-100"
+                                }`}
+                              >
+                                {option.label}
+                              </button>
+                            ))}
                           </div>
                         </div>
-                      )
-                    })}
+                      </div>
+
+                      <div className="rounded-2xl border border-white/10 bg-ink-900/70 p-3">
+                        <span className="text-xs font-semibold text-slate-200">Tekrarlama</span>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {TASK_RECURRENCE_OPTIONS.map((option) => (
+                            <button
+                              key={option.id}
+                              type="button"
+                              onClick={() => handleTaskDraftChange("recurrence", option.id)}
+                              className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition ${
+                                taskDraft.recurrence === option.id
+                                  ? "border-amber-300/70 bg-amber-500/20 text-amber-50"
+                                  : "border-white/10 text-slate-200 hover:border-amber-300/60 hover:text-amber-100"
+                              }`}
+                            >
+                              {option.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {taskDraft.recurrence === "custom" && (
+                        <div className="rounded-2xl border border-white/10 bg-ink-900/70 p-3">
+                          <label className="text-xs font-semibold text-slate-200" htmlFor="task-custom-date">
+                            Ozel tarih
+                          </label>
+                          <input
+                            id="task-custom-date"
+                            type="date"
+                            value={taskDraft.customDate}
+                            onChange={(e) => handleTaskDraftChange("customDate", e.target.value)}
+                            className="mt-2 w-full rounded-xl border border-white/10 bg-ink-950 px-3 py-2 text-sm text-slate-100 focus:border-amber-300/70 focus:outline-none focus:ring-2 focus:ring-amber-400/20"
+                          />
+                        </div>
+                      )}
+
+                      <div className="rounded-2xl border border-white/10 bg-ink-900/70 p-3">
+                        <span className="text-xs font-semibold text-slate-200">Oncelik</span>
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          {TASK_PRIORITY_OPTIONS.map((option) => (
+                            <button
+                              key={option.id}
+                              type="button"
+                              onClick={() => handleTaskDraftChange("priority", option.id)}
+                              className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition ${
+                                taskDraft.priority === option.id
+                                  ? TASK_PRIORITY_STYLES[option.id]
+                                  : "border-white/10 text-slate-200 hover:border-amber-300/60 hover:text-amber-100"
+                              }`}
+                            >
+                              {option.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="rounded-2xl border border-white/10 bg-ink-900/70 p-3">
+                        <div className="flex items-center justify-between">
+                          <label className="text-xs font-semibold text-slate-200" htmlFor="task-details">
+                            Gorev ayrintilari
+                          </label>
+                          <button
+                            type="button"
+                            onClick={() => setIsTaskDetailsExpanded((prev) => !prev)}
+                            className="rounded-full border border-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-200 transition hover:border-amber-300/60 hover:text-amber-100"
+                          >
+                            {isTaskDetailsExpanded ? "Kucult" : "Dokuman modu"}
+                          </button>
+                        </div>
+                        <textarea
+                          id="task-details"
+                          value={taskDraft.details}
+                          onChange={(e) => handleTaskDraftChange("details", e.target.value)}
+                          rows={isTaskDetailsExpanded ? 12 : 7}
+                          placeholder="Gorev ayrintilarini yaz"
+                          className={`mt-3 w-full resize-y rounded-xl border border-white/10 bg-ink-950 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-amber-300/70 focus:outline-none focus:ring-2 focus:ring-amber-400/20 ${
+                            isTaskDetailsExpanded ? "min-h-[260px]" : "min-h-[160px]"
+                          }`}
+                        />
+                        <div className="mt-2 flex items-center justify-between text-[11px] text-slate-400">
+                          <span>Buyuk metinler icin dokuman modunu ac.</span>
+                          <span>{taskDraft.details.length} karakter</span>
+                        </div>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={handleTaskAdd}
+                        className="w-full rounded-xl border border-amber-400/70 bg-amber-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-amber-50 shadow-glow transition hover:-translate-y-0.5 hover:border-amber-300 hover:bg-amber-500/25"
+                      >
+                        Gorevi olustur
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={`${panelClass} bg-ink-900/60`}>
+                  <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-300/80">
+                    Calisma rutini
+                  </p>
+                  <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                    <div className="rounded-2xl border border-white/10 bg-ink-950/50 p-3 text-sm text-slate-300">
+                      <p className="text-xs uppercase tracking-[0.2em] text-slate-400">1</p>
+                      <p className="mt-2">Basligi net yaz, sorumluyu ekle.</p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-ink-950/50 p-3 text-sm text-slate-300">
+                      <p className="text-xs uppercase tracking-[0.2em] text-slate-400">2</p>
+                      <p className="mt-2">Ayrintilari dokuman gibi toparla.</p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-ink-950/50 p-3 text-sm text-slate-300">
+                      <p className="text-xs uppercase tracking-[0.2em] text-slate-400">3</p>
+                      <p className="mt-2">Kanaldan kanala tasiyarak ilerlet.</p>
+                    </div>
+                    <div className="rounded-2xl border border-white/10 bg-ink-950/50 p-3 text-sm text-slate-300">
+                      <p className="text-xs uppercase tracking-[0.2em] text-slate-400">4</p>
+                      <p className="mt-2">Her degisim otomatik kaydedilir.</p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         )}
-
         {activeTab === "stock" && (
           <div className="space-y-6">
             <header className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-6 shadow-card">
@@ -3780,7 +3863,7 @@ function App() {
                   </span>
                   <h1 className="font-display text-3xl font-semibold text-white">Dijital Anahtar Stoku</h1>
                   <p className="max-w-2xl text-sm text-slate-200/80">
-                    AnahtarlarÄ± gÃ¶rsel olarak tut, kopyala, ekle ve sil. Bu bÃ¶lÃ¼m veri tabanÄ±na baÄŸlÄ± Ã§alÄ±ÅŸÄ±r.
+                    Anahtarları görsel olarak tut, kopyala, ekle ve sil. Bu bölüm veri tabanına bağlı çalışır.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -3788,10 +3871,10 @@ function App() {
                     Toplam stok: {stockSummary.total}
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-                    ÃœrÃ¼n: {products.length}
+                    Ürün: {products.length}
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full border border-rose-300/40 bg-rose-500/10 px-3 py-1 text-xs text-rose-100">
-                    TÃ¼kenen: {stockSummary.empty}
+                    Tükenen: {stockSummary.empty}
                   </span>
                 </div>
               </div>
@@ -3801,9 +3884,9 @@ function App() {
               <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60 p-4 shadow-card">
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_120%_at_20%_0%,rgba(58,199,255,0.18),transparent)]" />
                 <div className="relative">
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Toplam Ã¼rÃ¼n</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Toplam ürün</p>
                   <p className="mt-2 text-3xl font-semibold text-white">{products.length}</p>
-                  <p className="mt-1 text-xs text-slate-400">KayÄ±tlÄ± Ã¼rÃ¼n sayÄ±sÄ±</p>
+                  <p className="mt-1 text-xs text-slate-400">Kayıtlı ürün sayısı</p>
                 </div>
               </div>
               <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60 p-4 shadow-card">
@@ -3811,15 +3894,15 @@ function App() {
                 <div className="relative">
                   <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Toplam stok</p>
                   <p className="mt-2 text-3xl font-semibold text-white">{stockSummary.total}</p>
-                  <p className="mt-1 text-xs text-slate-400">TÃ¼m Ã¼rÃ¼nlerdeki anahtar</p>
+                  <p className="mt-1 text-xs text-slate-400">Tüm ürünlerdeki anahtar</p>
                 </div>
               </div>
               <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60 p-4 shadow-card">
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_120%_at_20%_0%,rgba(244,63,94,0.18),transparent)]" />
                 <div className="relative">
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Stoksuz Ã¼rÃ¼n</p>
+                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Stoksuz ürün</p>
                   <p className="mt-2 text-3xl font-semibold text-white">{stockSummary.empty}</p>
-                  <p className="mt-1 text-xs text-slate-400">Stok bekleyen Ã¼rÃ¼n</p>
+                  <p className="mt-1 text-xs text-slate-400">Stok bekleyen ürün</p>
                 </div>
               </div>
             </div>
@@ -3830,9 +3913,9 @@ function App() {
                   <div className="flex flex-wrap items-center justify-between gap-4">
                     <div>
                       <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
-                        ÃœrÃ¼n kataloÄŸu
+                        Ürün kataloğu
                       </p>
-                      <p className="text-sm text-slate-400">StoklarÄ± satÄ±r bazÄ±nda yÃ¶net, toplu iÅŸlem yap.</p>
+                      <p className="text-sm text-slate-400">Stokları satır bazında yönet, toplu işlem yap.</p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
                       <div className="flex items-center gap-2 rounded-full border border-white/10 bg-ink-900 px-3 py-1.5 shadow-inner">
@@ -3841,15 +3924,15 @@ function App() {
                           type="text"
                           value={productSearch}
                           onChange={(e) => setProductSearch(e.target.value)}
-                          placeholder="ÃœrÃ¼n ya da kod"
+                          placeholder="Ürün ya da kod"
                           className="w-56 bg-transparent text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none"
                         />
                       </div>
                       <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                        {products.length} Ã¼rÃ¼n / {stockSummary.total} stok
+                        {products.length} ürün / {stockSummary.total} stok
                       </span>
                       <span className="rounded-full border border-rose-300/40 bg-rose-500/10 px-3 py-1 text-xs font-semibold text-rose-100">
-                        TÃ¼kenen: {stockSummary.empty}
+                        Tükenen: {stockSummary.empty}
                       </span>
                     </div>
                   </div>
@@ -3857,7 +3940,7 @@ function App() {
                   <div className="mt-4 grid gap-4">
                     {filteredProducts.length === 0 && (
                       <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
-                        HenÃ¼z Ã¼rÃ¼n yok.
+                        Henüz ürün yok.
                       </div>
                     )}
                     {filteredProducts.map((product) => (
@@ -3868,7 +3951,7 @@ function App() {
                         onDragOver={(event) => handleDragOver(event, product.id)}
                         onDrop={(event) => handleDrop(event, product.id)}
                         onDragEnd={handleDragEnd}
-                        title="SÃ¼rÃ¼kle ve sÄ±rala"
+                        title="Sürükle ve sırala"
                         className={`rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner transition hover:border-accent-400/60 hover:bg-ink-800/80 hover:shadow-card ${
                           dragState.activeId === product.id ? "opacity-60" : ""
                         } ${dragState.overId === product.id ? "ring-2 ring-accent-300/60" : ""} cursor-grab`}
@@ -3915,7 +3998,7 @@ function App() {
                                   onClick={() => handleEditCancel(product.id)}
                                   className="flex h-8 items-center justify-center rounded-md border border-white/10 px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-500/15 hover:text-rose-50"
                                 >
-                                  Ä°ptal
+                                  İptal
                                 </button>
                               </>
                             ) : (
@@ -3924,7 +4007,7 @@ function App() {
                                 onClick={() => handleEditStart(product)}
                                 className="flex h-8 items-center justify-center rounded-md border border-white/10 px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50"
                               >
-                                DÃ¼zenle
+                                Düzenle
                               </button>
                             )}
                             {lastDeleted?.productId === product.id && (
@@ -3944,7 +4027,7 @@ function App() {
                                   ? "rotate-180 border-accent-300/60 bg-white/10 text-accent-200"
                                   : ""
                               }`}
-                              aria-label="ÃœrÃ¼n detaylarÄ±nÄ± aÃ§/kapat"
+                              aria-label="Ürün detaylarını aç/kapat"
                             >
                               &gt;
                             </button>
@@ -3962,7 +4045,7 @@ function App() {
                                     onClick={() => handleProductCopyMessage(product.id)}
                                     className="rounded-md border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
                                   >
-                                    Teslimat mesajÄ±nÄ± kopyala
+                                    Teslimat mesajını kopyala
                                   </button>
                                 )}
                               <button
@@ -3974,7 +4057,7 @@ function App() {
                                     : "border-rose-400/60 bg-rose-500/10 text-rose-50 hover:border-rose-300 hover:bg-rose-500/20"
                                 }`}
                               >
-                                {confirmProductTarget === product.id ? "Silmek iÃ§in tekrar tÄ±kla" : "ÃœrÃ¼nÃ¼ sil"}
+                                {confirmProductTarget === product.id ? "Silmek için tekrar tıkla" : "Ürünü sil"}
                               </button>
                             </div>
                             {editingProduct[product.id] && (
@@ -3985,7 +4068,7 @@ function App() {
                                       className="text-[11px] font-semibold uppercase tracking-wide text-slate-300"
                                       htmlFor={`edit-name-${product.id}`}
                                     >
-                                      ÃœrÃ¼n adÄ±
+                                      Ürün adı
                                     </label>
                                     <input
                                       id={`edit-name-${product.id}`}
@@ -4000,7 +4083,7 @@ function App() {
                                       className="text-[11px] font-semibold uppercase tracking-wide text-slate-300"
                                       htmlFor={`edit-note-${product.id}`}
                                     >
-                                      Teslimat ÅŸablonu
+                                      Teslimat şablonu
                                     </label>
                                     <select
                                       id={`edit-note-${product.id}`}
@@ -4008,7 +4091,7 @@ function App() {
                                       onChange={(e) => handleEditChange(product.id, "deliveryTemplate", e.target.value)}
                                       className="w-full rounded-md border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-1 focus:ring-accent-500/30"
                                     >
-                                      <option value="">SeÃ§in</option>
+                                      <option value="">Seçin</option>
                                       {templates.map((tpl) => (
                                         <option key={tpl.label} value={tpl.label}>
                                           {tpl.label}
@@ -4021,7 +4104,7 @@ function App() {
                             )}
                             {product.stocks.length === 0 && (
                               <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-400">
-                                Bu Ã¼rÃ¼nde stok yok.
+                                Bu üründe stok yok.
                               </div>
                             )}
                             {product.stocks.length > 0 && (
@@ -4109,32 +4192,32 @@ function App() {
                   <div className="relative">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Yeni Ã¼rÃ¼n ekle</p>
-                        <p className="text-sm text-slate-400">SaÄŸdan Ã¼rÃ¼n yarat, solda stoklarÄ± gÃ¶rÃ¼n.</p>
+                        <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Yeni ürün ekle</p>
+                        <p className="text-sm text-slate-400">Sağdan ürün yarat, solda stokları görün.</p>
                       </div>
                       <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                        {products.length} Ã¼rÃ¼n
+                        {products.length} ürün
                       </span>
                     </div>
 
                     <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
                       <div className="space-y-2">
                         <label className="text-xs font-semibold text-slate-200" htmlFor="prd-name">
-                          ÃœrÃ¼n adÄ±
+                          Ürün adı
                         </label>
                         <input
                           id="prd-name"
                           type="text"
                           value={productForm.name}
                           onChange={(e) => setProductForm((prev) => ({ ...prev, name: e.target.value }))}
-                          placeholder="Ã–rn: Deluxe Edition"
+                          placeholder="Örn: Deluxe Edition"
                           className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                         />
                       </div>
 
                       <div className="space-y-2">
                         <label className="text-xs font-semibold text-slate-200" htmlFor="prd-delivery">
-                          Teslimat ÅŸablonu (opsiyonel)
+                          Teslimat şablonu (opsiyonel)
                         </label>
                         <select
                           id="prd-delivery"
@@ -4142,7 +4225,7 @@ function App() {
                           onChange={(e) => setProductForm((prev) => ({ ...prev, deliveryTemplate: e.target.value }))}
                           className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 pr-3 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                         >
-                          <option value="">SeÃ§ (opsiyonel)</option>
+                          <option value="">Seç (opsiyonel)</option>
                           {templates.map((tpl) => (
                             <option key={tpl.label} value={tpl.label}>
                               {tpl.label}
@@ -4157,7 +4240,7 @@ function App() {
                           onClick={handleProductAdd}
                           className="flex-1 min-w-[140px] rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
                         >
-                          ÃœrÃ¼n ekle
+                          Ürün ekle
                         </button>
                         <button
                           type="button"
@@ -4177,7 +4260,7 @@ function App() {
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Stok ekle</p>
-                        <p className="text-sm text-slate-400">SeÃ§ilen Ã¼rÃ¼ne anahtar ekle.</p>
+                        <p className="text-sm text-slate-400">Seçilen ürüne anahtar ekle.</p>
                       </div>
                       <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
                         {stockSummary.total} stok
@@ -4187,7 +4270,7 @@ function App() {
                     <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
                       <div className="space-y-2">
                         <label className="text-xs font-semibold text-slate-200" htmlFor="stock-product">
-                          ÃœrÃ¼n seÃ§
+                          Ürün seç
                         </label>
                         <select
                           id="stock-product"
@@ -4212,7 +4295,7 @@ function App() {
                           rows={4}
                           value={stockForm.code}
                           onChange={(e) => setStockForm((prev) => ({ ...prev, code: e.target.value }))}
-                          placeholder="Her satÄ±r bir anahtar / kod, Ã¶rn: XXXX-XXXX-XXXX-XXXX"
+                          placeholder="Her satır bir anahtar / kod, örn: XXXX-XXXX-XXXX-XXXX"
                           className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                         />
                       </div>
@@ -4246,19 +4329,19 @@ function App() {
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-2">
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
-                    Problemli MÃ¼ÅŸteriler
+                    Problemli Müşteriler
                   </span>
-                  <h1 className="font-display text-3xl font-semibold text-white">Problemli MÃ¼ÅŸteriler</h1>
+                  <h1 className="font-display text-3xl font-semibold text-white">Problemli Müşteriler</h1>
                   <p className="max-w-2xl text-sm text-slate-200/80">
-                    MÃ¼ÅŸteri kullanÄ±cÄ± adÄ± ve sorununu kaydet; Ã§Ã¶zÃ¼lÃ¼nce â€œProblem Ã§Ã¶zÃ¼ldÃ¼â€ ile kapat veya sil.
+                    Müşteri kullanıcı adı ve sorununu kaydet; çözülünce “Problem çözüldü” ile kapat veya sil.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-                    AÃ§Ä±k problem: {openProblems.length}
+                    Açık problem: {openProblems.length}
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-                    Ã‡Ã¶zÃ¼len: {resolvedProblems.length}
+                    Çözülen: {resolvedProblems.length}
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
                     Toplam: {problems.length}
@@ -4272,18 +4355,18 @@ function App() {
                 <div className={`${panelClass} bg-ink-800/60`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">AÃ§Ä±k problemler</p>
-                      <p className="text-sm text-slate-400">KullanÄ±cÄ± adÄ± ve sorun bilgisi listelenir.</p>
+                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Açık problemler</p>
+                      <p className="text-sm text-slate-400">Kullanıcı adı ve sorun bilgisi listelenir.</p>
                     </div>
                     <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                      {openProblems.length} kayÄ±t
+                      {openProblems.length} kayıt
                     </span>
                   </div>
 
                   <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {openProblems.length === 0 && (
                       <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
-                        AÃ§Ä±k problem yok.
+                        Açık problem yok.
                       </div>
                     )}
                     {openProblems.map((pb) => (
@@ -4314,7 +4397,7 @@ function App() {
                             onClick={() => handleProblemResolve(pb.id)}
                             className="rounded-lg border border-emerald-300/70 bg-emerald-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/25"
                           >
-                            Ã‡Ã¶zÃ¼ldÃ¼
+                            Çözüldü
                           </button>
                           <button
                             type="button"
@@ -4336,17 +4419,17 @@ function App() {
                 <div className={`${panelClass} bg-ink-900/60`}>
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Ã‡Ã¶zÃ¼len problemler</p>
-                      <p className="text-sm text-slate-400">Ã‡Ã¶zÃ¼lmÃ¼ÅŸ kayÄ±tlarÄ± sakla ya da sil.</p>
+                      <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Çözülen problemler</p>
+                      <p className="text-sm text-slate-400">Çözülmüş kayıtları sakla ya da sil.</p>
                     </div>
                     <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                      {resolvedProblems.length} kayÄ±t
+                      {resolvedProblems.length} kayıt
                     </span>
                   </div>
                   <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     {resolvedProblems.length === 0 && (
                       <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
-                        Ã‡Ã¶zÃ¼len kayÄ±t yok.
+                        Çözülen kayıt yok.
                       </div>
                     )}
                     {resolvedProblems.map((pb) => (
@@ -4377,7 +4460,7 @@ function App() {
                             onClick={() => handleProblemReopen(pb.id)}
                             className="rounded-lg border border-amber-300/70 bg-amber-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-amber-50 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
                           >
-                            Ã‡Ã¶zÃ¼lmedi
+                            Çözülmedi
                           </button>
                         <button
                           type="button"
@@ -4402,7 +4485,7 @@ function App() {
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Problem ekle</p>
-                      <p className="text-sm text-slate-400">KullanÄ±cÄ± adÄ± ve sorunu yazÄ±p kaydet.</p>
+                      <p className="text-sm text-slate-400">Kullanıcı adı ve sorunu yazıp kaydet.</p>
                     </div>
                     <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
                       Toplam: {problems.length}
@@ -4412,7 +4495,7 @@ function App() {
                   <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
                     <div className="space-y-2">
                       <label className="text-xs font-semibold text-slate-200" htmlFor="pb-username">
-                        KullanÄ±cÄ± adÄ±
+                        Kullanıcı adı
                       </label>
                       <input
                         id="pb-username"
@@ -4433,7 +4516,7 @@ function App() {
                         value={problemIssue}
                         onChange={(e) => setProblemIssue(e.target.value)}
                         rows={4}
-                        placeholder="Sorunun kÄ±sa Ã¶zeti..."
+                        placeholder="Sorunun kısa özeti..."
                         className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                       />
                     </div>
@@ -4481,6 +4564,7 @@ function App() {
 }
 
 export default App
+
 
 
 
