@@ -268,6 +268,12 @@ const allowedTaskStatus = new Set(["todo", "doing", "done"])
 const allowedTaskDueTypes = new Set(["today", "repeat", "date"])
 const allowedTaskRepeatDays = new Set(["0", "1", "2", "3", "4", "5", "6"])
 
+const parseRepeatDays = (value) => {
+  if (value === null || value === undefined) return []
+  const rawList = Array.isArray(value) ? value : [value]
+  return rawList.map((day) => String(day).trim()).filter((day) => day)
+}
+
 app.get("/api/problems", async (_req, res) => {
   const problems = await prisma.problem.findMany({ orderBy: { createdAt: "desc" } })
   res.json(problems)
@@ -356,7 +362,7 @@ app.post("/api/tasks", async (req, res) => {
   const noteRaw = req.body?.note
   const ownerRaw = req.body?.owner
   const dueTypeRaw = req.body?.dueType
-  const repeatDayRaw = req.body?.repeatDay
+  const repeatDaysRaw = req.body?.repeatDays
   const dueDateRaw = req.body?.dueDate
 
   if (!title) {
@@ -370,12 +376,18 @@ app.post("/api/tasks", async (req, res) => {
     return
   }
 
-  const repeatDay = String(repeatDayRaw ?? "").trim()
+  const repeatDays = parseRepeatDays(repeatDaysRaw)
+  const invalidRepeatDay = repeatDays.find((day) => !allowedTaskRepeatDays.has(day))
   const dueDate = String(dueDateRaw ?? "").trim()
 
+  if (invalidRepeatDay) {
+    res.status(400).json({ error: "invalid repeatDays" })
+    return
+  }
+
   if (dueType === "repeat") {
-    if (!repeatDay || !allowedTaskRepeatDays.has(repeatDay)) {
-      res.status(400).json({ error: "invalid repeatDay" })
+    if (repeatDays.length === 0) {
+      res.status(400).json({ error: "repeatDays required" })
       return
     }
   }
@@ -399,7 +411,7 @@ app.post("/api/tasks", async (req, res) => {
       dueType,
       ...(note === undefined ? {} : { note }),
       ...(owner === undefined ? {} : { owner }),
-      ...(dueType === "repeat" ? { repeatDay } : { repeatDay: null }),
+      ...(dueType === "repeat" ? { repeatDays } : { repeatDays: [] }),
       ...(dueType === "date" ? { dueDate } : { dueDate: null }),
       repeatWakeAt: null,
     },
@@ -420,7 +432,7 @@ app.put("/api/tasks/:id", async (req, res) => {
   const ownerRaw = req.body?.owner
   const statusRaw = req.body?.status
   const dueTypeRaw = req.body?.dueType
-  const repeatDayRaw = req.body?.repeatDay
+  const repeatDaysRaw = req.body?.repeatDays
   const dueDateRaw = req.body?.dueDate
   const repeatWakeAtRaw = req.body?.repeatWakeAt
 
@@ -472,17 +484,19 @@ app.put("/api/tasks/:id", async (req, res) => {
     data.dueType = dueType
   }
 
-  if (repeatDayRaw !== undefined) {
-    if (repeatDayRaw === null) {
-      data.repeatDay = null
+  let repeatDays = undefined
+  if (repeatDaysRaw !== undefined) {
+    if (repeatDaysRaw === null) {
+      repeatDays = []
     } else {
-      const repeatDay = String(repeatDayRaw).trim()
-      if (repeatDay && !allowedTaskRepeatDays.has(repeatDay)) {
-        res.status(400).json({ error: "invalid repeatDay" })
+      repeatDays = parseRepeatDays(repeatDaysRaw)
+      const invalidRepeatDay = repeatDays.find((day) => !allowedTaskRepeatDays.has(day))
+      if (invalidRepeatDay) {
+        res.status(400).json({ error: "invalid repeatDays" })
         return
       }
-      data.repeatDay = repeatDay || null
     }
+    data.repeatDays = repeatDays
   }
 
   if (dueDateRaw !== undefined) {
@@ -505,12 +519,12 @@ app.put("/api/tasks/:id", async (req, res) => {
 
   if (dueType !== undefined) {
     if (dueType === "repeat") {
-      const repeatDay = repeatDayRaw === undefined ? "" : String(repeatDayRaw).trim()
-      if (!repeatDay || !allowedTaskRepeatDays.has(repeatDay)) {
-        res.status(400).json({ error: "invalid repeatDay" })
+      const effectiveRepeatDays = repeatDays ?? []
+      if (effectiveRepeatDays.length === 0) {
+        res.status(400).json({ error: "repeatDays required" })
         return
       }
-      data.repeatDay = repeatDay
+      data.repeatDays = effectiveRepeatDays
       data.dueDate = null
     }
     if (dueType === "date") {
@@ -520,10 +534,10 @@ app.put("/api/tasks/:id", async (req, res) => {
         return
       }
       data.dueDate = dueDate
-      data.repeatDay = null
+      data.repeatDays = []
     }
     if (dueType === "today") {
-      data.repeatDay = null
+      data.repeatDays = []
       data.dueDate = null
     }
   }

@@ -87,7 +87,7 @@ const initialTasks = [
     note: "Genel, satış, destek",
     owner: "Ece",
     dueType: "repeat",
-    repeatDay: "2",
+    repeatDays: ["2"],
     status: "doing",
   },
   {
@@ -148,6 +148,8 @@ const taskRepeatDays = [
   { value: "6", label: "Cumartesi" },
   { value: "0", label: "Pazar" },
 ]
+
+const taskRepeatDayValues = new Set(taskRepeatDays.map((day) => day.value))
 
 
 const getInitialTheme = () => {
@@ -484,11 +486,13 @@ function App() {
     note: "",
     owner: "",
     dueType: "today",
-    repeatDay: "1",
+    repeatDays: ["1"],
     dueDate: "",
   })
   const [confirmTaskDelete, setConfirmTaskDelete] = useState(null)
   const [taskDragState, setTaskDragState] = useState({ activeId: null, overStatus: null })
+  const [isTaskEditOpen, setIsTaskEditOpen] = useState(false)
+  const [taskEditDraft, setTaskEditDraft] = useState(null)
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false)
   const [noteModalDraft, setNoteModalDraft] = useState("")
   const [taskDetailTarget, setTaskDetailTarget] = useState(null)
@@ -496,6 +500,7 @@ function App() {
   const noteLineRef = useRef(null)
   const detailNoteRef = useRef(null)
   const detailNoteLineRef = useRef(null)
+  const noteModalTargetRef = useRef(null)
   const [isTasksLoading, setIsTasksLoading] = useState(true)
   const taskLoadErrorRef = useRef(false)
 
@@ -1020,20 +1025,6 @@ function App() {
         const res = await apiFetch("/api/tasks", { signal: controller.signal })
         if (!res.ok) throw new Error("api_error")
         const data = await res.json()
-        const normalizeTask = (task) => {
-          const dueDate = task?.dueDate || ""
-          const dueType = task?.dueType || (dueDate ? "date" : "today")
-          const repeatDay = task?.repeatDay ?? "1"
-          return {
-            ...task,
-            note: task?.note ?? "",
-            owner: task?.owner ?? "",
-            dueType,
-            dueDate: dueType === "date" ? dueDate : "",
-            repeatDay: dueType === "repeat" ? String(repeatDay) : "",
-            repeatWakeAt: task?.repeatWakeAt ?? "",
-          }
-        }
         setTasks(Array.isArray(data) ? data.map(normalizeTask) : [])
         taskLoadErrorRef.current = false
       } catch (error) {
@@ -1042,7 +1033,7 @@ function App() {
           taskLoadErrorRef.current = true
           toast.error("Görevler alınamadı (API/DB kontrol edin).")
         }
-        setTasks(initialTasks)
+        setTasks(initialTasks.map(normalizeTask))
       } finally {
         setIsTasksLoading(false)
       }
@@ -1085,16 +1076,19 @@ function App() {
   }, [apiFetch, isAuthed])
 
   useEffect(() => {
-    if (!isNoteModalOpen && !taskDetailTarget) return
+    if (!isNoteModalOpen && !taskDetailTarget && !isTaskEditOpen) return
     const handleKey = (event) => {
       if (event.key === "Escape") {
         setIsNoteModalOpen(false)
         setTaskDetailTarget(null)
+        setIsTaskEditOpen(false)
+        setTaskEditDraft(null)
+        noteModalTargetRef.current = null
       }
     }
     window.addEventListener("keydown", handleKey)
     return () => window.removeEventListener("keydown", handleKey)
-  }, [isNoteModalOpen, taskDetailTarget])
+  }, [isNoteModalOpen, taskDetailTarget, isTaskEditOpen])
 
   const toggleProductOpen = (productId) => {
     setOpenProducts((prev) => ({ ...prev, [productId]: !(prev[productId] ?? false)}))
@@ -1113,6 +1107,21 @@ function App() {
     return next
   }
 
+  const normalizeRepeatDays = (value) => {
+    const rawList = Array.isArray(value) ? value : value ? [value] : []
+    return rawList
+      .map((day) => String(day).trim())
+      .filter((day) => day && taskRepeatDayValues.has(day))
+  }
+
+  const getRepeatDayLabels = (repeatDays) => {
+    const selected = new Set(normalizeRepeatDays(repeatDays))
+    return taskRepeatDays.filter((day) => selected.has(day.value)).map((day) => day.label)
+  }
+
+  const taskFormRepeatLabels = getRepeatDayLabels(taskForm.repeatDays)
+  const taskEditRepeatLabels = getRepeatDayLabels(taskEditDraft?.repeatDays)
+
   const formatTaskDate = (value) => {
     if (!value) return ""
     const dateValue = new Date(`${value}T00:00:00`)
@@ -1122,11 +1131,26 @@ function App() {
     return value
   }
 
+  const normalizeTask = (task) => {
+    const dueDate = task?.dueDate || ""
+    const dueType = task?.dueType || (dueDate ? "date" : "today")
+    const repeatDays = normalizeRepeatDays(task?.repeatDays ?? (task?.repeatDay ? [task.repeatDay] : []))
+    return {
+      ...task,
+      note: task?.note ?? "",
+      owner: task?.owner ?? "",
+      dueType,
+      dueDate: dueType === "date" ? dueDate : "",
+      repeatDays,
+      repeatWakeAt: task?.repeatWakeAt ?? "",
+    }
+  }
+
   const getTaskDueLabel = (task) => {
     if (task.dueType === "today") return "Bugün"
     if (task.dueType === "repeat") {
-      const day = taskRepeatDays.find((item) => item.value === String(task.repeatDay))
-      return day ? `Her ${day.label}` : "Tekrarlanabilir"
+      const labels = getRepeatDayLabels(task.repeatDays)
+      return labels.length > 0 ? `Her ${labels.join(", ")}` : "Tekrarlanabilir"
     }
     if (task.dueType === "date") {
       return task.dueDate ? formatTaskDate(task.dueDate) : "Tarih seçilmedi"
@@ -1138,21 +1162,29 @@ function App() {
     const today = getLocalDateString(new Date())
     if (task.dueType === "today") return true
     if (task.dueType === "date") return task.dueDate === today
-    if (task.dueType === "repeat") return String(new Date().getDay()) === String(task.repeatDay)
+    if (task.dueType === "repeat") {
+      const dayValue = String(new Date().getDay())
+      return normalizeRepeatDays(task.repeatDays).includes(dayValue)
+    }
     return false
   }
 
-  const openNoteModal = () => {
-    setNoteModalDraft(taskForm.note)
+  const openNoteModal = (value, onSave) => {
+    setNoteModalDraft(value ?? "")
+    noteModalTargetRef.current = onSave
     setIsNoteModalOpen(true)
   }
 
   const handleNoteModalSave = () => {
-    setTaskForm((prev) => ({ ...prev, note: noteModalDraft }))
+    if (noteModalTargetRef.current) {
+      noteModalTargetRef.current(noteModalDraft)
+    }
+    noteModalTargetRef.current = null
     setIsNoteModalOpen(false)
   }
 
   const handleNoteModalClose = () => {
+    noteModalTargetRef.current = null
     setIsNoteModalOpen(false)
   }
 
@@ -1185,14 +1217,42 @@ function App() {
     setTaskDetailTarget(null)
   }
 
+  const openTaskEdit = (task) => {
+    const normalized = normalizeTask(task)
+    setTaskEditDraft({
+      id: normalized.id,
+      title: normalized.title ?? "",
+      note: normalized.note ?? "",
+      owner: normalized.owner ?? "",
+      dueType: normalized.dueType ?? "today",
+      repeatDays: normalized.repeatDays ?? [],
+      dueDate: normalized.dueDate ?? "",
+    })
+    setIsTaskEditOpen(true)
+  }
+
+  const closeTaskEdit = () => {
+    setIsTaskEditOpen(false)
+    setTaskEditDraft(null)
+  }
+
   const resetTaskForm = () => {
     setTaskForm({
       title: "",
       note: "",
       owner: "",
       dueType: "today",
-      repeatDay: "1",
+      repeatDays: ["1"],
       dueDate: "",
+    })
+  }
+
+  const toggleRepeatDay = (value, setState) => {
+    setState((prev) => {
+      if (!prev) return prev
+      const current = Array.isArray(prev.repeatDays) ? prev.repeatDays : []
+      const next = current.includes(value) ? current.filter((day) => day !== value) : [...current, value]
+      return { ...prev, repeatDays: next }
     })
   }
 
@@ -1206,15 +1266,11 @@ function App() {
       })
       if (!res.ok) throw new Error("task_update_failed")
       const updated = await res.json()
+      const normalized = normalizeTask(updated)
       setTasks((prev) =>
         prev.map((task) =>
           task.id === taskId
-            ? {
-              ...updated,
-              note: updated?.note ?? "",
-              owner: updated?.owner ?? "",
-              repeatWakeAt: updated?.repeatWakeAt ?? "",
-            }
+            ? normalized
             : task,
         ),
       )
@@ -1232,6 +1288,11 @@ function App() {
       toast.error("Görev adı gerekli.")
       return
     }
+    const repeatDays = normalizeRepeatDays(taskForm.repeatDays)
+    if (taskForm.dueType === "repeat" && repeatDays.length === 0) {
+      toast.error("Tekrarlanabilir gün seçin.")
+      return
+    }
     if (taskForm.dueType === "date" && !taskForm.dueDate) {
       toast.error("Özel tarih seçin.")
       return
@@ -1245,27 +1306,48 @@ function App() {
           note: taskForm.note.trim(),
           owner: taskForm.owner.trim(),
           dueType: taskForm.dueType,
-          repeatDay: taskForm.dueType === "repeat" ? taskForm.repeatDay : "",
+          repeatDays: taskForm.dueType === "repeat" ? repeatDays : [],
           dueDate: taskForm.dueType === "date" ? taskForm.dueDate : "",
         }),
       })
       if (!res.ok) throw new Error("task_create_failed")
       const created = await res.json()
-      setTasks((prev) => [
-        {
-          ...created,
-          note: created?.note ?? "",
-          owner: created?.owner ?? "",
-          repeatWakeAt: created?.repeatWakeAt ?? "",
-        },
-        ...prev,
-      ])
+      setTasks((prev) => [normalizeTask(created), ...prev])
       resetTaskForm()
       toast.success("Görev eklendi")
     } catch (error) {
       console.error(error)
       toast.error("Görev eklenemedi (API/DB kontrol edin).")
     }
+  }
+
+  const handleTaskEditSave = async () => {
+    if (!taskEditDraft) return
+    const titleValue = taskEditDraft.title.trim()
+    if (!titleValue) {
+      toast.error("Görev adı gerekli.")
+      return
+    }
+    const repeatDays = normalizeRepeatDays(taskEditDraft.repeatDays)
+    if (taskEditDraft.dueType === "repeat" && repeatDays.length === 0) {
+      toast.error("Tekrarlanabilir gün seçin.")
+      return
+    }
+    if (taskEditDraft.dueType === "date" && !taskEditDraft.dueDate) {
+      toast.error("Özel tarih seçin.")
+      return
+    }
+    const updated = await saveTaskUpdate(taskEditDraft.id, {
+      title: titleValue,
+      note: taskEditDraft.note.trim(),
+      owner: taskEditDraft.owner.trim(),
+      dueType: taskEditDraft.dueType,
+      repeatDays: taskEditDraft.dueType === "repeat" ? repeatDays : [],
+      dueDate: taskEditDraft.dueType === "date" ? taskEditDraft.dueDate : null,
+    })
+    if (!updated) return
+    closeTaskEdit()
+    toast.success("Görev güncellendi")
   }
 
   const handleTaskAdvance = async (taskId) => {
@@ -3305,6 +3387,13 @@ function App() {
                                   >
                                     Detay
                                   </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => openTaskEdit(task)}
+                                    className="rounded-lg border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50"
+                                  >
+                                    Düzenle
+                                  </button>
                                   {status === "done" && (
                                     <button
                                       type="button"
@@ -3368,10 +3457,14 @@ function App() {
                         <label htmlFor="task-note">Not</label>
                         <button
                           type="button"
-                          onClick={openNoteModal}
+                          onClick={() =>
+                            openNoteModal(taskForm.note, (value) =>
+                              setTaskForm((prev) => ({ ...prev, note: value })),
+                            )
+                          }
                           className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] uppercase tracking-[0.2em] text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
                         >
-                          Genislet
+                          Genişlet
                         </button>
                       </div>
                       <textarea
@@ -3405,12 +3498,17 @@ function App() {
                       <select
                         id="task-due-type"
                         value={taskForm.dueType}
-                        onChange={(e) =>
+                        onChange={(e) => {
+                          const nextType = e.target.value
                           setTaskForm((prev) => ({
                             ...prev,
-                            dueType: e.target.value,
+                            dueType: nextType,
+                            repeatDays:
+                              nextType === "repeat" && (!prev.repeatDays || prev.repeatDays.length === 0)
+                                ? ["1"]
+                                : prev.repeatDays ?? [],
                           }))
-                        }
+                        }}
                         className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 pr-3 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                       >
                         {taskDueTypeOptions.map((option) => (
@@ -3423,21 +3521,36 @@ function App() {
 
                     {taskForm.dueType === "repeat" && (
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-200" htmlFor="task-repeat-day">
-                          Tekrarlanabilir gün
-                        </label>
-                        <select
-                          id="task-repeat-day"
-                          value={taskForm.repeatDay}
-                          onChange={(e) => setTaskForm((prev) => ({ ...prev, repeatDay: e.target.value }))}
-                          className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 pr-3 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                        >
-                          {taskRepeatDays.map((day) => (
-                            <option key={day.value} value={day.value}>
-                              {day.label}
-                            </option>
-                          ))}
-                        </select>
+                        <div className="flex items-center justify-between text-xs font-semibold text-slate-200">
+                          <span>Tekrarlanabilir gün</span>
+                          <span className="text-[11px] text-slate-400">
+                            {taskFormRepeatLabels.length} gün seçili
+                          </span>
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          {taskRepeatDays.map((day) => {
+                            const isActive = normalizeRepeatDays(taskForm.repeatDays).includes(day.value)
+                            return (
+                              <button
+                                key={day.value}
+                                type="button"
+                                onClick={() => toggleRepeatDay(day.value, setTaskForm)}
+                                className={`rounded-full border px-3 py-1 text-[11px] font-semibold transition ${
+                                  isActive
+                                    ? "border-accent-300 bg-accent-500/20 text-accent-50 shadow-glow"
+                                    : "border-white/10 bg-white/5 text-slate-200 hover:border-accent-300/60 hover:text-accent-100"
+                                }`}
+                              >
+                                {day.label}
+                              </button>
+                            )
+                          })}
+                        </div>
+                        <p className="text-xs text-slate-400">
+                          {taskFormRepeatLabels.length > 0
+                            ? `Seçilen günler: ${taskFormRepeatLabels.join(", ")}`
+                            : "Gün seçilmedi."}
+                        </p>
                       </div>
                     )}
 
@@ -4640,9 +4753,200 @@ function App() {
           </div>
         )}
       </div>
-      {isNoteModalOpen && (
+      {isTaskEditOpen && taskEditDraft && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
+          onClick={closeTaskEdit}
+        >
+          <div
+            className="w-full max-w-3xl overflow-hidden rounded-2xl border border-white/10 bg-ink-900 shadow-card"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-white/10 bg-ink-800 px-4 py-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-300/80">
+                  Görev düzenle
+                </p>
+                <p className="text-xs text-slate-400">{taskEditDraft.title.length} karakter</p>
+              </div>
+              <button
+                type="button"
+                onClick={closeTaskEdit}
+                className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
+              >
+                Kapat
+              </button>
+            </div>
+
+            <div className="space-y-4 p-4">
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-slate-200" htmlFor="task-edit-title">
+                  Görev adı
+                </label>
+                <input
+                  id="task-edit-title"
+                  type="text"
+                  value={taskEditDraft.title}
+                  onChange={(e) =>
+                    setTaskEditDraft((prev) => (prev ? { ...prev, title: e.target.value } : prev))
+                  }
+                  placeholder="Örn: Stok raporunu güncelle"
+                  className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs font-semibold text-slate-200">
+                  <label htmlFor="task-edit-note">Not</label>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      openNoteModal(taskEditDraft.note, (value) =>
+                        setTaskEditDraft((prev) => (prev ? { ...prev, note: value } : prev)),
+                      )
+                    }
+                    className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] uppercase tracking-[0.2em] text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
+                  >
+                    Genişlet
+                  </button>
+                </div>
+                <textarea
+                  id="task-edit-note"
+                  rows={3}
+                  value={taskEditDraft.note}
+                  onChange={(e) =>
+                    setTaskEditDraft((prev) => (prev ? { ...prev, note: e.target.value } : prev))
+                  }
+                  placeholder="Kısa not veya kontrol listesi"
+                  className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-slate-200" htmlFor="task-edit-owner">
+                  Sorumlu
+                </label>
+                <input
+                  id="task-edit-owner"
+                  type="text"
+                  value={taskEditDraft.owner}
+                  onChange={(e) =>
+                    setTaskEditDraft((prev) => (prev ? { ...prev, owner: e.target.value } : prev))
+                  }
+                  placeholder="Örn: Ayşe"
+                  className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-xs font-semibold text-slate-200" htmlFor="task-edit-due-type">
+                  Bitiş tarihi
+                </label>
+                <select
+                  id="task-edit-due-type"
+                  value={taskEditDraft.dueType}
+                  onChange={(e) => {
+                    const nextType = e.target.value
+                    setTaskEditDraft((prev) => {
+                      if (!prev) return prev
+                      return {
+                        ...prev,
+                        dueType: nextType,
+                        repeatDays:
+                          nextType === "repeat" && (!prev.repeatDays || prev.repeatDays.length === 0)
+                            ? ["1"]
+                            : prev.repeatDays ?? [],
+                      }
+                    })
+                  }}
+                  className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 pr-3 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                >
+                  {taskDueTypeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {taskEditDraft.dueType === "repeat" && (
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-semibold text-slate-200">
+                    <span>Tekrarlanabilir gün</span>
+                    <span className="text-[11px] text-slate-400">
+                      {taskEditRepeatLabels.length} gün seçili
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {taskRepeatDays.map((day) => {
+                      const isActive = normalizeRepeatDays(taskEditDraft.repeatDays).includes(day.value)
+                      return (
+                        <button
+                          key={day.value}
+                          type="button"
+                          onClick={() => toggleRepeatDay(day.value, setTaskEditDraft)}
+                          className={`rounded-full border px-3 py-1 text-[11px] font-semibold transition ${
+                            isActive
+                              ? "border-accent-300 bg-accent-500/20 text-accent-50 shadow-glow"
+                              : "border-white/10 bg-white/5 text-slate-200 hover:border-accent-300/60 hover:text-accent-100"
+                          }`}
+                        >
+                          {day.label}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    {taskEditRepeatLabels.length > 0
+                      ? `Seçilen günler: ${taskEditRepeatLabels.join(", ")}`
+                      : "Gün seçilmedi."}
+                  </p>
+                </div>
+              )}
+
+              {taskEditDraft.dueType === "date" && (
+                <div className="space-y-2">
+                  <label className="text-xs font-semibold text-slate-200" htmlFor="task-edit-due-date">
+                    Özel tarih
+                  </label>
+                  <input
+                    id="task-edit-due-date"
+                    type="date"
+                    value={taskEditDraft.dueDate}
+                    onChange={(e) =>
+                      setTaskEditDraft((prev) => (prev ? { ...prev, dueDate: e.target.value } : prev))
+                    }
+                    className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-ink-800 px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Esc ile kapat</p>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={handleTaskEditSave}
+                  className="min-w-[140px] rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
+                >
+                  Kaydet
+                </button>
+                <button
+                  type="button"
+                  onClick={closeTaskEdit}
+                  className="min-w-[120px] rounded-lg border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
+                >
+                  İptal
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {isNoteModalOpen && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 px-4"
           onClick={handleNoteModalClose}
         >
           <div
@@ -4724,13 +5028,25 @@ function App() {
                 </p>
                 <p className="text-lg font-semibold text-slate-100">{taskDetailTarget.title}</p>
               </div>
-              <button
-                type="button"
-                onClick={closeTaskDetail}
-                className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
-              >
-                Kapat
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    openTaskEdit(taskDetailTarget)
+                    closeTaskDetail()
+                  }}
+                  className="rounded-lg border border-accent-300/70 bg-accent-500/15 px-3 py-1 text-xs font-semibold text-accent-50 transition hover:border-accent-200 hover:bg-accent-500/25"
+                >
+                  Düzenle
+                </button>
+                <button
+                  type="button"
+                  onClick={closeTaskDetail}
+                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
+                >
+                  Kapat
+                </button>
+              </div>
             </div>
 
             <div className="mt-4 flex flex-wrap gap-2">
