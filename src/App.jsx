@@ -78,7 +78,6 @@ const initialTasks = [
     title: "Haftalik oncelik listesini guncelle",
     note: "Kritik musteriler + teslim sureleri",
     status: "todo",
-    priority: "high",
     due: "2025-12-29",
   },
   {
@@ -86,7 +85,6 @@ const initialTasks = [
     title: "Sablon kategorilerini toparla",
     note: "Genel, satis, destek",
     status: "doing",
-    priority: "normal",
     due: "",
   },
   {
@@ -94,7 +92,6 @@ const initialTasks = [
     title: "Haftalik raporu paylas",
     note: "Cuma 17:00",
     status: "done",
-    priority: "low",
     due: "2025-12-27",
   },
 ]
@@ -132,22 +129,6 @@ const taskStatusMeta = {
   },
 }
 
-const taskPriorityMeta = {
-  high: {
-    label: "Yuksek",
-    badge: "border-rose-300/70 bg-rose-500/15 text-rose-50",
-  },
-  normal: {
-    label: "Normal",
-    badge: "border-sky-300/70 bg-sky-500/15 text-sky-50",
-  },
-  low: {
-    label: "Dusuk",
-    badge: "border-emerald-300/70 bg-emerald-500/15 text-emerald-50",
-  },
-}
-
-const taskPriorityOrder = { high: 0, normal: 1, low: 2 }
 
 const getInitialTheme = () => {
   if (typeof window === "undefined") return "dark"
@@ -493,12 +474,10 @@ function App() {
   const [taskForm, setTaskForm] = useState({
     title: "",
     note: "",
-    priority: "normal",
     due: "",
   })
-  const [taskSearch, setTaskSearch] = useState("")
-  const [taskPriorityFilter, setTaskPriorityFilter] = useState("all")
   const [confirmTaskDelete, setConfirmTaskDelete] = useState(null)
+  const [taskDragState, setTaskDragState] = useState({ activeId: null, overStatus: null })
 
   const isLight = theme === "light"
 
@@ -967,64 +946,22 @@ function App() {
     const done = tasks.filter((task) => task.status === "done").length
     const doing = tasks.filter((task) => task.status === "doing").length
     const todo = tasks.filter((task) => task.status === "todo").length
-    const high = tasks.filter((task) => task.priority === "high" && task.status !== "done").length
-    return { total, done, doing, todo, high }
+    return { total, done, doing, todo }
   }, [tasks])
-
-  const filteredTasks = useMemo(() => {
-    const text = taskSearch.trim().toLowerCase()
-    return tasks.filter((task) => {
-      if (taskPriorityFilter !== "all" && task.priority !== taskPriorityFilter) return false
-      if (!text) return true
-      const haystack = `${task.title ?? ""} ${task.note ?? ""}`.toLowerCase()
-      return haystack.includes(text)
-    })
-  }, [tasks, taskPriorityFilter, taskSearch])
 
   const taskGroups = useMemo(() => {
     const groups = { todo: [], doing: [], done: [] }
-    const parseDue = (value) => {
-      if (!value) return Number.POSITIVE_INFINITY
-      const timestamp = Date.parse(value)
-      return Number.isFinite(timestamp) ? timestamp : Number.POSITIVE_INFINITY
-    }
-    filteredTasks.forEach((task) => {
+    tasks.forEach((task) => {
       const status = task?.status && task.status in groups ? task.status : "todo"
       groups[status].push(task)
     })
-    Object.values(groups).forEach((group) => {
-      group.sort((a, b) => {
-        const priorityDiff =
-          (taskPriorityOrder[a.priority] ?? 99) - (taskPriorityOrder[b.priority] ?? 99)
-        if (priorityDiff !== 0) return priorityDiff
-        const dueDiff = parseDue(a.due) - parseDue(b.due)
-        if (dueDiff !== 0) return dueDiff
-        return String(a.title ?? "").localeCompare(String(b.title ?? ""), "tr", {
-          sensitivity: "base",
-        })
-      })
-    })
     return groups
-  }, [filteredTasks])
+  }, [tasks])
 
   const focusTask = useMemo(() => {
     const openTasks = tasks.filter((task) => task.status !== "done")
     if (openTasks.length === 0) return null
-    const parseDue = (value) => {
-      if (!value) return Number.POSITIVE_INFINITY
-      const timestamp = Date.parse(value)
-      return Number.isFinite(timestamp) ? timestamp : Number.POSITIVE_INFINITY
-    }
-    return [...openTasks].sort((a, b) => {
-      const priorityDiff =
-        (taskPriorityOrder[a.priority] ?? 99) - (taskPriorityOrder[b.priority] ?? 99)
-      if (priorityDiff !== 0) return priorityDiff
-      const dueDiff = parseDue(a.due) - parseDue(b.due)
-      if (dueDiff !== 0) return dueDiff
-      return String(a.title ?? "").localeCompare(String(b.title ?? ""), "tr", {
-        sensitivity: "base",
-      })
-    })[0]
+    return openTasks[0]
   }, [tasks])
 
 
@@ -1080,7 +1017,7 @@ function App() {
   }
 
   const resetTaskForm = () => {
-    setTaskForm({ title: "", note: "", priority: "normal", due: "" })
+    setTaskForm({ title: "", note: "", due: "" })
   }
 
   const handleTaskAdd = () => {
@@ -1093,7 +1030,6 @@ function App() {
       id: createTaskId(),
       title: titleValue,
       note: taskForm.note.trim(),
-      priority: taskForm.priority,
       status: "todo",
       due: taskForm.due,
       createdAt: new Date().toISOString(),
@@ -1129,6 +1065,35 @@ function App() {
     }
     setConfirmTaskDelete(taskId)
     toast("Silmek icin tekrar tikla", { position: "top-right" })
+  }
+
+  const handleTaskDragStart = (event, taskId) => {
+    event.dataTransfer.effectAllowed = "move"
+    event.dataTransfer.setData("text/plain", taskId)
+    setTaskDragState({ activeId: taskId, overStatus: null })
+  }
+
+  const handleTaskDragOver = (event, status) => {
+    event.preventDefault()
+    if (taskDragState.overStatus === status) return
+    setTaskDragState((prev) => ({ ...prev, overStatus: status }))
+  }
+
+  const handleTaskDrop = (event, status) => {
+    event.preventDefault()
+    const taskId = taskDragState.activeId || event.dataTransfer.getData("text/plain")
+    if (!taskId) {
+      setTaskDragState({ activeId: null, overStatus: null })
+      return
+    }
+    setTasks((prev) =>
+      prev.map((task) => (task.id === taskId ? { ...task, status } : task)),
+    )
+    setTaskDragState({ activeId: null, overStatus: null })
+  }
+
+  const handleTaskDragEnd = () => {
+    setTaskDragState({ activeId: null, overStatus: null })
   }
 
   const handleAuthSubmit = async (event) => {
@@ -2977,7 +2942,7 @@ function App() {
                   </span>
                   <h1 className="font-display text-3xl font-semibold text-white">Gorevler</h1>
                   <p className="max-w-2xl text-sm text-slate-200/80">
-                    Oncelik, not ve tarih ile gorevlerini takipe al. Hepsi lokal tutulur.
+                    Not ve tarih ile gorevlerini takipe al. Hepsi lokal tutulur.
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -2986,9 +2951,6 @@ function App() {
                   </span>
                   <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
                     Acik: {taskStats.todo + taskStats.doing}
-                  </span>
-                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-                    Yuksek oncelik: {taskStats.high}
                   </span>
                 </div>
               </div>
@@ -3000,7 +2962,7 @@ function App() {
                   <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                     <div>
                       <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Gorev tahtasi</p>
-                      <p className="text-sm text-slate-400">Duruma gore gorevleri hizlica guncelle.</p>
+                      <p className="text-sm text-slate-400">Kartlari surukleyip yeni duruma birak.</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
                       <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
@@ -3012,45 +2974,22 @@ function App() {
                     </div>
                   </div>
 
-                  <div className="mt-4 grid gap-3 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-200" htmlFor="task-search">
-                        Ara
-                      </label>
-                      <input
-                        id="task-search"
-                        type="text"
-                        value={taskSearch}
-                        onChange={(e) => setTaskSearch(e.target.value)}
-                        placeholder="Baslik veya not"
-                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <label className="text-xs font-semibold text-slate-200" htmlFor="task-priority-filter">
-                        Oncelik filtresi
-                      </label>
-                      <select
-                        id="task-priority-filter"
-                        value={taskPriorityFilter}
-                        onChange={(e) => setTaskPriorityFilter(e.target.value)}
-                        className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 pr-3 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                      >
-                        <option value="all">Hepsi</option>
-                        {Object.entries(taskPriorityMeta).map(([value, meta]) => (
-                          <option key={value} value={value}>
-                            {meta.label}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-
                   <div className="mt-6 grid gap-4 md:grid-cols-3">
                     {Object.entries(taskStatusMeta).map(([status, meta]) => (
                       <div
                         key={status}
-                        className="flex h-full flex-col gap-4 rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner"
+                        onDragOver={(event) => handleTaskDragOver(event, status)}
+                        onDrop={(event) => handleTaskDrop(event, status)}
+                        onDragLeave={() =>
+                          setTaskDragState((prev) =>
+                            prev.overStatus === status ? { ...prev, overStatus: null } : prev,
+                          )
+                        }
+                        className={`flex h-full flex-col gap-4 rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner transition ${
+                          taskDragState.overStatus === status
+                            ? "border-accent-400/60 ring-2 ring-accent-400/30"
+                            : ""
+                        }`}
                       >
                         <div className="flex items-center justify-between">
                           <div>
@@ -3068,10 +3007,12 @@ function App() {
                             </div>
                           )}
                           {taskGroups[status].map((task) => {
-                            const priority = taskPriorityMeta[task.priority] || taskPriorityMeta.normal
                             return (
                               <div
                                 key={task.id}
+                                draggable
+                                onDragStart={(event) => handleTaskDragStart(event, task.id)}
+                                onDragEnd={handleTaskDragEnd}
                                 className="flex flex-col gap-3 rounded-xl border border-white/10 bg-ink-800/70 p-3 shadow-inner"
                               >
                                 <div className="flex items-start justify-between gap-2">
@@ -3081,9 +3022,6 @@ function App() {
                                       <p className="text-xs text-slate-400">{task.note}</p>
                                     )}
                                   </div>
-                                  <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${priority.badge}`}>
-                                    {priority.label}
-                                  </span>
                                 </div>
                                 {task.due && (
                                   <span className="w-fit rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-slate-300">
@@ -3172,36 +3110,17 @@ function App() {
                       />
                     </div>
 
-                    <div className="grid gap-3 sm:grid-cols-2">
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-200" htmlFor="task-priority">
-                          Oncelik
-                        </label>
-                        <select
-                          id="task-priority"
-                          value={taskForm.priority}
-                          onChange={(e) => setTaskForm((prev) => ({ ...prev, priority: e.target.value }))}
-                          className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 pr-3 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                        >
-                          {Object.entries(taskPriorityMeta).map(([value, meta]) => (
-                            <option key={value} value={value}>
-                              {meta.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-200" htmlFor="task-due">
-                          Son tarih
-                        </label>
-                        <input
-                          id="task-due"
-                          type="date"
-                          value={taskForm.due}
-                          onChange={(e) => setTaskForm((prev) => ({ ...prev, due: e.target.value }))}
-                          className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                        />
-                      </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-200" htmlFor="task-due">
+                        Son tarih
+                      </label>
+                      <input
+                        id="task-due"
+                        type="date"
+                        value={taskForm.due}
+                        onChange={(e) => setTaskForm((prev) => ({ ...prev, due: e.target.value }))}
+                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                      />
                     </div>
 
                     <div className="flex flex-wrap gap-3">
@@ -3228,7 +3147,6 @@ function App() {
                   <div className="mt-3 space-y-2 text-sm text-slate-300">
                     <p>- Acik gorev: {taskStats.todo + taskStats.doing}</p>
                     <p>- Tamamlanan: {taskStats.done}</p>
-                    <p>- Yuksek oncelik: {taskStats.high}</p>
                   </div>
                   <div className="mt-4 rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-200 shadow-inner">
                     {focusTask ? (
