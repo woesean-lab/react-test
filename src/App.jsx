@@ -1102,6 +1102,14 @@ function App() {
     return ""
   }
 
+  const isTaskDueToday = (task) => {
+    const today = getLocalDateString(new Date())
+    if (task.dueType === "today") return true
+    if (task.dueType === "date") return task.dueDate === today
+    if (task.dueType === "repeat") return String(new Date().getDay()) === String(task.repeatDay)
+    return false
+  }
+
   const resetTaskForm = () => {
     setTaskForm({
       title: "",
@@ -3139,7 +3147,13 @@ function App() {
                                     )}
                                   </div>
                                 </div>
-                                <span className="w-fit rounded-full border border-white/10 bg-white/5 px-2 py-1 text-[11px] text-slate-300">
+                                <span
+                                  className={`w-fit rounded-full border px-2 py-1 text-[11px] ${
+                                    isTaskDueToday(task)
+                                      ? "border-rose-300/70 bg-rose-500/20 text-rose-100"
+                                      : "border-white/10 bg-white/5 text-slate-300"
+                                  }`}
+                                >
                                   Bitis: {getTaskDueLabel(task)}
                                 </span>
                                 <div className="flex flex-wrap gap-2">
