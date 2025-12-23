@@ -203,19 +203,19 @@
   }
 
   [data-theme='light'] .bg-amber-500\/10 {
-    background-color: rgba(245, 158, 11, 0.12);
+    background-color: rgba(245, 158, 11, 0.18);
   }
 
   [data-theme='light'] .bg-amber-500\/15 {
-    background-color: rgba(245, 158, 11, 0.16);
+    background-color: rgba(245, 158, 11, 0.22);
   }
 
   [data-theme='light'] .bg-amber-500\/20 {
-    background-color: rgba(245, 158, 11, 0.2);
+    background-color: rgba(245, 158, 11, 0.26);
   }
 
   [data-theme='light'] .bg-amber-500\/25 {
-    background-color: rgba(245, 158, 11, 0.26);
+    background-color: rgba(245, 158, 11, 0.32);
   }
 
   [data-theme='light'] .bg-rose-500\/10 {
@@ -264,12 +264,12 @@
   }
 
   [data-theme='light'] .border-amber-300\/40 {
-    border-color: rgba(245, 158, 11, 0.35);
+    border-color: rgba(245, 158, 11, 0.45);
   }
 
   [data-theme='light'] .border-amber-300\/60,
   [data-theme='light'] .border-amber-300\/70 {
-    border-color: rgba(245, 158, 11, 0.45);
+    border-color: rgba(245, 158, 11, 0.6);
   }
 
   [data-theme='light'] .border-rose-300\/40 {
@@ -358,6 +358,10 @@
   }
 
   [data-theme='light'] .text-amber-50 {
+    color: #78350f;
+  }
+
+  [data-theme='light'] .text-amber-100 {
     color: #92400e;
   }
 
