@@ -500,6 +500,7 @@ function App() {
   const [productOrder, setProductOrder] = useState([])
   const [dragState, setDragState] = useState({ activeId: null, overId: null })
   const [editingProduct, setEditingProduct] = useState({})
+  const [deletingStocks, setDeletingStocks] = useState({})
 
   const [tasks, setTasks] = useState([])
   const [taskForm, setTaskForm] = useState({
@@ -2741,18 +2742,25 @@ function App() {
         const res = await apiFetch(`/api/stocks/${stockId}`, { method: "DELETE" })
         if (!res.ok && res.status !== 404) throw new Error("stock_delete_failed")
 
-        setProducts((prev) =>
-          prev.map((product) =>
-            product.id === productId
-              ? { ...product, stocks: product.stocks.filter((stk) => stk.id !== stockId)}
-              : product,
-          ),
-        )
-        if (removed) {
-          setLastDeleted({ productId, stocks: [removed] })
-        }
-
-        setConfirmStockTarget(null)
+        setDeletingStocks((prev) => ({ ...prev, [stockId]: true }))
+        window.setTimeout(() => {
+          setProducts((prev) =>
+            prev.map((product) =>
+              product.id === productId
+                ? { ...product, stocks: product.stocks.filter((stk) => stk.id !== stockId)}
+                : product,
+            ),
+          )
+          if (removed) {
+            setLastDeleted({ productId, stocks: [removed] })
+          }
+          setDeletingStocks((prev) => {
+            const next = { ...prev }
+            delete next[stockId]
+            return next
+          })
+          setConfirmStockTarget(null)
+        }, 180)
         toast.success("Anahtar silindi")
         return
       } catch (error) {
@@ -4489,7 +4497,9 @@ function App() {
                                   {availableStocks.map((stk, idx) => (
                                     <div
                                       key={stk.id}
-                                      className="group flex flex-col items-start gap-3 rounded-xl border border-emerald-300/40 bg-emerald-500/10 px-3 py-2 transition hover:border-emerald-200/70 hover:bg-emerald-500/15 cursor-default sm:flex-row sm:items-center"
+                                      className={`group flex flex-col items-start gap-3 rounded-xl border border-emerald-300/40 bg-emerald-500/10 px-3 py-2 transition hover:border-emerald-200/70 hover:bg-emerald-500/15 cursor-default sm:flex-row sm:items-center ${
+                                        deletingStocks[stk.id] ? "opacity-50 scale-[0.98]" : ""
+                                      }`}
                                       onDragStart={(event) => event.preventDefault()}
                                       onMouseDown={(event) => event.stopPropagation()}
                                     >
@@ -4550,7 +4560,9 @@ function App() {
                                   {usedStocks.map((stk, idx) => (
                                     <div
                                       key={stk.id}
-                                      className="group flex flex-col items-start gap-3 rounded-xl border border-rose-300/40 bg-rose-500/10 px-3 py-2 transition hover:border-rose-200/70 hover:bg-rose-500/15 cursor-default sm:flex-row sm:items-center"
+                                      className={`group flex flex-col items-start gap-3 rounded-xl border border-rose-300/40 bg-rose-500/10 px-3 py-2 transition hover:border-rose-200/70 hover:bg-rose-500/15 cursor-default sm:flex-row sm:items-center ${
+                                        deletingStocks[stk.id] ? "opacity-50 scale-[0.98]" : ""
+                                      }`}
                                       onDragStart={(event) => event.preventDefault()}
                                       onMouseDown={(event) => event.stopPropagation()}
                                     >
