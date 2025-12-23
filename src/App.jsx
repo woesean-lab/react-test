@@ -496,6 +496,7 @@ function App() {
   const [openProducts, setOpenProducts] = useState({})
   const [confirmProductTarget, setConfirmProductTarget] = useState(null)
   const [bulkCount, setBulkCount] = useState({})
+  const [usedBulkCount, setUsedBulkCount] = useState({})
   const [lastDeleted, setLastDeleted] = useState(null)
   const [productOrder, setProductOrder] = useState([])
   const [dragState, setDragState] = useState({ activeId: null, overId: null })
@@ -2754,6 +2755,46 @@ function App() {
     }
   }
 
+  const handleUsedBulkDelete = async (productId) => {
+    const product = products.find((p) => p.id === productId)
+    if (!product) return
+
+    const usedStocks = splitStocks(product.stocks).used
+    const rawCount = usedBulkCount[productId]
+    const count = Math.max(1, Number(rawCount ?? usedStocks.length) || usedStocks.length)
+    const removed = usedStocks.slice(0, count)
+    if (removed.length === 0) {
+      toast.error("Bu üründe silinecek kullanılmış stok yok.")
+      return
+    }
+
+    try {
+      const res = await apiFetch("/api/stocks/bulk-delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ids: removed.map((stk) => stk.id) }),
+      })
+      if (!res.ok) throw new Error("stock_bulk_delete_failed")
+
+      const removedIds = new Set(removed.map((stk) => stk.id))
+      setProducts((prev) =>
+        prev.map((p) =>
+          p.id === productId
+            ? { ...p, stocks: p.stocks.filter((stk) => !removedIds.has(stk.id)) }
+            : p,
+        ),
+      )
+      setUsedBulkCount((prev) => ({ ...prev, [productId]: "" }))
+      toast.success(`${removed.length} kullanılmış stok silindi`, {
+        duration: 1800,
+        position: "top-right",
+      })
+    } catch (error) {
+      console.error(error)
+      toast.error("Stoklar silinemedi (API/DB kontrol edin).")
+    }
+  }
+
   const handleStockDeleteWithConfirm = async (productId, stockId) => {
     const key = `${productId}-${stockId}`
     if (confirmStockTarget === key) {
@@ -4598,9 +4639,34 @@ function App() {
                                   <span className="text-[11px] uppercase tracking-[0.18em] text-slate-400">
                                     Kullanılan stoklar
                                   </span>
-                                  <span className="rounded-full border border-amber-300/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-50">
-                                    {usedCount} adet
-                                  </span>
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <div className="flex items-center gap-2 rounded-full border border-white/10 bg-ink-900 px-2 py-1">
+                                      <input
+                                        id={`used-bulk-${product.id}`}
+                                        type="text"
+                                        value={usedBulkCount[product.id] ?? usedCount}
+                                        onChange={(e) =>
+                                          setUsedBulkCount((prev) => ({
+                                            ...prev,
+                                            [product.id]: e.target.value.replace(/\D/g, ""),
+                                          }))
+                                        }
+                                        inputMode="numeric"
+                                        className="w-16 appearance-none bg-transparent text-xs text-slate-100 focus:outline-none"
+                                      />
+                                      <span className="text-[11px] text-slate-500">/ {usedCount}</span>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleUsedBulkDelete(product.id)}
+                                      className="rounded-md border border-rose-300/60 bg-rose-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-rose-50 transition hover:-translate-y-0.5 hover:border-rose-200 hover:bg-rose-500/25"
+                                    >
+                                      Toplu sil
+                                    </button>
+                                    <span className="rounded-full border border-amber-300/40 bg-amber-500/10 px-2.5 py-1 text-[11px] font-semibold text-amber-50">
+                                      {usedCount} adet
+                                    </span>
+                                  </div>
                                 </div>
                                 <div className="space-y-2">
                                   {usedStocks.map((stk, idx) => (
