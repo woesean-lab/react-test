@@ -4248,14 +4248,14 @@ function App() {
                       <p className="text-sm text-slate-400">Stokları satır bazında yönet, toplu işlem yap.</p>
                     </div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <div className="flex items-center gap-2 rounded-full border border-white/10 bg-ink-900 px-3 py-1.5 shadow-inner">
+                      <div className="flex w-full items-center gap-2 rounded-full border border-white/10 bg-ink-900 px-3 py-1.5 shadow-inner sm:w-auto">
                         <span className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Ara</span>
                         <input
                           type="text"
                           value={productSearch}
                           onChange={(e) => setProductSearch(e.target.value)}
                           placeholder="Ürün ya da kod"
-                          className="w-56 bg-transparent text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none"
+                          className="w-full min-w-0 bg-transparent text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none sm:w-64 md:w-72"
                         />
                       </div>
                       <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
