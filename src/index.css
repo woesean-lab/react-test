@@ -106,6 +106,10 @@
     background-color: #eef4fd;
   }
 
+  [data-theme='light'] .bg-ink-900\/95 {
+    background-color: rgba(238, 244, 253, 0.95);
+  }
+
   [data-theme='light'] .bg-ink-900\/60 {
     background-color: rgba(238, 244, 253, 0.72);
   }
@@ -116,6 +120,10 @@
 
   [data-theme='light'] .bg-ink-900\/80 {
     background-color: rgba(238, 244, 253, 0.9);
+  }
+
+  [data-theme='light'] .bg-ink-800 {
+    background-color: #e2ecfb;
   }
 
   [data-theme='light'] .bg-ink-800\/60 {
