@@ -1529,6 +1529,10 @@ function App() {
   }
 
   const handleDragStart = (event, productId) => {
+    if (event.target.closest('[data-no-drag="true"]')) {
+      event.preventDefault()
+      return
+    }
     event.dataTransfer.effectAllowed = "move"
     event.dataTransfer.setData("text/plain", productId)
     setDragState({ activeId: productId, overId: null })
@@ -2598,10 +2602,7 @@ function App() {
     const templateValue = selectedTemplate
       ? templates.find((tpl) => tpl.label === selectedTemplate)?.value
       : ""
-    if (selectedTemplate && !templateValue) {
-      toast.error("Geçerli teslimat mesajı bulunamadı.")
-      return
-    }
+    const hasTemplate = Boolean(selectedTemplate && templateValue)
 
     try {
       const res = await apiFetch(`/api/products/${productId}`, {
@@ -2609,9 +2610,9 @@ function App() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
-          note: selectedTemplate || null,
-          deliveryTemplate: selectedTemplate || null,
-          deliveryMessage: templateValue || null,
+          note: hasTemplate ? selectedTemplate : null,
+          deliveryTemplate: hasTemplate ? selectedTemplate : null,
+          deliveryMessage: hasTemplate ? templateValue : null,
         }),
       })
       if (!res.ok) throw new Error("product_update_failed")
@@ -4621,6 +4622,7 @@ function App() {
                                 <div className="space-y-2">
                                   {availableStocks.map((stk, idx) => (
                                     <div
+                                      data-no-drag="true"
                                       key={stk.id}
                                       className={`group flex flex-col items-start gap-3 rounded-xl border border-emerald-300/40 bg-emerald-500/10 px-3 py-2 transition-all duration-300 hover:border-emerald-200/70 hover:bg-emerald-500/15 cursor-default sm:flex-row sm:items-center ${
                                         deletingStocks[stk.id] ? "opacity-50 scale-[0.98]" : ""
@@ -4715,6 +4717,7 @@ function App() {
                                 <div className="space-y-2">
                                   {usedStocks.map((stk, idx) => (
                                     <div
+                                      data-no-drag="true"
                                       key={stk.id}
                                       className={`group flex flex-col items-start gap-3 rounded-xl border border-rose-300/40 bg-rose-500/10 px-3 py-2 transition-all duration-300 hover:border-rose-200/70 hover:bg-rose-500/15 cursor-default sm:flex-row sm:items-center ${
                                         deletingStocks[stk.id] ? "opacity-50 scale-[0.98]" : ""
@@ -5562,10 +5565,6 @@ function App() {
 }
 
 export default App
-
-
-
-
 
 
 
