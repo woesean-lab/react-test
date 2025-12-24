@@ -498,12 +498,17 @@ function App() {
   const [bulkCount, setBulkCount] = useState({})
   const [usedBulkCount, setUsedBulkCount] = useState({})
   const [lastDeleted, setLastDeleted] = useState(null)
+  const [isStockModalOpen, setIsStockModalOpen] = useState(false)
+  const [stockModalDraft, setStockModalDraft] = useState("")
+  const [stockModalTarget, setStockModalTarget] = useState(null)
   const [productOrder, setProductOrder] = useState([])
   const [dragState, setDragState] = useState({ activeId: null, overId: null })
   const [editingProduct, setEditingProduct] = useState({})
   const [deletingStocks, setDeletingStocks] = useState({})
   const [usingStocks, setUsingStocks] = useState({})
   const [highlightStocks, setHighlightStocks] = useState({})
+  const stockModalTextareaRef = useRef(null)
+  const stockModalLineRef = useRef(null)
 
   const [tasks, setTasks] = useState([])
   const [taskForm, setTaskForm] = useState({
@@ -1225,6 +1230,16 @@ function App() {
   const handleNoteScroll = (event) => {
     if (!noteLineRef.current) return
     noteLineRef.current.scrollTop = event.target.scrollTop
+  }
+
+  const stockModalLineCount = useMemo(() => {
+    const count = stockModalDraft.split("\n").length
+    return Math.max(1, count)
+  }, [stockModalDraft])
+
+  const handleStockModalScroll = (event) => {
+    if (!stockModalLineRef.current) return
+    stockModalLineRef.current.scrollTop = event.target.scrollTop
   }
 
   const detailNoteText = taskDetailTarget?.note || ""
@@ -2415,6 +2430,54 @@ function App() {
         ),
       )
       resetStockForm()
+      toast.success(codes.length + " stok eklendi")
+    } catch (error) {
+      console.error(error)
+      toast.error("Stok eklenemedi (API/DB kontrol edin).")
+    }
+  }
+
+  const openStockModal = (product) => {
+    setStockModalTarget(product)
+    setStockModalDraft("")
+    setIsStockModalOpen(true)
+  }
+
+  const handleStockModalClose = () => {
+    setIsStockModalOpen(false)
+    setStockModalTarget(null)
+  }
+
+  const handleStockModalSave = async () => {
+    if (!stockModalTarget) return
+    const productId = stockModalTarget.id
+    const normalized = stockModalDraft.replace(/\r\n/g, "\n").replace(/\r/g, "\n")
+    const codes = normalized.split("\n").map((line) => line.trim()).filter(Boolean)
+    if (!productId) {
+      toast.error("Ürün seçin.")
+      return
+    }
+    if (codes.length === 0) {
+      toast.error("Anahtar kodu boş olamaz.")
+      return
+    }
+
+    try {
+      const res = await apiFetch(`/api/products/${productId}/stocks`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ codes }),
+      })
+      if (!res.ok) throw new Error("stock_create_failed")
+      const updatedStocks = await res.json()
+      setProducts((prev) =>
+        prev.map((product) =>
+          product.id === productId ? { ...product, stocks: updatedStocks } : product,
+        ),
+      )
+      setStockModalDraft("")
+      setIsStockModalOpen(false)
+      setStockModalTarget(null)
       toast.success(codes.length + " stok eklendi")
     } catch (error) {
       console.error(error)
@@ -4397,6 +4460,14 @@ function App() {
                             )}
                             <button
                               type="button"
+                              onClick={() => openStockModal(product)}
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300/60 hover:bg-white/10 hover:text-accent-100"
+                              aria-label="Stok ekle"
+                            >
+                              +
+                            </button>
+                            <button
+                              type="button"
                               onClick={() => toggleProductOpen(product.id)}
                               className={`inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-slate-200 transition ${
                                 openProducts[product.id]
@@ -5327,6 +5398,76 @@ function App() {
           </div>
         </div>
       )}
+      {isStockModalOpen && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 px-4"
+          onClick={handleStockModalClose}
+        >
+          <div
+            className="w-full max-w-3xl overflow-hidden rounded-2xl border border-white/10 bg-ink-900 shadow-card"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-white/10 bg-ink-800 px-4 py-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-300/80">
+                  Stok ekle
+                </p>
+                <p className="text-xs text-slate-400">
+                  {stockModalTarget?.name || "Ürün"} · {stockModalDraft.length} karakter
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleStockModalClose}
+                className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
+              >
+                Kapat
+              </button>
+            </div>
+
+            <div className="flex max-h-[420px] overflow-hidden">
+              <div
+                ref={stockModalLineRef}
+                className="w-12 shrink-0 overflow-hidden border-r border-white/10 bg-ink-800 px-2 py-3 text-right font-mono text-[11px] leading-6 text-slate-500"
+              >
+                {Array.from({ length: stockModalLineCount }, (_, index) => (
+                  <div key={index}>{index + 1}</div>
+                ))}
+              </div>
+              <textarea
+                ref={stockModalTextareaRef}
+                id="product-stock-modal"
+                rows={12}
+                value={stockModalDraft}
+                onChange={(e) => setStockModalDraft(e.target.value)}
+                onScroll={handleStockModalScroll}
+                placeholder="Her satır bir anahtar / kod"
+                className="flex-1 resize-none overflow-auto bg-ink-900 px-4 py-3 font-mono text-[13px] leading-6 text-slate-100 placeholder:text-slate-500 focus:outline-none"
+              />
+            </div>
+
+            <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-ink-800 px-4 py-3">
+              <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Esc ile kapat</p>
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={handleStockModalSave}
+                  className="min-w-[140px] rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
+                >
+                  Kaydet
+                </button>
+                <button
+                  type="button"
+                  onClick={handleStockModalClose}
+                  className="min-w-[120px] rounded-lg border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
+                >
+                  İptal
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {taskDetailTarget && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4"
@@ -5421,11 +5562,6 @@ function App() {
 }
 
 export default App
-
-
-
-
-
 
 
 
