@@ -4264,7 +4264,7 @@ function App() {
               </div>
             </header>
 
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="grid grid-cols-3 gap-3 sm:gap-4">
               <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60 p-4 shadow-card">
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_120%_at_20%_0%,rgba(58,199,255,0.18),transparent)]" />
                 <div className="relative">
@@ -4326,14 +4326,6 @@ function App() {
                             className="w-full min-w-0 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
                           />
                         </div>
-                      </div>
-                      <div className="flex flex-wrap gap-2">
-                        <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                          {products.length} ürün / {stockSummary.total} stok
-                        </span>
-                        <span className="rounded-full border border-rose-300/40 bg-rose-500/10 px-3 py-1 text-xs font-semibold text-rose-100">
-                          Tükenen: {stockSummary.empty}
-                        </span>
                       </div>
                     </div>
                   </div>
@@ -5430,7 +5422,6 @@ function App() {
 }
 
 export default App
-
 
 
 
