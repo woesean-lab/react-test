@@ -501,6 +501,7 @@ function App() {
   const [productOrder, setProductOrder] = useState([])
   const [dragState, setDragState] = useState({ activeId: null, overId: null })
   const [editingProduct, setEditingProduct] = useState({})
+  const productSearchRef = useRef(null)
   const [deletingStocks, setDeletingStocks] = useState({})
   const [usingStocks, setUsingStocks] = useState({})
   const [highlightStocks, setHighlightStocks] = useState({})
@@ -4305,12 +4306,34 @@ function App() {
                       <div className="flex h-11 w-full items-center gap-2 rounded-full border border-white/10 bg-ink-900 px-4 shadow-inner sm:w-auto">
                         <span className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Ara</span>
                         <input
+                          ref={productSearchRef}
                           type="text"
                           value={productSearch}
                           onChange={(e) => setProductSearch(e.target.value)}
-                          placeholder="Ürün ya da kod"
-                          className="w-full min-w-0 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none sm:w-80 md:w-96"
+                          placeholder="\u00dcr\u00fcn ya da kod"
+                          className="w-full min-w-0 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none sm:w-72 md:w-80"
                         />
+                        <button
+                          type="button"
+                          onClick={() => productSearchRef.current?.focus()}
+                          className="group inline-flex items-center gap-2 rounded-full border border-accent-300/40 bg-gradient-to-r from-accent-500/40 via-emerald-400/10 to-accent-400/40 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-accent-50 shadow-glow transition hover:border-accent-200 hover:from-accent-400/60 hover:to-accent-400/60"
+                          aria-label="Ara"
+                        >
+                          <svg
+                            aria-hidden="true"
+                            viewBox="0 0 24 24"
+                            className="h-3.5 w-3.5 text-accent-100 transition group-hover:scale-110"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          >
+                            <circle cx="11" cy="11" r="7" />
+                            <line x1="16.5" y1="16.5" x2="21" y2="21" />
+                          </svg>
+                          Ara
+                        </button>
                       </div>
                       <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
                         {products.length} ürün / {stockSummary.total} stok
