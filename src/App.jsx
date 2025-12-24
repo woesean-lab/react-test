@@ -453,6 +453,7 @@ function App() {
   const [listName, setListName] = useState("")
   const [isListsLoading, setIsListsLoading] = useState(true)
   const [isListSaving, setIsListSaving] = useState(false)
+  const [isListAutosaving, setIsListAutosaving] = useState(false)
   const [listSavedAt, setListSavedAt] = useState(null)
   const [listRenameDraft, setListRenameDraft] = useState("")
   const [confirmListDelete, setConfirmListDelete] = useState(null)
@@ -472,6 +473,7 @@ function App() {
   const listSaveTimers = useRef(new Map())
   const listSaveQueue = useRef(new Map())
   const listSavedTimer = useRef(null)
+  const listSaveInFlight = useRef(0)
   const listLoadErrorRef = useRef(false)
   const listSaveErrorRef = useRef(false)
   const [isEditingActiveTemplate, setIsEditingActiveTemplate] = useState(false)
@@ -1905,6 +1907,14 @@ function App() {
     toast("Silmek için tekrar tıkla", { position: "top-right" })
   }
 
+  const syncListAutosaveState = useCallback(() => {
+    const hasPending =
+      listSaveInFlight.current > 0 ||
+      listSaveTimers.current.size > 0 ||
+      listSaveQueue.current.size > 0
+    setIsListAutosaving(hasPending)
+  }, [])
+
   const queueListSave = useCallback(
     (list) => {
       if (!isAuthed || !list?.id) return
@@ -1918,7 +1928,12 @@ function App() {
         timers.delete(list.id)
         const payload = listSaveQueue.current.get(list.id)
         listSaveQueue.current.delete(list.id)
-        if (!payload) return
+        if (!payload) {
+          syncListAutosaveState()
+          return
+        }
+        listSaveInFlight.current += 1
+        syncListAutosaveState()
         try {
           const res = await apiFetch(`/api/lists/${list.id}`, {
             method: "PUT",
@@ -1939,11 +1954,15 @@ function App() {
             listSaveErrorRef.current = true
             toast.error("Liste kaydedilemedi (API/DB kontrol edin).")
           }
+        } finally {
+          listSaveInFlight.current = Math.max(0, listSaveInFlight.current - 1)
+          syncListAutosaveState()
         }
       }, 600)
       timers.set(list.id, timeoutId)
+      syncListAutosaveState()
     },
-    [apiFetch, isAuthed],
+    [apiFetch, isAuthed, syncListAutosaveState],
   )
 
   const updateListById = (listId, updater) => {
@@ -1976,6 +1995,7 @@ function App() {
     listSaveQueue.current.delete(list.id)
 
     setIsListSaving(true)
+    setIsListAutosaving(false)
     try {
       const res = await apiFetch(`/api/lists/${list.id}`, {
         method: "PUT",
@@ -3904,6 +3924,10 @@ function App() {
                         {listSavedAt ? (
                           <span className="rounded-full border border-emerald-300/40 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-100">
                             Kaydedildi
+                          </span>
+                        ) : isListAutosaving ? (
+                          <span className="rounded-full border border-sky-300/40 bg-sky-500/10 px-2 py-0.5 text-[11px] font-semibold text-sky-100">
+                            Otomatik kaydediliyor
                           </span>
                         ) : (
                           <span className="text-[11px] text-slate-500">Otomatik kaydetme aktif</span>
