@@ -1907,16 +1907,12 @@ function App() {
 
   const updateListById = (listId, updater) => {
     if (!listId) return
-    let nextList = null
     setLists((prev) =>
       prev.map((list) => {
         if (list.id !== listId) return list
-        const updated = updater(list)
-        nextList = updated
-        return updated
+        return updater(list)
       }),
     )
-    return nextList
   }
 
   const handleListSave = async (targetList) => {
@@ -2030,16 +2026,15 @@ function App() {
 
   const handleListCellChange = (rowIndex, colIndex, value) => {
     if (!activeList) return
-    const nextList = updateListById(activeList.id, (list) => {
-      const rows = list.rows.map((row, rIndex) => {
-        if (rIndex !== rowIndex) return row
-        const nextRow = [...row]
-        while (nextRow.length <= colIndex) nextRow.push("")
-        nextRow[colIndex] = updateListCellValue(nextRow[colIndex], value)
-        return nextRow
-      })
-      return { ...list, rows }
+    const rows = activeListRows.map((row, rIndex) => {
+      if (rIndex !== rowIndex) return row
+      const nextRow = [...row]
+      while (nextRow.length <= colIndex) nextRow.push("")
+      nextRow[colIndex] = updateListCellValue(nextRow[colIndex], value)
+      return nextRow
     })
+    const nextList = { ...activeList, rows }
+    updateListById(activeList.id, () => nextList)
     scheduleListAutoSave(nextList)
   }
 
@@ -2062,29 +2057,28 @@ function App() {
     const grid = parseClipboardGrid(text)
     if (grid.length === 1 && grid[0].length === 1) return
     event.preventDefault()
-    const nextList = updateListById(activeList.id, (list) => {
-      const baseRows = Array.isArray(list.rows) ? list.rows : []
-      const rows = baseRows.map((row) => [...row])
-      const requiredRows = rowIndex + grid.length
-      while (rows.length < requiredRows) {
-        rows.push([])
+    const baseRows = Array.isArray(activeListRows) ? activeListRows : []
+    const rows = baseRows.map((row) => [...row])
+    const requiredRows = rowIndex + grid.length
+    while (rows.length < requiredRows) {
+      rows.push([])
+    }
+    grid.forEach((gridRow, rowOffset) => {
+      const targetRowIndex = rowIndex + rowOffset
+      const row = rows[targetRowIndex] ?? []
+      const nextRow = [...row]
+      const requiredCols = colIndex + gridRow.length
+      while (nextRow.length < requiredCols) {
+        nextRow.push("")
       }
-      grid.forEach((gridRow, rowOffset) => {
-        const targetRowIndex = rowIndex + rowOffset
-        const row = rows[targetRowIndex] ?? []
-        const nextRow = [...row]
-        const requiredCols = colIndex + gridRow.length
-        while (nextRow.length < requiredCols) {
-          nextRow.push("")
-        }
-        gridRow.forEach((cellValue, colOffset) => {
-          const targetColIndex = colIndex + colOffset
-          nextRow[targetColIndex] = updateListCellValue(nextRow[targetColIndex], cellValue)
-        })
-        rows[targetRowIndex] = nextRow
+      gridRow.forEach((cellValue, colOffset) => {
+        const targetColIndex = colIndex + colOffset
+        nextRow[targetColIndex] = updateListCellValue(nextRow[targetColIndex], cellValue)
       })
-      return { ...list, rows }
+      rows[targetRowIndex] = nextRow
     })
+    const nextList = { ...activeList, rows }
+    updateListById(activeList.id, () => nextList)
     scheduleListAutoSave(nextList)
   }
 
