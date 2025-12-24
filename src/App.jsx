@@ -454,6 +454,7 @@ function App() {
   const [isListsLoading, setIsListsLoading] = useState(true)
   const [isListSaving, setIsListSaving] = useState(false)
   const [isListAutosaving, setIsListAutosaving] = useState(false)
+  const [listAutosavePulse, setListAutosavePulse] = useState(false)
   const [listSavedAt, setListSavedAt] = useState(null)
   const [listRenameDraft, setListRenameDraft] = useState("")
   const [confirmListDelete, setConfirmListDelete] = useState(null)
@@ -476,6 +477,7 @@ function App() {
   const listSaveInFlight = useRef(0)
   const listAutosaveStartedAt = useRef(null)
   const listAutosaveTimer = useRef(null)
+  const listAutosavePulseTimer = useRef(null)
   const listLoadErrorRef = useRef(false)
   const listSaveErrorRef = useRef(false)
   const [isEditingActiveTemplate, setIsEditingActiveTemplate] = useState(false)
@@ -703,6 +705,9 @@ function App() {
       }
       if (listAutosaveTimer.current) {
         window.clearTimeout(listAutosaveTimer.current)
+      }
+      if (listAutosavePulseTimer.current) {
+        window.clearTimeout(listAutosavePulseTimer.current)
       }
     }
   }, [])
@@ -1952,6 +1957,17 @@ function App() {
     }, minVisibleMs - elapsed)
   }, [])
 
+  const triggerListAutosavePulse = useCallback(() => {
+    setListAutosavePulse(true)
+    if (listAutosavePulseTimer.current) {
+      window.clearTimeout(listAutosavePulseTimer.current)
+    }
+    listAutosavePulseTimer.current = window.setTimeout(() => {
+      listAutosavePulseTimer.current = null
+      setListAutosavePulse(false)
+    }, 900)
+  }, [])
+
   const queueListSave = useCallback(
     (list) => {
       if (!isAuthed || !list?.id) return
@@ -2121,6 +2137,7 @@ function App() {
 
   const handleListCellChange = (rowIndex, colIndex, value) => {
     if (!activeList) return
+    triggerListAutosavePulse()
     updateListById(activeList.id, (list) => {
       const rows = list.rows.map((row, rIndex) => {
         if (rIndex !== rowIndex) return row
@@ -3961,7 +3978,7 @@ function App() {
                     <div className="flex flex-wrap items-center gap-3">
                       <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
                         <span>Başlıklara sağ tıkla: ekle/sil</span>
-                        {isListAutosaving ? (
+                        {isListAutosaving || listAutosavePulse ? (
                           <span className="rounded-full border border-sky-300/40 bg-sky-500/10 px-2 py-0.5 text-[11px] font-semibold text-sky-100">
                             Otomatik kaydediliyor
                           </span>
