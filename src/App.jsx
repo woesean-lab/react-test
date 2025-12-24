@@ -1968,6 +1968,51 @@ function App() {
     }, 900)
   }, [])
 
+  const flushListSave = useCallback(
+    async (listId) => {
+      if (!isAuthed || !listId) return
+      const timers = listSaveTimers.current
+      const existing = timers.get(listId)
+      if (existing) {
+        window.clearTimeout(existing)
+        timers.delete(listId)
+      }
+      const payload = listSaveQueue.current.get(listId)
+      if (!payload) {
+        syncListAutosaveState()
+        return
+      }
+      listSaveQueue.current.delete(listId)
+      listSaveInFlight.current += 1
+      syncListAutosaveState()
+      try {
+        const res = await apiFetch(`/api/lists/${listId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        })
+        if (!res.ok) throw new Error("list_save_failed")
+        listSaveErrorRef.current = false
+        setListSavedAt(Date.now())
+        if (listSavedTimer.current) {
+          window.clearTimeout(listSavedTimer.current)
+        }
+        listSavedTimer.current = window.setTimeout(() => {
+          setListSavedAt(null)
+        }, 2200)
+      } catch (error) {
+        if (!listSaveErrorRef.current) {
+          listSaveErrorRef.current = true
+          toast.error("Liste kaydedilemedi (API/DB kontrol edin).")
+        }
+      } finally {
+        listSaveInFlight.current = Math.max(0, listSaveInFlight.current - 1)
+        syncListAutosaveState()
+      }
+    },
+    [apiFetch, isAuthed, syncListAutosaveState],
+  )
+
   const queueListSave = useCallback(
     (list) => {
       if (!isAuthed || !list?.id) return
@@ -4106,13 +4151,16 @@ function App() {
                                           setEditingListCell({ row: rowIndex, col: colIndex })
                                           setSelectedListCell({ row: rowIndex, col: colIndex })
                                         }}
-                                      onBlur={() =>
+                                      onBlur={() => {
                                         setEditingListCell((prev) =>
                                           prev.row === rowIndex && prev.col === colIndex
                                             ? { row: null, col: null }
                                             : prev,
                                         )
-                                      }
+                                        if (activeList?.id) {
+                                          flushListSave(activeList.id)
+                                        }
+                                      }}
                                       onChange={(e) =>
                                         handleListCellChange(rowIndex, colIndex, e.target.value)
                                       }
