@@ -509,6 +509,7 @@ function App() {
   const [highlightStocks, setHighlightStocks] = useState({})
   const stockModalTextareaRef = useRef(null)
   const stockModalLineRef = useRef(null)
+  const isStockTextSelectingRef = useRef(false)
 
   const [tasks, setTasks] = useState([])
   const [taskForm, setTaskForm] = useState({
@@ -1529,6 +1530,10 @@ function App() {
   }
 
   const handleDragStart = (event, productId) => {
+    if (isStockTextSelectingRef.current) {
+      event.preventDefault()
+      return
+    }
     if (event.target.closest('[data-no-drag="true"]')) {
       event.preventDefault()
       return
@@ -4634,7 +4639,16 @@ function App() {
                                           : ""
                                       }`}
                                       onDragStart={(event) => event.preventDefault()}
-                                      onMouseDown={(event) => event.stopPropagation()}
+                                      onMouseDown={(event) => {
+                                        event.stopPropagation()
+                                        isStockTextSelectingRef.current = true
+                                      }}
+                                      onMouseUp={() => {
+                                        isStockTextSelectingRef.current = false
+                                      }}
+                                      onMouseLeave={() => {
+                                        isStockTextSelectingRef.current = false
+                                      }}
                                     >
                                       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[11px] font-semibold text-slate-300 transition group-hover:border-accent-300 group-hover:text-accent-100">
                                         #{idx + 1}
@@ -4727,7 +4741,16 @@ function App() {
                                           : ""
                                       }`}
                                       onDragStart={(event) => event.preventDefault()}
-                                      onMouseDown={(event) => event.stopPropagation()}
+                                      onMouseDown={(event) => {
+                                        event.stopPropagation()
+                                        isStockTextSelectingRef.current = true
+                                      }}
+                                      onMouseUp={() => {
+                                        isStockTextSelectingRef.current = false
+                                      }}
+                                      onMouseLeave={() => {
+                                        isStockTextSelectingRef.current = false
+                                      }}
                                     >
                                       <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[11px] font-semibold text-slate-300 transition group-hover:border-amber-300 group-hover:text-amber-100">
                                         #{idx + 1}
@@ -5565,7 +5588,6 @@ function App() {
 }
 
 export default App
-
 
 
 
