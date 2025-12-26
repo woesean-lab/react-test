@@ -4,7 +4,7 @@ export const getStockStatus = (stock) =>
   stock?.status === STOCK_STATUS.used ? STOCK_STATUS.used : STOCK_STATUS.available
 
 export const splitStocks = (stocks) => {
-  const list = Array.isArray(stocks) ? stocks : []
+  const list = Array.isArray(stocks) ? stocks.filter(Boolean) : []
   const available = []
   const used = []
   list.forEach((stock) => {

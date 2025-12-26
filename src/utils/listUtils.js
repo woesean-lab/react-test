@@ -10,7 +10,7 @@ const LIST_CURRENCY_FORMATTER = new Intl.NumberFormat("tr-TR", {
   currency: "TRY",
   maximumFractionDigits: 2,
 })
-const LIST_DATE_FORMATTER = new Intl.DateTimeFormat("tr-TR")
+export const LIST_DATE_FORMATTER = new Intl.DateTimeFormat("tr-TR")
 
 export const toColumnLabel = (index) => {
   let label = ""
