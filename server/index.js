@@ -51,6 +51,8 @@ const initialTemplates = [
   { label: "Bilgilendirme", value: "Son durum: Görev planlandığı gibi ilerliyor.", category: "Bilgilendirme" },
   { label: "Hatırlatma", value: "Unutma: Akşam 18:00 toplantısına hazır ol.", category: "Hatırlatma" },
 ]
+
+
 async function ensureDefaults() {
   await prisma.category.upsert({
     where: { name: "Genel" },
@@ -910,8 +912,23 @@ app.delete("/api/lists/:id", async (req, res) => {
   }
 })
 
-app.use(express.static(distDir))
+app.use(
+  express.static(distDir, {
+    setHeaders: (res, filePath) => {
+      const ext = path.extname(filePath).toLowerCase()
+      if (ext === ".js") res.setHeader("Content-Type", "application/javascript; charset=utf-8")
+      if (ext === ".css") res.setHeader("Content-Type", "text/css; charset=utf-8")
+      if (ext === ".html") res.setHeader("Content-Type", "text/html; charset=utf-8")
+      if (ext === ".json" || ext === ".map") {
+        res.setHeader("Content-Type", "application/json; charset=utf-8")
+      }
+      if (ext === ".svg") res.setHeader("Content-Type", "image/svg+xml; charset=utf-8")
+      if (ext === ".txt") res.setHeader("Content-Type", "text/plain; charset=utf-8")
+    },
+  })
+)
 app.get(/^\/(?!api\/).*/, (req, res) => {
+  res.setHeader("Content-Type", "text/html; charset=utf-8")
   res.sendFile(path.join(distDir, "index.html"))
 })
 
