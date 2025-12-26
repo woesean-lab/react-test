@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "react-hot-toast"
+import LoadingIndicator from "../components/LoadingIndicator"
 import {
   AUTH_TOKEN_STORAGE_KEY,
   DEFAULT_LIST_COLS,
@@ -2028,11 +2029,11 @@ export default function useAppData() {
   const toastIconTheme = isLight
     ? { primary: "#2563eb", secondary: "#ffffff" }
     : { primary: "#3ac7ff", secondary: "#0f1625" }
-  const templateCountText = showLoading ? <LoadingIndicator label="Y├╝kleniyor" /> : templates.length
-  const categoryCountText = showLoading ? <LoadingIndicator label="Y├╝kleniyor" /> : categories.length
-  const selectedCategoryText = showLoading ? <LoadingIndicator label="Y├╝kleniyor" /> : selectedCategory.trim() || "Genel"
-  const listCountText = isListsTabLoading ? <LoadingIndicator label="Y├╝kleniyor" /> : lists.length
-  const taskCountText = isTasksTabLoading ? <LoadingIndicator label="Y├╝kleniyor" /> : taskStats.total
+  const templateCountText = showLoading ? <LoadingIndicator label="Yükleniyor" /> : templates.length
+  const categoryCountText = showLoading ? <LoadingIndicator label="Yükleniyor" /> : categories.length
+  const selectedCategoryText = showLoading ? <LoadingIndicator label="Yükleniyor" /> : selectedCategory.trim() || "Genel"
+  const listCountText = isListsTabLoading ? <LoadingIndicator label="Yükleniyor" /> : lists.length
+  const taskCountText = isTasksTabLoading ? <LoadingIndicator label="Yükleniyor" /> : taskStats.total
 
   const isAuthBusy = isAuthChecking || isAuthLoading
 
