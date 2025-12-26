@@ -425,6 +425,261 @@ function LoadingIndicator({ label = "Yükleniyor..." }) {
   )
 }
 
+function SkeletonBlock({ className = "" }) {
+  return <div className={`animate-pulse rounded-lg bg-white/10 ${className}`} />
+}
+
+function MessagesSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 shadow-card">
+        <SkeletonBlock className="h-4 w-32 rounded-full" />
+        <SkeletonBlock className="mt-4 h-8 w-64" />
+        <SkeletonBlock className="mt-3 h-4 w-2/3" />
+        <div className="mt-4 flex flex-wrap gap-2">
+          <SkeletonBlock className="h-7 w-28 rounded-full" />
+          <SkeletonBlock className="h-7 w-36 rounded-full" />
+          <SkeletonBlock className="h-7 w-24 rounded-full" />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,0.9fr)]">
+        <div className="space-y-6">
+          <div className={`${panelClass} bg-ink-800/60`}>
+            <SkeletonBlock className="h-4 w-40" />
+            <SkeletonBlock className="mt-4 h-10 w-full" />
+            <div className="mt-4 space-y-3">
+              {Array.from({ length: 4 }).map((_, idx) => (
+                <SkeletonBlock key={`msg-main-${idx}`} className="h-10 w-full rounded-xl" />
+              ))}
+            </div>
+          </div>
+          <div className={`${panelClass} bg-ink-800/60`}>
+            <SkeletonBlock className="h-4 w-36" />
+            <SkeletonBlock className="mt-4 h-24 w-full rounded-xl" />
+          </div>
+        </div>
+        <div className="space-y-6">
+          <div className={`${panelClass} bg-ink-800/60`}>
+            <SkeletonBlock className="h-4 w-28" />
+            <div className="mt-4 space-y-2">
+              {Array.from({ length: 5 }).map((_, idx) => (
+                <SkeletonBlock key={`msg-side-${idx}`} className="h-4 w-full" />
+              ))}
+            </div>
+          </div>
+          <div className={`${panelClass} bg-ink-800/60`}>
+            <SkeletonBlock className="h-4 w-24" />
+            <SkeletonBlock className="mt-4 h-28 w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function TasksSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 shadow-card">
+        <SkeletonBlock className="h-4 w-28 rounded-full" />
+        <SkeletonBlock className="mt-4 h-8 w-40" />
+        <SkeletonBlock className="mt-3 h-4 w-2/3" />
+        <div className="mt-4 flex flex-wrap gap-2">
+          <SkeletonBlock className="h-7 w-28 rounded-full" />
+          <SkeletonBlock className="h-7 w-24 rounded-full" />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
+          <div className={`${panelClass} bg-ink-900/60`}>
+            <div className="flex items-center justify-between">
+              <SkeletonBlock className="h-4 w-40" />
+              <SkeletonBlock className="h-6 w-24 rounded-full" />
+            </div>
+            <div className="mt-6 grid gap-4 md:grid-cols-3">
+              {Array.from({ length: 3 }).map((_, idx) => (
+                <div
+                  key={`task-board-${idx}`}
+                  className="rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner"
+                >
+                  <SkeletonBlock className="h-3 w-24 rounded-full" />
+                  <SkeletonBlock className="mt-2 h-2 w-16 rounded-full" />
+                  <SkeletonBlock className="mt-4 h-20 w-full rounded-xl" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="space-y-6">
+          <div className={`${panelClass} bg-ink-800/60`}>
+            <SkeletonBlock className="h-4 w-32" />
+            <SkeletonBlock className="mt-3 h-20 w-full rounded-xl" />
+          </div>
+          <div className={`${panelClass} bg-ink-800/60`}>
+            <SkeletonBlock className="h-4 w-28" />
+            <SkeletonBlock className="mt-3 h-16 w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ListsSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 shadow-card">
+        <SkeletonBlock className="h-4 w-24 rounded-full" />
+        <SkeletonBlock className="mt-4 h-8 w-40" />
+        <SkeletonBlock className="mt-3 h-4 w-2/3" />
+        <div className="mt-4 flex flex-wrap gap-2">
+          <SkeletonBlock className="h-7 w-32 rounded-full" />
+          <SkeletonBlock className="h-7 w-40 rounded-full" />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
+          <div className={`${panelClass} bg-ink-800/60`}>
+            <div className="flex items-center justify-between">
+              <SkeletonBlock className="h-4 w-28" />
+              <SkeletonBlock className="h-6 w-24 rounded-full" />
+            </div>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, idx) => (
+                <div
+                  key={`list-card-${idx}`}
+                  className="rounded-xl border border-white/10 bg-ink-900/60 p-4 shadow-inner"
+                >
+                  <SkeletonBlock className="h-3 w-24 rounded-full" />
+                  <SkeletonBlock className="mt-2 h-2 w-16 rounded-full" />
+                </div>
+              ))}
+            </div>
+          </div>
+          <div className={`${panelClass} bg-ink-900/60`}>
+            <div className="flex items-center justify-between">
+              <SkeletonBlock className="h-4 w-32" />
+              <SkeletonBlock className="h-6 w-24 rounded-full" />
+            </div>
+            <div className="mt-4 space-y-2">
+              {Array.from({ length: 6 }).map((_, idx) => (
+                <SkeletonBlock key={`list-row-${idx}`} className="h-8 w-full rounded-xl" />
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="space-y-6">
+          <div className={`${panelClass} bg-ink-900/70`}>
+            <SkeletonBlock className="h-4 w-32" />
+            <SkeletonBlock className="mt-4 h-10 w-full rounded-xl" />
+            <SkeletonBlock className="mt-3 h-10 w-full rounded-xl" />
+          </div>
+          <div className={`${panelClass} bg-ink-900/70`}>
+            <SkeletonBlock className="h-4 w-28" />
+            <SkeletonBlock className="mt-4 h-24 w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function StockSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 shadow-card">
+        <SkeletonBlock className="h-4 w-24 rounded-full" />
+        <SkeletonBlock className="mt-4 h-8 w-56" />
+        <SkeletonBlock className="mt-3 h-4 w-2/3" />
+        <div className="mt-4 flex flex-wrap gap-2">
+          <SkeletonBlock className="h-7 w-32 rounded-full" />
+          <SkeletonBlock className="h-7 w-24 rounded-full" />
+          <SkeletonBlock className="h-7 w-28 rounded-full" />
+        </div>
+      </div>
+      <div className="grid grid-cols-3 gap-3 sm:gap-4">
+        {Array.from({ length: 3 }).map((_, idx) => (
+          <div
+            key={`stock-metric-${idx}`}
+            className="rounded-2xl border border-white/10 bg-ink-900/60 p-4 shadow-card"
+          >
+            <SkeletonBlock className="h-3 w-24 rounded-full" />
+            <SkeletonBlock className="mt-3 h-6 w-20" />
+            <SkeletonBlock className="mt-3 h-3 w-28 rounded-full" />
+          </div>
+        ))}
+      </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,0.9fr)]">
+        <div className="space-y-6">
+          <div className={`${panelClass} bg-ink-800/60`}>
+            <SkeletonBlock className="h-4 w-36" />
+            <SkeletonBlock className="mt-4 h-10 w-full" />
+            <div className="mt-4 grid gap-3">
+              {Array.from({ length: 4 }).map((_, idx) => (
+                <SkeletonBlock key={`stock-card-${idx}`} className="h-16 w-full rounded-2xl" />
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="space-y-6">
+          <div className={`${panelClass} bg-ink-900/70`}>
+            <SkeletonBlock className="h-4 w-32" />
+            <SkeletonBlock className="mt-4 h-10 w-full rounded-xl" />
+            <SkeletonBlock className="mt-3 h-10 w-full rounded-xl" />
+          </div>
+          <div className={`${panelClass} bg-ink-900/70`}>
+            <SkeletonBlock className="h-4 w-24" />
+            <SkeletonBlock className="mt-4 h-24 w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function ProblemsSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-6 shadow-card">
+        <SkeletonBlock className="h-4 w-32 rounded-full" />
+        <SkeletonBlock className="mt-4 h-8 w-56" />
+        <SkeletonBlock className="mt-3 h-4 w-2/3" />
+        <div className="mt-4 flex flex-wrap gap-2">
+          <SkeletonBlock className="h-7 w-28 rounded-full" />
+          <SkeletonBlock className="h-7 w-28 rounded-full" />
+          <SkeletonBlock className="h-7 w-24 rounded-full" />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="space-y-6 lg:col-span-2">
+          <div className={`${panelClass} bg-ink-800/60`}>
+            <SkeletonBlock className="h-4 w-36" />
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {Array.from({ length: 6 }).map((_, idx) => (
+                <div
+                  key={`problem-card-${idx}`}
+                  className="rounded-xl border border-white/10 bg-ink-900/60 p-4 shadow-inner"
+                >
+                  <SkeletonBlock className="h-3 w-24 rounded-full" />
+                  <SkeletonBlock className="mt-3 h-10 w-full rounded-lg" />
+                  <SkeletonBlock className="mt-3 h-3 w-16 rounded-full" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="space-y-6">
+          <div className={`${panelClass} bg-ink-900/70`}>
+            <SkeletonBlock className="h-4 w-28" />
+            <SkeletonBlock className="mt-4 h-10 w-full rounded-xl" />
+            <SkeletonBlock className="mt-3 h-20 w-full rounded-xl" />
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function App() {
   const [activeTab, setActiveTab] = useState("messages")
   const [isTabLoading, setIsTabLoading] = useState(false)
@@ -3313,8 +3568,11 @@ function App() {
           </div>
         </div>
 
-        {activeTab === "messages" && (
-          <>
+        {activeTab === "messages" &&
+          (showLoading ? (
+            <MessagesSkeleton />
+          ) : (
+            <>
             <header className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-6 shadow-card">
               <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
                 <div className="space-y-3">
@@ -3677,11 +3935,14 @@ function App() {
                 </div>
               </div>
             </div>
-          </>
-        )}
+            </>
+          ))}
 
-        {activeTab === "tasks" && (
-          <div className="space-y-6">
+        {activeTab === "tasks" &&
+          (isTasksTabLoading ? (
+            <TasksSkeleton />
+          ) : (
+            <div className="space-y-6">
             <header className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-6 shadow-card">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-2">
@@ -4062,11 +4323,14 @@ function App() {
                 </div>
               </div>
             </div>
-          </div>
-        )}
+            </div>
+          ))}
 
-        {activeTab === "lists" && (
-          <div className="space-y-6">
+        {activeTab === "lists" &&
+          (isListsTabLoading ? (
+            <ListsSkeleton />
+          ) : (
+            <div className="space-y-6">
             <header className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-6 shadow-card">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-2">
@@ -4536,10 +4800,13 @@ function App() {
                 </div>
               </div>
             )}
-          </div>
-        )}
-        {activeTab === "stock" && (
-          <div className="space-y-6">
+            </div>
+          ))}
+        {activeTab === "stock" &&
+          (isStockTabLoading ? (
+            <StockSkeleton />
+          ) : (
+            <div className="space-y-6">
             <header className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-6 shadow-card">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-2">
@@ -5329,10 +5596,13 @@ function App() {
                 </div>
               </div>
             </div>
-          </div>
-        )}
-        {activeTab === "problems" && (
-          <div className="space-y-6">
+            </div>
+          ))}
+        {activeTab === "problems" &&
+          (isProblemsTabLoading ? (
+            <ProblemsSkeleton />
+          ) : (
+            <div className="space-y-6">
             <header className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-6 shadow-card">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-2">
@@ -5586,8 +5856,8 @@ function App() {
                 </div>
               </div>
             </div>
-          </div>
-        )}
+            </div>
+          ))}
       </div>
       {isTaskEditOpen && taskEditDraft && (
         <div
