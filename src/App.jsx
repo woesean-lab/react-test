@@ -406,12 +406,16 @@ function App() {
     <div className="min-h-screen px-4 pb-16 pt-10 text-slate-50">
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
         <div className="sticky top-4 z-30 flex flex-wrap items-center gap-3 rounded-3xl border border-white/10 bg-ink-900/80 px-3 py-2 shadow-card backdrop-blur">
-          <div className="flex items-center gap-2 px-2 py-1">
-            <span className="font-display text-sm font-semibold uppercase tracking-[0.32em] text-white">
-              Pulcip
-            </span>
-            <span className="text-xs text-slate-500">/</span>
-            <span className="text-sm font-medium text-slate-300">Manage</span>
+          <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-ink-900/70 px-3 py-2 shadow-inner">
+            <span className="h-6 w-1 rounded-full bg-accent-400/80 shadow-glow" />
+            <div className="flex items-baseline gap-2">
+              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.32em] text-accent-200">
+                Pulcip
+              </span>
+              <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-400">
+                Manage
+              </span>
+            </div>
           </div>
           <span className="hidden h-7 w-px bg-white/10 sm:block" />
           {canViewMessages && (
