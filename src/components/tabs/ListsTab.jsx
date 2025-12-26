@@ -46,7 +46,6 @@ function ListsSkeleton({ panelClass }) {
               ))}
             </div>
           </div>
-          )}
         </div>
         <div className="space-y-6">
           <div className={`${panelClass} bg-ink-900/70`}>
@@ -211,7 +210,6 @@ export default function ListsTab({
               )}
             </div>
           </div>
-          )}
 
           <div className={`${panelClass} bg-ink-900/60`}>
             <div className="flex flex-wrap items-center justify-between gap-3">

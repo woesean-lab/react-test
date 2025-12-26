@@ -950,7 +950,7 @@ export default function StockTab({
                     </div>
                   </div>
                 </div>
-              </div>
+              )}
             </div>
             </div>
   )
