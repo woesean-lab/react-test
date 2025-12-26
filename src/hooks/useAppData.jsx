@@ -60,7 +60,7 @@ export default function useAppData() {
   const [authPassword, setAuthPassword] = useState("")
   const [authError, setAuthError] = useState("")
   const [isAuthLoading, setIsAuthLoading] = useState(false)
-  const [title, setTitle] = useState("Pulcip Manage")
+  const [title, setTitle] = useState("Pulcip")
   const [message, setMessage] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("Genel")
   const [newCategory, setNewCategory] = useState("")
