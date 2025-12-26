@@ -2343,9 +2343,23 @@ export default function useAppData() {
     <button
       type="button"
       onClick={handleLogout}
-      className="inline-flex items-center justify-center rounded-2xl border border-white/10 bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-rose-300/60 hover:bg-rose-500/15 hover:text-rose-50"
+      className="inline-flex items-center gap-2 rounded-2xl bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
     >
-      Cikis
+      <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        className="h-4 w-4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M9 6v-1a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6a2 2 0 0 1-2-2v-1" />
+        <path d="M15 12H4" />
+        <path d="m8 8-4 4 4 4" />
+      </svg>
+      {"\u00C7\u0131k\u0131\u015F"}
     </button>
   )
 
