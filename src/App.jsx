@@ -484,11 +484,13 @@ function App() {
   const [delayDone, setDelayDone] = useState(false)
 
   const [problems, setProblems] = useState([])
+  const [isProblemsLoading, setIsProblemsLoading] = useState(true)
   const [problemUsername, setProblemUsername] = useState("")
   const [problemIssue, setProblemIssue] = useState("")
   const [confirmProblemTarget, setConfirmProblemTarget] = useState(null)
 
   const [products, setProducts] = useState([])
+  const [isProductsLoading, setIsProductsLoading] = useState(true)
   const [productForm, setProductForm] = useState({ name: "", deliveryTemplate: "" })
   const [stockForm, setStockForm] = useState({ productId: "", code: "" })
   const [confirmStockTarget, setConfirmStockTarget] = useState(null)
@@ -1590,6 +1592,7 @@ function App() {
   useEffect(() => {
     if (!isAuthed) return
     const controller = new AbortController()
+    setIsProblemsLoading(true)
     ;(async () => {
       try {
         const res = await apiFetch("/api/problems", { signal: controller.signal })
@@ -1597,10 +1600,14 @@ function App() {
         const data = await res.json()
         setProblems(data ?? [])
       } catch (error) {
-        if (error?.name === "AbortError") return
+        if (error?.name === "AbortError") {
+          setIsProblemsLoading(false)
+          return
+        }
         setProblems(initialProblems)
         toast.error("Problem listesi alınamadı (API/DB kontrol edin)")
       }
+      setIsProblemsLoading(false)
     })()
 
     return () => controller.abort()
@@ -1609,6 +1616,7 @@ function App() {
   useEffect(() => {
     if (!isAuthed) return
     const controller = new AbortController()
+    setIsProductsLoading(true)
     ;(async () => {
       try {
         const res = await apiFetch("/api/products", { signal: controller.signal })
@@ -1616,10 +1624,14 @@ function App() {
         const data = await res.json()
         setProducts(data ?? [])
       } catch (error) {
-        if (error?.name === "AbortError") return
+        if (error?.name === "AbortError") {
+          setIsProductsLoading(false)
+          return
+        }
         setProducts(initialProducts)
         toast.error("Stok listesi alınamadı (API/DB kontrol edin)")
       }
+      setIsProductsLoading(false)
     })()
 
     return () => controller.abort()
@@ -3537,7 +3549,34 @@ function App() {
                   </div>
 
                   <div className="mt-6 grid gap-4 md:grid-cols-3">
-                    {Object.entries(taskStatusMeta).map(([status, meta]) => (
+                    {isTasksLoading
+                      ? Array.from({ length: 3 }).map((_, idx) => (
+                        <div
+                          key={`task-skeleton-${idx}`}
+                          className="flex h-full flex-col gap-4 rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div>
+                              <div className="h-3 w-24 animate-pulse rounded-full bg-white/10" />
+                              <div className="mt-2 h-2 w-16 animate-pulse rounded-full bg-white/10" />
+                            </div>
+                            <div className="h-6 w-10 animate-pulse rounded-full bg-white/10" />
+                          </div>
+                          <div className="space-y-3">
+                            {Array.from({ length: 3 }).map((__, jdx) => (
+                              <div
+                                key={`task-skel-card-${idx}-${jdx}`}
+                                className="rounded-xl border border-white/10 bg-ink-800/70 p-3 shadow-inner"
+                              >
+                                <div className="h-3 w-3/4 animate-pulse rounded-full bg-white/10" />
+                                <div className="mt-2 h-2 w-full animate-pulse rounded-full bg-white/10" />
+                                <div className="mt-2 h-2 w-1/2 animate-pulse rounded-full bg-white/10" />
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      ))
+                      : Object.entries(taskStatusMeta).map(([status, meta]) => (
                       <div
                         key={status}
                         onDragOver={(event) => handleTaskDragOver(event, status)}
@@ -3890,16 +3929,25 @@ function App() {
                   </div>
 
                   <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {!isListsLoading && lists.length === 0 && (
-                      <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
+                    {isListsLoading ? (
+                      <div className="col-span-full grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {Array.from({ length: 6 }).map((_, idx) => (
+                          <div
+                            key={`list-skeleton-${idx}`}
+                            className="rounded-xl border border-white/10 bg-ink-900/60 p-4 shadow-inner"
+                          >
+                            <div className="h-3 w-24 animate-pulse rounded-full bg-white/10" />
+                            <div className="mt-2 h-2 w-16 animate-pulse rounded-full bg-white/10" />
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <>
+                        {lists.length === 0 && (
+                          <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
                         Henüz liste yok.
-                      </div>
-                    )}
-                    {isListsLoading && (
-                      <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
-                        <LoadingIndicator label="Listeler yükleniyor..." />
-                      </div>
-                    )}
+                          </div>
+                        )}
                     {lists.map((list) => {
                       const rowCount = list.rows?.length ?? 0
                       const colCount =
@@ -3923,6 +3971,8 @@ function App() {
                         </button>
                       )
                     })}
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -3977,7 +4027,20 @@ function App() {
                   </div>
 
                   
-                  {!activeList ? (
+                  {isListsLoading ? (
+                    <div className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-ink-900/80">
+                      <div className="p-4">
+                        <div className="h-3 w-32 animate-pulse rounded-full bg-white/10" />
+                        <div className="mt-4 space-y-2">
+                          {Array.from({ length: 6 }).map((_, idx) => (
+                            <div key={`list-table-skel-${idx}`} className="h-8 rounded-lg bg-white/5">
+                              <div className="h-full w-full animate-pulse rounded-lg bg-ink-800/80" />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  ) : !activeList ? (
                     <div className="mt-4 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
                       Bir liste seçin veya yeni liste oluşturun.
                     </div>
@@ -4400,11 +4463,28 @@ function App() {
                   </div>
 
                   <div className="mt-4 grid gap-4">
-                    {filteredProducts.length === 0 && (
-                      <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
+                    {isProductsLoading ? (
+                      <>
+                        {Array.from({ length: 4 }).map((_, idx) => (
+                          <div
+                            key={`product-skeleton-${idx}`}
+                            className="rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner"
+                          >
+                            <div className="flex items-center justify-between">
+                              <div className="h-4 w-32 animate-pulse rounded-full bg-white/10" />
+                              <div className="h-6 w-16 animate-pulse rounded-full bg-white/10" />
+                            </div>
+                            <div className="mt-3 h-10 animate-pulse rounded-lg bg-white/5" />
+                          </div>
+                        ))}
+                      </>
+                    ) : (
+                      <>
+                        {filteredProducts.length === 0 && (
+                          <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
                         Henüz ürün yok.
-                      </div>
-                    )}
+                          </div>
+                        )}
                     {filteredProducts.map((product) => {
                       const { available: availableStocks, used: usedStocks } = splitStocks(product.stocks)
                       const availableCount = availableStocks.length
@@ -4800,6 +4880,8 @@ function App() {
                         </div>
                       )
                     })}
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
@@ -4982,11 +5064,26 @@ function App() {
                   </div>
 
                   <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {openProblems.length === 0 && (
-                      <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
-                        Açık problem yok.
+                    {isProblemsLoading ? (
+                      <div className="col-span-full grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {Array.from({ length: 6 }).map((_, idx) => (
+                          <div
+                            key={`problem-skeleton-${idx}`}
+                            className="rounded-xl border border-white/10 bg-ink-900 p-4 shadow-inner"
+                          >
+                            <div className="h-3 w-24 animate-pulse rounded-full bg-white/10" />
+                            <div className="mt-3 h-10 animate-pulse rounded-lg bg-white/5" />
+                            <div className="mt-3 h-4 w-20 animate-pulse rounded-full bg-white/10" />
+                          </div>
+                        ))}
                       </div>
-                    )}
+                    ) : (
+                      <>
+                        {openProblems.length === 0 && (
+                          <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
+                        Açık problem yok.
+                          </div>
+                        )}
                     {openProblems.map((pb) => (
                       <div
                         key={pb.id}
@@ -5031,6 +5128,8 @@ function App() {
                         </div>
                       </div>
                     ))}
+                      </>
+                    )}
                   </div>
                 </div>
 
@@ -5045,11 +5144,26 @@ function App() {
                     </span>
                   </div>
                   <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    {resolvedProblems.length === 0 && (
-                      <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
-                        Çözülen kayıt yok.
+                    {isProblemsLoading ? (
+                      <div className="col-span-full grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                        {Array.from({ length: 3 }).map((_, idx) => (
+                          <div
+                            key={`resolved-skeleton-${idx}`}
+                            className="rounded-xl border border-emerald-200/40 bg-emerald-950/50 p-4 shadow-inner"
+                          >
+                            <div className="h-3 w-24 animate-pulse rounded-full bg-white/10" />
+                            <div className="mt-3 h-10 animate-pulse rounded-lg bg-white/5" />
+                            <div className="mt-3 h-4 w-20 animate-pulse rounded-full bg-white/10" />
+                          </div>
+                        ))}
                       </div>
-                    )}
+                    ) : (
+                      <>
+                        {resolvedProblems.length === 0 && (
+                          <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
+                        Çözülen kayıt yok.
+                          </div>
+                        )}
                     {resolvedProblems.map((pb) => (
                       <div
                         key={pb.id}
@@ -5094,6 +5208,8 @@ function App() {
                         </div>
                       </div>
                     ))}
+                      </>
+                    )}
                   </div>
                 </div>
               </div>
