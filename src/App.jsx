@@ -336,7 +336,7 @@ function App() {
                 : "bg-white/5 text-slate-200 hover:bg-white/10"
             }`}
           >
-            G├Ârev
+            {"G\u00f6rev"}
           </button>
           <button
             type="button"
@@ -347,7 +347,7 @@ function App() {
                 : "bg-white/5 text-slate-200 hover:bg-white/10"
             }`}
           >
-            Problemli M├╝┼şteriler
+            {"Problemli M\u00fc\u015fteriler"}
           </button>
           <button
             type="button"
