@@ -474,6 +474,7 @@ function App() {
   })
   const listSavedTimer = useRef(null)
   const listAutoSaveTimer = useRef(null)
+  const templateLoadTimerRef = useRef(null)
   const listLoadErrorRef = useRef(false)
   const listSaveErrorRef = useRef(false)
   const [isEditingActiveTemplate, setIsEditingActiveTemplate] = useState(false)
@@ -636,6 +637,29 @@ function App() {
     [authToken],
   )
 
+  const loadLists = useCallback(
+    async (signal) => {
+      setIsListsLoading(true)
+      try {
+        const res = await apiFetch("/api/lists", { signal })
+        if (!res.ok) throw new Error("api_error")
+        const data = await res.json()
+        setLists(Array.isArray(data) ? data : [])
+        listLoadErrorRef.current = false
+      } catch (error) {
+        if (error?.name === "AbortError") return
+        setLists([])
+        if (!listLoadErrorRef.current) {
+          listLoadErrorRef.current = true
+          toast.error("Liste verileri alınamadı (API/DB kontrol edin).")
+        }
+      } finally {
+        setIsListsLoading(false)
+      }
+    },
+    [apiFetch],
+  )
+
   useEffect(() => {
     try {
       const stored = localStorage.getItem(PRODUCT_ORDER_STORAGE_KEY)
@@ -651,28 +675,16 @@ function App() {
   useEffect(() => {
     if (!isAuthed) return
     const controller = new AbortController()
-    setIsListsLoading(true)
-    ;(async () => {
-      try {
-        const res = await apiFetch("/api/lists", { signal: controller.signal })
-        if (!res.ok) throw new Error("api_error")
-        const data = await res.json()
-        setLists(Array.isArray(data) ? data : [])
-        listLoadErrorRef.current = false
-      } catch (error) {
-        if (error?.name === "AbortError") return
-        setLists([])
-        if (!listLoadErrorRef.current) {
-          listLoadErrorRef.current = true
-          toast.error("Liste verileri alınamadı (API/DB kontrol edin).")
-        }
-      } finally {
-        setIsListsLoading(false)
-      }
-    })()
-
+    loadLists(controller.signal)
     return () => controller.abort()
-  }, [apiFetch, isAuthed])
+  }, [isAuthed, loadLists])
+
+  useEffect(() => {
+    if (!isAuthed || activeTab !== "lists") return
+    const controller = new AbortController()
+    loadLists(controller.signal)
+    return () => controller.abort()
+  }, [activeTab, isAuthed, loadLists])
 
   useEffect(() => {
     if (lists.length === 0) {
@@ -1070,13 +1082,11 @@ function App() {
     }
   }, [productOrder])
 
-  useEffect(() => {
-    if (!isAuthed) return
-    const controller = new AbortController()
-    setIsTasksLoading(true)
-    ;(async () => {
+  const loadTasks = useCallback(
+    async (signal) => {
+      setIsTasksLoading(true)
       try {
-        const res = await apiFetch("/api/tasks", { signal: controller.signal })
+        const res = await apiFetch("/api/tasks", { signal })
         if (!res.ok) throw new Error("api_error")
         const data = await res.json()
         setTasks(Array.isArray(data) ? data.map(normalizeTask) : [])
@@ -1091,9 +1101,23 @@ function App() {
       } finally {
         setIsTasksLoading(false)
       }
-    })()
+    },
+    [apiFetch],
+  )
+
+  useEffect(() => {
+    if (!isAuthed) return
+    const controller = new AbortController()
+    loadTasks(controller.signal)
     return () => controller.abort()
-  }, [apiFetch, isAuthed])
+  }, [isAuthed, loadTasks])
+
+  useEffect(() => {
+    if (!isAuthed || activeTab !== "tasks") return
+    const controller = new AbortController()
+    loadTasks(controller.signal)
+    return () => controller.abort()
+  }, [activeTab, isAuthed, loadTasks])
 
   useEffect(() => {
     if (!isAuthed) return
@@ -1607,72 +1631,91 @@ function App() {
     })
   }, [categories])
 
-  useEffect(() => {
-    if (!isAuthed) return
-    const controller = new AbortController()
-    setIsProblemsLoading(true)
-    ;(async () => {
+  const loadProblems = useCallback(
+    async (signal) => {
+      setIsProblemsLoading(true)
       try {
-        const res = await apiFetch("/api/problems", { signal: controller.signal })
+        const res = await apiFetch("/api/problems", { signal })
         if (!res.ok) throw new Error("api_error")
         const data = await res.json()
         setProblems(data ?? [])
       } catch (error) {
-        if (error?.name === "AbortError") {
-          setIsProblemsLoading(false)
-          return
-        }
+        if (error?.name === "AbortError") return
         setProblems(initialProblems)
         toast.error("Problem listesi alınamadı (API/DB kontrol edin)")
+      } finally {
+        setIsProblemsLoading(false)
       }
-      setIsProblemsLoading(false)
-    })()
-
-    return () => controller.abort()
-  }, [apiFetch, isAuthed])
+    },
+    [apiFetch],
+  )
 
   useEffect(() => {
     if (!isAuthed) return
     const controller = new AbortController()
-    setIsProductsLoading(true)
-    ;(async () => {
+    loadProblems(controller.signal)
+    return () => controller.abort()
+  }, [isAuthed, loadProblems])
+
+  useEffect(() => {
+    if (!isAuthed || activeTab !== "problems") return
+    const controller = new AbortController()
+    loadProblems(controller.signal)
+    return () => controller.abort()
+  }, [activeTab, isAuthed, loadProblems])
+
+  const loadProducts = useCallback(
+    async (signal) => {
+      setIsProductsLoading(true)
       try {
-        const res = await apiFetch("/api/products", { signal: controller.signal })
+        const res = await apiFetch("/api/products", { signal })
         if (!res.ok) throw new Error("api_error")
         const data = await res.json()
         setProducts(data ?? [])
       } catch (error) {
-        if (error?.name === "AbortError") {
-          setIsProductsLoading(false)
-          return
-        }
+        if (error?.name === "AbortError") return
         setProducts(initialProducts)
         toast.error("Stok listesi alınamadı (API/DB kontrol edin)")
+      } finally {
+        setIsProductsLoading(false)
       }
-      setIsProductsLoading(false)
-    })()
+    },
+    [apiFetch],
+  )
 
+  useEffect(() => {
+    if (!isAuthed) return
+    const controller = new AbortController()
+    loadProducts(controller.signal)
     return () => controller.abort()
-  }, [apiFetch, isAuthed])
+  }, [isAuthed, loadProducts])
+
+  useEffect(() => {
+    if (!isAuthed || activeTab !== "stock") return
+    const controller = new AbortController()
+    loadProducts(controller.signal)
+    return () => controller.abort()
+  }, [activeTab, isAuthed, loadProducts])
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDelayDone(true), 1200)
     return () => window.clearTimeout(timer)
   }, [])
 
-  useEffect(() => {
-    if (!isAuthed) return
-    const controller = new AbortController()
-    const startedAt = Date.now()
-    let timeoutId = null
+  const loadTemplates = useCallback(
+    async (signal) => {
+      const startedAt = Date.now()
+      if (templateLoadTimerRef.current) {
+        window.clearTimeout(templateLoadTimerRef.current)
+        templateLoadTimerRef.current = null
+      }
 
-    setIsLoading(true)
+      setIsLoading(true)
 
-    ;(async () => {
       try {
         const [catsRes, templatesRes] = await Promise.all([
-          apiFetch("/api/categories", { signal: controller.signal }),
-          apiFetch("/api/templates", { signal: controller.signal }),
+          apiFetch("/api/categories", { signal }),
+          apiFetch("/api/templates", { signal }),
         ])
 
         if (!catsRes.ok || !templatesRes.ok) throw new Error("api_error")
@@ -1684,9 +1727,14 @@ function App() {
         setCategories(safeCategories)
         setTemplates(serverTemplates ?? [])
 
-        const firstTemplate = serverTemplates?.[0]
-        setSelectedTemplate(firstTemplate?.label ?? null)
-        if (firstTemplate?.category) setSelectedCategory(firstTemplate.category)
+        setSelectedTemplate((prev) => {
+          if (prev && (serverTemplates ?? []).some((tpl) => tpl.label === prev)) return prev
+          return serverTemplates?.[0]?.label ?? null
+        })
+        setSelectedCategory((prev) => {
+          if (prev && safeCategories.includes(prev)) return prev
+          return serverTemplates?.[0]?.category || safeCategories[0] || "Genel"
+        })
       } catch (error) {
         if (error?.name === "AbortError") return
         setCategories(fallbackCategories)
@@ -1697,15 +1745,37 @@ function App() {
       } finally {
         const elapsed = Date.now() - startedAt
         const delay = Math.max(0, 600 - elapsed)
-        timeoutId = window.setTimeout(() => setIsLoading(false), delay)
+        templateLoadTimerRef.current = window.setTimeout(() => setIsLoading(false), delay)
       }
-    })()
+    },
+    [apiFetch],
+  )
 
+  useEffect(() => {
+    if (!isAuthed) return
+    const controller = new AbortController()
+    loadTemplates(controller.signal)
     return () => {
       controller.abort()
-      if (timeoutId) window.clearTimeout(timeoutId)
+      if (templateLoadTimerRef.current) {
+        window.clearTimeout(templateLoadTimerRef.current)
+        templateLoadTimerRef.current = null
+      }
     }
-  }, [apiFetch, isAuthed])
+  }, [isAuthed, loadTemplates])
+
+  useEffect(() => {
+    if (!isAuthed || activeTab !== "messages") return
+    const controller = new AbortController()
+    loadTemplates(controller.signal)
+    return () => {
+      controller.abort()
+      if (templateLoadTimerRef.current) {
+        window.clearTimeout(templateLoadTimerRef.current)
+        templateLoadTimerRef.current = null
+      }
+    }
+  }, [activeTab, isAuthed, loadTemplates])
 
   useEffect(() => {
     setOpenProducts((prev) => {
@@ -5942,8 +6012,3 @@ function App() {
 }
 
 export default App
-
-
-
-
-
