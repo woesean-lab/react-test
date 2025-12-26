@@ -95,9 +95,9 @@ export default function TasksTab({
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
-              G”revler
+              Görevler
             </span>
-            <h1 className="font-display text-3xl font-semibold text-white">G”revler</h1>
+            <h1 className="font-display text-3xl font-semibold text-white">Görevler</h1>
             <p className="max-w-2xl text-sm text-slate-200/80">
               Not ve tarih ile gorevlerini takipe al. Hepsi lokal tutulur.
             </p>
@@ -118,7 +118,7 @@ export default function TasksTab({
           <div className={`${panelClass} bg-ink-900/60`}>
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">G”rev panosu</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Görev panosu</p>
                 <p className="text-sm text-slate-400">Kartlari surukleyip yeni duruma birak.</p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -232,7 +232,7 @@ export default function TasksTab({
                                 : "border-white/10 bg-white/5 text-slate-300"
                             }`}
                           >
-                            BitiŸ: {getTaskDueLabel(task)}
+                            Bitiş: {getTaskDueLabel(task)}
                           </span>
                           <div className="flex flex-wrap gap-2">
                             {status !== "done" && (
@@ -241,7 +241,7 @@ export default function TasksTab({
                                 onClick={() => handleTaskAdvance(task.id)}
                                 className="rounded-lg border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50"
                               >
-                                {status === "todo" ? "BaŸlat" : "Tamamla"}
+                                {status === "todo" ? "Başlat" : "Tamamla"}
                               </button>
                             )}
                             <button
@@ -256,7 +256,7 @@ export default function TasksTab({
                               onClick={() => openTaskEdit(task)}
                               className="rounded-lg border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50"
                             >
-                              Dzenle
+                              Düzenle
                             </button>
                             {status === "done" && (
                               <button
@@ -293,7 +293,7 @@ export default function TasksTab({
           <div className={`${panelClass} bg-ink-900/70`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">G”rev ekle</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Görev ekle</p>
                 <p className="text-sm text-slate-400">Yeni isleri listeye ekle.</p>
               </div>
               <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
@@ -304,7 +304,7 @@ export default function TasksTab({
             <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-200" htmlFor="task-title">
-                  G”rev ad
+                  Görev adı
                 </label>
                 <input
                   id="task-title"
@@ -328,7 +328,7 @@ export default function TasksTab({
                     }
                     className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] uppercase tracking-[0.2em] text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
                   >
-                    GeniŸlet
+                    Genişlet
                   </button>
                 </div>
                 <textarea
@@ -357,7 +357,7 @@ export default function TasksTab({
 
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-200" htmlFor="task-due-type">
-                  BitiŸ tarihi
+                  Bitiş tarihi
                 </label>
                 <select
                   id="task-due-type"
@@ -386,9 +386,9 @@ export default function TasksTab({
               {taskForm.dueType === "repeat" && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-xs font-semibold text-slate-200">
-                    <span>Tekrarlanabilir gn</span>
+                    <span>Tekrarlanabilir gün</span>
                     <span className="text-[11px] text-slate-400">
-                      {taskFormRepeatLabels.length} gn se‡ili
+                      {taskFormRepeatLabels.length} gün seçili
                     </span>
                   </div>
                   <div className="flex flex-wrap gap-2">
@@ -412,8 +412,8 @@ export default function TasksTab({
                   </div>
                   <p className="text-xs text-slate-400">
                     {taskFormRepeatLabels.length > 0
-                      ? `Se‡ilen gnler: ${taskFormRepeatLabels.join(", ")}`
-                      : "Gn se‡ilmedi."}
+                      ? `Seçilen günler: ${taskFormRepeatLabels.join(", ")}`
+                      : "Gün seçilmedi."}
                   </p>
                 </div>
               )}
@@ -421,7 +421,7 @@ export default function TasksTab({
               {taskForm.dueType === "date" && (
                 <div className="space-y-2">
                   <label className="text-xs font-semibold text-slate-200" htmlFor="task-due-date">
-                    ™zel tarih
+                    Özel tarih
                   </label>
                   <input
                     id="task-due-date"
@@ -439,7 +439,7 @@ export default function TasksTab({
                   onClick={handleTaskAdd}
                   className="flex-1 min-w-[140px] rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
                 >
-                  G”rev ekle
+                  Görev ekle
                 </button>
                 <button
                   type="button"
@@ -465,7 +465,7 @@ export default function TasksTab({
                   <p className="mt-1 text-sm text-slate-100">{focusTask.title}</p>
                 </>
               ) : (
-                <p>G”rev kalmad. Yeni g”rev ekleyebilirsin.</p>
+                <p>Görev kalmadı. Yeni görev ekleyebilirsin.</p>
               )}
             </div>
           </div>

@@ -74,19 +74,19 @@ export default function ProblemsTab({
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
-              Problemli MŸteriler
+              Problemli Müşteriler
             </span>
-            <h1 className="font-display text-3xl font-semibold text-white">Problemli MŸteriler</h1>
+            <h1 className="font-display text-3xl font-semibold text-white">Problemli Müşteriler</h1>
             <p className="max-w-2xl text-sm text-slate-200/80">
-              MŸteri kullanc ad ve sorununu kaydet; ‡”zlnce "Problem ‡”zld" ile kapat veya sil.
+              Müşteri kullanıcı adı ve sorununu kaydet; çözülünce "Problem çözüldü" ile kapat veya sil.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-              A‡k problem: {openProblems.length}
+              Açık problem: {openProblems.length}
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-              €”zlen: {resolvedProblems.length}
+              Çözülen: {resolvedProblems.length}
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
               Toplam: {problems.length}
@@ -100,11 +100,11 @@ export default function ProblemsTab({
           <div className={`${panelClass} bg-ink-800/60`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">A‡k problemler</p>
-                <p className="text-sm text-slate-400">Kullanc ad ve sorun bilgisi listelenir.</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Açık problemler</p>
+                <p className="text-sm text-slate-400">Kullanıcı adı ve sorun bilgisi listelenir.</p>
               </div>
               <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                {openProblems.length} kayt
+                {openProblems.length} kayıt
               </span>
             </div>
 
@@ -126,7 +126,7 @@ export default function ProblemsTab({
                 <>
                   {openProblems.length === 0 && (
                     <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
-                      A‡k problem yok.
+                      Açık problem yok.
                     </div>
                   )}
                   {openProblems.map((pb) => (
@@ -157,7 +157,7 @@ export default function ProblemsTab({
                           onClick={() => handleProblemResolve(pb.id)}
                           className="rounded-lg border border-emerald-300/70 bg-emerald-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/25"
                         >
-                          €”zld
+                          Çözüldü
                         </button>
                         <button
                           type="button"
@@ -181,11 +181,11 @@ export default function ProblemsTab({
           <div className={`${panelClass} bg-ink-900/60`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">€”zlen problemler</p>
-                <p className="text-sm text-slate-400">€”zlmŸ kaytlar sakla ya da sil.</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Çözülen problemler</p>
+                <p className="text-sm text-slate-400">Çözülmüş kayıtları sakla ya da sil.</p>
               </div>
               <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                {resolvedProblems.length} kayt
+                {resolvedProblems.length} kayıt
               </span>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -206,7 +206,7 @@ export default function ProblemsTab({
                 <>
                   {resolvedProblems.length === 0 && (
                     <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
-                      €”zlen kayt yok.
+                      Çözülen kayıt yok.
                     </div>
                   )}
                   {resolvedProblems.map((pb) => (
@@ -237,7 +237,7 @@ export default function ProblemsTab({
                           onClick={() => handleProblemReopen(pb.id)}
                           className="rounded-lg border border-amber-300/70 bg-amber-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-amber-50 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
                         >
-                          €”zlmedi
+                          Çözülmedi
                         </button>
                         <button
                           type="button"
@@ -264,7 +264,7 @@ export default function ProblemsTab({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Problem ekle</p>
-                <p className="text-sm text-slate-400">Kullanc ad ve sorunu yazp kaydet.</p>
+                <p className="text-sm text-slate-400">Kullanıcı adı ve sorunu yazıp kaydet.</p>
               </div>
               <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
                 Toplam: {problems.length}
@@ -274,7 +274,7 @@ export default function ProblemsTab({
             <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-200" htmlFor="pb-username">
-                  Kullanc ad
+                  Kullanıcı adı
                 </label>
                 <input
                   id="pb-username"
@@ -295,7 +295,7 @@ export default function ProblemsTab({
                   value={problemIssue}
                   onChange={(e) => setProblemIssue(e.target.value)}
                   rows={4}
-                  placeholder="Sorunun ksa ”zeti..."
+                  placeholder="Sorunun kısa özeti..."
                   className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                 />
               </div>

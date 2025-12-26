@@ -107,17 +107,17 @@ export default function MessagesTab({
                 Pulcip Manage
               </h1>
               <p className="max-w-2xl text-sm text-slate-200/80 md:text-base">
-                Kendi tonunu bul, hazr Ÿablonlarn hzla dzenle ve tek tkla ekibinle paylaŸ.
+                Kendi tonunu bul, hazır şablonlarını hızla düzenle ve tek tıkla ekibinle paylaş.
               </p>
             </div>
             <div className="flex flex-wrap gap-2.5">
               <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-accent-200 md:text-sm">
                 <span className="h-2 w-2 rounded-full bg-accent-400" />
-                žablon: {templateCountText}
+                Şablon: {templateCountText}
               </span>
               <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-accent-200 md:text-sm">
                 <span className="h-2 w-2 rounded-full bg-amber-300" />
-                Kategori says: {categoryCountText}
+                Kategori sayısı: {categoryCountText}
               </span>
               <span className="flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-accent-200 md:text-sm">
                 <span className="h-2 w-2 rounded-full bg-amber-300" />
@@ -132,11 +132,11 @@ export default function MessagesTab({
               <div className="flex items-start justify-between gap-3">
                 <div className="space-y-1">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-200/70">
-                    Aktif Ÿablon
+                    Aktif şablon
                   </p>
                   <div className="flex flex-wrap items-center gap-2">
                     <h3 className="font-display text-2xl font-semibold text-white">
-                      {activeTemplate?.label || (showLoading ? "Ykleniyor..." : "Yeni Ÿablon")}
+                      {activeTemplate?.label || (showLoading ? "Yükleniyor..." : "Yeni şablon")}
                     </h3>
                     <span
                       className={`rounded-full px-3 py-1 text-[11px] font-semibold ${getCategoryClass(
@@ -160,7 +160,7 @@ export default function MessagesTab({
                     }`}
                     disabled={!activeTemplate || showLoading || isTemplateSaving}
                   >
-                    {isEditingActiveTemplate ? "Vazge‡" : "Mesaj dzenle"}
+                    {isEditingActiveTemplate ? "Vazgeç" : "Mesajı düzenle"}
                   </button>
                   <button
                     type="button"
@@ -183,13 +183,13 @@ export default function MessagesTab({
                   rows={4}
                   autoFocus
                   disabled={isTemplateSaving}
-                  placeholder="Mesaj i‡eri§ini gncelle"
+                  placeholder="Mesaj içeriğini güncelle"
                   className="mt-3 w-full rounded-lg border border-white/10 bg-ink-900/80 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                 />
               ) : (
                 <p className="mt-3 text-sm leading-relaxed text-slate-200/90">
                   {activeTemplate?.value ||
-                    (showLoading ? "Veriler ykleniyor..." : "Mesajn dzenleyip kaydetmeye baŸla.")}
+                    (showLoading ? "Veriler yükleniyor..." : "Mesajını düzenleyip kaydetmeye başla.")}
                 </p>
               )}
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-300/80">
@@ -210,12 +210,12 @@ export default function MessagesTab({
                       disabled={isTemplateSaving}
                       className="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-rose-300 hover:bg-rose-500/15 hover:text-rose-50 disabled:cursor-not-allowed disabled:opacity-70"
                     >
-                      Vazge‡
+                      Vazgeç
                     </button>
                   </div>
                 ) : (
                   <span className="rounded-full bg-white/10 px-3 py-1 font-semibold text-accent-100">
-                    {showLoading ? "Bekle" : "Hazr"}
+                    {showLoading ? "Bekle" : "Hazır"}
                   </span>
                 )}
               </div>
@@ -229,12 +229,12 @@ export default function MessagesTab({
           <div className={`${panelClass} bg-ink-800/60`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">žablon listesi</p>
-                <p className="text-sm text-slate-400">BaŸlklarna dokunarak dzenle ve kopyala.</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Şablon listesi</p>
+                <p className="text-sm text-slate-400">Başlıklarına dokunarak düzenle ve kopyala.</p>
               </div>
               <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
                 {showLoading && <span className="h-2 w-2 animate-pulse rounded-full bg-accent-400" />}
-                {templateCountText} {showLoading ? "" : "se‡enek"}
+                {templateCountText} {showLoading ? "" : "seçenek"}
               </span>
             </div>
 
@@ -274,7 +274,7 @@ export default function MessagesTab({
                           >
                             {cat}
                           </span>
-                          <span className="text-xs text-slate-400">{list.length} Ÿablon</span>
+                          <span className="text-xs text-slate-400">{list.length} şablon</span>
                         </span>
                         <span
                           className={`inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-slate-200 transition ${
@@ -290,7 +290,7 @@ export default function MessagesTab({
                         <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
                           {list.length === 0 && (
                             <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
-                              Bu kategoride Ÿablon yok.
+                              Bu kategoride şablon yok.
                             </div>
                           )}
                           {list.map((tpl) => (
@@ -323,7 +323,7 @@ export default function MessagesTab({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Kategori ekle</p>
-                <p className="text-sm text-slate-400">Yeni kategori ekle, ardndan mesaj alanndan se‡.</p>
+                <p className="text-sm text-slate-400">Yeni kategori ekle, ardından mesaj alanından seç.</p>
               </div>
               <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
                 {categoryCountText} kategori
@@ -336,7 +336,7 @@ export default function MessagesTab({
                 type="text"
                 value={newCategory}
                 onChange={(e) => setNewCategory(e.target.value)}
-                placeholder="™rn: Duyuru"
+                placeholder="Örn: Duyuru"
                 className="flex-1 rounded-xl border border-white/10 bg-ink-900 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/40"
               />
               <button
@@ -375,23 +375,23 @@ export default function MessagesTab({
           <div className={`${panelClass} bg-ink-900/60`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">žablon ekle</p>
-                <p className="text-sm text-slate-400">BaŸlk, kategori ve mesaj ekleyip kaydet.</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Şablon ekle</p>
+                <p className="text-sm text-slate-400">Başlık, kategori ve mesajı ekleyip kaydet.</p>
               </div>
-              <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">Hzl ekle</span>
+              <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">Hızlı ekle</span>
             </div>
 
             <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-200" htmlFor="title-mini">
-                  BaŸlk
+                  Başlık
                 </label>
                 <input
                   id="title-mini"
                   type="text"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  placeholder="™rn: KarŸlama notu"
+                  placeholder="Örn: Karşılama notu"
                   className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                 />
               </div>
@@ -417,14 +417,14 @@ export default function MessagesTab({
               <div className="space-y-2">
                 <div className="flex items-center justify-between text-xs font-semibold text-slate-200">
                   <label htmlFor="message-mini">Mesaj</label>
-                  <span className="text-[11px] text-slate-400">Anlk karakter: {messageLength}</span>
+                  <span className="text-[11px] text-slate-400">Anlık karakter: {messageLength}</span>
                 </div>
                 <textarea
                   id="message-mini"
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   rows={4}
-                  placeholder="Mesaj i‡eri§i..."
+                  placeholder="Mesaj içeriği..."
                   className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                 />
               </div>
@@ -449,11 +449,11 @@ export default function MessagesTab({
           </div>
 
           <div className={`${panelClass} bg-ink-800/60`}>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Hzl ipu‡lar</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Hızlı ipuçları</p>
             <ul className="mt-3 space-y-2 text-sm text-slate-300">
-              <li>- BaŸlk boŸ kalrsa otomatik bir isimle kaydedilir.</li>
-              <li>- žablona tklamak metni panoya kopyalar.</li>
-              <li>- Kategori silince Ÿablonlar "Genel"e taŸnr.</li>
+              <li>- Başlık boş kalırsa otomatik bir isimle kaydedilir.</li>
+              <li>- Şablona tıklamak metni panoya kopyalar.</li>
+              <li>- Kategori silince şablonlar "Genel"e taşınır.</li>
             </ul>
           </div>
         </div>

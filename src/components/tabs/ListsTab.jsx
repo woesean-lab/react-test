@@ -128,7 +128,7 @@ export default function ListsTab({
             </span>
             <h1 className="font-display text-3xl font-semibold text-white">Listeler</h1>
             <p className="max-w-2xl text-sm text-slate-200/80">
-              Yeni liste oluŸtur, listeleri g”rntle ve hcreleri Excel benzeri bi‡imde dzenle.
+              Yeni liste oluştur, listeleri görüntüle ve hücreleri Excel benzeri biçimde düzenle.
             </p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -136,7 +136,7 @@ export default function ListsTab({
               Toplam liste: {listCountText}
             </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-              Aktif: {activeList?.name || "Se‡ilmedi"}
+              Aktif: {activeList?.name || "Seçilmedi"}
             </span>
           </div>
         </div>
@@ -148,7 +148,7 @@ export default function ListsTab({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Listeler</p>
-                <p className="text-sm text-slate-400">Listeye tkla ve tabloyu a‡.</p>
+                <p className="text-sm text-slate-400">Listeye tıkla ve tabloyu aç.</p>
               </div>
               <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
                 {listCountText} liste
@@ -172,7 +172,7 @@ export default function ListsTab({
                 <>
                   {lists.length === 0 && (
                     <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
-                      Henz liste yok.
+                      Henüz liste yok.
                     </div>
                   )}
                   {lists.map((list) => {
@@ -193,7 +193,7 @@ export default function ListsTab({
                       >
                         <p className="text-sm font-semibold">{list.name}</p>
                         <p className="mt-1 text-xs text-slate-400">
-                          {rowCount} satr ú {colCount} stun
+                          {rowCount} satır · {colCount} sütun
                         </p>
                       </button>
                     )
@@ -206,12 +206,12 @@ export default function ListsTab({
           <div className={`${panelClass} bg-ink-900/60`}>
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Liste i‡eri§i</p>
-                <p className="text-sm text-slate-400">Hcreleri se‡ip dzenleyebilirsin.</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Liste içeriği</p>
+                <p className="text-sm text-slate-400">Hücreleri seçip düzenleyebilirsin.</p>
               </div>
               <div className="flex flex-wrap items-center gap-3">
                 <div className="flex flex-wrap items-center gap-2 text-xs text-slate-400">
-                  <span>BaŸlklara sa§ tkla: ekle/sil</span>
+                  <span>Başlıklara sağ tıkla: ekle/sil</span>
                   {listSavedAt ? (
                     <span className="rounded-full border border-emerald-300/40 bg-emerald-500/10 px-2 py-0.5 text-[11px] font-semibold text-emerald-100">
                       Kaydedildi
@@ -268,7 +268,7 @@ export default function ListsTab({
               </div>
             ) : !activeList ? (
               <div className="mt-4 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
-                Bir liste se‡in veya yeni liste oluŸturun.
+                Bir liste seçin veya yeni liste oluşturun.
               </div>
             ) : (
               <>
@@ -380,7 +380,7 @@ export default function ListsTab({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Yeni liste</p>
-                <p className="text-sm text-slate-400">Liste adn girip oluŸtur.</p>
+                <p className="text-sm text-slate-400">Liste adını girip oluştur.</p>
               </div>
               <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
                 {listCountText} liste
@@ -390,7 +390,7 @@ export default function ListsTab({
             <div className="mt-4 space-y-2">
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-200" htmlFor="list-name">
-                  Liste ad
+                  Liste adı
                 </label>
                 <input
                   id="list-name"
@@ -403,7 +403,7 @@ export default function ListsTab({
                       handleListCreate()
                     }
                   }}
-                  placeholder="™rn: Haftalk rapor"
+                  placeholder="Örn: Haftalık rapor"
                   className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                 />
               </div>
@@ -412,7 +412,7 @@ export default function ListsTab({
                 onClick={handleListCreate}
                 className="w-full rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
               >
-                Liste oluŸtur
+                Liste oluştur
               </button>
             </div>
           </div>
@@ -421,19 +421,19 @@ export default function ListsTab({
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
-                  Listeyi dzenle
+                  Listeyi düzenle
                 </p>
-                <p className="text-sm text-slate-400">Aktif listenin adn de§iŸtir ya da sil.</p>
+                <p className="text-sm text-slate-400">Aktif listenin adını değiştir ya da sil.</p>
               </div>
               <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                {activeList?.name || "Se‡ilmedi"}
+                {activeList?.name || "Seçilmedi"}
               </span>
             </div>
 
             <div className="mt-4 space-y-3">
               <div className="space-y-2">
                 <label className="text-xs font-semibold text-slate-200" htmlFor="list-rename">
-                  Liste ad
+                  Liste adı
                 </label>
                 <input
                   id="list-rename"
@@ -446,7 +446,7 @@ export default function ListsTab({
                       handleListRename()
                     }
                   }}
-                  placeholder="Liste ad"
+                  placeholder="Liste adı"
                   disabled={!activeList}
                   className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
                 />
@@ -458,7 +458,7 @@ export default function ListsTab({
                   disabled={!activeList}
                   className="flex-1 min-w-[140px] rounded-lg border border-emerald-300/70 bg-emerald-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-emerald-50 shadow-glow transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Gncelle
+                  Güncelle
                 </button>
                 <button
                   type="button"
@@ -469,7 +469,7 @@ export default function ListsTab({
                       return
                     }
                     setConfirmListDelete(activeList.id)
-                    toast("Silmek i‡in tekrar tkla", { position: "top-right" })
+                    toast("Silmek için tekrar tıkla", { position: "top-right" })
                   }}
                   disabled={!activeList}
                   className={`min-w-[140px] rounded-lg border px-4 py-2.5 text-xs font-semibold uppercase tracking-wide transition ${
@@ -485,16 +485,16 @@ export default function ListsTab({
           </div>
 
           <div className={`${panelClass} bg-ink-800/60`}>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">˜pu‡lar</p>
+            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">İpuçları</p>
             <ul className="mt-3 space-y-2 text-sm text-slate-300">
-              <li>- Yeni liste varsaylan bir tabloyla baŸlar.</li>
-              <li>- Satr/stun ekleyerek tabloyu geniŸlet.</li>
+              <li>- Yeni liste varsayılan bir tabloyla başlar.</li>
+              <li>- Satır/sütun ekleyerek tabloyu genişlet.</li>
               <li>- Bir hucreye cok satir yapistirinca asagiya yayilir.</li>
-              <li>- Forml i‡in "=" ile baŸla (”rn: =SUM(A1:A5)).</li>
+              <li>- Formül için "=" ile başla (örn: =SUM(A1:A5)).</li>
               <li>- Desteklenenler: SUM, AVERAGE, MIN, MAX, COUNT.</li>
-              <li>- Satr/stun baŸl§na sa§ tkla: ekle/sil.</li>
+              <li>- Satır/sütun başlığına sağ tıkla: ekle/sil.</li>
               <li>- Satir/sutun secmek icin basliga tikla; Shift aralik, Ctrl tek tek.</li>
-              <li>- Veriler veritabannda saklanr.</li>
+              <li>- Veriler veritabanında saklanır.</li>
             </ul>
           </div>
         </div>
@@ -515,8 +515,8 @@ export default function ListsTab({
                   }}
                   className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition hover:bg-white/10"
                 >
-                  Satr ekle
-                  <span className="text-[10px] text-slate-400">Altna</span>
+                  Satır ekle
+                  <span className="text-[10px] text-slate-400">Altına</span>
                 </button>
                 <button
                   type="button"
@@ -527,8 +527,8 @@ export default function ListsTab({
                   disabled={!canDeleteListRow}
                   className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-rose-100 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Satr sil
-                  <span className="text-[10px] text-rose-200/70">Se‡ili</span>
+                  Satır sil
+                  <span className="text-[10px] text-rose-200/70">Seçili</span>
                 </button>
                 {selectedListRows.size > 1 && (
                   <button
@@ -555,8 +555,8 @@ export default function ListsTab({
                   }}
                   className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left transition hover:bg-white/10"
                 >
-                  Stun ekle
-                  <span className="text-[10px] text-slate-400">Sa§na</span>
+                  Sütun ekle
+                  <span className="text-[10px] text-slate-400">Sağına</span>
                 </button>
                 <button
                   type="button"
@@ -567,8 +567,8 @@ export default function ListsTab({
                   disabled={!canDeleteListColumn}
                   className="flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-rose-100 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  Stun sil
-                  <span className="text-[10px] text-rose-200/70">Se‡ili</span>
+                  Sütun sil
+                  <span className="text-[10px] text-rose-200/70">Seçili</span>
                 </button>
                 {selectedListCols.size > 1 && (
                   <button
