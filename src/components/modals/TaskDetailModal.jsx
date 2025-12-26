@@ -22,7 +22,7 @@ export default function TaskDetailModal({
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1">
             <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-300/80">
-              Görev detayı
+              GÃ¶rev detayÄ±
             </p>
             <p className="text-lg font-semibold text-slate-100">{target.title}</p>
           </div>
@@ -36,7 +36,7 @@ export default function TaskDetailModal({
               }}
               className="rounded-lg border border-accent-300/70 bg-accent-500/15 px-3 py-1 text-xs font-semibold text-accent-50 transition hover:border-accent-200 hover:bg-accent-500/25"
             >
-              Düzenle
+              DÃ¼zenle
             </button>
             )}
             <button
@@ -56,10 +56,10 @@ export default function TaskDetailModal({
             </span>
           )}
           <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold text-slate-200">
-            Durum: {taskStatusMeta[target.status]?.label || "Yapılacak"}
+            Durum: {taskStatusMeta[target.status]?.label || "YapÄ±lacak"}
           </span>
           <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold text-slate-200">
-            Bitiş: {getTaskDueLabel(target)}
+            BitiÅŸ: {getTaskDueLabel(target)}
           </span>
         </div>
 
