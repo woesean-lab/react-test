@@ -209,6 +209,7 @@ function App() {
     handleProblemAdd,
     isTaskEditOpen,
     taskEditDraft,
+    setTaskEditDraft,
     closeTaskEdit,
     handleTaskEditSave,
     taskEditRepeatLabels,

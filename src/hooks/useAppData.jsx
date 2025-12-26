@@ -2987,6 +2987,7 @@ export default function useAppData() {
     handleProblemAdd,
     isTaskEditOpen,
     taskEditDraft,
+    setTaskEditDraft,
     closeTaskEdit,
     handleTaskEditSave,
     taskEditRepeatLabels,
