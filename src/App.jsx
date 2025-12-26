@@ -3092,6 +3092,7 @@ function App() {
             handleEditSave={handleEditSave}
             handleEditCancel={handleEditCancel}
             confirmProductTarget={confirmProductTarget}
+            confirmStockTarget={confirmStockTarget}
             handleProductDeleteWithConfirm={handleProductDeleteWithConfirm}
             bulkCount={bulkCount}
             setBulkCount={setBulkCount}

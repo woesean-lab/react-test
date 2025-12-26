@@ -82,6 +82,7 @@ export default function StockTab({
   handleEditSave,
   handleEditCancel,
   confirmProductTarget,
+  confirmStockTarget,
   handleProductDeleteWithConfirm,
   bulkCount,
   setBulkCount,
