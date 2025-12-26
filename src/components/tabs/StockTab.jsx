@@ -129,7 +129,8 @@ export default function StockTab({
     return <StockSkeleton panelClass={panelClass} />
   }
 
-  return (            <div className="space-y-6">
+  return (
+    <div className="space-y-6">
             <header className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-6 shadow-card">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
                 <div className="space-y-2">
@@ -157,7 +158,6 @@ export default function StockTab({
                     </span>
                   )}
                 </div>
-                )}
               </div>
             </header>
 
@@ -953,6 +953,7 @@ export default function StockTab({
               )}
             </div>
             </div>
+          </div>
   )
 }
 
