@@ -216,6 +216,7 @@ function App() {
     roles,
     users,
     isAdminLoading,
+    isAdminTabLoading,
     roleDraft,
     setRoleDraft,
     userDraft,
@@ -670,7 +671,7 @@ function App() {
 
         {activeTab === "admin" && canViewAdmin && (
           <AdminTab
-            isLoading={isAdminLoading}
+            isLoading={isAdminTabLoading}
             panelClass={panelClass}
             activeUser={activeUser}
             roles={roles}

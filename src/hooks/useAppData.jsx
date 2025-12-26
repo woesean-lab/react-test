@@ -2248,6 +2248,7 @@ export default function useAppData() {
   const isListsTabLoading = isListsLoading || (activeTab === "lists" && isTabLoading)
   const isStockTabLoading = isProductsLoading || (activeTab === "stock" && isTabLoading)
   const isProblemsTabLoading = isProblemsLoading || (activeTab === "problems" && isTabLoading)
+  const isAdminTabLoading = isAdminLoading || (activeTab === "admin" && isTabLoading)
 
   const toastStyle = isLight
     ? { background: "#ffffff", color: "#0f172a", border: "1px solid #e2e8f0" }
@@ -3221,6 +3222,7 @@ export default function useAppData() {
     roles,
     users,
     isAdminLoading,
+    isAdminTabLoading,
     roleDraft,
     setRoleDraft,
     userDraft,
