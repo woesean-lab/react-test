@@ -601,6 +601,7 @@ function App() {
             confirmTaskDelete={confirmTaskDelete}
             taskForm={taskForm}
             setTaskForm={setTaskForm}
+            activeUser={activeUser}
             taskUsers={taskUsers}
             openNoteModal={openNoteModal}
             taskDueTypeOptions={taskDueTypeOptions}
