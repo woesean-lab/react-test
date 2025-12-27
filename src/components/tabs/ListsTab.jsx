@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react"
 import { toast } from "react-hot-toast"
 
 function SkeletonBlock({ className = "" }) {
@@ -119,6 +120,113 @@ export default function ListsTab({
   handleListDeleteColumn,
 }) {
   const isListsTabLoading = isLoading
+  const [isListExpandOpen, setIsListExpandOpen] = useState(false)
+
+  useEffect(() => {
+    if (!activeList) {
+      setIsListExpandOpen(false)
+    }
+  }, [activeList])
+
+  const renderListTable = (wrapperClassName) => (
+    <div className={wrapperClassName}>
+      <table className="min-w-[640px] w-full border-collapse text-xs text-slate-200">
+        <thead className="bg-white/5 text-slate-300">
+          <tr>
+            <th className="w-10 border border-white/10 px-2 py-1 text-center text-[11px] font-semibold text-slate-400">
+              #
+            </th>
+            {activeListColumnLabels.map((label, colIndex) => {
+              const isSelected = selectedListCols.has(colIndex) || selectedListCell.col === colIndex
+              return (
+                <th
+                  key={label}
+                  onClick={canEditStructure ? (event) => handleListColumnSelect(event, colIndex) : undefined}
+                  onContextMenu={
+                    canEditStructure ? (event) => handleListContextMenu(event, "column", colIndex) : undefined
+                  }
+                  className={`cursor-pointer border border-white/10 px-2 py-1 text-center text-[11px] font-semibold ${
+                    isSelected ? "bg-white/10 text-white" : ""
+                  }`}
+                >
+                  {label}
+                </th>
+              )
+            })}
+          </tr>
+        </thead>
+        <tbody>
+          {activeListRows.map((row, rowIndex) => (
+            <tr key={`${activeList.id}-${rowIndex}`}>
+              <td
+                onClick={canEditStructure ? (event) => handleListRowSelect(event, rowIndex) : undefined}
+                onContextMenu={
+                  canEditStructure ? (event) => handleListContextMenu(event, "row", rowIndex) : undefined
+                }
+                className={`cursor-pointer border border-white/10 px-2 py-1 text-center text-[11px] ${
+                  selectedListRows.has(rowIndex) || selectedListCell.row === rowIndex
+                    ? "bg-white/10 text-white"
+                    : "text-slate-400"
+                }`}
+              >
+                {rowIndex + 1}
+              </td>
+              {activeListColumns.map((colIndex) => {
+                const cellData = getListCellData(rowIndex, colIndex)
+                const rawValue = cellData.value ?? ""
+                const isEditingCell = editingListCell.row === rowIndex && editingListCell.col === colIndex
+                const displayValue = isEditingCell ? rawValue : getListCellDisplayValue(rowIndex, colIndex)
+                const alignClass =
+                  cellData.format?.align === "center"
+                    ? "text-center"
+                    : cellData.format?.align === "right"
+                      ? "text-right"
+                      : "text-left"
+                const cellToneClass = LIST_CELL_TONE_CLASSES[cellData.format?.tone || "none"] || ""
+                const cellTextClass = [
+                  alignClass,
+                  cellData.format?.bold ? "font-semibold" : "",
+                  cellData.format?.italic ? "italic" : "",
+                  cellData.format?.underline ? "underline" : "",
+                ]
+                  .filter(Boolean)
+                  .join(" ")
+                return (
+                  <td key={`${rowIndex}-${colIndex}`} className={`border border-white/10 p-0 ${cellToneClass}`}>
+                    <input
+                      value={displayValue}
+                      onFocus={() => {
+                        if (!canEditCells) return
+                        setEditingListCell({ row: rowIndex, col: colIndex })
+                        setSelectedListCell({ row: rowIndex, col: colIndex })
+                      }}
+                      onBlur={() => {
+                        if (!canEditCells) return
+                        setEditingListCell((prev) =>
+                          prev.row === rowIndex && prev.col === colIndex ? { row: null, col: null } : prev,
+                        )
+                      }}
+                      onChange={(e) => {
+                        if (!canEditCells) return
+                        handleListCellChange(rowIndex, colIndex, e.target.value)
+                      }}
+                      onPaste={(e) => {
+                        if (!canEditCells) return
+                        handleListPaste(e, rowIndex, colIndex)
+                      }}
+                      readOnly={!canEditCells}
+                      spellCheck={false}
+                      className={`h-8 w-full bg-transparent px-2 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-accent-400/60 ${cellTextClass}`}
+                    />
+                  </td>
+                )
+              })}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
 
   if (isListsTabLoading) {
     return <ListsSkeleton panelClass={panelClass} />
@@ -252,6 +360,14 @@ export default function ListsTab({
                     )}
                   </div>
                 )}
+                <button
+                  type="button"
+                  onClick={() => setIsListExpandOpen(true)}
+                  disabled={!activeList || isListsTabLoading}
+                  className="inline-flex items-center rounded-[0.5rem] border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-300 hover:text-accent-100 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  {"Geni\u015flet"}
+                </button>
                 {canSaveList && (
                   <button
                     type="button"
@@ -540,6 +656,38 @@ export default function ListsTab({
           </div>
         </div>
       </div>
+      {isListExpandOpen && activeList && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 px-4"
+          onClick={() => setIsListExpandOpen(false)}
+        >
+          <div
+            className="w-full max-w-6xl overflow-hidden rounded-2xl border border-white/10 bg-ink-900 shadow-card"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <div className="flex items-center justify-between border-b border-white/10 bg-ink-800 px-4 py-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-300/80">
+                  {"Liste g\u00f6r\u00fcn\u00fcm\u00fc"}
+                </p>
+                <p className="text-xs text-slate-400">{activeList.name}</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsListExpandOpen(false)}
+                className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
+              >
+                Kapat
+              </button>
+            </div>
+            <div className="p-4">
+              {renderListTable(
+                "max-h-[70vh] overflow-auto rounded-xl border border-white/10 bg-ink-900/80",
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       {canEditStructure && listContextMenu.open && (
         <div
           className="fixed z-50"
