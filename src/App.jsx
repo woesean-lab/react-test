@@ -510,6 +510,19 @@ function App() {
             </button>
           )}
           <div className="ml-auto flex items-center gap-2">
+            {activeUser?.username && (
+              <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-200">
+                <span className="text-[10px] uppercase tracking-[0.24em] text-slate-400">
+                  {"Ho\u015f geldin,"}
+                </span>
+                <span
+                  className="max-w-[160px] truncate text-sm font-semibold text-accent-100"
+                  title={activeUser.username}
+                >
+                  {activeUser.username}
+                </span>
+              </div>
+            )}
             {canViewAdmin && (
               <button
                 type="button"
