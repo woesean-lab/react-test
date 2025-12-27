@@ -619,6 +619,71 @@ app.delete("/api/users/:id", requireAnyPermission(["admin.users.manage", "admin.
   }
 })
 
+app.put("/api/profile", async (req, res) => {
+  const user = req.user
+  if (!user) {
+    res.status(401).json({ error: "unauthorized" })
+    return
+  }
+
+  const usernameRaw = req.body?.username
+  const currentPassword = String(req.body?.currentPassword ?? "")
+  const newPasswordRaw = req.body?.newPassword
+
+  const username = usernameRaw === undefined ? undefined : String(usernameRaw).trim()
+  const newPassword = newPasswordRaw === undefined ? undefined : String(newPasswordRaw)
+
+  if (username !== undefined && !username) {
+    res.status(400).json({ error: "username cannot be empty" })
+    return
+  }
+  if (newPassword !== undefined && !newPassword) {
+    res.status(400).json({ error: "newPassword cannot be empty" })
+    return
+  }
+
+  const usernameChanged = username !== undefined && username !== user.username
+  const passwordChanged = newPassword !== undefined
+  if (!usernameChanged && !passwordChanged) {
+    res.status(400).json({ error: "no changes" })
+    return
+  }
+  if (!currentPassword) {
+    res.status(400).json({ error: "current password required" })
+    return
+  }
+  if (!verifyPassword(currentPassword, user.passwordHash)) {
+    res.status(403).json({ error: "invalid password" })
+    return
+  }
+
+  try {
+    const updated = await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        ...(usernameChanged ? { username } : {}),
+        ...(passwordChanged ? { passwordHash: hashPassword(newPassword) } : {}),
+      },
+      include: { role: true },
+    })
+
+    if (usernameChanged) {
+      await prisma.task.updateMany({
+        where: { owner: user.username },
+        data: { owner: updated.username },
+      })
+    }
+
+    res.json(serializeUser(updated))
+  } catch (error) {
+    if (error?.code === "P2002") {
+      res.status(409).json({ error: "Username already exists" })
+      return
+    }
+    throw error
+  }
+})
+
 const allowedProblemStatus = new Set(["open", "resolved"])
 const allowedTaskStatus = new Set(["todo", "doing", "done"])
 const allowedTaskDueTypes = new Set(["today", "repeat", "date"])

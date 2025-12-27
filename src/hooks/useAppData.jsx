@@ -63,6 +63,13 @@ export default function useAppData() {
   const [authError, setAuthError] = useState("")
   const [isAuthLoading, setIsAuthLoading] = useState(false)
   const [isLogoutLoading, setIsLogoutLoading] = useState(false)
+  const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [isProfileSaving, setIsProfileSaving] = useState(false)
+  const [profileDraft, setProfileDraft] = useState({
+    username: "",
+    currentPassword: "",
+    newPassword: "",
+  })
   const [title, setTitle] = useState("Pulcip Manage")
   const [message, setMessage] = useState("")
   const [selectedCategory, setSelectedCategory] = useState("Genel")
@@ -1345,12 +1352,111 @@ export default function useAppData() {
     setAuthUsername("")
     setAuthPassword("")
     setAuthError("")
+    setIsProfileOpen(false)
+    setProfileDraft({ username: "", currentPassword: "", newPassword: "" })
     try {
       localStorage.removeItem(AUTH_TOKEN_STORAGE_KEY)
     } catch (error) {
       console.warn("Could not clear auth token", error)
     }
     setIsLogoutLoading(false)
+  }
+
+  const openProfileModal = () => {
+    if (!activeUser) return
+    setProfileDraft({
+      username: activeUser.username ?? "",
+      currentPassword: "",
+      newPassword: "",
+    })
+    setIsProfileOpen(true)
+  }
+
+  const closeProfileModal = () => {
+    setIsProfileOpen(false)
+    setProfileDraft((prev) => ({
+      ...prev,
+      currentPassword: "",
+      newPassword: "",
+    }))
+  }
+
+  const handleProfileSave = async () => {
+    if (!activeUser || isProfileSaving) return
+    const username = profileDraft.username.trim()
+    const currentPassword = profileDraft.currentPassword.trim()
+    const newPassword = profileDraft.newPassword.trim()
+
+    if (!username) {
+      toast.error("Kullan\u0131c\u0131 ad\u0131 gerekli.")
+      return
+    }
+
+    const usernameChanged = username !== activeUser.username
+    const passwordChanged = Boolean(newPassword)
+
+    if (!usernameChanged && !passwordChanged) {
+      toast("De\u011fi\u015fiklik yok.", { position: "top-right" })
+      return
+    }
+
+    if (!currentPassword) {
+      toast.error("Mevcut \u015fifre gerekli.")
+      return
+    }
+
+    setIsProfileSaving(true)
+    try {
+      const res = await apiFetch("/api/profile", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          username,
+          currentPassword,
+          ...(passwordChanged ? { newPassword } : {}),
+        }),
+      })
+
+      if (res.status === 403) {
+        toast.error("Mevcut \u015fifre hatal\u0131.")
+        return
+      }
+      if (res.status === 409) {
+        toast.error("Bu kullan\u0131c\u0131 ad\u0131 zaten kullan\u0131l\u0131yor.")
+        return
+      }
+      if (!res.ok) {
+        throw new Error("profile_save_failed")
+      }
+
+      const updated = await res.json()
+      if (usernameChanged && updated?.username) {
+        const previousUsername = activeUser.username
+        const nextUsername = updated.username
+        setTasks((prev) =>
+          prev.map((task) => (task.owner === previousUsername ? { ...task, owner: nextUsername } : task)),
+        )
+        setTaskUsers((prev) =>
+          prev.map((user) =>
+            user.username === previousUsername ? { ...user, username: nextUsername } : user,
+          ),
+        )
+        setTaskForm((prev) => ({
+          ...prev,
+          owner: prev.owner === previousUsername ? nextUsername : prev.owner,
+        }))
+      }
+      setActiveUser(updated)
+      setUsers((prev) => prev.map((user) => (user.id === updated.id ? updated : user)))
+      setProfileDraft({ username: updated?.username ?? username, currentPassword: "", newPassword: "" })
+      setIsProfileOpen(false)
+      toast.success("Profil g\u00FCncellendi")
+    } catch (error) {
+      console.error(error)
+      toast.error("Profil g\u00FCncellenemedi (API/DB kontrol edin).")
+    } finally {
+      setIsProfileSaving(false)
+    }
   }
 
   const resetRoleDraft = () => setRoleDraft({ id: null, name: "", permissions: [] })
@@ -2399,17 +2505,6 @@ export default function useAppData() {
     </button>
   )
 
-  const logoutButton = (
-    <button
-      type="button"
-      onClick={handleLogout}
-      disabled={isLogoutLoading}
-      className="inline-flex items-center rounded-2xl bg-white/5 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
-    >
-      {"\u00C7\u0131k\u0131\u015F"}
-    </button>
-  )
-
   const categoryColors = useMemo(() => {
     const map = {}
     categories.forEach((cat, idx) => {
@@ -3127,8 +3222,15 @@ export default function useAppData() {
     authError,
     setAuthError,
     handleAuthSubmit,
-    logoutButton,
+    handleLogout,
     themeToggleButton,
+    isProfileOpen,
+    isProfileSaving,
+    profileDraft,
+    setProfileDraft,
+    openProfileModal,
+    closeProfileModal,
+    handleProfileSave,
     permissions,
     hasPermission,
     hasAnyPermission,

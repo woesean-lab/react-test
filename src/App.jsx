@@ -1,4 +1,6 @@
-﻿import { Toaster } from "react-hot-toast"
+import { useEffect, useRef, useState } from "react"
+import { Toaster } from "react-hot-toast"
+import ProfileModal from "./components/modals/ProfileModal"
 import NoteModal from "./components/modals/NoteModal"
 import StockModal from "./components/modals/StockModal"
 import TaskDetailModal from "./components/modals/TaskDetailModal"
@@ -28,8 +30,15 @@ function App() {
     authError,
     setAuthError,
     handleAuthSubmit,
-    logoutButton,
+    handleLogout,
     themeToggleButton,
+    isProfileOpen,
+    isProfileSaving,
+    profileDraft,
+    setProfileDraft,
+    openProfileModal,
+    closeProfileModal,
+    handleProfileSave,
     hasPermission,
     hasAnyPermission,
     toastStyle,
@@ -271,6 +280,29 @@ function App() {
     handleDetailNoteScroll
   } = useAppData()
 
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const userMenuRef = useRef(null)
+  const userInitial = (activeUser?.username || "?").trim().charAt(0).toUpperCase() || "?"
+  const userName = activeUser?.username ?? ""
+
+  useEffect(() => {
+    if (!isUserMenuOpen) return
+    const handleClick = (event) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
+        setIsUserMenuOpen(false)
+      }
+    }
+    const handleKey = (event) => {
+      if (event.key === "Escape") setIsUserMenuOpen(false)
+    }
+    window.addEventListener("click", handleClick)
+    window.addEventListener("keydown", handleKey)
+    return () => {
+      window.removeEventListener("click", handleClick)
+      window.removeEventListener("keydown", handleKey)
+    }
+  }, [isUserMenuOpen])
+
   const canViewMessages = hasPermission(PERMISSIONS.messagesView)
   const canCreateMessages = hasAnyPermission([PERMISSIONS.messagesCreate, PERMISSIONS.messagesEdit])
   const canEditMessages = hasAnyPermission([PERMISSIONS.messagesTemplateEdit, PERMISSIONS.messagesEdit])
@@ -510,19 +542,6 @@ function App() {
             </button>
           )}
           <div className="ml-auto flex items-center gap-2">
-            {activeUser?.username && (
-              <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
-                <span className="uppercase tracking-[0.2em] text-slate-500">
-                  {"Ho\u015f geldin,"}
-                </span>
-                <span
-                  className="max-w-[140px] truncate font-semibold text-slate-200"
-                  title={activeUser.username}
-                >
-                  {activeUser.username}
-                </span>
-              </div>
-            )}
             {canViewAdmin && (
               <button
                 type="button"
@@ -536,8 +555,74 @@ function App() {
                 Admin
               </button>
             )}
-            {logoutButton}
             {themeToggleButton}
+            <div className="relative" ref={userMenuRef}>
+              <button
+                type="button"
+                onClick={() => setIsUserMenuOpen((prev) => !prev)}
+                className={`inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-2.5 py-2 text-sm font-semibold text-slate-200 transition hover:border-accent-300/60 hover:bg-white/10 ${
+                  isUserMenuOpen ? "border-accent-300/70 bg-white/10" : ""
+                }`}
+                aria-haspopup="menu"
+                aria-expanded={isUserMenuOpen}
+                aria-label={"Kullan\u0131c\u0131 men\u00fc\u00fc"}
+              >
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-500/20 text-xs font-semibold uppercase text-accent-50 shadow-glow">
+                  {userInitial}
+                </span>
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  className={`h-4 w-4 transition ${isUserMenuOpen ? "rotate-180" : ""}`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="m6 9 6 6 6-6" />
+                </svg>
+              </button>
+              {isUserMenuOpen && (
+                <div
+                  className="absolute right-0 mt-2 w-56 rounded-2xl border border-white/10 bg-ink-900/95 p-2 shadow-card backdrop-blur"
+                  role="menu"
+                >
+                  <div className="px-3 py-2">
+                    <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500">
+                      {"Ho\u015f geldin"}
+                    </p>
+                    <p className="text-sm font-semibold text-slate-100" title={userName}>
+                      {userName}
+                    </p>
+                  </div>
+                  <div className="my-1 h-px bg-white/10" />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsUserMenuOpen(false)
+                      openProfileModal()
+                    }}
+                    className="flex w-full items-center rounded-xl px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
+                    role="menuitem"
+                  >
+                    {"Profil d\u00fczenle"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsUserMenuOpen(false)
+                      handleLogout()
+                    }}
+                    disabled={isLogoutLoading}
+                    className="flex w-full items-center rounded-xl px-3 py-2 text-sm font-semibold text-rose-100 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                    role="menuitem"
+                  >
+                    {"\u00C7\u0131k\u0131\u015F"}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
@@ -820,6 +905,14 @@ function App() {
           normalizeRepeatDays={normalizeRepeatDays}
           toggleRepeatDay={toggleRepeatDay}
           taskEditRepeatLabels={taskEditRepeatLabels}
+        />
+        <ProfileModal
+          isOpen={isProfileOpen}
+          isSaving={isProfileSaving}
+          draft={profileDraft}
+          setDraft={setProfileDraft}
+          onClose={closeProfileModal}
+          onSave={handleProfileSave}
         />
         <NoteModal
           isOpen={isNoteModalOpen}
