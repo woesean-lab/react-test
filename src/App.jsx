@@ -560,8 +560,8 @@ function App() {
               <button
                 type="button"
                 onClick={() => setIsUserMenuOpen((prev) => !prev)}
-                className={`inline-flex h-9 items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-2.5 text-sm font-semibold text-slate-200 transition hover:border-accent-300/60 hover:bg-white/10 ${
-                  isUserMenuOpen ? "border-accent-300/70 bg-white/10" : ""
+                className={`inline-flex h-9 items-center gap-1.5 rounded-xl bg-white/5 px-2.5 text-sm font-semibold text-slate-200 transition hover:bg-white/10 ${
+                  isUserMenuOpen ? "bg-white/10" : ""
                 }`}
                 aria-haspopup="menu"
                 aria-expanded={isUserMenuOpen}
