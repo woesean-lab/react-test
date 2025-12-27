@@ -36,9 +36,7 @@ function TasksSkeleton({ panelClass }) {
           </div>
         </div>
         <div className="space-y-6">
-          )}
-
-                    <div className={`${panelClass} bg-ink-800/60`}>
+          <div className={`${panelClass} bg-ink-800/60`}>
             <SkeletonBlock className="h-4 w-32" />
             <SkeletonBlock className="mt-3 h-20 w-full rounded-xl" />
           </div>

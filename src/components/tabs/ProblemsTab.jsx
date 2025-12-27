@@ -39,7 +39,6 @@ function ProblemsSkeleton({ panelClass }) {
             <SkeletonBlock className="mt-4 h-10 w-full rounded-xl" />
             <SkeletonBlock className="mt-3 h-20 w-full rounded-xl" />
           </div>
-          )}
         </div>
       </div>
     </div>
