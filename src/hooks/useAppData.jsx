@@ -3065,6 +3065,7 @@ export default function useAppData() {
     isAuthChecking,
     isAuthed,
     isAuthBusy,
+    isAuthLoading,
     isLogoutLoading,
     activeUser,
     authUsername,

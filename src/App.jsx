@@ -18,6 +18,7 @@ function App() {
     isAuthChecking,
     isAuthed,
     isAuthBusy,
+    isAuthLoading,
     isLogoutLoading,
     activeUser,
     authUsername,
@@ -322,7 +323,7 @@ function App() {
   if (!isAuthed) {
     return (
       <div className="min-h-screen px-4 pb-16 pt-10 text-slate-50">
-        {isAuthBusy && (
+        {isAuthLoading && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-900/70 px-4 backdrop-blur">
             <div className="rounded-2xl border border-white/10 bg-ink-900/80 px-5 py-4 shadow-card">
               <LoadingIndicator label="Giriş yapılıyor" />
