@@ -322,6 +322,13 @@ function App() {
   if (!isAuthed) {
     return (
       <div className="min-h-screen px-4 pb-16 pt-10 text-slate-50">
+        {isAuthBusy && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-950/70 px-4 backdrop-blur">
+            <div className="rounded-2xl border border-white/10 bg-ink-900/90 px-5 py-4 shadow-card">
+              <LoadingIndicator label="Giriş yapılıyor" />
+            </div>
+          </div>
+        )}
         <div className="mx-auto flex w-full max-w-lg flex-col gap-6">
           <div className="flex items-center justify-between rounded-3xl border border-white/10 bg-ink-900/80 px-4 py-3 shadow-card backdrop-blur">
             <div className="space-y-2">

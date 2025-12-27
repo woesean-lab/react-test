@@ -1286,7 +1286,7 @@ export default function useAppData() {
   const handleLogout = async () => {
     if (isLogoutLoading) return
     setIsLogoutLoading(true)
-    await delay(5000)
+    await delay(3000)
     setIsAuthed(false)
     setAuthToken("")
     setActiveUser(null)
