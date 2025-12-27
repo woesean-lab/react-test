@@ -511,12 +511,12 @@ function App() {
           )}
           <div className="ml-auto flex items-center gap-2">
             {activeUser?.username && (
-              <div className="flex items-center gap-2 text-sm text-slate-300">
-                <span className="uppercase tracking-[0.24em] text-slate-500">
+              <div className="flex items-center gap-1.5 text-[11px] text-slate-400">
+                <span className="uppercase tracking-[0.2em] text-slate-500">
                   {"Ho\u015f geldin,"}
                 </span>
                 <span
-                  className="max-w-[160px] truncate text-sm font-semibold text-accent-100"
+                  className="max-w-[140px] truncate font-semibold text-slate-200"
                   title={activeUser.username}
                 >
                   {activeUser.username}
