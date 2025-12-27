@@ -125,7 +125,7 @@ export default function TasksTab({
           <div className={`${panelClass} bg-ink-900/60`}>
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">GÃ¶rev panosu</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">{"G\u00f6rev ekle"}</p>
                 <p className="text-sm text-slate-400">Kartlari surukleyip yeni duruma birak.</p>
               </div>
               <div className="flex flex-wrap gap-2">
@@ -314,7 +314,7 @@ export default function TasksTab({
           <div className={`${panelClass} bg-ink-900/70`}>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">GÃ¶rev ekle</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">{"G\u00f6rev ekle"}</p>
                 <p className="text-sm text-slate-400">Yeni isleri listeye ekle.</p>
               </div>
               <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
@@ -349,7 +349,7 @@ export default function TasksTab({
                     }
                     className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] uppercase tracking-[0.2em] text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
                   >
-                    GeniÅŸlet
+                    {"Geni\u015flet"}
                   </button>
                 </div>
                 <textarea
@@ -484,7 +484,7 @@ export default function TasksTab({
           )}
 
           <div className={`${panelClass} bg-ink-800/60`}>
-            <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Odak notu</p>
+                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">{"G\u00f6rev ekle"}</p>
             <div className="mt-3 space-y-2 text-sm text-slate-300">
               <p>- Acik gorev: {taskStats.todo + taskStats.doing}</p>
               <p>- Tamamlanan: {taskStats.done}</p>
@@ -505,5 +505,7 @@ export default function TasksTab({
     </div>
   )
 }
+
+
 
 
