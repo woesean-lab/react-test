@@ -992,14 +992,14 @@ export default function useAppData() {
   }
 
   const getTaskDueLabel = (task) => {
-    if (task.dueType === "today") return "Bugâ”œâ•n"
+    if (task.dueType === "today") return "Bug\u00fcn"
     if (task.dueType === "repeat") {
       const labels = getRepeatDayLabels(task.repeatDays)
-      const todayTag = isTaskDueToday(task) ? " (Bugâ”œâ•n)" : ""
+      const todayTag = isTaskDueToday(task) ? " (Bug\u00fcn)" : ""
       return labels.length > 0 ? `Her ${labels.join(", ")}${todayTag}` : `Tekrarlanabilir${todayTag}`
     }
     if (task.dueType === "date") {
-      return task.dueDate ? formatTaskDate(task.dueDate) : "Tarih seâ”œÄŸilmedi"
+      return task.dueDate ? formatTaskDate(task.dueDate) : "Tarih se\u00e7ilmedi"
     }
     return ""
   }
@@ -3372,4 +3372,7 @@ export default function useAppData() {
     handleDetailNoteScroll
   }
 }
+
+
+
 
