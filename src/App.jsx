@@ -560,20 +560,20 @@ function App() {
               <button
                 type="button"
                 onClick={() => setIsUserMenuOpen((prev) => !prev)}
-                className={`inline-flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-2.5 py-2 text-sm font-semibold text-slate-200 transition hover:border-accent-300/60 hover:bg-white/10 ${
+                className={`inline-flex h-9 items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-2.5 text-sm font-semibold text-slate-200 transition hover:border-accent-300/60 hover:bg-white/10 ${
                   isUserMenuOpen ? "border-accent-300/70 bg-white/10" : ""
                 }`}
                 aria-haspopup="menu"
                 aria-expanded={isUserMenuOpen}
                 aria-label={"Kullan\u0131c\u0131 men\u00fc\u00fc"}
               >
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-accent-500/20 text-xs font-semibold uppercase text-accent-50 shadow-glow">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent-500/20 text-[11px] font-semibold uppercase text-accent-50 shadow-glow">
                   {userInitial}
                 </span>
                 <svg
                   viewBox="0 0 24 24"
                   aria-hidden="true"
-                  className={`h-4 w-4 transition ${isUserMenuOpen ? "rotate-180" : ""}`}
+                  className={`h-3.5 w-3.5 transition ${isUserMenuOpen ? "rotate-180" : ""}`}
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.6"
