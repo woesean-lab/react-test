@@ -213,7 +213,11 @@ export default function TasksTab({
                           onDragEnd={canProgressTasks ? handleTaskDragEnd : undefined}
                           className={`flex flex-col gap-3 rounded-xl border p-3 shadow-inner transition hover:shadow-glow cursor-grab ${
                             isOwner
-                              ? "border-accent-400/40 bg-accent-500/10 hover:border-accent-300/60 hover:bg-accent-500/15"
+                              ? status === "todo"
+                                ? "border-amber-300/60 bg-amber-500/15 hover:border-amber-200/70 hover:bg-amber-500/20"
+                                : status === "doing"
+                                  ? "border-sky-300/60 bg-sky-500/15 hover:border-sky-200/70 hover:bg-sky-500/20"
+                                  : "border-emerald-300/60 bg-emerald-500/15 hover:border-emerald-200/70 hover:bg-emerald-500/20"
                               : "border-white/10 bg-ink-800/70 hover:border-accent-300/40 hover:bg-ink-800/80"
                           }`}
                         >
