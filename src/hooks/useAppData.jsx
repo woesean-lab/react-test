@@ -39,6 +39,8 @@ import {
 import { getStockStatus, splitStocks } from "../utils/stockUtils"
 import { getInitialTheme } from "../utils/theme"
 
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+
 export default function useAppData() {
   const [activeTab, setActiveTab] = useState("messages")
   const [isTabLoading, setIsTabLoading] = useState(false)
@@ -1267,6 +1269,7 @@ export default function useAppData() {
         console.warn("Could not persist auth token", error)
       }
       setAuthToken(token)
+      await delay(700)
       setIsAuthed(true)
       setActiveUser(data?.user ?? null)
       setAuthUsername("")
