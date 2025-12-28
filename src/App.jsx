@@ -533,13 +533,25 @@ function App() {
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
         <div className="sticky top-4 z-30 rounded-3xl border border-white/10 bg-ink-900/80 px-3 py-2 shadow-card backdrop-blur">
           <div className="grid w-full grid-cols-[auto_1fr_auto] items-center gap-3 sm:flex sm:items-center">
+            <div className="col-span-3 row-start-1 flex items-center gap-3 rounded-xl border border-white/10 bg-ink-900/70 px-3 py-2 shadow-inner sm:col-auto sm:row-auto">
+              <span className="h-6 w-1 rounded-full bg-accent-400/80 shadow-glow" />
+              <div className="flex items-baseline gap-2">
+                <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.32em] text-accent-200">
+                  Pulcip
+                </span>
+                <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-400">
+                  Manage
+                </span>
+              </div>
+            </div>
+
             <button
               type="button"
               onClick={() => setIsTabMenuOpen((prev) => !prev)}
               className={`inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/5 text-slate-200 transition hover:bg-white/10 sm:hidden ${
                 isTabMenuOpen ? "bg-white/10" : ""
               }`}
-              aria-label="Sekme menüsü"
+              aria-label="Sekme menusu"
               aria-expanded={isTabMenuOpen}
               aria-controls="mobile-tab-menu"
             >
@@ -556,17 +568,6 @@ function App() {
                 <path d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <div className="col-span-3 row-start-2 flex items-center gap-3 rounded-xl border border-white/10 bg-ink-900/70 px-3 py-2 shadow-inner sm:col-auto sm:row-auto">
-              <span className="h-6 w-1 rounded-full bg-accent-400/80 shadow-glow" />
-              <div className="flex items-baseline gap-2">
-                <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.32em] text-accent-200">
-                  Pulcip
-                </span>
-                <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-400">
-                  Manage
-                </span>
-              </div>
-            </div>
 
             <div className="hidden sm:flex sm:flex-1">
               <div className="flex w-full items-center gap-2 overflow-x-auto pb-1 sm:overflow-visible sm:pb-0">
