@@ -76,7 +76,19 @@ const formatRangeLabel = (dateString, rangeKey) => {
 
 const buildLineChart = (values, width = 860, height = 240, padding = 30) => {
   if (!Array.isArray(values) || values.length === 0) {
-    return { width, height, padding, points: [], linePath: "", areaPath: "", gridLines: [] }
+    return {
+      width,
+      height,
+      padding,
+      points: [],
+      linePath: "",
+      areaPath: "",
+      gridLines: [],
+      min: 0,
+      max: 0,
+      range: 1,
+      innerHeight: height - padding * 2,
+    }
   }
   const max = Math.max(...values)
   const min = Math.min(...values)
@@ -93,7 +105,7 @@ const buildLineChart = (values, width = 860, height = 240, padding = 30) => {
   const gridLines = Array.from({ length: 4 }, (_, index) => {
     return padding + (innerHeight / 3) * index
   })
-  return { width, height, padding, points, linePath, areaPath, gridLines }
+  return { width, height, padding, points, linePath, areaPath, gridLines, min, max, range, innerHeight }
 }
 
 const getTrendTone = (value) => {
@@ -173,11 +185,37 @@ export default function ChartsTab({ isLoading, panelClass }) {
   const trendValue = values.length > 1 ? values[values.length - 1] - values[0] : 0
   const trendPercent = values[0] ? Math.round((trendValue / values[0]) * 100) : 0
   const trendTone = getTrendTone(trendValue)
+  const valueToY = (value) => {
+    const safeRange = lineChart.range || 1
+    return lineChart.padding + lineChart.innerHeight - ((value - lineChart.min) / safeRange) * lineChart.innerHeight
+  }
+  const yTicks = useMemo(() => {
+    if (values.length === 0) return []
+    return [
+      { label: numberFormatter.format(summary.max), value: summary.max },
+      { label: numberFormatter.format(summary.average), value: summary.average },
+      { label: numberFormatter.format(summary.min), value: summary.min },
+    ]
+  }, [numberFormatter, summary, values.length])
   const topEntry = useMemo(() => {
     if (data.length === 0) return null
     return data.reduce((acc, item) => (item.value > acc.value ? item : acc), data[0])
   }, [data])
   const recentEntries = useMemo(() => [...data].slice(-5).reverse(), [data])
+  const recentMax = useMemo(() => {
+    if (recentEntries.length === 0) return 0
+    return recentEntries.reduce((acc, item) => Math.max(acc, item.value), 0)
+  }, [recentEntries])
+  const extremes = useMemo(() => {
+    if (values.length === 0) return { maxIndex: -1, minIndex: -1 }
+    let maxIndex = 0
+    let minIndex = 0
+    values.forEach((value, index) => {
+      if (value > values[maxIndex]) maxIndex = index
+      if (value < values[minIndex]) minIndex = index
+    })
+    return { maxIndex, minIndex }
+  }, [values])
   const tickLabels = useMemo(() => {
     if (data.length === 0) return []
     if (data.length <= 3) return data.map((item) => item.label)
@@ -339,36 +377,49 @@ export default function ChartsTab({ isLoading, panelClass }) {
                 {recentEntries.length} kayit
               </span>
             </div>
-            <div className="mt-4 overflow-hidden rounded-2xl border border-white/10">
-              <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)_auto] items-center gap-2 bg-white/5 px-3 py-2 text-[10px] uppercase tracking-[0.24em] text-slate-400">
-                <span>Tarih</span>
-                <span>Etiket</span>
-                <span className="text-right">Satis</span>
-              </div>
+            <div className="mt-4 space-y-3">
               {recentEntries.length === 0 ? (
-                <div className="px-3 py-4 text-xs text-slate-400">Henuz giris yok.</div>
+                <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-4 text-xs text-slate-400">
+                  Henuz giris yok.
+                </div>
               ) : (
-                <div className="divide-y divide-white/10">
-                  {recentEntries.map((item, index) => (
+                recentEntries.map((item, index) => {
+                  const barWidth = recentMax ? Math.max(8, Math.round((item.value / recentMax) * 100)) : 0
+                  return (
                     <div
                       key={`${item.label}-${index}`}
-                      className="grid grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)_auto] items-center gap-2 px-3 py-2"
+                      className="rounded-2xl border border-white/10 bg-gradient-to-br from-ink-900/70 via-ink-900/60 to-ink-800/60 p-3"
                     >
-                      <div>
-                        <p className="text-sm font-semibold text-slate-100">
-                          {item.date || item.label}
-                        </p>
-                        <p className="text-[11px] text-slate-500">Giris kaydi</p>
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold text-slate-100">
+                            {item.date || item.label}
+                          </p>
+                          <div className="mt-1 inline-flex items-center gap-2">
+                            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-slate-300">
+                              {item.label}
+                            </span>
+                            <span className="text-[10px] uppercase tracking-[0.24em] text-slate-500">
+                              Giris
+                            </span>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-sm font-semibold text-slate-100">
+                            {numberFormatter.format(item.value)}
+                          </p>
+                          <p className="text-[10px] text-slate-500">Satis miktari</p>
+                        </div>
                       </div>
-                      <span className="inline-flex w-fit items-center rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-slate-300">
-                        {item.label}
-                      </span>
-                      <span className="text-right text-sm font-semibold text-slate-100">
-                        {numberFormatter.format(item.value)}
-                      </span>
+                      <div className="mt-3 h-1.5 rounded-full bg-white/10">
+                        <div
+                          className="h-1.5 rounded-full bg-gradient-to-r from-accent-400/80 to-accent-200/70"
+                          style={{ width: `${barWidth}%` }}
+                        />
+                      </div>
                     </div>
-                  ))}
-                </div>
+                  )
+                })
               )}
             </div>
           </section>
@@ -424,6 +475,18 @@ export default function ChartsTab({ isLoading, panelClass }) {
                       strokeDasharray="4 5"
                     />
                   ))}
+                  {yTicks.map((tick, index) => (
+                    <text
+                      key={`tick-${index}`}
+                      x={lineChart.padding - 8}
+                      y={valueToY(tick.value) + 4}
+                      textAnchor="end"
+                      fontSize="10"
+                      fill="rgba(148,163,184,0.7)"
+                    >
+                      {tick.label}
+                    </text>
+                  ))}
                   {lineChart.areaPath && (
                     <path d={lineChart.areaPath} fill="url(#sales-area)" stroke="none" />
                   )}
@@ -439,6 +502,8 @@ export default function ChartsTab({ isLoading, panelClass }) {
                   )}
                   {lineChart.points.map((point, index) => {
                     const isLast = index === lineChart.points.length - 1
+                    const isMax = index === extremes.maxIndex
+                    const isMin = index === extremes.minIndex
                     return (
                       <g key={`line-point-${index}`}>
                         <circle
@@ -457,6 +522,16 @@ export default function ChartsTab({ isLoading, panelClass }) {
                             stroke="rgba(58, 199, 255, 0.5)"
                             strokeWidth="2"
                           />
+                        )}
+                        {(isMax || isMin) && (
+                          <text
+                            x={point.x + 8}
+                            y={point.y - 8}
+                            fontSize="10"
+                            fill={isMax ? "rgba(226,245,255,0.95)" : "rgba(148,163,184,0.85)"}
+                          >
+                            {isMax ? "Zirve" : "Dip"}
+                          </text>
                         )}
                       </g>
                     )
