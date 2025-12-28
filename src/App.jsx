@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Toaster } from "react-hot-toast"
 import ProfileModal from "./components/modals/ProfileModal"
 import NoteModal from "./components/modals/NoteModal"
