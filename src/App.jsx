@@ -377,7 +377,7 @@ function App() {
   })()
   const getTabSlideClass = (tabKey) => {
     if (!hasMountedRef.current || activeTab !== tabKey) return ""
-    return slideDirection === "backward" ? "tab-slide-in-left" : "tab-slide-in-right"
+    return slideDirection === "backward" ? "tab-slide-in-right" : "tab-slide-in-left"
   }
   if (isAuthChecking) {
     return null
