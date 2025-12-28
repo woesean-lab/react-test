@@ -444,105 +444,145 @@ export default function ChartsTab({ isLoading, panelClass }) {
               </div>
             </div>
 
-            <div className="mt-5">
-              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
-                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(58,199,255,0.16),transparent_60%)]" />
-                <svg
-                  viewBox={`0 0 ${lineChart.width} ${lineChart.height}`}
-                  className="relative z-10 h-52 w-full"
-                  preserveAspectRatio="none"
-                  role="img"
-                  aria-label="Satis line chart"
-                >
-                  <defs>
-                    <linearGradient id="sales-area" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#3ac7ff" stopOpacity="0.3" />
-                      <stop offset="100%" stopColor="#2b9fff" stopOpacity="0.03" />
-                    </linearGradient>
-                    <linearGradient id="sales-line" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#3ac7ff" />
-                      <stop offset="100%" stopColor="#2b9fff" />
-                    </linearGradient>
-                  </defs>
-                  {lineChart.gridLines.map((y, index) => (
-                    <line
-                      key={`line-grid-${index}`}
-                      x1={lineChart.padding}
-                      x2={lineChart.width - lineChart.padding}
-                      y1={y}
-                      y2={y}
-                      stroke="rgba(255, 255, 255, 0.08)"
-                      strokeDasharray="4 5"
-                    />
-                  ))}
-                  {yTicks.map((tick, index) => (
-                    <text
-                      key={`tick-${index}`}
-                      x={lineChart.padding - 8}
-                      y={valueToY(tick.value) + 4}
-                      textAnchor="end"
-                      fontSize="10"
-                      fill="rgba(148,163,184,0.7)"
-                    >
-                      {tick.label}
-                    </text>
-                  ))}
-                  {lineChart.areaPath && (
-                    <path d={lineChart.areaPath} fill="url(#sales-area)" stroke="none" />
-                  )}
-                  {lineChart.linePath && (
-                    <path
-                      d={lineChart.linePath}
-                      fill="none"
-                      stroke="url(#sales-line)"
-                      strokeWidth="3"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    />
-                  )}
-                  {lineChart.points.map((point, index) => {
-                    const isLast = index === lineChart.points.length - 1
-                    const isMax = index === extremes.maxIndex
-                    const isMin = index === extremes.minIndex
-                    return (
-                      <g key={`line-point-${index}`}>
-                        <circle
-                          cx={point.x}
-                          cy={point.y}
-                          r={isLast ? 4.8 : 3.8}
-                          fill={isLast ? "#e2f5ff" : "#3ac7ff"}
-                          opacity={isLast ? 1 : 0.75}
-                        />
-                        {isLast && (
+              <div className="mt-5">
+                <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
+                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(58,199,255,0.16),transparent_60%)]" />
+                  <svg
+                    viewBox={`0 0 ${lineChart.width} ${lineChart.height}`}
+                    className="relative z-10 h-52 w-full"
+                    preserveAspectRatio="none"
+                    role="img"
+                    aria-label="Satis line chart"
+                  >
+                    <defs>
+                      <linearGradient id="sales-area" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#3ac7ff" stopOpacity="0.3" />
+                        <stop offset="100%" stopColor="#2b9fff" stopOpacity="0.03" />
+                      </linearGradient>
+                      <linearGradient id="sales-line" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#3ac7ff" />
+                        <stop offset="100%" stopColor="#2b9fff" />
+                      </linearGradient>
+                      <filter id="line-glow" x="-20%" y="-20%" width="140%" height="140%">
+                        <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#3ac7ff" floodOpacity="0.35" />
+                      </filter>
+                    </defs>
+                    {lineChart.gridLines.map((y, index) => (
+                      <line
+                        key={`line-grid-${index}`}
+                        x1={lineChart.padding}
+                        x2={lineChart.width - lineChart.padding}
+                        y1={y}
+                        y2={y}
+                        stroke="rgba(255, 255, 255, 0.08)"
+                        strokeDasharray="4 5"
+                      />
+                    ))}
+                    {yTicks.map((tick, index) => (
+                      <text
+                        key={`tick-${index}`}
+                        x={lineChart.padding - 8}
+                        y={valueToY(tick.value) + 4}
+                        textAnchor="end"
+                        fontSize="10"
+                        fill="rgba(148,163,184,0.7)"
+                      >
+                        {tick.label}
+                      </text>
+                    ))}
+                    {values.length > 0 && (
+                      <line
+                        x1={lineChart.padding}
+                        x2={lineChart.width - lineChart.padding}
+                        y1={valueToY(summary.average)}
+                        y2={valueToY(summary.average)}
+                        stroke="rgba(148,163,184,0.4)"
+                        strokeDasharray="6 6"
+                      />
+                    )}
+                    {extremes.maxIndex >= 0 && lineChart.points[extremes.maxIndex] && (
+                      <line
+                        x1={lineChart.points[extremes.maxIndex].x}
+                        x2={lineChart.points[extremes.maxIndex].x}
+                        y1={lineChart.points[extremes.maxIndex].y}
+                        y2={lineChart.height - lineChart.padding}
+                        stroke="rgba(58,199,255,0.35)"
+                        strokeDasharray="4 6"
+                      />
+                    )}
+                    {extremes.minIndex >= 0 && lineChart.points[extremes.minIndex] && (
+                      <line
+                        x1={lineChart.points[extremes.minIndex].x}
+                        x2={lineChart.points[extremes.minIndex].x}
+                        y1={lineChart.points[extremes.minIndex].y}
+                        y2={lineChart.height - lineChart.padding}
+                        stroke="rgba(148,163,184,0.35)"
+                        strokeDasharray="4 6"
+                      />
+                    )}
+                    {lineChart.areaPath && (
+                      <path d={lineChart.areaPath} fill="url(#sales-area)" stroke="none" />
+                    )}
+                    {lineChart.linePath && (
+                      <path
+                        d={lineChart.linePath}
+                        fill="none"
+                        stroke="url(#sales-line)"
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        filter="url(#line-glow)"
+                      />
+                    )}
+                    {lineChart.points.map((point, index) => {
+                      const isLast = index === lineChart.points.length - 1
+                      const isMax = index === extremes.maxIndex
+                      const isMin = index === extremes.minIndex
+                      return (
+                        <g key={`line-point-${index}`}>
                           <circle
                             cx={point.x}
                             cy={point.y}
-                            r="8.5"
-                            fill="none"
-                            stroke="rgba(58, 199, 255, 0.5)"
-                            strokeWidth="2"
+                            r={isLast ? 4.8 : 3.8}
+                            fill={isLast ? "#e2f5ff" : "#3ac7ff"}
+                            opacity={isLast ? 1 : 0.75}
                           />
-                        )}
-                        {(isMax || isMin) && (
-                          <text
-                            x={point.x + 8}
-                            y={point.y - 8}
-                            fontSize="10"
-                            fill={isMax ? "rgba(226,245,255,0.95)" : "rgba(148,163,184,0.85)"}
-                          >
-                            {isMax ? "Zirve" : "Dip"}
-                          </text>
-                        )}
-                      </g>
-                    )
-                  })}
-                </svg>
-              </div>
+                          {isLast && (
+                            <circle
+                              cx={point.x}
+                              cy={point.y}
+                              r="8.5"
+                              fill="none"
+                              stroke="rgba(58, 199, 255, 0.5)"
+                              strokeWidth="2"
+                            />
+                          )}
+                          {(isMax || isMin) && (
+                            <text
+                              x={point.x + 8}
+                              y={point.y - 8}
+                              fontSize="10"
+                              fill={isMax ? "rgba(226,245,255,0.95)" : "rgba(148,163,184,0.85)"}
+                            >
+                              {isMax
+                                ? `Zirve ${numberFormatter.format(point.value)}`
+                                : `Dip ${numberFormatter.format(point.value)}`}
+                            </text>
+                          )}
+                        </g>
+                      )
+                    })}
+                  </svg>
+                </div>
               {tickLabels.length > 0 && (
-                <div className="mt-3 flex justify-between text-[10px] uppercase tracking-[0.24em] text-slate-500">
-                  {tickLabels.map((label) => (
-                    <span key={`tick-${label}`}>{label}</span>
-                  ))}
+                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[10px] uppercase tracking-[0.24em] text-slate-500">
+                  <div className="flex items-center gap-2">
+                    <span className="h-2 w-2 rounded-full bg-accent-300 shadow-glow" />
+                    <span>{tickLabels[0]}</span>
+                    {tickLabels[1] && <span>{tickLabels[1]}</span>}
+                    {tickLabels[2] && <span>{tickLabels[2]}</span>}
+                  </div>
+                  <span>Ortalama cizgisi</span>
                 </div>
               )}
             </div>
