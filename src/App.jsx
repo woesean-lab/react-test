@@ -11,7 +11,6 @@ import MessagesTab from "./components/tabs/MessagesTab"
 import ProblemsTab from "./components/tabs/ProblemsTab"
 import StockTab from "./components/tabs/StockTab"
 import TasksTab from "./components/tabs/TasksTab"
-import SalesGraphTab from "./components/tabs/SalesGraphTab"
 import AdminTab from "./components/tabs/AdminTab"
 import useAppData from "./hooks/useAppData"
 import { PERMISSIONS } from "./constants/appConstants"
@@ -359,32 +358,19 @@ function App() {
   const canManageRoles = hasAnyPermission([PERMISSIONS.adminRolesManage, PERMISSIONS.adminManage])
   const canManageUsers = hasAnyPermission([PERMISSIONS.adminUsersManage, PERMISSIONS.adminManage])
   const canViewAdmin = canManageRoles || canManageUsers
-  const canViewGraphs = true
   const tabItems = useMemo(
     () => [
       { key: "messages", label: "Mesajlar", canView: canViewMessages },
       { key: "tasks", label: "G\u00f6rev", canView: canViewTasks },
-      { key: "charts", label: "Grafik", canView: canViewGraphs },
       { key: "problems", label: "Problemli M\u00fc\u015fteriler", canView: canViewProblems },
       { key: "lists", label: "Listeler", canView: canViewLists },
       { key: "stock", label: "Stok", canView: canViewStock },
       { key: "admin", label: "Admin", canView: canViewAdmin },
     ],
-    [
-      canViewAdmin,
-      canViewGraphs,
-      canViewLists,
-      canViewMessages,
-      canViewProblems,
-      canViewStock,
-      canViewTasks,
-    ],
+    [canViewAdmin, canViewLists, canViewMessages, canViewProblems, canViewStock, canViewTasks],
   )
   const visibleTabs = useMemo(() => tabItems.filter((item) => item.canView), [tabItems])
-  const nonAdminTabs = useMemo(
-    () => visibleTabs.filter((item) => item.key !== "admin"),
-    [visibleTabs],
-  )
+  const nonAdminTabs = useMemo(() => visibleTabs.filter((item) => item.key !== "admin"), [visibleTabs])
   const tabOrder = useMemo(() => visibleTabs.map((item) => item.key), [visibleTabs])
 
   const handleTabSwitch = (nextTab) => {
@@ -855,12 +841,6 @@ function App() {
               handleListInsertColumn={handleListInsertColumn}
               handleListDeleteColumn={handleListDeleteColumn}
             />
-          </div>
-        )}
-
-        {activeTab === "charts" && canViewGraphs && (
-          <div className={getTabSlideClass("charts")}>
-            <SalesGraphTab panelClass={panelClass} />
           </div>
         )}
 
