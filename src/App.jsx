@@ -830,6 +830,7 @@ function App() {
     pointerEvents: "none",
     willChange: "transform, opacity",
   }
+  const tabOverflowX = tabTransition.phase === "idle" ? "visible" : "hidden"
 
   return (
     <div className="min-h-screen px-4 pb-16 pt-10 text-slate-50">
@@ -1003,7 +1004,7 @@ function App() {
             </div>
           </div>
         </div>
-        <div className="relative">
+        <div className="relative" style={{ overflowX: tabOverflowX }}>
           {prevTabContent && tabTransition.prev && (
             <div className="absolute inset-0" style={prevPanelStyle} aria-hidden="true">
               {prevTabContent}
