@@ -281,6 +281,7 @@ function App() {
   } = useAppData()
 
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const [isTabMenuOpen, setIsTabMenuOpen] = useState(false)
   const userMenuRef = useRef(null)
   const prevTabRef = useRef(activeTab)
   const manualDirectionRef = useRef(false)
@@ -357,16 +358,19 @@ function App() {
   const canManageRoles = hasAnyPermission([PERMISSIONS.adminRolesManage, PERMISSIONS.adminManage])
   const canManageUsers = hasAnyPermission([PERMISSIONS.adminUsersManage, PERMISSIONS.adminManage])
   const canViewAdmin = canManageRoles || canManageUsers
-  const tabOrder = useMemo(() => {
-    const order = []
-    if (canViewMessages) order.push("messages")
-    if (canViewTasks) order.push("tasks")
-    if (canViewProblems) order.push("problems")
-    if (canViewLists) order.push("lists")
-    if (canViewStock) order.push("stock")
-    if (canViewAdmin) order.push("admin")
-    return order
-  }, [canViewAdmin, canViewLists, canViewMessages, canViewProblems, canViewStock, canViewTasks])
+  const tabItems = useMemo(
+    () => [
+      { key: "messages", label: "Mesajlar", canView: canViewMessages },
+      { key: "tasks", label: "G\u00f6rev", canView: canViewTasks },
+      { key: "problems", label: "Problemli M\u00fc\u015fteriler", canView: canViewProblems },
+      { key: "lists", label: "Listeler", canView: canViewLists },
+      { key: "stock", label: "Stok", canView: canViewStock },
+      { key: "admin", label: "Admin", canView: canViewAdmin },
+    ],
+    [canViewAdmin, canViewLists, canViewMessages, canViewProblems, canViewStock, canViewTasks],
+  )
+  const visibleTabs = useMemo(() => tabItems.filter((item) => item.canView), [tabItems])
+  const tabOrder = useMemo(() => visibleTabs.map((item) => item.key), [visibleTabs])
 
   const handleTabSwitch = (nextTab) => {
     if (nextTab === activeTab) return
@@ -377,6 +381,7 @@ function App() {
     manualDirectionRef.current = true
     setTabSlideDirection(direction)
     setActiveTab(nextTab)
+    setIsTabMenuOpen(false)
   }
 
   useEffect(() => {
@@ -400,6 +405,17 @@ function App() {
   const getTabSlideClass = (tabKey) => {
     if (!hasMountedRef.current || activeTab !== tabKey) return ""
     return tabSlideDirection === "backward" ? "tab-slide-in-right" : "tab-slide-in-left"
+  }
+  const getTabButtonClass = (tabKey, variant) => {
+    const base =
+      variant === "mobile"
+        ? "flex w-full items-center justify-start rounded-xl px-4 py-2.5 text-sm font-semibold transition"
+        : "rounded-2xl px-4 py-2 text-sm font-semibold transition"
+    const tone =
+      activeTab === tabKey
+        ? "bg-accent-500/20 text-accent-50 shadow-glow"
+        : "bg-white/5 text-slate-200 hover:bg-white/10"
+    return `${base} ${tone}`
   }
   if (isAuthChecking) {
     return null
@@ -529,93 +545,48 @@ function App() {
               </div>
             </div>
 
-            <div className="order-last w-full sm:order-none sm:flex-1">
-              <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:overflow-visible sm:pb-0">
+            <div className="order-last hidden w-full sm:order-none sm:flex sm:flex-1">
+              <div className="flex w-full items-center gap-2 overflow-x-auto pb-1 sm:overflow-visible sm:pb-0">
                 <div className="flex items-center gap-2 whitespace-nowrap pr-2">
                   <span className="hidden h-7 w-px bg-white/10 sm:block" />
-                  {canViewMessages && (
+                  {visibleTabs.map((item) => (
                     <button
+                      key={item.key}
                       type="button"
-                      onClick={() => handleTabSwitch("messages")}
-                      className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-                        activeTab === "messages"
-                          ? "bg-accent-500/20 text-accent-50 shadow-glow"
-                          : "bg-white/5 text-slate-200 hover:bg-white/10"
-                      }`}
+                      onClick={() => handleTabSwitch(item.key)}
+                      className={getTabButtonClass(item.key, "desktop")}
                     >
-                      Mesajlar
+                      {item.label}
                     </button>
-                  )}
-                  {canViewTasks && (
-                    <button
-                      type="button"
-                      onClick={() => handleTabSwitch("tasks")}
-                      className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-                        activeTab === "tasks"
-                          ? "bg-accent-500/20 text-accent-50 shadow-glow"
-                          : "bg-white/5 text-slate-200 hover:bg-white/10"
-                      }`}
-                    >
-                      {"G\u00f6rev"}
-                    </button>
-                  )}
-                  {canViewProblems && (
-                    <button
-                      type="button"
-                      onClick={() => handleTabSwitch("problems")}
-                      className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-                        activeTab === "problems"
-                          ? "bg-accent-500/20 text-accent-50 shadow-glow"
-                          : "bg-white/5 text-slate-200 hover:bg-white/10"
-                      }`}
-                    >
-                      {"Problemli M\u00fc\u015fteriler"}
-                    </button>
-                  )}
-                  {canViewLists && (
-                    <button
-                      type="button"
-                      onClick={() => handleTabSwitch("lists")}
-                      className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-                        activeTab === "lists"
-                          ? "bg-accent-500/20 text-accent-50 shadow-glow"
-                          : "bg-white/5 text-slate-200 hover:bg-white/10"
-                      }`}
-                    >
-                      Listeler
-                    </button>
-                  )}
-                  {canViewStock && (
-                    <button
-                      type="button"
-                      onClick={() => handleTabSwitch("stock")}
-                      className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-                        activeTab === "stock"
-                          ? "bg-accent-500/20 text-accent-50 shadow-glow"
-                          : "bg-white/5 text-slate-200 hover:bg-white/10"
-                      }`}
-                    >
-                      Stok
-                    </button>
-                  )}
-                  {canViewAdmin && (
-                    <button
-                      type="button"
-                      onClick={() => handleTabSwitch("admin")}
-                      className={`inline-flex items-center justify-center rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-                        activeTab === "admin"
-                          ? "bg-accent-500/20 text-accent-50 shadow-glow"
-                          : "bg-white/5 text-slate-200 hover:bg-white/10"
-                      }`}
-                    >
-                      Admin
-                    </button>
-                  )}
+                  ))}
                 </div>
               </div>
             </div>
 
             <div className="flex items-center gap-2 sm:ml-auto">
+              <button
+                type="button"
+                onClick={() => setIsTabMenuOpen((prev) => !prev)}
+                className={`inline-flex h-9 w-9 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-200 transition hover:bg-white/10 sm:hidden ${
+                  isTabMenuOpen ? "bg-white/10" : ""
+                }`}
+                aria-label="Sekme menüsü"
+                aria-expanded={isTabMenuOpen}
+                aria-controls="mobile-tab-menu"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  className="h-4 w-4"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.8"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
               {themeToggleButton}
               <div className="relative" ref={userMenuRef}>
                 <button
@@ -686,6 +657,22 @@ function App() {
               </div>
             </div>
           </div>
+          {isTabMenuOpen && (
+            <div id="mobile-tab-menu" className="mt-2 sm:hidden">
+              <div className="space-y-2 rounded-2xl border border-white/10 bg-ink-900/95 p-3 shadow-card">
+                {visibleTabs.map((item) => (
+                  <button
+                    key={item.key}
+                    type="button"
+                    onClick={() => handleTabSwitch(item.key)}
+                    className={getTabButtonClass(item.key, "mobile")}
+                  >
+                    {item.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {activeTab === "messages" && canViewMessages && (
