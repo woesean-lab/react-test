@@ -108,6 +108,29 @@ const buildLineChart = (values, width = 860, height = 240, padding = 30) => {
   return { width, height, padding, points, linePath, areaPath, gridLines, min, max, range, innerHeight }
 }
 
+const buildGhostSeries = (values) => {
+  if (!Array.isArray(values) || values.length === 0) return []
+  return values.map((value, index) => Math.round(value * (0.78 + (index % 4) * 0.06)))
+}
+
+const mapValuesToPoints = (values, chart) => {
+  if (!Array.isArray(values) || values.length === 0 || !chart) return []
+  const step =
+    values.length > 1 ? (chart.width - chart.padding * 2) / (values.length - 1) : 0
+  const range = chart.range || 1
+  return values.map((value, index) => {
+    const x = chart.padding + index * step
+    const y =
+      chart.padding + chart.innerHeight - ((value - chart.min) / range) * chart.innerHeight
+    return { x, y, value }
+  })
+}
+
+const pointsToPath = (points) => {
+  if (!Array.isArray(points) || points.length === 0) return ""
+  return points.map((point, index) => `${index === 0 ? "M" : "L"}${point.x} ${point.y}`).join(" ")
+}
+
 const getTrendTone = (value) => {
   if (value >= 0) {
     return {
@@ -182,6 +205,11 @@ export default function ChartsTab({ isLoading, panelClass }) {
     return { total, average, max, min }
   }, [values])
   const lineChart = useMemo(() => buildLineChart(values), [values])
+  const ghostValues = useMemo(() => buildGhostSeries(values), [values])
+  const ghostPath = useMemo(
+    () => pointsToPath(mapValuesToPoints(ghostValues, lineChart)),
+    [ghostValues, lineChart],
+  )
   const trendValue = values.length > 1 ? values[values.length - 1] - values[0] : 0
   const trendPercent = values[0] ? Math.round((trendValue / values[0]) * 100) : 0
   const trendTone = getTrendTone(trendValue)
@@ -377,214 +405,228 @@ export default function ChartsTab({ isLoading, panelClass }) {
                 {recentEntries.length} kayit
               </span>
             </div>
-            <div className="mt-4 space-y-3">
+            <div className="mt-4 rounded-2xl border border-white/10 bg-white/5">
               {recentEntries.length === 0 ? (
-                <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-4 text-xs text-slate-400">
-                  Henuz giris yok.
-                </div>
+                <div className="px-4 py-4 text-xs text-slate-400">Henuz giris yok.</div>
               ) : (
-                recentEntries.map((item, index) => {
-                  const barWidth = recentMax ? Math.max(8, Math.round((item.value / recentMax) * 100)) : 0
-                  return (
-                    <div
-                      key={`${item.label}-${index}`}
-                      className="rounded-2xl border border-white/10 bg-gradient-to-br from-ink-900/70 via-ink-900/60 to-ink-800/60 p-3"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div>
-                          <p className="text-sm font-semibold text-slate-100">
-                            {item.date || item.label}
-                          </p>
-                          <div className="mt-1 inline-flex items-center gap-2">
-                            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-slate-300">
-                              {item.label}
-                            </span>
-                            <span className="text-[10px] uppercase tracking-[0.24em] text-slate-500">
-                              Giris
-                            </span>
+                <div className="relative space-y-5 px-4 py-4">
+                  <div className="absolute left-4 top-4 bottom-4 w-px bg-white/10" />
+                  {recentEntries.map((item, index) => {
+                    const barWidth = recentMax ? Math.max(10, Math.round((item.value / recentMax) * 100)) : 0
+                    return (
+                      <div key={`${item.label}-${index}`} className="relative pl-6">
+                        <span className="absolute left-[10px] top-2 h-2.5 w-2.5 rounded-full bg-accent-300 shadow-glow" />
+                        <div className="flex items-start justify-between gap-4">
+                          <div>
+                            <p className="text-sm font-semibold text-slate-100">
+                              {item.date || item.label}
+                            </p>
+                            <p className="text-[11px] text-slate-500">Etiket: {item.label}</p>
+                          </div>
+                          <div className="text-right">
+                            <p className="text-sm font-semibold text-slate-100">
+                              {numberFormatter.format(item.value)}
+                            </p>
+                            <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500">
+                              Satis
+                            </p>
                           </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-sm font-semibold text-slate-100">
-                            {numberFormatter.format(item.value)}
-                          </p>
-                          <p className="text-[10px] text-slate-500">Satis miktari</p>
+                        <div className="mt-2 h-1.5 rounded-full bg-white/10">
+                          <div
+                            className="h-1.5 rounded-full bg-gradient-to-r from-accent-400/80 to-accent-200/70"
+                            style={{ width: `${barWidth}%` }}
+                          />
                         </div>
                       </div>
-                      <div className="mt-3 h-1.5 rounded-full bg-white/10">
-                        <div
-                          className="h-1.5 rounded-full bg-gradient-to-r from-accent-400/80 to-accent-200/70"
-                          style={{ width: `${barWidth}%` }}
-                        />
-                      </div>
-                    </div>
-                  )
-                })
+                    )
+                  })}
+                </div>
               )}
             </div>
           </section>
         </div>
 
         <div className="space-y-6">
-          <section className={`${panelClass} bg-gradient-to-br from-ink-900/70 via-ink-900/60 to-ink-800/60`}>
-            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
-                  Satis grafigi
-                </p>
-                <p className="text-xs text-slate-400">{rangeMeta.caption}</p>
+          <section className={`${panelClass} relative overflow-hidden bg-ink-900/60`}>
+            <div className="absolute -right-24 -top-16 h-56 w-56 rounded-full bg-accent-400/15 blur-3xl" />
+            <div className="absolute -left-16 bottom-0 h-40 w-40 rounded-full bg-sky-300/10 blur-3xl" />
+            <div className="relative z-10 space-y-5">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
+                    Satis grafigi
+                  </p>
+                  <p className="text-xs text-slate-400">{rangeMeta.caption}</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${trendTone.badge}`}>
+                    {trendTone.label} {trendTone.sign}{Math.abs(trendPercent)}%
+                  </span>
+                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+                    Ortalama: {numberFormatter.format(summary.average)}
+                  </span>
+                </div>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
-                  Ortalama: {numberFormatter.format(summary.average)}
-                </span>
-                <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${trendTone.badge}`}>
-                  {trendTone.label} {trendTone.sign}{Math.abs(trendPercent)}%
-                </span>
-              </div>
-            </div>
 
-              <div className="mt-5">
-                <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
-                  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(58,199,255,0.16),transparent_60%)]" />
-                  <svg
-                    viewBox={`0 0 ${lineChart.width} ${lineChart.height}`}
-                    className="relative z-10 h-52 w-full"
-                    preserveAspectRatio="none"
-                    role="img"
-                    aria-label="Satis line chart"
-                  >
-                    <defs>
-                      <linearGradient id="sales-area" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#3ac7ff" stopOpacity="0.3" />
-                        <stop offset="100%" stopColor="#2b9fff" stopOpacity="0.03" />
-                      </linearGradient>
-                      <linearGradient id="sales-line" x1="0" y1="0" x2="1" y2="0">
-                        <stop offset="0%" stopColor="#3ac7ff" />
-                        <stop offset="100%" stopColor="#2b9fff" />
-                      </linearGradient>
-                      <filter id="line-glow" x="-20%" y="-20%" width="140%" height="140%">
-                        <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#3ac7ff" floodOpacity="0.35" />
-                      </filter>
-                    </defs>
-                    {lineChart.gridLines.map((y, index) => (
-                      <line
-                        key={`line-grid-${index}`}
-                        x1={lineChart.padding}
-                        x2={lineChart.width - lineChart.padding}
-                        y1={y}
-                        y2={y}
-                        stroke="rgba(255, 255, 255, 0.08)"
-                        strokeDasharray="4 5"
-                      />
-                    ))}
-                    {yTicks.map((tick, index) => (
-                      <text
-                        key={`tick-${index}`}
-                        x={lineChart.padding - 8}
-                        y={valueToY(tick.value) + 4}
-                        textAnchor="end"
-                        fontSize="10"
-                        fill="rgba(148,163,184,0.7)"
-                      >
-                        {tick.label}
-                      </text>
-                    ))}
-                    {values.length > 0 && (
-                      <line
-                        x1={lineChart.padding}
-                        x2={lineChart.width - lineChart.padding}
-                        y1={valueToY(summary.average)}
-                        y2={valueToY(summary.average)}
-                        stroke="rgba(148,163,184,0.4)"
-                        strokeDasharray="6 6"
-                      />
-                    )}
-                    {extremes.maxIndex >= 0 && lineChart.points[extremes.maxIndex] && (
-                      <line
-                        x1={lineChart.points[extremes.maxIndex].x}
-                        x2={lineChart.points[extremes.maxIndex].x}
-                        y1={lineChart.points[extremes.maxIndex].y}
-                        y2={lineChart.height - lineChart.padding}
-                        stroke="rgba(58,199,255,0.35)"
-                        strokeDasharray="4 6"
-                      />
-                    )}
-                    {extremes.minIndex >= 0 && lineChart.points[extremes.minIndex] && (
-                      <line
-                        x1={lineChart.points[extremes.minIndex].x}
-                        x2={lineChart.points[extremes.minIndex].x}
-                        y1={lineChart.points[extremes.minIndex].y}
-                        y2={lineChart.height - lineChart.padding}
-                        stroke="rgba(148,163,184,0.35)"
-                        strokeDasharray="4 6"
-                      />
-                    )}
-                    {lineChart.areaPath && (
-                      <path d={lineChart.areaPath} fill="url(#sales-area)" stroke="none" />
-                    )}
-                    {lineChart.linePath && (
-                      <path
-                        d={lineChart.linePath}
-                        fill="none"
-                        stroke="url(#sales-line)"
-                        strokeWidth="3"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        filter="url(#line-glow)"
-                      />
-                    )}
-                    {lineChart.points.map((point, index) => {
-                      const isLast = index === lineChart.points.length - 1
-                      const isMax = index === extremes.maxIndex
-                      const isMin = index === extremes.minIndex
-                      return (
-                        <g key={`line-point-${index}`}>
-                          <circle
-                            cx={point.x}
-                            cy={point.y}
-                            r={isLast ? 4.8 : 3.8}
-                            fill={isLast ? "#e2f5ff" : "#3ac7ff"}
-                            opacity={isLast ? 1 : 0.75}
-                          />
-                          {isLast && (
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,0.28fr)_minmax(0,1fr)]">
+                <div className="grid gap-3">
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <p className="text-[10px] uppercase tracking-[0.24em] text-slate-400">Toplam</p>
+                    <p className="mt-2 text-2xl font-semibold text-slate-100">
+                      {numberFormatter.format(summary.total)}
+                    </p>
+                    <p className="text-xs text-slate-400">Secili donem</p>
+                  </div>
+                  <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                    <p className="text-[10px] uppercase tracking-[0.24em] text-slate-400">Zirve / Dip</p>
+                    <p className="mt-2 text-sm font-semibold text-slate-100">
+                      {numberFormatter.format(summary.max)}
+                    </p>
+                    <p className="text-xs text-slate-500">Zirve</p>
+                    <p className="mt-3 text-sm font-semibold text-slate-100">
+                      {numberFormatter.format(summary.min)}
+                    </p>
+                    <p className="text-xs text-slate-500">Dip</p>
+                  </div>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
+                  <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60 p-4">
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(58,199,255,0.2),transparent_55%)]" />
+                    <svg
+                      viewBox={`0 0 ${lineChart.width} ${lineChart.height}`}
+                      className="relative z-10 h-52 w-full"
+                      preserveAspectRatio="none"
+                      role="img"
+                      aria-label="Satis line chart"
+                    >
+                      <defs>
+                        <linearGradient id="sales-area" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#3ac7ff" stopOpacity="0.3" />
+                          <stop offset="100%" stopColor="#2b9fff" stopOpacity="0.03" />
+                        </linearGradient>
+                        <linearGradient id="sales-line" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="#3ac7ff" />
+                          <stop offset="100%" stopColor="#2b9fff" />
+                        </linearGradient>
+                        <linearGradient id="ghost-line" x1="0" y1="0" x2="1" y2="0">
+                          <stop offset="0%" stopColor="rgba(148,163,184,0.7)" />
+                          <stop offset="100%" stopColor="rgba(148,163,184,0.2)" />
+                        </linearGradient>
+                        <filter id="line-glow" x="-20%" y="-20%" width="140%" height="140%">
+                          <feDropShadow dx="0" dy="0" stdDeviation="4" floodColor="#3ac7ff" floodOpacity="0.35" />
+                        </filter>
+                      </defs>
+                      {lineChart.gridLines.map((y, index) => (
+                        <line
+                          key={`line-grid-${index}`}
+                          x1={lineChart.padding}
+                          x2={lineChart.width - lineChart.padding}
+                          y1={y}
+                          y2={y}
+                          stroke="rgba(255, 255, 255, 0.08)"
+                          strokeDasharray="4 5"
+                        />
+                      ))}
+                      {yTicks.map((tick, index) => (
+                        <text
+                          key={`tick-${index}`}
+                          x={lineChart.padding - 8}
+                          y={valueToY(tick.value) + 4}
+                          textAnchor="end"
+                          fontSize="10"
+                          fill="rgba(148,163,184,0.7)"
+                        >
+                          {tick.label}
+                        </text>
+                      ))}
+                      {values.length > 0 && (
+                        <line
+                          x1={lineChart.padding}
+                          x2={lineChart.width - lineChart.padding}
+                          y1={valueToY(summary.average)}
+                          y2={valueToY(summary.average)}
+                          stroke="rgba(148,163,184,0.4)"
+                          strokeDasharray="6 6"
+                        />
+                      )}
+                      {ghostPath && (
+                        <path
+                          d={ghostPath}
+                          fill="none"
+                          stroke="url(#ghost-line)"
+                          strokeWidth="2"
+                          strokeDasharray="6 6"
+                        />
+                      )}
+                      {lineChart.areaPath && (
+                        <path d={lineChart.areaPath} fill="url(#sales-area)" stroke="none" />
+                      )}
+                      {lineChart.linePath && (
+                        <path
+                          d={lineChart.linePath}
+                          fill="none"
+                          stroke="url(#sales-line)"
+                          strokeWidth="3"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          filter="url(#line-glow)"
+                        />
+                      )}
+                      {lineChart.points.map((point, index) => {
+                        const isLast = index === lineChart.points.length - 1
+                        const isMax = index === extremes.maxIndex
+                        const isMin = index === extremes.minIndex
+                        return (
+                          <g key={`line-point-${index}`}>
                             <circle
                               cx={point.x}
                               cy={point.y}
-                              r="8.5"
-                              fill="none"
-                              stroke="rgba(58, 199, 255, 0.5)"
-                              strokeWidth="2"
+                              r={isLast ? 4.8 : 3.6}
+                              fill={isLast ? "#e2f5ff" : "#3ac7ff"}
+                              opacity={isLast ? 1 : 0.7}
                             />
-                          )}
-                          {(isMax || isMin) && (
-                            <text
-                              x={point.x + 8}
-                              y={point.y - 8}
-                              fontSize="10"
-                              fill={isMax ? "rgba(226,245,255,0.95)" : "rgba(148,163,184,0.85)"}
-                            >
-                              {isMax
-                                ? `Zirve ${numberFormatter.format(point.value)}`
-                                : `Dip ${numberFormatter.format(point.value)}`}
-                            </text>
-                          )}
-                        </g>
-                      )
-                    })}
-                  </svg>
-                </div>
-              {tickLabels.length > 0 && (
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 text-[10px] uppercase tracking-[0.24em] text-slate-500">
-                  <div className="flex items-center gap-2">
-                    <span className="h-2 w-2 rounded-full bg-accent-300 shadow-glow" />
-                    <span>{tickLabels[0]}</span>
-                    {tickLabels[1] && <span>{tickLabels[1]}</span>}
-                    {tickLabels[2] && <span>{tickLabels[2]}</span>}
+                            {isLast && (
+                              <circle
+                                cx={point.x}
+                                cy={point.y}
+                                r="8.5"
+                                fill="none"
+                                stroke="rgba(58, 199, 255, 0.5)"
+                                strokeWidth="2"
+                              />
+                            )}
+                            {(isMax || isMin) && (
+                              <text
+                                x={point.x + 8}
+                                y={point.y - 8}
+                                fontSize="10"
+                                fill={isMax ? "rgba(226,245,255,0.95)" : "rgba(148,163,184,0.85)"}
+                              >
+                                {isMax
+                                  ? `Zirve ${numberFormatter.format(point.value)}`
+                                  : `Dip ${numberFormatter.format(point.value)}`}
+                              </text>
+                            )}
+                          </g>
+                        )
+                      })}
+                    </svg>
                   </div>
-                  <span>Ortalama cizgisi</span>
+                  <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-[10px] uppercase tracking-[0.24em] text-slate-500">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-accent-300 shadow-glow" />
+                      <span>Guncel</span>
+                      <span className="h-2 w-2 rounded-full bg-slate-400/60" />
+                      <span>Onceki</span>
+                    </div>
+                    {tickLabels.length > 0 && (
+                      <span>{tickLabels[0]} · {tickLabels[tickLabels.length - 1]}</span>
+                    )}
+                  </div>
                 </div>
-              )}
+              </div>
             </div>
           </section>
 
