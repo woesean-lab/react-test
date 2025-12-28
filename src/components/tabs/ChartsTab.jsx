@@ -74,7 +74,7 @@ const formatRangeLabel = (dateString, rangeKey) => {
   return `H${week}`
 }
 
-const buildLineChart = (values, width = 840, height = 230, padding = 28) => {
+const buildLineChart = (values, width = 860, height = 240, padding = 30) => {
   if (!Array.isArray(values) || values.length === 0) {
     return { width, height, padding, points: [], linePath: "", areaPath: "", gridLines: [] }
   }
@@ -125,7 +125,7 @@ function ChartsSkeleton({ panelClass }) {
         <SkeletonBlock className="mt-4 h-9 w-56" />
         <SkeletonBlock className="mt-3 h-4 w-2/3" />
       </div>
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)_minmax(0,0.8fr)]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
         <div className="space-y-6">
           <div className={`${panelClass} bg-ink-900/60`}>
             <SkeletonBlock className="h-4 w-32 rounded-full" />
@@ -136,18 +136,14 @@ function ChartsSkeleton({ panelClass }) {
             <SkeletonBlock className="mt-4 h-20 w-full rounded-2xl" />
           </div>
         </div>
-        <div className={`${panelClass} bg-ink-900/60`}>
-          <SkeletonBlock className="h-4 w-40 rounded-full" />
-          <SkeletonBlock className="mt-4 h-52 w-full rounded-2xl" />
-        </div>
         <div className="space-y-6">
           <div className={`${panelClass} bg-ink-900/60`}>
-            <SkeletonBlock className="h-4 w-32 rounded-full" />
-            <SkeletonBlock className="mt-4 h-20 w-full rounded-2xl" />
+            <SkeletonBlock className="h-4 w-40 rounded-full" />
+            <SkeletonBlock className="mt-4 h-52 w-full rounded-2xl" />
           </div>
           <div className={`${panelClass} bg-ink-900/60`}>
-            <SkeletonBlock className="h-4 w-24 rounded-full" />
-            <SkeletonBlock className="mt-4 h-24 w-full rounded-2xl" />
+            <SkeletonBlock className="h-4 w-28 rounded-full" />
+            <SkeletonBlock className="mt-4 h-20 w-full rounded-2xl" />
           </div>
         </div>
       </div>
@@ -213,8 +209,8 @@ export default function ChartsTab({ isLoading, panelClass }) {
     <div className="space-y-6">
       <header className="relative overflow-hidden rounded-3xl border border-white/10 bg-ink-900/80 p-6 shadow-card">
         <div className="pointer-events-none absolute inset-0">
-          <div className="absolute -right-16 -top-10 h-56 w-56 rounded-full bg-accent-400/20 blur-3xl" />
-          <div className="absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-sky-300/10 blur-3xl" />
+          <div className="absolute -left-16 -top-10 h-48 w-48 rounded-full bg-accent-400/20 blur-3xl" />
+          <div className="absolute right-0 bottom-0 h-56 w-56 rounded-full bg-sky-300/10 blur-3xl" />
         </div>
         <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div className="space-y-3">
@@ -225,7 +221,7 @@ export default function ChartsTab({ isLoading, panelClass }) {
               Satis panosu
             </h1>
             <p className="max-w-2xl text-sm text-slate-200/80">
-              Gunluk, haftalik, aylik ve yillik satisi cizgisel olarak izle. Demo veri uzerinde calisir.
+              Gunluk, haftalik, aylik ve yillik satisi tek bir line chart ile izle.
             </p>
           </div>
           <div className="inline-flex flex-wrap gap-2 rounded-full border border-white/10 bg-white/5 p-1">
@@ -248,7 +244,7 @@ export default function ChartsTab({ isLoading, panelClass }) {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)_minmax(0,0.8fr)]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,0.85fr)_minmax(0,1.15fr)]">
         <div className="space-y-6">
           <section className={`${panelClass} bg-ink-900/60`}>
             <div className="flex items-center justify-between">
@@ -336,85 +332,106 @@ export default function ChartsTab({ isLoading, panelClass }) {
           </section>
         </div>
 
-        <section className={`${panelClass} bg-ink-900/60`}>
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
-                Line chart
-              </p>
-              <p className="text-xs text-slate-400">{rangeMeta.caption}</p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
-                Ortalama: {numberFormatter.format(summary.average)}
-              </span>
-              <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${trendTone.badge}`}>
-                {trendTone.label} {trendTone.sign}{Math.abs(trendPercent)}%
-              </span>
-            </div>
-          </div>
-
-          <div className="mt-6 rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
-            <svg
-              viewBox={`0 0 ${lineChart.width} ${lineChart.height}`}
-              className="h-52 w-full"
-              preserveAspectRatio="none"
-              role="img"
-              aria-label="Satis line chart"
-            >
-              <defs>
-                <linearGradient id="sales-area" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="#3ac7ff" stopOpacity="0.3" />
-                  <stop offset="100%" stopColor="#2b9fff" stopOpacity="0.05" />
-                </linearGradient>
-                <linearGradient id="sales-line" x1="0" y1="0" x2="1" y2="0">
-                  <stop offset="0%" stopColor="#3ac7ff" />
-                  <stop offset="100%" stopColor="#2b9fff" />
-                </linearGradient>
-              </defs>
-              {lineChart.gridLines.map((y, index) => (
-                <line
-                  key={`line-grid-${index}`}
-                  x1={lineChart.padding}
-                  x2={lineChart.width - lineChart.padding}
-                  y1={y}
-                  y2={y}
-                  stroke="rgba(255, 255, 255, 0.08)"
-                  strokeDasharray="4 5"
-                />
-              ))}
-              {lineChart.areaPath && <path d={lineChart.areaPath} fill="url(#sales-area)" stroke="none" />}
-              {lineChart.linePath && (
-                <path d={lineChart.linePath} fill="none" stroke="url(#sales-line)" strokeWidth="3" />
-              )}
-              {lineChart.points.map((point, index) => (
-                <circle
-                  key={`line-point-${index}`}
-                  cx={point.x}
-                  cy={point.y}
-                  r={index === lineChart.points.length - 1 ? 4.6 : 3.6}
-                  fill={index === lineChart.points.length - 1 ? "#e2f5ff" : "#3ac7ff"}
-                  opacity={index === lineChart.points.length - 1 ? 1 : 0.75}
-                />
-              ))}
-            </svg>
-          </div>
-
-          <div className="mt-4 flex flex-wrap gap-2">
-            {data.map((item, index) => (
-              <span
-                key={`${item.label}-${index}`}
-                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200"
-              >
-                <span className={`h-2 w-2 rounded-full ${index === data.length - 1 ? "bg-accent-300 shadow-glow" : "bg-accent-400/80"}`} />
-                <span className="font-semibold text-slate-100">{item.label}</span>
-                <span className="text-slate-400">{numberFormatter.format(item.value)}</span>
-              </span>
-            ))}
-          </div>
-        </section>
-
         <div className="space-y-6">
+          <section className={`${panelClass} relative overflow-hidden bg-ink-900/60`}>
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(58,199,255,0.12),transparent_55%)]" />
+            <div className="relative z-10 p-0">
+              <div className="flex flex-col gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
+                    Line chart
+                  </p>
+                  <p className="text-xs text-slate-400">{rangeMeta.caption}</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+                    Toplam: {numberFormatter.format(summary.total)}
+                  </span>
+                  <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${trendTone.badge}`}>
+                    {trendTone.label} {trendTone.sign}{Math.abs(trendPercent)}%
+                  </span>
+                </div>
+              </div>
+
+              <div className="px-6 pb-6">
+                <div className="rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
+                  <svg
+                    viewBox={`0 0 ${lineChart.width} ${lineChart.height}`}
+                    className="h-52 w-full"
+                    preserveAspectRatio="none"
+                    role="img"
+                    aria-label="Satis line chart"
+                  >
+                    <defs>
+                      <linearGradient id="sales-area" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#3ac7ff" stopOpacity="0.28" />
+                        <stop offset="100%" stopColor="#2b9fff" stopOpacity="0.04" />
+                      </linearGradient>
+                      <linearGradient id="sales-line" x1="0" y1="0" x2="1" y2="0">
+                        <stop offset="0%" stopColor="#3ac7ff" />
+                        <stop offset="100%" stopColor="#2b9fff" />
+                      </linearGradient>
+                    </defs>
+                    {lineChart.gridLines.map((y, index) => (
+                      <line
+                        key={`line-grid-${index}`}
+                        x1={lineChart.padding}
+                        x2={lineChart.width - lineChart.padding}
+                        y1={y}
+                        y2={y}
+                        stroke="rgba(255, 255, 255, 0.08)"
+                        strokeDasharray="4 5"
+                      />
+                    ))}
+                    {lineChart.areaPath && (
+                      <path d={lineChart.areaPath} fill="url(#sales-area)" stroke="none" />
+                    )}
+                    {lineChart.linePath && (
+                      <path d={lineChart.linePath} fill="none" stroke="url(#sales-line)" strokeWidth="3" />
+                    )}
+                    {lineChart.points.map((point, index) => (
+                      <circle
+                        key={`line-point-${index}`}
+                        cx={point.x}
+                        cy={point.y}
+                        r={index === lineChart.points.length - 1 ? 4.6 : 3.6}
+                        fill={index === lineChart.points.length - 1 ? "#e2f5ff" : "#3ac7ff"}
+                        opacity={index === lineChart.points.length - 1 ? 1 : 0.75}
+                      />
+                    ))}
+                  </svg>
+                </div>
+
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {data.map((item, index) => (
+                    <span
+                      key={`${item.label}-${index}`}
+                      className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200"
+                    >
+                      <span
+                        className={`h-2 w-2 rounded-full ${
+                          index === data.length - 1 ? "bg-accent-300 shadow-glow" : "bg-accent-400/80"
+                        }`}
+                      />
+                      <span className="font-semibold text-slate-100">{item.label}</span>
+                      <span className="text-slate-400">{numberFormatter.format(item.value)}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4 text-xs text-slate-200 sm:absolute sm:right-6 sm:top-6 sm:mt-0 sm:w-48">
+              <p className="text-[10px] uppercase tracking-[0.24em] text-slate-400">En cok satis</p>
+              <p className="mt-2 text-sm font-semibold text-slate-100">
+                {topEntry ? topEntry.date || topEntry.label : "-"}
+              </p>
+              <p className="text-xs text-slate-400">
+                {topEntry ? numberFormatter.format(topEntry.value) : "Veri yok"}
+              </p>
+            </div>
+          </section>
+
           <section className={`${panelClass} bg-ink-900/60`}>
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
@@ -424,35 +441,27 @@ export default function ChartsTab({ isLoading, panelClass }) {
                 Toplam satis
               </span>
             </div>
-            <div className="mt-4 space-y-3">
+            <div className="mt-4 grid gap-3 sm:grid-cols-3">
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
                 <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Toplam</p>
-                <p className="mt-2 text-2xl font-semibold text-slate-100">
+                <p className="mt-2 text-xl font-semibold text-slate-100">
                   {numberFormatter.format(summary.total)}
                 </p>
                 <p className="text-xs text-slate-400">Secili donem</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-xs uppercase tracking-[0.24em] text-slate-400">En cok satis</p>
-                <p className="mt-2 text-lg font-semibold text-slate-100">
-                  {topEntry ? topEntry.date || topEntry.label : "-"}
+                <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Ortalama</p>
+                <p className="mt-2 text-xl font-semibold text-slate-100">
+                  {numberFormatter.format(summary.average)}
                 </p>
-                <p className="text-xs text-slate-400">
-                  {topEntry ? numberFormatter.format(topEntry.value) : "Veri yok"}
-                </p>
+                <p className="text-xs text-slate-400">Donem basina</p>
               </div>
               <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <div className="flex items-center justify-between text-xs text-slate-400">
-                  <span>Min / Max</span>
-                  <span>{numberFormatter.format(summary.min)} / {numberFormatter.format(summary.max)}</span>
-                </div>
-                <div className="mt-2 h-2 rounded-full bg-white/10">
-                  <div
-                    className="h-2 rounded-full bg-gradient-to-r from-accent-400 via-sky-300 to-accent-500"
-                    style={{ width: `${summary.max ? Math.max(12, Math.round((summary.average / summary.max) * 100)) : 0}%` }}
-                  />
-                </div>
-                <p className="mt-2 text-xs text-slate-400">Ortalama: {numberFormatter.format(summary.average)}</p>
+                <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Min / Max</p>
+                <p className="mt-2 text-lg font-semibold text-slate-100">
+                  {numberFormatter.format(summary.min)} / {numberFormatter.format(summary.max)}
+                </p>
+                <p className="text-xs text-slate-400">Aralik</p>
               </div>
             </div>
             <p className="mt-3 text-xs text-slate-400">
