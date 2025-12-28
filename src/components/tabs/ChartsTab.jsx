@@ -7,7 +7,7 @@ const rangeOptions = [
   { key: "yearly", label: "Yillik", caption: "Son 5 yil" },
 ]
 
-const salesSeries = {
+const baseSeries = {
   daily: [
     { label: "Pzt", value: 3200 },
     { label: "Sal", value: 2800 },
@@ -52,55 +52,60 @@ const salesSeries = {
 
 const createSeriesState = () =>
   Object.fromEntries(
-    Object.entries(salesSeries).map(([key, items]) => [
+    Object.entries(baseSeries).map(([key, items]) => [
       key,
       items.map((item) => ({ ...item })),
     ]),
   )
 
-const buildFlowChart = (values, width = 760, height = 180, padding = 22) => {
+const formatRangeLabel = (dateString, rangeKey) => {
+  if (!dateString) return ""
+  const date = new Date(dateString)
+  if (Number.isNaN(date.getTime())) return dateString
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, "0")
+  const day = String(date.getDate()).padStart(2, "0")
+  if (rangeKey === "daily") return `${month}/${day}`
+  if (rangeKey === "monthly") return `${year}-${month}`
+  if (rangeKey === "yearly") return String(year)
+  const start = new Date(year, 0, 1)
+  const diff = Math.floor((date - start) / 86400000) + start.getDay()
+  const week = Math.ceil((diff + 1) / 7)
+  return `H${week}`
+}
+
+const buildTrackChart = (values, width = 760, height = 210, padding = 26) => {
   if (!Array.isArray(values) || values.length === 0) {
-    return { width, height, padding, path: "", areaPath: "", points: [], gridLines: [] }
+    return { width, height, padding, baseline: height - padding, points: [], gridLines: [] }
   }
   const max = Math.max(...values)
   const min = Math.min(...values)
   const range = Math.max(1, max - min)
   const step = values.length > 1 ? (width - padding * 2) / (values.length - 1) : 0
-  const innerHeight = height - padding * 2
+  const baseline = height - padding
   const points = values.map((value, index) => {
     const x = padding + index * step
-    const y = padding + innerHeight - ((value - min) / range) * innerHeight
+    const y = padding + (1 - (value - min) / range) * (baseline - padding)
     return { x, y, value }
   })
-  const path = points.map((point, index) => `${index === 0 ? "M" : "L"}${point.x} ${point.y}`).join(" ")
-  const areaPath = `${path} L ${width - padding} ${height - padding} L ${padding} ${height - padding} Z`
   const gridLines = Array.from({ length: 4 }, (_, index) => {
-    return padding + (innerHeight / 3) * index
+    return padding + ((baseline - padding) / 3) * index
   })
-  return { width, height, padding, path, areaPath, points, gridLines }
+  return { width, height, padding, baseline, points, gridLines }
 }
 
-const buildSparkPath = (values, width = 240, height = 64, padding = 6) => {
-  if (!Array.isArray(values) || values.length === 0) {
-    return { width, height, path: "", points: [] }
-  }
+const buildIntensity = (values) => {
+  if (!Array.isArray(values) || values.length === 0) return []
   const max = Math.max(...values)
   const min = Math.min(...values)
   const range = Math.max(1, max - min)
-  const step = values.length > 1 ? (width - padding * 2) / (values.length - 1) : 0
-  const innerHeight = height - padding * 2
-  const points = values.map((value, index) => {
-    const x = padding + index * step
-    const y = padding + innerHeight - ((value - min) / range) * innerHeight
-    return { x, y }
+  return values.map((value) => {
+    const ratio = (value - min) / range
+    if (ratio > 0.75) return "bg-accent-500/80"
+    if (ratio > 0.55) return "bg-accent-400/70"
+    if (ratio > 0.35) return "bg-accent-200/50"
+    return "bg-white/10"
   })
-  const path = points.map((point, index) => `${index === 0 ? "M" : "L"}${point.x} ${point.y}`).join(" ")
-  return { width, height, path, points }
-}
-
-const buildPreviousSeries = (values) => {
-  if (!Array.isArray(values) || values.length === 0) return []
-  return values.map((value, index) => Math.round(value * (0.82 + (index % 4) * 0.05)))
 }
 
 const getTrendTone = (value) => {
@@ -131,36 +136,29 @@ function ChartsSkeleton({ panelClass }) {
         <SkeletonBlock className="h-4 w-24 rounded-full" />
         <SkeletonBlock className="mt-4 h-9 w-56" />
         <SkeletonBlock className="mt-3 h-4 w-2/3" />
-        <div className="mt-4 flex flex-wrap gap-2">
-          <SkeletonBlock className="h-8 w-24 rounded-full" />
-          <SkeletonBlock className="h-8 w-24 rounded-full" />
-        </div>
       </div>
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.3fr)_minmax(0,0.8fr)]">
         <div className="space-y-6">
           <div className={`${panelClass} bg-ink-900/60`}>
             <SkeletonBlock className="h-4 w-40 rounded-full" />
-            <SkeletonBlock className="mt-5 h-32 w-full rounded-2xl" />
-            <SkeletonBlock className="mt-4 h-10 w-2/3 rounded-xl" />
+            <SkeletonBlock className="mt-5 h-24 w-full rounded-2xl" />
           </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {Array.from({ length: 3 }).map((_, idx) => (
-              <div key={`chart-skeleton-${idx}`} className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <SkeletonBlock className="h-3 w-16 rounded-full" />
-                <SkeletonBlock className="mt-3 h-6 w-24 rounded-full" />
-                <SkeletonBlock className="mt-2 h-3 w-20 rounded-full" />
-              </div>
-            ))}
+          <div className={`${panelClass} bg-ink-900/60`}>
+            <SkeletonBlock className="h-4 w-32 rounded-full" />
+            <SkeletonBlock className="mt-4 h-20 w-full rounded-2xl" />
           </div>
         </div>
+        <div className={`${panelClass} bg-ink-900/60`}>
+          <SkeletonBlock className="h-4 w-40 rounded-full" />
+          <SkeletonBlock className="mt-4 h-40 w-full rounded-2xl" />
+        </div>
         <div className="space-y-6">
-          <div className={`${panelClass} bg-ink-800/60`}>
+          <div className={`${panelClass} bg-ink-900/60`}>
             <SkeletonBlock className="h-4 w-32 rounded-full" />
             <SkeletonBlock className="mt-4 h-16 w-full rounded-2xl" />
-            <SkeletonBlock className="mt-4 h-32 w-full rounded-2xl" />
           </div>
-          <div className={`${panelClass} bg-ink-800/60`}>
-            <SkeletonBlock className="h-4 w-32 rounded-full" />
+          <div className={`${panelClass} bg-ink-900/60`}>
+            <SkeletonBlock className="h-4 w-28 rounded-full" />
             <SkeletonBlock className="mt-4 h-24 w-full rounded-2xl" />
           </div>
         </div>
@@ -187,18 +185,15 @@ export default function ChartsTab({ isLoading, panelClass }) {
     const average = Math.round(total / values.length)
     return { total, average, max, min }
   }, [values])
-  const flowChart = useMemo(() => buildFlowChart(values), [values])
-  const previousValues = useMemo(() => buildPreviousSeries(values), [values])
-  const spark = useMemo(() => buildSparkPath(values, 260, 72, 6), [values])
-  const sparkPrev = useMemo(() => buildSparkPath(previousValues, 260, 72, 6), [previousValues])
+  const chart = useMemo(() => buildTrackChart(values), [values])
+  const intensity = useMemo(() => buildIntensity(values), [values])
   const trendValue = values.length > 1 ? values[values.length - 1] - values[0] : 0
   const trendPercent = values[0] ? Math.round((trendValue / values[0]) * 100) : 0
   const trendTone = getTrendTone(trendValue)
-  const targetTotal = Math.round(summary.total * 1.12)
+  const recentEntries = useMemo(() => [...data].slice(-5).reverse(), [data])
+  const targetTotal = Math.round(summary.total * 1.14)
   const targetProgress = targetTotal ? Math.min(100, Math.round((summary.total / targetTotal) * 100)) : 0
-  const topSpikes = useMemo(() => {
-    return [...data].sort((a, b) => b.value - a.value).slice(0, 3)
-  }, [data])
+
   const handleEntrySubmit = (event) => {
     event.preventDefault()
     const dateValue = String(entryDate || "").trim()
@@ -212,17 +207,10 @@ export default function ChartsTab({ isLoading, panelClass }) {
       return
     }
     setEntryError("")
+    const label = formatRangeLabel(dateValue, rangeMeta.key) || dateValue
     setSeriesByRange((prev) => {
       const list = Array.isArray(prev[rangeMeta.key]) ? [...prev[rangeMeta.key]] : []
-      const matchIndex = list.findIndex(
-        (item) => (item.date || item.label) === dateValue,
-      )
-      const nextItem = { label: dateValue, value: amountValue, date: dateValue, custom: true }
-      if (matchIndex >= 0) {
-        list[matchIndex] = { ...list[matchIndex], ...nextItem }
-      } else {
-        list.push(nextItem)
-      }
+      list.push({ label, value: amountValue, date: dateValue, custom: true })
       return { ...prev, [rangeMeta.key]: list }
     })
     setEntryValue("")
@@ -239,298 +227,83 @@ export default function ChartsTab({ isLoading, panelClass }) {
           <div className="absolute -right-16 -top-10 h-56 w-56 rounded-full bg-accent-400/20 blur-3xl" />
           <div className="absolute -left-10 bottom-0 h-40 w-40 rounded-full bg-sky-300/10 blur-3xl" />
         </div>
-        <div className="relative z-10 grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
-                Grafik
-              </span>
-              <span className="text-xs text-slate-400">Satis nabzi</span>
-            </div>
-            <div>
-              <h1 className="font-display text-3xl font-semibold text-white md:text-4xl">
-                Satis tahtasi
-              </h1>
-              <p className="mt-2 max-w-2xl text-sm text-slate-200/80">
-                Haftalik, gunluk, aylik ve yillik satisi tek bir panelde izle. Veriler su an ornek
-                akista.
-              </p>
-            </div>
-            <div className="inline-flex flex-wrap gap-2 rounded-full border border-white/10 bg-white/5 p-1">
-              {rangeOptions.map((option) => (
-                <button
-                  key={option.key}
-                  type="button"
-                  onClick={() => setRange(option.key)}
-                  className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
-                    range === option.key
-                      ? "bg-accent-500/20 text-accent-50 shadow-glow"
-                      : "text-slate-300 hover:bg-white/10"
-                  }`}
-                  aria-pressed={range === option.key}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
+        <div className="relative z-10 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-3">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
+              Grafik
+            </span>
+            <h1 className="font-display text-3xl font-semibold text-white md:text-4xl">
+              Satis laboratuvari
+            </h1>
+            <p className="max-w-2xl text-sm text-slate-200/80">
+              Akisi sekillendir, topladigin veriyi katmanlar halinde izle. Demo veri uzerinde calisir.
+            </p>
           </div>
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-300/70">
-                Donem ozeti
-              </p>
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
-                {rangeMeta.caption}
-              </span>
-            </div>
-            <div className="mt-4 flex items-center justify-between gap-6">
-              <div>
-                <p className="text-3xl font-semibold text-slate-100">
-                  {numberFormatter.format(summary.total)}
-                </p>
-                <p className="text-xs text-slate-400">Toplam satis</p>
-              </div>
-              <div className="relative">
-                <svg viewBox="0 0 120 120" className="h-20 w-20">
-                  <circle cx="60" cy="60" r="46" fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="10" />
-                  <circle
-                    cx="60"
-                    cy="60"
-                    r="46"
-                    fill="none"
-                    stroke="#3ac7ff"
-                    strokeWidth="10"
-                    strokeLinecap="round"
-                    strokeDasharray={`${2 * Math.PI * 46}`}
-                    strokeDashoffset={`${2 * Math.PI * 46 * (1 - targetProgress / 100)}`}
-                    transform="rotate(-90 60 60)"
-                  />
-                </svg>
-                <div className="absolute inset-0 flex flex-col items-center justify-center">
-                  <span className="text-sm font-semibold text-slate-100">{targetProgress}%</span>
-                  <span className="text-[10px] text-slate-400">Hedef</span>
-                </div>
-              </div>
-            </div>
-            <div className="mt-4 flex items-center gap-2">
-              <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${trendTone.badge}`}>
-                {trendTone.label}
-              </span>
-              <span className={`text-sm font-semibold ${trendTone.className}`}>
-                {trendTone.sign}
-                {Math.abs(trendPercent)}%
-              </span>
-              <span className="text-xs text-slate-400">Ilk/son karsilasma</span>
-            </div>
+          <div className="inline-flex flex-wrap gap-2 rounded-full border border-white/10 bg-white/5 p-1">
+            {rangeOptions.map((option) => (
+              <button
+                key={option.key}
+                type="button"
+                onClick={() => setRange(option.key)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition ${
+                  range === option.key
+                    ? "bg-accent-500/20 text-accent-50 shadow-glow"
+                    : "text-slate-300 hover:bg-white/10"
+                }`}
+                aria-pressed={range === option.key}
+              >
+                {option.label}
+              </button>
+            ))}
           </div>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.3fr)_minmax(0,0.8fr)]">
         <div className="space-y-6">
           <section className={`${panelClass} bg-ink-900/60`}>
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
-                  Satis akisi
-                </p>
-                <p className="text-sm text-slate-400">Akis hizini ve degisimleri yakala.</p>
-              </div>
-              <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
-                Ortalama: {numberFormatter.format(summary.average)}
-              </div>
-            </div>
-
-            <div className="mt-6 rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
-              <div className="flex items-center justify-between text-xs text-slate-400">
-                <span>Akis izi</span>
-                <span>{rangeMeta.caption}</span>
-              </div>
-              <div className="mt-4">
-                <svg
-                  viewBox={`0 0 ${flowChart.width} ${flowChart.height}`}
-                  className="h-44 w-full"
-                  preserveAspectRatio="none"
-                  role="img"
-                  aria-label="Satis akis grafigi"
-                >
-                  <defs>
-                    <linearGradient id="flow-area" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#3ac7ff" stopOpacity="0.35" />
-                      <stop offset="100%" stopColor="#2b9fff" stopOpacity="0.05" />
-                    </linearGradient>
-                    <linearGradient id="flow-line" x1="0" y1="0" x2="1" y2="0">
-                      <stop offset="0%" stopColor="#3ac7ff" />
-                      <stop offset="100%" stopColor="#2b9fff" />
-                    </linearGradient>
-                  </defs>
-                  {flowChart.gridLines.map((y, index) => (
-                    <line
-                      key={`flow-grid-${index}`}
-                      x1={flowChart.padding}
-                      x2={flowChart.width - flowChart.padding}
-                      y1={y}
-                      y2={y}
-                      stroke="rgba(255, 255, 255, 0.08)"
-                      strokeDasharray="4 5"
-                    />
-                  ))}
-                  {flowChart.areaPath && <path d={flowChart.areaPath} fill="url(#flow-area)" stroke="none" />}
-                  {flowChart.path && (
-                    <path d={flowChart.path} fill="none" stroke="url(#flow-line)" strokeWidth="3" />
-                  )}
-                  {flowChart.points.map((point, index) => {
-                    const isLast = index === flowChart.points.length - 1
-                    return (
-                      <circle
-                        key={`flow-point-${index}`}
-                        cx={point.x}
-                        cy={point.y}
-                        r={isLast ? 4.6 : 3.4}
-                        fill={isLast ? "#e2f5ff" : "#3ac7ff"}
-                        opacity={isLast ? 1 : 0.75}
-                      />
-                    )
-                  })}
-                </svg>
-              </div>
-              <div className="mt-4 flex flex-wrap gap-2">
-                {data.map((item, index) => (
-                  <span
-                    key={`${item.label}-${index}`}
-                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200"
-                  >
-                    <span
-                      className={`h-2 w-2 rounded-full ${
-                        index === data.length - 1 ? "bg-accent-300 shadow-glow" : "bg-accent-400/80"
-                      }`}
-                    />
-                    <span className="font-semibold text-slate-100">{item.label}</span>
-                    <span className="text-slate-400">{numberFormatter.format(item.value)}</span>
-                  </span>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <div className="grid gap-3 sm:grid-cols-3">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Zirve</p>
-              <p className="mt-2 text-xl font-semibold text-slate-100">
-                {numberFormatter.format(summary.max)}
-              </p>
-              <p className="text-xs text-slate-400">En yuksek nokta</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Taban</p>
-              <p className="mt-2 text-xl font-semibold text-slate-100">
-                {numberFormatter.format(summary.min)}
-              </p>
-              <p className="text-xs text-slate-400">En dusuk nokta</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-              <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Hedef</p>
-              <p className="mt-2 text-xl font-semibold text-slate-100">
-                {numberFormatter.format(targetTotal)}
-              </p>
-              <p className="text-xs text-slate-400">Planlanan seviye</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-6">
-          <section className={`${panelClass} bg-ink-800/60`}>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
-                  Karsilastirma
-                </p>
-                <p className="text-xs text-slate-400">Onceki donemle karsilastirma</p>
-              </div>
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
-                {rangeMeta.caption}
-              </span>
-            </div>
-
-            <div className="mt-4 rounded-2xl border border-white/10 bg-ink-900/50 p-4">
-              <div className="flex items-center justify-between text-xs text-slate-400">
-                <span>Su an</span>
-                <span>Onceki</span>
-              </div>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-                  <svg viewBox={`0 0 ${spark.width} ${spark.height}`} className="h-16 w-full">
-                    <path d={spark.path} fill="none" stroke="#3ac7ff" strokeWidth="2.2" />
-                  </svg>
-                  <p className="text-xs text-slate-400">Guncel akim</p>
-                </div>
-                <div className="rounded-xl border border-white/10 bg-white/5 p-3">
-                  <svg viewBox={`0 0 ${sparkPrev.width} ${sparkPrev.height}`} className="h-16 w-full">
-                    <path d={sparkPrev.path} fill="none" stroke="rgba(148,163,184,0.7)" strokeWidth="2" />
-                  </svg>
-                  <p className="text-xs text-slate-400">Onceki donem</p>
-                </div>
-              </div>
-              <div className="mt-4">
-                <div className="flex items-center justify-between text-xs text-slate-400">
-                  <span>Hedef ilerleme</span>
-                  <span>{targetProgress}%</span>
-                </div>
-                <div className="mt-2 h-2 rounded-full bg-white/10">
-                  <div
-                    className="h-2 rounded-full bg-gradient-to-r from-accent-400 via-sky-300 to-accent-500"
-                    style={{ width: `${targetProgress}%` }}
-                  />
-                </div>
-              </div>
-            </div>
-          </section>
-
-          <section className={`${panelClass} bg-ink-800/60`}>
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
                 Satis girisi
               </p>
               <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
-                Demo
+                {rangeMeta.caption}
               </span>
             </div>
             <form className="mt-4 space-y-4" onSubmit={handleEntrySubmit}>
-              <div className="grid gap-3 sm:grid-cols-2">
-                <label className="space-y-1 text-xs font-semibold text-slate-200">
-                  Tarih
-                  <input
-                    type="date"
-                    value={entryDate}
-                    onChange={(event) => {
-                      setEntryDate(event.target.value)
-                      if (entryError) setEntryError("")
-                    }}
-                    className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                  />
-                </label>
-                <label className="space-y-1 text-xs font-semibold text-slate-200">
-                  Satis miktari
-                  <input
-                    type="number"
-                    min="0"
-                    step="1"
-                    value={entryValue}
-                    onChange={(event) => {
-                      setEntryValue(event.target.value)
-                      if (entryError) setEntryError("")
-                    }}
-                    placeholder="0"
-                    className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                  />
-                </label>
-              </div>
+              <label className="space-y-1 text-xs font-semibold text-slate-200">
+                Tarih
+                <input
+                  type="date"
+                  value={entryDate}
+                  onChange={(event) => {
+                    setEntryDate(event.target.value)
+                    if (entryError) setEntryError("")
+                  }}
+                  className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                />
+              </label>
+              <label className="space-y-1 text-xs font-semibold text-slate-200">
+                Satis miktari
+                <input
+                  type="number"
+                  min="0"
+                  step="1"
+                  value={entryValue}
+                  onChange={(event) => {
+                    setEntryValue(event.target.value)
+                    if (entryError) setEntryError("")
+                  }}
+                  placeholder="0"
+                  className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                />
+              </label>
               {entryError && (
                 <div className="rounded-lg border border-rose-200/60 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
                   {entryError}
                 </div>
               )}
-              <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center justify-between">
                 <p className="text-xs text-slate-400">Kayit secili doneme eklenir.</p>
                 <button
                   type="submit"
@@ -542,35 +315,184 @@ export default function ChartsTab({ isLoading, panelClass }) {
             </form>
           </section>
 
-          <section className={`${panelClass} bg-ink-800/60`}>
+          <section className={`${panelClass} bg-ink-900/60`}>
             <div className="flex items-center justify-between">
               <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
-                Zirve notlari
+                Son girisler
               </p>
               <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
-                Top 3
+                {recentEntries.length} kayit
               </span>
             </div>
             <div className="mt-4 space-y-3">
-              {topSpikes.map((item, index) => (
+              {recentEntries.map((item, index) => (
                 <div key={`${item.label}-${index}`} className="rounded-xl border border-white/10 bg-white/5 px-3 py-2">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-semibold text-slate-100">{item.label}</p>
-                      <p className="text-xs text-slate-400">Satis zirvesi</p>
+                      <p className="text-sm font-semibold text-slate-100">{item.date || item.label}</p>
+                      <p className="text-xs text-slate-400">Etiket: {item.label}</p>
                     </div>
                     <span className="text-sm font-semibold text-slate-100">
                       {numberFormatter.format(item.value)}
                     </span>
                   </div>
-                  <div className="mt-2 h-1.5 rounded-full bg-white/10">
-                    <div
-                      className="h-1.5 rounded-full bg-gradient-to-r from-accent-400/80 to-accent-200/80"
-                      style={{ width: `${Math.max(16, Math.round((item.value / summary.max) * 100))}%` }}
-                    />
-                  </div>
                 </div>
               ))}
+              {recentEntries.length === 0 && (
+                <div className="rounded-xl border border-white/10 bg-white/5 px-3 py-4 text-xs text-slate-400">
+                  Henuz giris yok.
+                </div>
+              )}
+            </div>
+          </section>
+        </div>
+
+        <section className={`${panelClass} bg-ink-900/60`}>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
+                Akis rotasi
+              </p>
+              <p className="text-xs text-slate-400">Lollipop izleri ile akisi oku.</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+                Ortalama: {numberFormatter.format(summary.average)}
+              </span>
+              <span className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${trendTone.badge}`}>
+                {trendTone.label} {trendTone.sign}{Math.abs(trendPercent)}%
+              </span>
+            </div>
+          </div>
+
+          <div className="mt-6 rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
+            <svg
+              viewBox={`0 0 ${chart.width} ${chart.height}`}
+              className="h-48 w-full"
+              preserveAspectRatio="none"
+              role="img"
+              aria-label="Satis akis grafigi"
+            >
+              <defs>
+                <linearGradient id="track-stem" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#3ac7ff" stopOpacity="0.85" />
+                  <stop offset="100%" stopColor="#2b9fff" stopOpacity="0.2" />
+                </linearGradient>
+              </defs>
+              {chart.gridLines.map((y, index) => (
+                <line
+                  key={`track-grid-${index}`}
+                  x1={chart.padding}
+                  x2={chart.width - chart.padding}
+                  y1={y}
+                  y2={y}
+                  stroke="rgba(255, 255, 255, 0.08)"
+                  strokeDasharray="4 5"
+                />
+              ))}
+              <line
+                x1={chart.padding}
+                x2={chart.width - chart.padding}
+                y1={chart.baseline}
+                y2={chart.baseline}
+                stroke="rgba(255, 255, 255, 0.12)"
+              />
+              {chart.points.map((point, index) => (
+                <g key={`track-point-${index}`}>
+                  <line
+                    x1={point.x}
+                    x2={point.x}
+                    y1={chart.baseline}
+                    y2={point.y}
+                    stroke="url(#track-stem)"
+                    strokeWidth="4"
+                    strokeLinecap="round"
+                  />
+                  <circle
+                    cx={point.x}
+                    cy={point.y}
+                    r={index === chart.points.length - 1 ? 6 : 4.5}
+                    fill={index === chart.points.length - 1 ? "#e2f5ff" : "#3ac7ff"}
+                    stroke="rgba(15, 22, 37, 0.8)"
+                    strokeWidth="2"
+                  />
+                </g>
+              ))}
+            </svg>
+          </div>
+
+          <div className="mt-4 flex flex-wrap gap-2">
+            {data.map((item, index) => (
+              <span
+                key={`${item.label}-${index}`}
+                className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200"
+              >
+                <span className={`h-2 w-2 rounded-full ${index === data.length - 1 ? "bg-accent-300 shadow-glow" : "bg-accent-400/80"}`} />
+                <span className="font-semibold text-slate-100">{item.label}</span>
+                <span className="text-slate-400">{numberFormatter.format(item.value)}</span>
+              </span>
+            ))}
+          </div>
+        </section>
+
+        <div className="space-y-6">
+          <section className={`${panelClass} bg-ink-900/60`}>
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
+                Sinyal paneli
+              </p>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+                Hedef
+              </span>
+            </div>
+            <div className="mt-4 space-y-3">
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Toplam</p>
+                <p className="mt-2 text-2xl font-semibold text-slate-100">
+                  {numberFormatter.format(summary.total)}
+                </p>
+                <p className="text-xs text-slate-400">Secili donem</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+                <div className="flex items-center justify-between text-xs text-slate-400">
+                  <span>Hedef ilerleme</span>
+                  <span>{targetProgress}%</span>
+                </div>
+                <div className="mt-2 h-2 rounded-full bg-white/10">
+                  <div
+                    className="h-2 rounded-full bg-gradient-to-r from-accent-400 via-sky-300 to-accent-500"
+                    style={{ width: `${targetProgress}%` }}
+                  />
+                </div>
+                <p className="mt-2 text-xs text-slate-400">
+                  Hedef: {numberFormatter.format(targetTotal)}
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section className={`${panelClass} bg-ink-900/60`}>
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
+                Isi seridi
+              </p>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+                Dagilim
+              </span>
+            </div>
+            <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 p-4">
+              <div
+                className="grid gap-2"
+                style={{ gridTemplateColumns: `repeat(${Math.max(1, Math.min(values.length, 12))}, minmax(0, 1fr))` }}
+              >
+                {intensity.map((tone, index) => (
+                  <div key={`heat-${index}`} className={`h-6 rounded-lg ${tone}`} />
+                ))}
+              </div>
+              <div className="mt-4 flex items-center justify-between text-xs text-slate-400">
+                <span>Dusuk</span>
+                <span>Yuksek</span>
+              </div>
             </div>
             <p className="mt-3 text-xs text-slate-400">
               Demo veri kullaniyoruz, DB baglantisi acilmadi.
