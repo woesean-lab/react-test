@@ -50,6 +50,36 @@ const salesSeries = {
   ],
 }
 
+const createSeriesState = () =>
+  Object.fromEntries(
+    Object.entries(salesSeries).map(([key, items]) => [
+      key,
+      items.map((item) => ({ ...item })),
+    ]),
+  )
+
+const buildFlowChart = (values, width = 760, height = 180, padding = 22) => {
+  if (!Array.isArray(values) || values.length === 0) {
+    return { width, height, padding, path: "", areaPath: "", points: [], gridLines: [] }
+  }
+  const max = Math.max(...values)
+  const min = Math.min(...values)
+  const range = Math.max(1, max - min)
+  const step = values.length > 1 ? (width - padding * 2) / (values.length - 1) : 0
+  const innerHeight = height - padding * 2
+  const points = values.map((value, index) => {
+    const x = padding + index * step
+    const y = padding + innerHeight - ((value - min) / range) * innerHeight
+    return { x, y, value }
+  })
+  const path = points.map((point, index) => `${index === 0 ? "M" : "L"}${point.x} ${point.y}`).join(" ")
+  const areaPath = `${path} L ${width - padding} ${height - padding} L ${padding} ${height - padding} Z`
+  const gridLines = Array.from({ length: 4 }, (_, index) => {
+    return padding + (innerHeight / 3) * index
+  })
+  return { width, height, padding, path, areaPath, points, gridLines }
+}
+
 const buildSparkPath = (values, width = 240, height = 64, padding = 6) => {
   if (!Array.isArray(values) || values.length === 0) {
     return { width, height, path: "", points: [] }
@@ -66,19 +96,6 @@ const buildSparkPath = (values, width = 240, height = 64, padding = 6) => {
   })
   const path = points.map((point, index) => `${index === 0 ? "M" : "L"}${point.x} ${point.y}`).join(" ")
   return { width, height, path, points }
-}
-
-const buildBars = (values) => {
-  if (!Array.isArray(values) || values.length === 0) return []
-  const max = Math.max(1, ...values)
-  return values.map((value, index) => {
-    const height = Math.max(8, Math.round((value / max) * 100))
-    return {
-      value,
-      height,
-      tone: index % 3 === 0 ? "from-accent-400/80 to-accent-200/80" : "from-accent-600/80 to-accent-400/70",
-    }
-  })
 }
 
 const buildPreviousSeries = (values) => {
@@ -154,8 +171,12 @@ function ChartsSkeleton({ panelClass }) {
 
 export default function ChartsTab({ isLoading, panelClass }) {
   const [range, setRange] = useState("weekly")
+  const [seriesByRange, setSeriesByRange] = useState(() => createSeriesState())
+  const [entryDate, setEntryDate] = useState("")
+  const [entryValue, setEntryValue] = useState("")
+  const [entryError, setEntryError] = useState("")
   const rangeMeta = rangeOptions.find((option) => option.key === range) || rangeOptions[0]
-  const data = salesSeries[rangeMeta.key] || []
+  const data = seriesByRange[rangeMeta.key] || []
   const numberFormatter = useMemo(() => new Intl.NumberFormat("tr-TR"), [])
   const values = useMemo(() => data.map((item) => item.value), [data])
   const summary = useMemo(() => {
@@ -166,7 +187,7 @@ export default function ChartsTab({ isLoading, panelClass }) {
     const average = Math.round(total / values.length)
     return { total, average, max, min }
   }, [values])
-  const bars = useMemo(() => buildBars(values), [values])
+  const flowChart = useMemo(() => buildFlowChart(values), [values])
   const previousValues = useMemo(() => buildPreviousSeries(values), [values])
   const spark = useMemo(() => buildSparkPath(values, 260, 72, 6), [values])
   const sparkPrev = useMemo(() => buildSparkPath(previousValues, 260, 72, 6), [previousValues])
@@ -178,6 +199,34 @@ export default function ChartsTab({ isLoading, panelClass }) {
   const topSpikes = useMemo(() => {
     return [...data].sort((a, b) => b.value - a.value).slice(0, 3)
   }, [data])
+  const handleEntrySubmit = (event) => {
+    event.preventDefault()
+    const dateValue = String(entryDate || "").trim()
+    const amountValue = Number(entryValue)
+    if (!dateValue) {
+      setEntryError("Tarih gerekli.")
+      return
+    }
+    if (!Number.isFinite(amountValue) || amountValue <= 0) {
+      setEntryError("Satis miktari gecerli olmali.")
+      return
+    }
+    setEntryError("")
+    setSeriesByRange((prev) => {
+      const list = Array.isArray(prev[rangeMeta.key]) ? [...prev[rangeMeta.key]] : []
+      const matchIndex = list.findIndex(
+        (item) => (item.date || item.label) === dateValue,
+      )
+      const nextItem = { label: dateValue, value: amountValue, date: dateValue, custom: true }
+      if (matchIndex >= 0) {
+        list[matchIndex] = { ...list[matchIndex], ...nextItem }
+      } else {
+        list.push(nextItem)
+      }
+      return { ...prev, [rangeMeta.key]: list }
+    })
+    setEntryValue("")
+  }
 
   if (isLoading) {
     return <ChartsSkeleton panelClass={panelClass} />
@@ -285,33 +334,80 @@ export default function ChartsTab({ isLoading, panelClass }) {
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
                   Satis akisi
                 </p>
-                <p className="text-sm text-slate-400">Zirve ve durgun noktalari yakala.</p>
+                <p className="text-sm text-slate-400">Akis hizini ve degisimleri yakala.</p>
               </div>
               <div className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
                 Ortalama: {numberFormatter.format(summary.average)}
               </div>
             </div>
 
-            <div className="mt-6 overflow-x-auto pb-2">
-              <div className="flex min-w-[520px] items-end gap-3">
-                {bars.map((bar, index) => (
-                  <div key={`${data[index]?.label}-${index}`} className="flex min-w-[56px] flex-col items-center gap-3">
-                    <div className="relative flex h-32 w-full items-end rounded-2xl border border-white/10 bg-white/5 p-2">
-                      <div
-                        className={`w-full rounded-xl bg-gradient-to-t ${bar.tone}`}
-                        style={{ height: `${bar.height}%` }}
+            <div className="mt-6 rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
+              <div className="flex items-center justify-between text-xs text-slate-400">
+                <span>Akis izi</span>
+                <span>{rangeMeta.caption}</span>
+              </div>
+              <div className="mt-4">
+                <svg
+                  viewBox={`0 0 ${flowChart.width} ${flowChart.height}`}
+                  className="h-44 w-full"
+                  preserveAspectRatio="none"
+                  role="img"
+                  aria-label="Satis akis grafigi"
+                >
+                  <defs>
+                    <linearGradient id="flow-area" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#3ac7ff" stopOpacity="0.35" />
+                      <stop offset="100%" stopColor="#2b9fff" stopOpacity="0.05" />
+                    </linearGradient>
+                    <linearGradient id="flow-line" x1="0" y1="0" x2="1" y2="0">
+                      <stop offset="0%" stopColor="#3ac7ff" />
+                      <stop offset="100%" stopColor="#2b9fff" />
+                    </linearGradient>
+                  </defs>
+                  {flowChart.gridLines.map((y, index) => (
+                    <line
+                      key={`flow-grid-${index}`}
+                      x1={flowChart.padding}
+                      x2={flowChart.width - flowChart.padding}
+                      y1={y}
+                      y2={y}
+                      stroke="rgba(255, 255, 255, 0.08)"
+                      strokeDasharray="4 5"
+                    />
+                  ))}
+                  {flowChart.areaPath && <path d={flowChart.areaPath} fill="url(#flow-area)" stroke="none" />}
+                  {flowChart.path && (
+                    <path d={flowChart.path} fill="none" stroke="url(#flow-line)" strokeWidth="3" />
+                  )}
+                  {flowChart.points.map((point, index) => {
+                    const isLast = index === flowChart.points.length - 1
+                    return (
+                      <circle
+                        key={`flow-point-${index}`}
+                        cx={point.x}
+                        cy={point.y}
+                        r={isLast ? 4.6 : 3.4}
+                        fill={isLast ? "#e2f5ff" : "#3ac7ff"}
+                        opacity={isLast ? 1 : 0.75}
                       />
-                      {index === bars.length - 1 && (
-                        <div className="absolute -top-6 left-1/2 -translate-x-1/2 rounded-full border border-accent-300/60 bg-accent-500/20 px-2 py-0.5 text-[10px] font-semibold text-accent-100">
-                          Simdi
-                        </div>
-                      )}
-                    </div>
-                    <span className="text-[11px] font-semibold text-slate-300">{data[index]?.label}</span>
-                    <span className="text-[10px] text-slate-500">
-                      {numberFormatter.format(data[index]?.value ?? 0)}
-                    </span>
-                  </div>
+                    )
+                  })}
+                </svg>
+              </div>
+              <div className="mt-4 flex flex-wrap gap-2">
+                {data.map((item, index) => (
+                  <span
+                    key={`${item.label}-${index}`}
+                    className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200"
+                  >
+                    <span
+                      className={`h-2 w-2 rounded-full ${
+                        index === data.length - 1 ? "bg-accent-300 shadow-glow" : "bg-accent-400/80"
+                      }`}
+                    />
+                    <span className="font-semibold text-slate-100">{item.label}</span>
+                    <span className="text-slate-400">{numberFormatter.format(item.value)}</span>
+                  </span>
                 ))}
               </div>
             </div>
@@ -388,6 +484,62 @@ export default function ChartsTab({ isLoading, panelClass }) {
                 </div>
               </div>
             </div>
+          </section>
+
+          <section className={`${panelClass} bg-ink-800/60`}>
+            <div className="flex items-center justify-between">
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
+                Satis girisi
+              </p>
+              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+                Demo
+              </span>
+            </div>
+            <form className="mt-4 space-y-4" onSubmit={handleEntrySubmit}>
+              <div className="grid gap-3 sm:grid-cols-2">
+                <label className="space-y-1 text-xs font-semibold text-slate-200">
+                  Tarih
+                  <input
+                    type="date"
+                    value={entryDate}
+                    onChange={(event) => {
+                      setEntryDate(event.target.value)
+                      if (entryError) setEntryError("")
+                    }}
+                    className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                  />
+                </label>
+                <label className="space-y-1 text-xs font-semibold text-slate-200">
+                  Satis miktari
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={entryValue}
+                    onChange={(event) => {
+                      setEntryValue(event.target.value)
+                      if (entryError) setEntryError("")
+                    }}
+                    placeholder="0"
+                    className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                  />
+                </label>
+              </div>
+              {entryError && (
+                <div className="rounded-lg border border-rose-200/60 bg-rose-500/10 px-3 py-2 text-xs text-rose-100">
+                  {entryError}
+                </div>
+              )}
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <p className="text-xs text-slate-400">Kayit secili doneme eklenir.</p>
+                <button
+                  type="submit"
+                  className="rounded-full border border-accent-400/70 bg-accent-500/20 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300"
+                >
+                  Ekle
+                </button>
+              </div>
+            </form>
           </section>
 
           <section className={`${panelClass} bg-ink-800/60`}>
