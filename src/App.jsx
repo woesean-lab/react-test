@@ -515,165 +515,175 @@ function App() {
         </div>
       )}
       <div className="mx-auto flex max-w-6xl flex-col gap-8">
-        <div className="sticky top-4 z-30 flex flex-wrap items-center gap-3 rounded-3xl border border-white/10 bg-ink-900/80 px-3 py-2 shadow-card backdrop-blur">
-          <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-ink-900/70 px-3 py-2 shadow-inner">
-            <span className="h-6 w-1 rounded-full bg-accent-400/80 shadow-glow" />
-            <div className="flex items-baseline gap-2">
-              <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.32em] text-accent-200">
-                Pulcip
-              </span>
-              <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-400">
-                Manage
-              </span>
-            </div>
-          </div>
-          <span className="hidden h-7 w-px bg-white/10 sm:block" />
-          {canViewMessages && (
-            <button
-              type="button"
-              onClick={() => handleTabSwitch("messages")}
-              className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-                activeTab === "messages"
-                  ? "bg-accent-500/20 text-accent-50 shadow-glow"
-                  : "bg-white/5 text-slate-200 hover:bg-white/10"
-              }`}
-            >
-              Mesajlar
-            </button>
-          )}
-          {canViewTasks && (
-            <button
-              type="button"
-              onClick={() => handleTabSwitch("tasks")}
-              className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-                activeTab === "tasks"
-                  ? "bg-accent-500/20 text-accent-50 shadow-glow"
-                  : "bg-white/5 text-slate-200 hover:bg-white/10"
-              }`}
-            >
-              {"G\u00f6rev"}
-            </button>
-          )}
-          {canViewProblems && (
-            <button
-              type="button"
-              onClick={() => handleTabSwitch("problems")}
-              className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-                activeTab === "problems"
-                  ? "bg-accent-500/20 text-accent-50 shadow-glow"
-                  : "bg-white/5 text-slate-200 hover:bg-white/10"
-              }`}
-            >
-              {"Problemli M\u00fc\u015fteriler"}
-            </button>
-          )}
-          {canViewLists && (
-            <button
-              type="button"
-              onClick={() => handleTabSwitch("lists")}
-              className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-                activeTab === "lists"
-                  ? "bg-accent-500/20 text-accent-50 shadow-glow"
-                  : "bg-white/5 text-slate-200 hover:bg-white/10"
-              }`}
-            >
-              Listeler
-            </button>
-          )}
-          {canViewStock && (
-            <button
-              type="button"
-              onClick={() => handleTabSwitch("stock")}
-              className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-                activeTab === "stock"
-                  ? "bg-accent-500/20 text-accent-50 shadow-glow"
-                  : "bg-white/5 text-slate-200 hover:bg-white/10"
-              }`}
-            >
-              Stok
-            </button>
-          )}
-          <div className="ml-auto flex items-center gap-2">
-            {canViewAdmin && (
-              <button
-                type="button"
-                onClick={() => handleTabSwitch("admin")}
-                className={`inline-flex items-center justify-center rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-                  activeTab === "admin"
-                    ? "bg-accent-500/20 text-accent-50 shadow-glow"
-                    : "bg-white/5 text-slate-200 hover:bg-white/10"
-                }`}
-              >
-                Admin
-              </button>
-            )}
-            {themeToggleButton}
-            <div className="relative" ref={userMenuRef}>
-              <button
-                type="button"
-                onClick={() => setIsUserMenuOpen((prev) => !prev)}
-                className={`inline-flex h-9 items-center gap-1.5 rounded-xl bg-white/5 px-2.5 text-sm font-semibold text-slate-200 transition hover:bg-white/10 ${
-                  isUserMenuOpen ? "bg-white/10" : ""
-                }`}
-                aria-haspopup="menu"
-                aria-expanded={isUserMenuOpen}
-                aria-label={"Kullan\u0131c\u0131 men\u00fc\u00fc"}
-              >
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent-500/20 text-[11px] font-semibold uppercase text-accent-50 shadow-glow">
-                  {userInitial}
+        <div className="sticky top-4 z-30 rounded-3xl border border-white/10 bg-ink-900/80 px-3 py-2 shadow-card backdrop-blur">
+          <div className="flex w-full flex-col gap-3 sm:flex-row sm:items-center">
+            <div className="flex items-center gap-3 rounded-xl border border-white/10 bg-ink-900/70 px-3 py-2 shadow-inner">
+              <span className="h-6 w-1 rounded-full bg-accent-400/80 shadow-glow" />
+              <div className="flex items-baseline gap-2">
+                <span className="font-mono text-[11px] font-semibold uppercase tracking-[0.32em] text-accent-200">
+                  Pulcip
                 </span>
-                <svg
-                  viewBox="0 0 24 24"
-                  aria-hidden="true"
-                  className={`h-3.5 w-3.5 transition ${isUserMenuOpen ? "rotate-180" : ""}`}
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.6"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="m6 9 6 6 6-6" />
-                </svg>
-              </button>
-              {isUserMenuOpen && (
-                <div
-                  className="absolute right-0 mt-2 w-56 rounded-2xl border border-white/10 bg-ink-900/95 p-2 shadow-card backdrop-blur"
-                  role="menu"
-                >
-                  <div className="px-3 py-2">
-                    <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500">
-                      {"Ho\u015f geldin"}
-                    </p>
-                    <p className="text-sm font-semibold text-slate-100" title={userName}>
-                      {userName}
-                    </p>
-                  </div>
-                  <div className="my-1 h-px bg-white/10" />
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsUserMenuOpen(false)
-                      openProfileModal()
-                    }}
-                    className="flex w-full items-center rounded-xl px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
-                    role="menuitem"
-                  >
-                    {"Profil d\u00fczenle"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsUserMenuOpen(false)
-                      handleLogout()
-                    }}
-                    disabled={isLogoutLoading}
-                    className="flex w-full items-center rounded-xl px-3 py-2 text-sm font-semibold text-rose-100 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
-                    role="menuitem"
-                  >
-                    {"\u00C7\u0131k\u0131\u015F"}
-                  </button>
+                <span className="font-mono text-[10px] uppercase tracking-[0.28em] text-slate-400">
+                  Manage
+                </span>
+              </div>
+            </div>
+
+            <div className="order-last w-full sm:order-none sm:flex-1">
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 sm:overflow-visible sm:pb-0">
+                <div className="flex items-center gap-2 whitespace-nowrap pr-2">
+                  <span className="hidden h-7 w-px bg-white/10 sm:block" />
+                  {canViewMessages && (
+                    <button
+                      type="button"
+                      onClick={() => handleTabSwitch("messages")}
+                      className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+                        activeTab === "messages"
+                          ? "bg-accent-500/20 text-accent-50 shadow-glow"
+                          : "bg-white/5 text-slate-200 hover:bg-white/10"
+                      }`}
+                    >
+                      Mesajlar
+                    </button>
+                  )}
+                  {canViewTasks && (
+                    <button
+                      type="button"
+                      onClick={() => handleTabSwitch("tasks")}
+                      className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+                        activeTab === "tasks"
+                          ? "bg-accent-500/20 text-accent-50 shadow-glow"
+                          : "bg-white/5 text-slate-200 hover:bg-white/10"
+                      }`}
+                    >
+                      {"G\u00f6rev"}
+                    </button>
+                  )}
+                  {canViewProblems && (
+                    <button
+                      type="button"
+                      onClick={() => handleTabSwitch("problems")}
+                      className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+                        activeTab === "problems"
+                          ? "bg-accent-500/20 text-accent-50 shadow-glow"
+                          : "bg-white/5 text-slate-200 hover:bg-white/10"
+                      }`}
+                    >
+                      {"Problemli M\u00fc\u015fteriler"}
+                    </button>
+                  )}
+                  {canViewLists && (
+                    <button
+                      type="button"
+                      onClick={() => handleTabSwitch("lists")}
+                      className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+                        activeTab === "lists"
+                          ? "bg-accent-500/20 text-accent-50 shadow-glow"
+                          : "bg-white/5 text-slate-200 hover:bg-white/10"
+                      }`}
+                    >
+                      Listeler
+                    </button>
+                  )}
+                  {canViewStock && (
+                    <button
+                      type="button"
+                      onClick={() => handleTabSwitch("stock")}
+                      className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+                        activeTab === "stock"
+                          ? "bg-accent-500/20 text-accent-50 shadow-glow"
+                          : "bg-white/5 text-slate-200 hover:bg-white/10"
+                      }`}
+                    >
+                      Stok
+                    </button>
+                  )}
+                  {canViewAdmin && (
+                    <button
+                      type="button"
+                      onClick={() => handleTabSwitch("admin")}
+                      className={`inline-flex items-center justify-center rounded-2xl px-4 py-2 text-sm font-semibold transition ${
+                        activeTab === "admin"
+                          ? "bg-accent-500/20 text-accent-50 shadow-glow"
+                          : "bg-white/5 text-slate-200 hover:bg-white/10"
+                      }`}
+                    >
+                      Admin
+                    </button>
+                  )}
                 </div>
-              )}
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 sm:ml-auto">
+              {themeToggleButton}
+              <div className="relative" ref={userMenuRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsUserMenuOpen((prev) => !prev)}
+                  className={`inline-flex h-9 items-center gap-1.5 rounded-xl bg-white/5 px-2.5 text-sm font-semibold text-slate-200 transition hover:bg-white/10 ${
+                    isUserMenuOpen ? "bg-white/10" : ""
+                  }`}
+                  aria-haspopup="menu"
+                  aria-expanded={isUserMenuOpen}
+                  aria-label={"Kullan\u0131c\u0131 men\u00fc\u00fc"}
+                >
+                  <span className="flex h-7 w-7 items-center justify-center rounded-full bg-accent-500/20 text-[11px] font-semibold uppercase text-accent-50 shadow-glow">
+                    {userInitial}
+                  </span>
+                  <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    className={`h-3.5 w-3.5 transition ${isUserMenuOpen ? "rotate-180" : ""}`}
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </button>
+                {isUserMenuOpen && (
+                  <div
+                    className="absolute right-0 mt-2 w-56 rounded-2xl border border-white/10 bg-ink-900/95 p-2 shadow-card backdrop-blur"
+                    role="menu"
+                  >
+                    <div className="px-3 py-2">
+                      <p className="text-[10px] uppercase tracking-[0.3em] text-slate-500">
+                        {"Ho\u015f geldin"}
+                      </p>
+                      <p className="text-sm font-semibold text-slate-100" title={userName}>
+                        {userName}
+                      </p>
+                    </div>
+                    <div className="my-1 h-px bg-white/10" />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsUserMenuOpen(false)
+                        openProfileModal()
+                      }}
+                      className="flex w-full items-center rounded-xl px-3 py-2 text-sm font-semibold text-slate-200 transition hover:bg-white/10"
+                      role="menuitem"
+                    >
+                      {"Profil d\u00fczenle"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setIsUserMenuOpen(false)
+                        handleLogout()
+                      }}
+                      disabled={isLogoutLoading}
+                      className="flex w-full items-center rounded-xl px-3 py-2 text-sm font-semibold text-rose-100 transition hover:bg-rose-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                      role="menuitem"
+                    >
+                      {"\u00C7\u0131k\u0131\u015F"}
+                    </button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         </div>
