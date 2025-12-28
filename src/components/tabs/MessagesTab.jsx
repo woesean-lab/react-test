@@ -100,7 +100,7 @@ export default function MessagesTab({
   }
 
   return (
-    <>
+    <div className="space-y-6">
       <header className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-6 shadow-card">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-3">
@@ -473,6 +473,6 @@ export default function MessagesTab({
           </div>
         </div>
       </div>
-    </>
+    </div>
   )
 }
