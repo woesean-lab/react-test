@@ -349,6 +349,358 @@ function App() {
   const canManageRoles = hasAnyPermission([PERMISSIONS.adminRolesManage, PERMISSIONS.adminManage])
   const canManageUsers = hasAnyPermission([PERMISSIONS.adminUsersManage, PERMISSIONS.adminManage])
   const canViewAdmin = canManageRoles || canManageUsers
+  const tabOrder = useMemo(
+    () =>
+      [
+        canViewMessages && "messages",
+        canViewTasks && "tasks",
+        canViewProblems && "problems",
+        canViewLists && "lists",
+        canViewStock && "stock",
+        canViewAdmin && "admin",
+      ].filter(Boolean),
+    [canViewMessages, canViewTasks, canViewProblems, canViewLists, canViewStock, canViewAdmin],
+  )
+  const slideDurationMs = 260
+  const slideEasing = "cubic-bezier(0.22, 1, 0.36, 1)"
+  const slideDistance = 100
+  const prevTabRef = useRef(activeTab)
+  const transitionTimerRef = useRef(null)
+  const transitionRafRef = useRef(null)
+  const [tabTransition, setTabTransition] = useState(() => ({
+    current: activeTab,
+    prev: null,
+    direction: 1,
+    phase: "idle",
+  }))
+
+  useEffect(() => {
+    if (activeTab === prevTabRef.current) return
+    const prevTab = prevTabRef.current
+    prevTabRef.current = activeTab
+
+    const prevIndex = tabOrder.indexOf(prevTab)
+    const nextIndex = tabOrder.indexOf(activeTab)
+    const direction = prevIndex === -1 || nextIndex === -1 ? 1 : nextIndex > prevIndex ? 1 : -1
+
+    setTabTransition({
+      current: activeTab,
+      prev: prevTab,
+      direction,
+      phase: "prepare",
+    })
+  }, [activeTab, tabOrder])
+
+  useEffect(() => {
+    if (tabTransition.phase !== "prepare") return
+    if (transitionRafRef.current) {
+      cancelAnimationFrame(transitionRafRef.current)
+    }
+    transitionRafRef.current = requestAnimationFrame(() => {
+      setTabTransition((prev) =>
+        prev.phase === "prepare" ? { ...prev, phase: "animate" } : prev,
+      )
+    })
+    return () => {
+      if (transitionRafRef.current) {
+        cancelAnimationFrame(transitionRafRef.current)
+      }
+    }
+  }, [tabTransition.phase])
+
+  useEffect(() => {
+    if (tabTransition.phase !== "animate") return
+    if (transitionTimerRef.current) {
+      clearTimeout(transitionTimerRef.current)
+    }
+    transitionTimerRef.current = setTimeout(() => {
+      setTabTransition((prev) => ({ ...prev, prev: null, phase: "idle" }))
+    }, slideDurationMs)
+    return () => {
+      if (transitionTimerRef.current) {
+        clearTimeout(transitionTimerRef.current)
+      }
+    }
+  }, [slideDurationMs, tabTransition.phase])
+
+  const renderTab = (tabKey) => {
+    switch (tabKey) {
+      case "messages":
+        if (!canViewMessages) return null
+        return (
+          <MessagesTab
+            isLoading={showLoading}
+            panelClass={panelClass}
+            canCreateTemplates={canCreateMessages}
+            canEditTemplates={canEditMessages}
+            canDeleteTemplates={canDeleteMessages}
+            canManageCategories={canManageMessageCategories}
+            templateCountText={templateCountText}
+            categoryCountText={categoryCountText}
+            selectedCategoryText={selectedCategoryText}
+            activeTemplate={activeTemplate}
+            selectedCategory={selectedCategory}
+            getCategoryClass={getCategoryClass}
+            isEditingActiveTemplate={isEditingActiveTemplate}
+            handleActiveTemplateEditCancel={handleActiveTemplateEditCancel}
+            handleActiveTemplateEditStart={handleActiveTemplateEditStart}
+            handleDeleteWithConfirm={handleDeleteWithConfirm}
+            confirmTarget={confirmTarget}
+            selectedTemplate={selectedTemplate}
+            isTemplateSaving={isTemplateSaving}
+            activeTemplateDraft={activeTemplateDraft}
+            setActiveTemplateDraft={setActiveTemplateDraft}
+            activeTemplateLength={activeTemplateLength}
+            handleActiveTemplateEditSave={handleActiveTemplateEditSave}
+            categories={categories}
+            groupedTemplates={groupedTemplates}
+            openCategories={openCategories}
+            setOpenCategories={setOpenCategories}
+            handleTemplateChange={handleTemplateChange}
+            newCategory={newCategory}
+            setNewCategory={setNewCategory}
+            handleCategoryAdd={handleCategoryAdd}
+            confirmCategoryTarget={confirmCategoryTarget}
+            handleCategoryDeleteWithConfirm={handleCategoryDeleteWithConfirm}
+            title={title}
+            setTitle={setTitle}
+            messageLength={messageLength}
+            message={message}
+            setMessage={setMessage}
+            handleAdd={handleAdd}
+            setSelectedCategory={setSelectedCategory}
+          />
+        )
+      case "tasks":
+        if (!canViewTasks) return null
+        return (
+          <TasksTab
+            isLoading={isTasksTabLoading}
+            panelClass={panelClass}
+            canCreateTasks={canCreateTasks}
+            canUpdateTasks={canUpdateTasks}
+            canProgressTasks={canProgressTasks}
+            canDeleteTasks={canDeleteTasks}
+            taskCountText={taskCountText}
+            taskStats={taskStats}
+            taskStatusMeta={taskStatusMeta}
+            taskGroups={taskGroups}
+            taskDragState={taskDragState}
+            setTaskDragState={setTaskDragState}
+            handleTaskDragOver={handleTaskDragOver}
+            handleTaskDrop={handleTaskDrop}
+            handleTaskDragStart={handleTaskDragStart}
+            handleTaskDragEnd={handleTaskDragEnd}
+            isTaskDueToday={isTaskDueToday}
+            getTaskDueLabel={getTaskDueLabel}
+            handleTaskAdvance={handleTaskAdvance}
+            openTaskDetail={openTaskDetail}
+            openTaskEdit={openTaskEdit}
+            handleTaskReopen={handleTaskReopen}
+            handleTaskDeleteWithConfirm={handleTaskDeleteWithConfirm}
+            confirmTaskDelete={confirmTaskDelete}
+            taskForm={taskForm}
+            setTaskForm={setTaskForm}
+            activeUser={activeUser}
+            taskUsers={taskUsers}
+            openNoteModal={openNoteModal}
+            taskDueTypeOptions={taskDueTypeOptions}
+            taskFormRepeatLabels={taskFormRepeatLabels}
+            taskRepeatDays={taskRepeatDays}
+            normalizeRepeatDays={normalizeRepeatDays}
+            toggleRepeatDay={toggleRepeatDay}
+            handleTaskAdd={handleTaskAdd}
+            resetTaskForm={resetTaskForm}
+            focusTask={focusTask}
+          />
+        )
+      case "lists":
+        if (!canViewLists) return null
+        return (
+          <ListsTab
+            isLoading={isListsTabLoading}
+            panelClass={panelClass}
+            canCreateList={canCreateLists}
+            canRenameList={canRenameLists}
+            canDeleteList={canDeleteLists}
+            canEditCells={canEditListCells}
+            canEditStructure={canEditListStructure}
+            canSaveList={canEditListCells}
+            listCountText={listCountText}
+            activeList={activeList}
+            activeListId={activeListId}
+            lists={lists}
+            DEFAULT_LIST_COLS={DEFAULT_LIST_COLS}
+            handleListSelect={handleListSelect}
+            listSavedAt={listSavedAt}
+            selectedListRows={selectedListRows}
+            selectedListCols={selectedListCols}
+            handleListDeleteSelectedRows={handleListDeleteSelectedRows}
+            handleListDeleteSelectedColumns={handleListDeleteSelectedColumns}
+            handleListSaveNow={handleListSaveNow}
+            isListSaving={isListSaving}
+            activeListColumnLabels={activeListColumnLabels}
+            handleListColumnSelect={handleListColumnSelect}
+            handleListContextMenu={handleListContextMenu}
+            handleListRowSelect={handleListRowSelect}
+            selectedListCell={selectedListCell}
+            activeListRows={activeListRows}
+            activeListColumns={activeListColumns}
+            getListCellData={getListCellData}
+            editingListCell={editingListCell}
+            setEditingListCell={setEditingListCell}
+            setSelectedListCell={setSelectedListCell}
+            getListCellDisplayValue={getListCellDisplayValue}
+            LIST_CELL_TONE_CLASSES={LIST_CELL_TONE_CLASSES}
+            handleListCellChange={handleListCellChange}
+            handleListPaste={handleListPaste}
+            listName={listName}
+            setListName={setListName}
+            handleListCreate={handleListCreate}
+            listRenameDraft={listRenameDraft}
+            setListRenameDraft={setListRenameDraft}
+            handleListRename={handleListRename}
+            confirmListDelete={confirmListDelete}
+            setConfirmListDelete={setConfirmListDelete}
+            handleListDelete={handleListDelete}
+            canDeleteListRow={canDeleteListRow}
+            canDeleteListColumn={canDeleteListColumn}
+            listContextMenu={listContextMenu}
+            handleListInsertRow={handleListInsertRow}
+            handleListContextMenuClose={handleListContextMenuClose}
+            handleListDeleteRow={handleListDeleteRow}
+            handleListInsertColumn={handleListInsertColumn}
+            handleListDeleteColumn={handleListDeleteColumn}
+          />
+        )
+      case "stock":
+        if (!canViewStock) return null
+        return (
+          <StockTab
+            isLoading={isStockTabLoading}
+            panelClass={panelClass}
+            canCreateProducts={canCreateProducts}
+            canEditProducts={canEditProducts}
+            canDeleteProducts={canDeleteProducts}
+            canReorderProducts={canReorderProducts}
+            canAddStocks={canAddStocks}
+            canEditStocks={canEditStocks}
+            canDeleteStocks={canDeleteStocks}
+            canChangeStockStatus={canChangeStockStatus}
+            canCopyStocks={canCopyStocks}
+            canBulkStocks={canBulkStocks}
+            stockSummary={stockSummary}
+            products={products}
+            productSearch={productSearch}
+            setProductSearch={setProductSearch}
+            filteredProducts={filteredProducts}
+            splitStocks={splitStocks}
+            dragState={dragState}
+            handleDragStart={handleDragStart}
+            handleDragOver={handleDragOver}
+            handleDrop={handleDrop}
+            handleDragEnd={handleDragEnd}
+            lastDeleted={lastDeleted}
+            handleUndoDelete={handleUndoDelete}
+            openStockModal={openStockModal}
+            openProducts={openProducts}
+            toggleProductOpen={toggleProductOpen}
+            templates={templates}
+            handleProductCopyMessage={handleProductCopyMessage}
+            editingProduct={editingProduct}
+            handleEditStart={handleEditStart}
+            handleEditChange={handleEditChange}
+            handleEditSave={handleEditSave}
+            handleEditCancel={handleEditCancel}
+            confirmProductTarget={confirmProductTarget}
+            confirmStockTarget={confirmStockTarget}
+            handleProductDeleteWithConfirm={handleProductDeleteWithConfirm}
+            bulkCount={bulkCount}
+            setBulkCount={setBulkCount}
+            handleBulkCopyAndMarkUsed={handleBulkCopyAndMarkUsed}
+            handleBulkCopyAndDelete={handleBulkCopyAndDelete}
+            deletingStocks={deletingStocks}
+            usingStocks={usingStocks}
+            highlightStocks={highlightStocks}
+            isStockTextSelectingRef={isStockTextSelectingRef}
+            editingStocks={editingStocks}
+            savingStocks={savingStocks}
+            handleStockEditChange={handleStockEditChange}
+            handleStockEditSave={handleStockEditSave}
+            handleStockEditCancel={handleStockEditCancel}
+            handleStockCopy={handleStockCopy}
+            handleStockEditStart={handleStockEditStart}
+            handleStockStatusUpdate={handleStockStatusUpdate}
+            handleStockDeleteWithConfirm={handleStockDeleteWithConfirm}
+            STOCK_STATUS={STOCK_STATUS}
+            usedBulkCount={usedBulkCount}
+            setUsedBulkCount={setUsedBulkCount}
+            handleUsedBulkDelete={handleUsedBulkDelete}
+            productForm={productForm}
+            setProductForm={setProductForm}
+            handleProductAdd={handleProductAdd}
+            stockForm={stockForm}
+            setStockForm={setStockForm}
+            handleStockAdd={handleStockAdd}
+            resetStockForm={resetStockForm}
+          />
+        )
+      case "problems":
+        if (!canViewProblems) return null
+        return (
+          <ProblemsTab
+            isLoading={isProblemsTabLoading}
+            panelClass={panelClass}
+            canCreate={canCreateProblems}
+            canResolve={canResolveProblems}
+            canDelete={canDeleteProblems}
+            openProblems={openProblems}
+            resolvedProblems={resolvedProblems}
+            problems={problems}
+            handleProblemCopy={handleProblemCopy}
+            handleProblemResolve={handleProblemResolve}
+            handleProblemDeleteWithConfirm={handleProblemDeleteWithConfirm}
+            confirmProblemTarget={confirmProblemTarget}
+            handleProblemReopen={handleProblemReopen}
+            problemUsername={problemUsername}
+            setProblemUsername={setProblemUsername}
+            problemIssue={problemIssue}
+            setProblemIssue={setProblemIssue}
+            handleProblemAdd={handleProblemAdd}
+          />
+        )
+      case "admin":
+        if (!canViewAdmin) return null
+        return (
+          <AdminTab
+            isLoading={isAdminTabLoading}
+            panelClass={panelClass}
+            canManageRoles={canManageRoles}
+            canManageUsers={canManageUsers}
+            activeUser={activeUser}
+            roles={roles}
+            users={users}
+            roleDraft={roleDraft}
+            setRoleDraft={setRoleDraft}
+            userDraft={userDraft}
+            setUserDraft={setUserDraft}
+            confirmRoleDelete={confirmRoleDelete}
+            confirmUserDelete={confirmUserDelete}
+            handleRoleEditStart={handleRoleEditStart}
+            handleRoleEditCancel={handleRoleEditCancel}
+            toggleRolePermission={toggleRolePermission}
+            handleRoleSave={handleRoleSave}
+            handleRoleDeleteWithConfirm={handleRoleDeleteWithConfirm}
+            handleUserEditStart={handleUserEditStart}
+            handleUserEditCancel={handleUserEditCancel}
+            handleUserSave={handleUserSave}
+            handleUserDeleteWithConfirm={handleUserDeleteWithConfirm}
+          />
+        )
+      default:
+        return null
+    }
+  }
   if (isAuthChecking) {
     return null
   }
@@ -451,6 +803,32 @@ function App() {
         />
       </div>
     )
+  }
+
+  const currentTabContent = renderTab(tabTransition.current)
+  const prevTabContent = tabTransition.prev ? renderTab(tabTransition.prev) : null
+  const isPreparing = tabTransition.phase === "prepare"
+  const isAnimating = tabTransition.phase === "animate"
+  const transition =
+    isAnimating
+      ? `transform ${slideDurationMs}ms ${slideEasing}, opacity ${slideDurationMs}ms ${slideEasing}`
+      : "none"
+  const currentPanelStyle = {
+    transform: isPreparing
+      ? `translateX(${tabTransition.direction * slideDistance}%)`
+      : "translateX(0%)",
+    opacity: isPreparing ? 0.6 : 1,
+    transition,
+    willChange: "transform, opacity",
+  }
+  const prevPanelStyle = {
+    transform: isPreparing
+      ? "translateX(0%)"
+      : `translateX(${-tabTransition.direction * slideDistance}%)`,
+    opacity: isPreparing ? 1 : 0.4,
+    transition,
+    pointerEvents: "none",
+    willChange: "transform, opacity",
   }
 
   return (
@@ -625,272 +1003,16 @@ function App() {
             </div>
           </div>
         </div>
-
-        {activeTab === "messages" && canViewMessages && (
-          <MessagesTab
-            isLoading={showLoading}
-            panelClass={panelClass}
-            canCreateTemplates={canCreateMessages}
-            canEditTemplates={canEditMessages}
-            canDeleteTemplates={canDeleteMessages}
-            canManageCategories={canManageMessageCategories}
-            templateCountText={templateCountText}
-            categoryCountText={categoryCountText}
-            selectedCategoryText={selectedCategoryText}
-            activeTemplate={activeTemplate}
-            selectedCategory={selectedCategory}
-            getCategoryClass={getCategoryClass}
-            isEditingActiveTemplate={isEditingActiveTemplate}
-            handleActiveTemplateEditCancel={handleActiveTemplateEditCancel}
-            handleActiveTemplateEditStart={handleActiveTemplateEditStart}
-            handleDeleteWithConfirm={handleDeleteWithConfirm}
-            confirmTarget={confirmTarget}
-            selectedTemplate={selectedTemplate}
-            isTemplateSaving={isTemplateSaving}
-            activeTemplateDraft={activeTemplateDraft}
-            setActiveTemplateDraft={setActiveTemplateDraft}
-            activeTemplateLength={activeTemplateLength}
-            handleActiveTemplateEditSave={handleActiveTemplateEditSave}
-            categories={categories}
-            groupedTemplates={groupedTemplates}
-            openCategories={openCategories}
-            setOpenCategories={setOpenCategories}
-            handleTemplateChange={handleTemplateChange}
-            newCategory={newCategory}
-            setNewCategory={setNewCategory}
-            handleCategoryAdd={handleCategoryAdd}
-            confirmCategoryTarget={confirmCategoryTarget}
-            handleCategoryDeleteWithConfirm={handleCategoryDeleteWithConfirm}
-            title={title}
-            setTitle={setTitle}
-            messageLength={messageLength}
-            message={message}
-            setMessage={setMessage}
-            handleAdd={handleAdd}
-            setSelectedCategory={setSelectedCategory}
-          />
-        )}
-
-        {activeTab === "tasks" && canViewTasks && (
-          <TasksTab
-            isLoading={isTasksTabLoading}
-            panelClass={panelClass}
-            canCreateTasks={canCreateTasks}
-            canUpdateTasks={canUpdateTasks}
-            canProgressTasks={canProgressTasks}
-            canDeleteTasks={canDeleteTasks}
-            taskCountText={taskCountText}
-            taskStats={taskStats}
-            taskStatusMeta={taskStatusMeta}
-            taskGroups={taskGroups}
-            taskDragState={taskDragState}
-            setTaskDragState={setTaskDragState}
-            handleTaskDragOver={handleTaskDragOver}
-            handleTaskDrop={handleTaskDrop}
-            handleTaskDragStart={handleTaskDragStart}
-            handleTaskDragEnd={handleTaskDragEnd}
-            isTaskDueToday={isTaskDueToday}
-            getTaskDueLabel={getTaskDueLabel}
-            handleTaskAdvance={handleTaskAdvance}
-            openTaskDetail={openTaskDetail}
-            openTaskEdit={openTaskEdit}
-            handleTaskReopen={handleTaskReopen}
-            handleTaskDeleteWithConfirm={handleTaskDeleteWithConfirm}
-            confirmTaskDelete={confirmTaskDelete}
-            taskForm={taskForm}
-            setTaskForm={setTaskForm}
-            activeUser={activeUser}
-            taskUsers={taskUsers}
-            openNoteModal={openNoteModal}
-            taskDueTypeOptions={taskDueTypeOptions}
-            taskFormRepeatLabels={taskFormRepeatLabels}
-            taskRepeatDays={taskRepeatDays}
-            normalizeRepeatDays={normalizeRepeatDays}
-            toggleRepeatDay={toggleRepeatDay}
-            handleTaskAdd={handleTaskAdd}
-            resetTaskForm={resetTaskForm}
-            focusTask={focusTask}
-          />
-        )}
-
-        {activeTab === "lists" && canViewLists && (
-          <ListsTab
-            isLoading={isListsTabLoading}
-            panelClass={panelClass}
-            canCreateList={canCreateLists}
-            canRenameList={canRenameLists}
-            canDeleteList={canDeleteLists}
-            canEditCells={canEditListCells}
-            canEditStructure={canEditListStructure}
-            canSaveList={canEditListCells}
-            listCountText={listCountText}
-            activeList={activeList}
-            activeListId={activeListId}
-            lists={lists}
-            DEFAULT_LIST_COLS={DEFAULT_LIST_COLS}
-            handleListSelect={handleListSelect}
-            listSavedAt={listSavedAt}
-            selectedListRows={selectedListRows}
-            selectedListCols={selectedListCols}
-            handleListDeleteSelectedRows={handleListDeleteSelectedRows}
-            handleListDeleteSelectedColumns={handleListDeleteSelectedColumns}
-            handleListSaveNow={handleListSaveNow}
-            isListSaving={isListSaving}
-            activeListColumnLabels={activeListColumnLabels}
-            handleListColumnSelect={handleListColumnSelect}
-            handleListContextMenu={handleListContextMenu}
-            handleListRowSelect={handleListRowSelect}
-            selectedListCell={selectedListCell}
-            activeListRows={activeListRows}
-            activeListColumns={activeListColumns}
-            getListCellData={getListCellData}
-            editingListCell={editingListCell}
-            setEditingListCell={setEditingListCell}
-            setSelectedListCell={setSelectedListCell}
-            getListCellDisplayValue={getListCellDisplayValue}
-            LIST_CELL_TONE_CLASSES={LIST_CELL_TONE_CLASSES}
-            handleListCellChange={handleListCellChange}
-            handleListPaste={handleListPaste}
-            listName={listName}
-            setListName={setListName}
-            handleListCreate={handleListCreate}
-            listRenameDraft={listRenameDraft}
-            setListRenameDraft={setListRenameDraft}
-            handleListRename={handleListRename}
-            confirmListDelete={confirmListDelete}
-            setConfirmListDelete={setConfirmListDelete}
-            handleListDelete={handleListDelete}
-            canDeleteListRow={canDeleteListRow}
-            canDeleteListColumn={canDeleteListColumn}
-            listContextMenu={listContextMenu}
-            handleListInsertRow={handleListInsertRow}
-            handleListContextMenuClose={handleListContextMenuClose}
-            handleListDeleteRow={handleListDeleteRow}
-            handleListInsertColumn={handleListInsertColumn}
-            handleListDeleteColumn={handleListDeleteColumn}
-          />
-        )}
-
-        {activeTab === "stock" && canViewStock && (
-          <StockTab
-            isLoading={isStockTabLoading}
-            panelClass={panelClass}
-            canCreateProducts={canCreateProducts}
-            canEditProducts={canEditProducts}
-            canDeleteProducts={canDeleteProducts}
-            canReorderProducts={canReorderProducts}
-            canAddStocks={canAddStocks}
-            canEditStocks={canEditStocks}
-            canDeleteStocks={canDeleteStocks}
-            canChangeStockStatus={canChangeStockStatus}
-            canCopyStocks={canCopyStocks}
-            canBulkStocks={canBulkStocks}
-            stockSummary={stockSummary}
-            products={products}
-            productSearch={productSearch}
-            setProductSearch={setProductSearch}
-            filteredProducts={filteredProducts}
-            splitStocks={splitStocks}
-            dragState={dragState}
-            handleDragStart={handleDragStart}
-            handleDragOver={handleDragOver}
-            handleDrop={handleDrop}
-            handleDragEnd={handleDragEnd}
-            lastDeleted={lastDeleted}
-            handleUndoDelete={handleUndoDelete}
-            openStockModal={openStockModal}
-            openProducts={openProducts}
-            toggleProductOpen={toggleProductOpen}
-            templates={templates}
-            handleProductCopyMessage={handleProductCopyMessage}
-            editingProduct={editingProduct}
-            handleEditStart={handleEditStart}
-            handleEditChange={handleEditChange}
-            handleEditSave={handleEditSave}
-            handleEditCancel={handleEditCancel}
-            confirmProductTarget={confirmProductTarget}
-            confirmStockTarget={confirmStockTarget}
-            handleProductDeleteWithConfirm={handleProductDeleteWithConfirm}
-            bulkCount={bulkCount}
-            setBulkCount={setBulkCount}
-            handleBulkCopyAndMarkUsed={handleBulkCopyAndMarkUsed}
-            handleBulkCopyAndDelete={handleBulkCopyAndDelete}
-            deletingStocks={deletingStocks}
-            usingStocks={usingStocks}
-            highlightStocks={highlightStocks}
-            isStockTextSelectingRef={isStockTextSelectingRef}
-            editingStocks={editingStocks}
-            savingStocks={savingStocks}
-            handleStockEditChange={handleStockEditChange}
-            handleStockEditSave={handleStockEditSave}
-            handleStockEditCancel={handleStockEditCancel}
-            handleStockCopy={handleStockCopy}
-            handleStockEditStart={handleStockEditStart}
-            handleStockStatusUpdate={handleStockStatusUpdate}
-            handleStockDeleteWithConfirm={handleStockDeleteWithConfirm}
-            STOCK_STATUS={STOCK_STATUS}
-            usedBulkCount={usedBulkCount}
-            setUsedBulkCount={setUsedBulkCount}
-            handleUsedBulkDelete={handleUsedBulkDelete}
-            productForm={productForm}
-            setProductForm={setProductForm}
-            handleProductAdd={handleProductAdd}
-            stockForm={stockForm}
-            setStockForm={setStockForm}
-            handleStockAdd={handleStockAdd}
-            resetStockForm={resetStockForm}
-          />
-        )}
-
-        {activeTab === "problems" && canViewProblems && (
-          <ProblemsTab
-            isLoading={isProblemsTabLoading}
-            panelClass={panelClass}
-            canCreate={canCreateProblems}
-            canResolve={canResolveProblems}
-            canDelete={canDeleteProblems}
-            openProblems={openProblems}
-            resolvedProblems={resolvedProblems}
-            problems={problems}
-            handleProblemCopy={handleProblemCopy}
-            handleProblemResolve={handleProblemResolve}
-            handleProblemDeleteWithConfirm={handleProblemDeleteWithConfirm}
-            confirmProblemTarget={confirmProblemTarget}
-            handleProblemReopen={handleProblemReopen}
-            problemUsername={problemUsername}
-            setProblemUsername={setProblemUsername}
-            problemIssue={problemIssue}
-            setProblemIssue={setProblemIssue}
-            handleProblemAdd={handleProblemAdd}
-          />
-        )}
-
-        {activeTab === "admin" && canViewAdmin && (
-          <AdminTab
-            isLoading={isAdminTabLoading}
-            panelClass={panelClass}
-            canManageRoles={canManageRoles}
-            canManageUsers={canManageUsers}
-            activeUser={activeUser}
-            roles={roles}
-            users={users}
-            roleDraft={roleDraft}
-            setRoleDraft={setRoleDraft}
-            userDraft={userDraft}
-            setUserDraft={setUserDraft}
-            confirmRoleDelete={confirmRoleDelete}
-            confirmUserDelete={confirmUserDelete}
-            handleRoleEditStart={handleRoleEditStart}
-            handleRoleEditCancel={handleRoleEditCancel}
-            toggleRolePermission={toggleRolePermission}
-            handleRoleSave={handleRoleSave}
-            handleRoleDeleteWithConfirm={handleRoleDeleteWithConfirm}
-            handleUserEditStart={handleUserEditStart}
-            handleUserEditCancel={handleUserEditCancel}
-            handleUserSave={handleUserSave}
-            handleUserDeleteWithConfirm={handleUserDeleteWithConfirm}
-          />
-        )}
+        <div className="relative" style={{ overflowX: "hidden" }}>
+          {prevTabContent && tabTransition.prev && (
+            <div className="absolute inset-0" style={prevPanelStyle} aria-hidden="true">
+              {prevTabContent}
+            </div>
+          )}
+          <div className="relative" style={currentPanelStyle}>
+            {currentTabContent}
+          </div>
+        </div>
 
         <TaskEditModal
           isOpen={isTaskEditOpen}
