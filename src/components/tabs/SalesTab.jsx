@@ -226,22 +226,23 @@ export default function SalesTab({
                   <div className="flex items-end gap-3">
                     {chart.bars.map((bar, idx) => (
                       <div key={`bar-${idx}`} className="flex flex-1 flex-col items-center justify-end gap-2">
-                        <span
-                          className={`text-[11px] font-semibold ${
-                            bar.isPeak ? "text-emerald-300" : "text-slate-300"
-                          }`}
-                        >
-                          {bar.amount}
-                        </span>
-                        <div className="flex h-36 w-full items-end">
+                        <div className="flex h-36 w-full items-end justify-center">
                           <div
-                            className={`w-full rounded-2xl ${
+                            className={`relative w-full rounded-2xl ${
                               bar.isPeak
                                 ? "bg-emerald-400"
                                 : "bg-slate-600/80"
                             }`}
                             style={{ height: `${bar.heightPercent}%` }}
-                          />
+                          >
+                            <span
+                              className={`absolute -top-5 left-1/2 -translate-x-1/2 text-[11px] font-semibold ${
+                                bar.isPeak ? "text-emerald-300" : "text-slate-300"
+                              }`}
+                            >
+                              {bar.amount}
+                            </span>
+                          </div>
                         </div>
                         <span className="text-[11px] font-medium text-slate-300">
                           {bar.label}
