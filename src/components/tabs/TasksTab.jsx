@@ -258,17 +258,17 @@ export default function TasksTab({
                               )}
                             </div>
                           </div>
+                          <span
+                            className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs ${
+                              isTaskDueToday(task)
+                                ? "bg-rose-500/15 text-rose-100"
+                                : "bg-white/5 text-slate-300"
+                            }`}
+                          >
+                            {"Biti\u015f:"} {getTaskDueLabel(task)}
+                          </span>
                           {isExpanded && (
                             <>
-                              <span
-                                className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs ${
-                                  isTaskDueToday(task)
-                                    ? "bg-rose-500/15 text-rose-100"
-                                    : "bg-white/5 text-slate-300"
-                                }`}
-                              >
-                                {"Biti\u015f:"} {getTaskDueLabel(task)}
-                              </span>
                               <div className="flex flex-wrap gap-2">
                                 {canProgressTasks && status !== "done" && (
                                   <button
