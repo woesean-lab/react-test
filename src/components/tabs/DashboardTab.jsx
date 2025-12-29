@@ -74,68 +74,68 @@ export default function DashboardTab({
     },
     canViewLists && { id: "lists", label: "Listeler", value: listCountText, note: "Aktif" },
   ].filter(Boolean)
+  const headerMetrics = [
+    { id: "modules", label: "Aktif modul", value: moduleCount, note: "Erisilebilir sekmeler" },
+    { id: "alerts", label: "Kritik uyari", value: alerts.length, note: "Goz onunde tut" },
+    canViewTasks
+      ? { id: "tasks", label: "Gorev toplam", value: tasks.total, note: "Yurutulen isler" }
+      : { id: "resolved", label: "Cozulen problem", value: resolvedCount, note: "Son kontrol" },
+  ]
 
   return (
     <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-6 shadow-card">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(90%_120%_at_0%_0%,rgba(34,197,94,0.16),transparent)]" />
-        <div className="pointer-events-none absolute -right-24 -top-16 h-56 w-56 rounded-full bg-emerald-500/15 blur-3xl" />
-        <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
-              Kontrol Merkezi
-            </span>
-            <h1 className="mt-3 font-display text-3xl font-semibold text-white">Genel Durum</h1>
-            <p className="mt-2 text-sm text-slate-200/80">
-              Merhaba {userName}, bugunku operasyonlari tek bakista yonetebilirsin.
-            </p>
-            <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-200">
-              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300">
-                Aktif modul: {moduleCount}
+      <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-950 via-ink-900 to-ink-800 p-6 shadow-card">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(110%_120%_at_0%_0%,rgba(34,197,94,0.18),transparent)]" />
+        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(rgba(148,163,184,0.08)_1px,transparent_1px)] bg-[size:32px_32px] opacity-40" />
+        <div className="pointer-events-none absolute -right-28 -top-20 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl" />
+        <div className="relative space-y-6">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div className="max-w-xl">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
+                Kontrol Merkezi
               </span>
-              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300">
-                Kritik uyari: {alerts.length}
-              </span>
-              {canViewTasks && (
-                <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300">
-                  Gorev toplam: {tasks.total}
-                </span>
-              )}
+              <h1 className="mt-3 font-display text-3xl font-semibold text-white">Genel Durum</h1>
+              <p className="mt-2 text-sm text-slate-200/80">
+                Merhaba {userName}, bugunku operasyonlari tek bakista yonetebilirsin.
+              </p>
             </div>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-            <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-4 shadow-inner">
-              <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400/80 to-emerald-200/30 text-lg font-semibold text-ink-900">
+            <div className="flex flex-wrap items-stretch gap-3">
+              <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400/90 to-emerald-200/40 text-lg font-semibold text-ink-900">
                   {userInitial}
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-white">{userName}</p>
                   <p className="text-xs text-slate-400">{userRole}</p>
+                  <p className="mt-1 text-[10px] uppercase tracking-[0.22em] text-slate-500">
+                    Yetki: {permissionCount}
+                  </p>
                 </div>
               </div>
-              <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-300">
-                <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Yetki</p>
-                  <p className="mt-1 text-sm font-semibold text-white">{permissionCount}</p>
+              <div className="min-w-[200px] rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-slate-300">
+                <div className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Sistem</div>
+                <div className="mt-2 flex items-center gap-2 text-sm text-slate-100">
+                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                  Durum stabil
                 </div>
-                <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
-                  <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Modul</p>
-                  <p className="mt-1 text-sm font-semibold text-white">{moduleCount}</p>
-                </div>
+                {canViewSales && (
+                  <div className="mt-2 text-xs text-slate-400">Son 7 gun satis: {summary.last7Total}</div>
+                )}
+                <div className="mt-1 text-xs text-slate-400">Cozulen problem: {resolvedCount}</div>
               </div>
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-xs text-slate-300">
-              <div className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Sistem</div>
-              <div className="mt-2 flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                Durum stabil
+          </div>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {headerMetrics.map((metric) => (
+              <div
+                key={metric.id}
+                className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner"
+              >
+                <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">{metric.label}</p>
+                <p className="mt-1 text-2xl font-semibold text-white">{metric.value}</p>
+                <p className="text-xs text-slate-500">{metric.note}</p>
               </div>
-              {canViewSales && (
-                <div className="mt-3 text-xs text-slate-400">Son 7 gun satis: {summary.last7Total}</div>
-              )}
-              <div className="mt-1 text-xs text-slate-400">Cozulen problem: {resolvedCount}</div>
-            </div>
+            ))}
           </div>
         </div>
       </div>
