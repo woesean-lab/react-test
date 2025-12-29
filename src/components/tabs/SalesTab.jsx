@@ -230,9 +230,9 @@ export default function SalesTab({
               </div>
             </div>
 
-            <div className="mt-4 rounded-2xl border border-white/10 bg-ink-900/70 p-2 shadow-inner">
+            <div className="mt-4 rounded-2xl border border-white/10 bg-ink-900/70 p-0 shadow-inner">
               {chart ? (
-                <div className="space-y-3">
+                <div className="space-y-2 px-3 pb-3 pt-1">
                   <svg viewBox={`0 0 100 ${chartViewHeight}`} className="h-52 w-full">
                     <defs>
                       <linearGradient id="sales-gradient" x1="0" x2="0" y1="0" y2="1">
