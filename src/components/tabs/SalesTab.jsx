@@ -28,7 +28,7 @@ function SalesSkeleton({ panelClass }) {
       </div>
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.8fr)_minmax(0,0.8fr)]">
         <div className="space-y-6">
-          <div className={`${panelClass} bg-ink-900/60`}>
+          <div className={`${panelClass} bg-ink-900/60 px-5 py-5`}>
             <SkeletonBlock className="h-4 w-36" />
             <SkeletonBlock className="mt-4 h-32 w-full rounded-2xl" />
           </div>
@@ -234,10 +234,10 @@ export default function SalesTab({
               </div>
             </div>
 
-            <div className="mt-4 rounded-2xl border border-white/10 bg-ink-900/70 p-0 shadow-inner">
+            <div className="mt-3 rounded-2xl border border-white/10 bg-ink-900/70 p-0 shadow-inner">
               {chart ? (
                 <div className="space-y-2 px-3 pb-3 pt-1">
-                  <svg viewBox={`0 0 100 ${chartViewHeight}`} className="h-52 w-full">
+                  <svg viewBox={`0 0 100 ${chartViewHeight}`} className="h-44 w-full">
                     <defs>
                       <linearGradient id="sales-area-gradient" x1="0" x2="0" y1="0" y2="1">
                         <stop offset="0%" stopColor="#22c55e" stopOpacity="0.28" />
