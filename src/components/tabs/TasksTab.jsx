@@ -1,4 +1,6 @@
-﻿function SkeletonBlock({ className = "" }) {
+﻿import { useState } from "react"
+
+function SkeletonBlock({ className = "" }) {
   return <div className={`animate-pulse rounded-lg bg-white/10 ${className}`} />
 }
 
@@ -201,6 +203,7 @@ export default function TasksTab({
                     )}
                     {taskGroups[status].map((task) => {
                       const isOwner = activeUser?.username && task.owner === activeUser.username
+                      const isExpanded = expandedTaskId === task.id
                       return (
                         <div
                           key={task.id}
@@ -209,6 +212,9 @@ export default function TasksTab({
                             canProgressTasks ? (event) => handleTaskDragStart(event, task.id) : undefined
                           }
                           onDragEnd={canProgressTasks ? handleTaskDragEnd : undefined}
+                          onClick={() =>
+                            setExpandedTaskId((prev) => (prev === task.id ? null : task.id))
+                          }
                           className={`flex flex-col gap-3 rounded-xl border p-3 shadow-inner transition hover:shadow-glow cursor-grab ${
                             isOwner
                               ? status === "todo"
@@ -238,7 +244,7 @@ export default function TasksTab({
                                   {task.note}
                                 </p>
                               )}
-                              {task.owner && (
+                              {isExpanded && task.owner && (
                                 <span
                                   className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
                                     isOwner
@@ -251,68 +257,87 @@ export default function TasksTab({
                               )}
                             </div>
                           </div>
-                          <span
-                            className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs ${
-                              isTaskDueToday(task)
-                                ? "bg-rose-500/15 text-rose-100"
-                                : "bg-white/5 text-slate-300"
-                            }`}
-                          >
-                            {"Biti\u015f:"} {getTaskDueLabel(task)}
-                          </span>
-                          <div className="flex flex-wrap gap-2">
-                            {canProgressTasks && status !== "done" && (
-                              <button
-                                type="button"
-                                onClick={() => handleTaskAdvance(task.id)}
-                                className="rounded-lg border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50"
+                          {isExpanded && (
+                            <>
+                              <span
+                                className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs ${
+                                  isTaskDueToday(task)
+                                    ? "bg-rose-500/15 text-rose-100"
+                                    : "bg-white/5 text-slate-300"
+                                }`}
                               >
-                                {status === "todo" ? "Ba\u015flat" : "Tamamla"}
-                              </button>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => openTaskDetail(task)}
-                              className="rounded-lg border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50"
-                            >
-                              Detay
-                            </button>
-                            {(canUpdateTasks || canProgressTasks || canDeleteTasks) && (
-                              <>
-                            {canUpdateTasks && (
-                            <button
-                              type="button"
-                              onClick={() => openTaskEdit(task)}
-                              className="rounded-lg border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50"
-                            >
-                              {"D\u00fczenle"}
-                            </button>
-                            )}
-                            {canProgressTasks && status === "done" && (
-                              <button
-                                type="button"
-                                onClick={() => handleTaskReopen(task.id)}
-                                className="rounded-lg border border-amber-300/70 bg-amber-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-amber-50 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
-                              >
-                                Geri al
-                              </button>
-                            )}
-                            {canDeleteTasks && (
-                            <button
-                              type="button"
-                              onClick={() => handleTaskDeleteWithConfirm(task.id)}
-                              className={`rounded-lg border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition ${
-                                confirmTaskDelete === task.id
-                                  ? "border-rose-300 bg-rose-500/25 text-rose-50"
-                                  : "border-rose-400/60 bg-rose-500/10 text-rose-100 hover:border-rose-300 hover:bg-rose-500/20"
-                              }`}
-                            >
-                              {confirmTaskDelete === task.id ? "Emin misin?" : "Sil"}
-                            </button>
-                            )}
-                              </>
-                            )}
-                          </div>
+                                {"Biti\u015f:"} {getTaskDueLabel(task)}
+                              </span>
+                              <div className="flex flex-wrap gap-2">
+                                {canProgressTasks && status !== "done" && (
+                                  <button
+                                    type="button"
+                                    onClick={(event) => {
+                                      event.stopPropagation()
+                                      handleTaskAdvance(task.id)
+                                    }}
+                                    className="rounded-lg border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50"
+                                  >
+                                    {status === "todo" ? "Ba\u015flat" : "Tamamla"}
+                                  </button>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={(event) => {
+                                    event.stopPropagation()
+                                    openTaskDetail(task)
+                                  }}
+                                  className="rounded-lg border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50"
+                                >
+                                  Detay
+                                </button>
+                                {(canUpdateTasks || canProgressTasks || canDeleteTasks) && (
+                                  <>
+                                    {canUpdateTasks && (
+                                      <button
+                                        type="button"
+                                        onClick={(event) => {
+                                          event.stopPropagation()
+                                          openTaskEdit(task)
+                                        }}
+                                        className="rounded-lg border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50"
+                                      >
+                                        {"D\u00fczenle"}
+                                      </button>
+                                    )}
+                                    {canProgressTasks && status === "done" && (
+                                      <button
+                                        type="button"
+                                        onClick={(event) => {
+                                          event.stopPropagation()
+                                          handleTaskReopen(task.id)
+                                        }}
+                                        className="rounded-lg border border-amber-300/70 bg-amber-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-amber-50 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
+                                      >
+                                        Geri al
+                                      </button>
+                                    )}
+                                    {canDeleteTasks && (
+                                      <button
+                                        type="button"
+                                        onClick={(event) => {
+                                          event.stopPropagation()
+                                          handleTaskDeleteWithConfirm(task.id)
+                                        }}
+                                        className={`rounded-lg border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition ${
+                                          confirmTaskDelete === task.id
+                                            ? "border-rose-300 bg-rose-500/25 text-rose-50"
+                                            : "border-rose-400/60 bg-rose-500/10 text-rose-100 hover:border-rose-300 hover:bg-rose-500/20"
+                                        }`}
+                                      >
+                                        {confirmTaskDelete === task.id ? "Emin misin?" : "Sil"}
+                                      </button>
+                                    )}
+                                  </>
+                                )}
+                              </div>
+                            </>
+                          )}
                         </div>
                       )
                     })}
@@ -527,6 +552,7 @@ export default function TasksTab({
     </div>
   )
 }
+
 
 
 
