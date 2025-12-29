@@ -376,9 +376,20 @@ function App() {
   const canManageRoles = hasAnyPermission([PERMISSIONS.adminRolesManage, PERMISSIONS.adminManage])
   const canManageUsers = hasAnyPermission([PERMISSIONS.adminUsersManage, PERMISSIONS.adminManage])
   const canViewAdmin = canManageRoles || canManageUsers
+  const dashboardLabel = (
+    <span className="inline-flex items-center gap-2">
+      <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4">
+        <path
+          d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1v-10.5Z"
+          fill="currentColor"
+        />
+      </svg>
+      <span>Ana</span>
+    </span>
+  )
   const tabItems = useMemo(
     () => [
-      { key: "dashboard", label: "Dashboard", canView: canViewDashboard },
+      { key: "dashboard", label: dashboardLabel, canView: canViewDashboard },
       { key: "messages", label: "Mesajlar", canView: canViewMessages },
       { key: "tasks", label: "G\u00f6rev", canView: canViewTasks },
       { key: "sales", label: "Satış", canView: canViewSales },
@@ -396,6 +407,7 @@ function App() {
       canViewSales,
       canViewStock,
       canViewTasks,
+      dashboardLabel,
     ],
   )
   const visibleTabs = useMemo(() => tabItems.filter((item) => item.canView), [tabItems])
