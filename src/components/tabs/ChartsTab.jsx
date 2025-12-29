@@ -541,21 +541,13 @@ export default function ChartsTab({ isLoading, panelClass }) {
                     <span>Line chart</span>
                     <span>Aralik: {rangeMeta.label}</span>
                   </div>
-                  <div className="mt-4 grid gap-4 md:grid-cols-[minmax(0,0.2fr)_minmax(0,1fr)]">
-                    <div className="flex flex-col justify-between text-xs text-slate-400">
-                      {yTicks.map((tick) => (
-                        <div key={tick.label} className="flex items-center gap-2">
-                          <span className="h-px w-4 bg-white/20" />
-                          <span>{tick.label}</span>
-                        </div>
-                      ))}
-                    </div>
+                  <div className="mt-4">
                     <div className="relative h-60 w-full">
                       <div className="pointer-events-none absolute inset-0 rounded-2xl bg-[radial-gradient(circle_at_top,rgba(58,199,255,0.18),transparent_55%)]" />
                       <svg
                         viewBox={`0 0 ${lineChart.width} ${lineChart.height}`}
                         className="absolute inset-0 h-full w-full"
-                        preserveAspectRatio="xMidYMid meet"
+                        preserveAspectRatio="none"
                         role="img"
                         aria-label="Satis line chart"
                       >
@@ -586,6 +578,18 @@ export default function ChartsTab({ isLoading, panelClass }) {
                             stroke="rgba(255, 255, 255, 0.08)"
                             strokeDasharray="4 5"
                           />
+                        ))}
+                        {yTicks.map((tick) => (
+                          <text
+                            key={`tick-${tick.label}`}
+                            x={lineChart.padding - 10}
+                            y={valueToY(tick.value) + 4}
+                            textAnchor="end"
+                            fontSize="10"
+                            fill="rgba(148,163,184,0.7)"
+                          >
+                            {tick.label}
+                          </text>
                         ))}
                         {values.length > 0 && (
                           <line
