@@ -22,6 +22,19 @@ export default function DashboardTab({
   const resolvedCount = Array.isArray(resolvedProblems) ? resolvedProblems.length : 0
   const stocks = stockSummary || { total: 0, used: 0, empty: 0 }
   const userName = activeUser?.username || "Kullanici"
+  const userRole = activeUser?.role?.name || "Personel"
+  const permissionCount = Array.isArray(activeUser?.role?.permissions)
+    ? activeUser.role.permissions.length
+    : 0
+  const moduleCount = [
+    canViewMessages,
+    canViewTasks,
+    canViewSales,
+    canViewProblems,
+    canViewLists,
+    canViewStock,
+  ].filter(Boolean).length
+  const userInitial = userName.slice(0, 1).toUpperCase() || "K"
   const alerts = [
     canViewProblems && {
       id: "problems",
@@ -66,23 +79,62 @@ export default function DashboardTab({
     <div className="space-y-6">
       <div className="relative overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-6 shadow-card">
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(90%_120%_at_0%_0%,rgba(34,197,94,0.16),transparent)]" />
-        <div className="relative">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div>
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
-                Kontrol Merkezi
+        <div className="pointer-events-none absolute -right-24 -top-16 h-56 w-56 rounded-full bg-emerald-500/15 blur-3xl" />
+        <div className="relative grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_minmax(0,0.85fr)]">
+          <div>
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
+              Kontrol Merkezi
+            </span>
+            <h1 className="mt-3 font-display text-3xl font-semibold text-white">Genel Durum</h1>
+            <p className="mt-2 text-sm text-slate-200/80">
+              Merhaba {userName}, bugunku operasyonlari tek bakista yonetebilirsin.
+            </p>
+            <div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-200">
+              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300">
+                Aktif modul: {moduleCount}
               </span>
-              <h1 className="mt-3 font-display text-3xl font-semibold text-white">Genel Durum</h1>
-              <p className="mt-2 text-sm text-slate-200/80">
-                Merhaba {userName}, bugunku durumun kisa ozetini gorebilirsin.
-              </p>
+              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300">
+                Kritik uyari: {alerts.length}
+              </span>
+              {canViewTasks && (
+                <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300">
+                  Gorev toplam: {tasks.total}
+                </span>
+              )}
             </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-slate-300">
+          </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-4 shadow-inner">
+              <div className="flex items-center gap-3">
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400/80 to-emerald-200/30 text-lg font-semibold text-ink-900">
+                  {userInitial}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">{userName}</p>
+                  <p className="text-xs text-slate-400">{userRole}</p>
+                </div>
+              </div>
+              <div className="mt-3 grid grid-cols-2 gap-2 text-xs text-slate-300">
+                <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Yetki</p>
+                  <p className="mt-1 text-sm font-semibold text-white">{permissionCount}</p>
+                </div>
+                <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+                  <p className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Modul</p>
+                  <p className="mt-1 text-sm font-semibold text-white">{moduleCount}</p>
+                </div>
+              </div>
+            </div>
+            <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-4 text-xs text-slate-300">
               <div className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Sistem</div>
               <div className="mt-2 flex items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
                 Durum stabil
               </div>
+              {canViewSales && (
+                <div className="mt-3 text-xs text-slate-400">Son 7 gun satis: {summary.last7Total}</div>
+              )}
+              <div className="mt-1 text-xs text-slate-400">Cozulen problem: {resolvedCount}</div>
             </div>
           </div>
         </div>
@@ -144,7 +196,7 @@ export default function DashboardTab({
             <div className="mt-4 space-y-3">
               {alerts.length === 0 ? (
                 <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-300 shadow-inner">
-                  Kritik uyarı yok. Sistem dengeli.
+                  Kritik uyari yok. Sistem dengeli.
                 </div>
               ) : (
                 alerts.map((alert) => (
