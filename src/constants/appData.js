@@ -1,18 +1,18 @@
-﻿export const fallbackTemplates = [
+ï»¿export const fallbackTemplates = [
   {
-    label: "Hoş geldin",
-    value: "Hoş geldin! Burada herkese yer var.",
-    category: "Karşılama",
+    label: "HoÅŸ geldin",
+    value: "HoÅŸ geldin! Burada herkese yer var.",
+    category: "KarÅŸÄ±lama",
   },
   {
     label: "Bilgilendirme",
-    value: "Son durum: Görev planlandığı gibi ilerliyor.",
+    value: "Son durum: GÃ¶rev planlandÄ±ÄŸÄ± gibi ilerliyor.",
     category: "Bilgilendirme",
   },
   {
-    label: "Hatırlatma",
-    value: "Unutma: Akşam 18:00 toplantısına hazır ol.",
-    category: "Hatırlatma",
+    label: "HatÄ±rlatma",
+    value: "Unutma: AkÅŸam 18:00 toplantÄ±sÄ±na hazÄ±r ol.",
+    category: "HatÄ±rlatma",
   },
 ]
 
@@ -21,8 +21,8 @@ export const fallbackCategories = Array.from(
 )
 
 export const initialProblems = [
-  { id: 1, username: "@ornek1", issue: "Ödeme ekranda takıldı, 2 kez kart denemiş.", status: "open" },
-  { id: 2, username: "@ornek2", issue: "Teslimat gecikmesi şikayeti.", status: "open" },
+  { id: 1, username: "@ornek1", issue: "Ã–deme ekranda takÄ±ldÄ±, 2 kez kart denemiÅŸ.", status: "open" },
+  { id: 2, username: "@ornek2", issue: "Teslimat gecikmesi ÅŸikayeti.", status: "open" },
 ]
 
 export const initialProducts = [
@@ -38,7 +38,7 @@ export const initialProducts = [
   {
     id: "prd-2",
     name: "Galaxy Pass",
-    note: "Deneme sürümü için",
+    note: "Deneme sÃ¼rÃ¼mÃ¼ iÃ§in",
     stocks: [{ id: "stk-3", code: "XBGP-3M-TRIAL-KEY" }],
   },
   {
@@ -52,8 +52,8 @@ export const initialProducts = [
 export const initialTasks = [
   {
     id: "tsk-1",
-    title: "Haftalık öncelik listesini güncelle",
-    note: "Kritik müşteriler + teslim süreleri",
+    title: "HaftalÄ±k Ã¶ncelik listesini gÃ¼ncelle",
+    note: "Kritik mÃ¼ÅŸteriler + teslim sÃ¼releri",
     owner: "Burak",
     dueType: "date",
     dueDate: "2025-12-29",
@@ -61,8 +61,8 @@ export const initialTasks = [
   },
   {
     id: "tsk-2",
-    title: "Şablon kategorilerini toparla",
-    note: "Genel, satış, destek",
+    title: "Åablon kategorilerini toparla",
+    note: "Genel, satÄ±ÅŸ, destek",
     owner: "Ece",
     dueType: "repeat",
     repeatDays: ["2"],
@@ -70,7 +70,7 @@ export const initialTasks = [
   },
   {
     id: "tsk-3",
-    title: "Haftalık raporu paylaş",
+    title: "HaftalÄ±k raporu paylaÅŸ",
     note: "Cuma 17:00",
     owner: "Tuna",
     dueType: "today",

@@ -36,7 +36,7 @@ export const categoryPalette = [
 
 export const taskStatusMeta = {
   todo: {
-    label: "Yapýlacak",
+    label: "YapÄ±lacak",
     helper: "Planla",
     accent: "text-amber-200",
     badge: "border-amber-300/60 bg-amber-500/15 text-amber-50",
@@ -48,7 +48,7 @@ export const taskStatusMeta = {
     badge: "border-sky-300/60 bg-sky-500/15 text-sky-50",
   },
   done: {
-    label: "Tamamlandý",
+    label: "TamamlandÄ±",
     helper: "Bitenler",
     accent: "text-emerald-200",
     badge: "border-emerald-300/60 bg-emerald-500/15 text-emerald-50",
@@ -56,16 +56,16 @@ export const taskStatusMeta = {
 }
 
 export const taskDueTypeOptions = [
-  { value: "today", label: "Bugün" },
-  { value: "repeat", label: "Tekrarlanabilir gün" },
-  { value: "date", label: "Özel tarih" },
+  { value: "today", label: "BugÃ¼n" },
+  { value: "repeat", label: "Tekrarlanabilir gÃ¼n" },
+  { value: "date", label: "Ã–zel tarih" },
 ]
 
 export const taskRepeatDays = [
   { value: "1", label: "Pazartesi" },
-  { value: "2", label: "Salý" },
-  { value: "3", label: "Çarþamba" },
-  { value: "4", label: "Perþembe" },
+  { value: "2", label: "SalÄ±" },
+  { value: "3", label: "Ã‡arÅŸamba" },
+  { value: "4", label: "PerÅŸembe" },
   { value: "5", label: "Cuma" },
   { value: "6", label: "Cumartesi" },
   { value: "0", label: "Pazar" },
