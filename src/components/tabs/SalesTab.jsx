@@ -123,7 +123,7 @@ export default function SalesTab({
     const bars = chartData.map((item, index) => {
       const amount = Number(item.amount ?? 0)
       const ratio = maxValue > 0 ? amount / maxValue : 0
-      const heightPercent = ratio === 0 ? 4 : Math.max(8, ratio * 100)
+      const heightPercent = ratio === 0 ? 4 : Math.max(8, ratio * 85)
       return {
         amount,
         ratio,
