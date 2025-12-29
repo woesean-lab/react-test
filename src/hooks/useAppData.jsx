@@ -1160,8 +1160,13 @@ export default function useAppData() {
       toast.error("Satis adedi girin.")
       return
     }
-    if (sales.some((sale) => String(sale?.date ?? "").trim() === date)) {
-      toast.error("Ayni tarih zaten var.")
+    const existing = sales.find((sale) => String(sale?.date ?? "").trim() === date)
+    if (existing) {
+      setSales((prev) =>
+        prev.map((sale) => (sale.id === existing.id ? { ...sale, amount } : sale)),
+      )
+      setSalesForm((prev) => ({ ...prev, amount: "" }))
+      toast.success("Satis guncellendi")
       return
     }
     const createdAt = new Date().toISOString()
