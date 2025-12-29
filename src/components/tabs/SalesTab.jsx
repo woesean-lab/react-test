@@ -78,7 +78,6 @@ export default function SalesTab({
   const summary = salesSummary || { total: 0, count: 0, average: 0, last7Total: 0 }
   const salesList = Array.isArray(recentSales) ? recentSales : []
   const chartData = Array.isArray(salesChartData) ? salesChartData : []
-  const chartList = chartData.slice(-6).reverse()
   const rangeMeta = {
     daily: { label: "Gunluk", helper: "Son 14 gunluk kayit" },
     weekly: { label: "Haftalik", helper: "Son 12 haftalik kayit" },
@@ -116,40 +115,27 @@ export default function SalesTab({
 
   const chart = (() => {
     if (chartData.length === 0) return null
-    const width = 100
-    const height = 40
-    const padX = 1
-    const padTop = 7
-    const padBottom = 5
-    const maxValue = Math.max(...chartData.map((item) => item.amount), 0)
-    const span = height - padTop - padBottom
-    const count = chartData.length
-    const step = count > 1 ? (width - padX * 2) / (count - 1) : 0
-    const points = chartData.map((item, index) => {
-      const value = Number(item.amount ?? 0)
-      const ratio = maxValue > 0 ? value / maxValue : 0
-      const x = count > 1 ? padX + index * step : width / 2
-      const y = height - padBottom - ratio * span
-      return { x, y, amount: value }
+    const maxValue = Math.max(...chartData.map((item) => Number(item.amount ?? 0)), 0)
+    let peakIndex = -1
+    chartData.forEach((item, index) => {
+      if (Number(item.amount ?? 0) === maxValue) peakIndex = index
     })
-    const line = points.map((point, idx) => `${idx === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ")
-    const area = `${line} L ${points[points.length - 1].x} ${height - padBottom} L ${points[0].x} ${height - padBottom} Z`
-    const peakIndex = points.findIndex((point) => point.amount === maxValue)
-    const lastIndex = points.length - 1
-    const gridLines = Array.from({ length: 4 }, (_, idx) => padTop + (span / 3) * idx)
-    return { points, line, area, maxValue, gridLines, height, padX, padTop, padBottom, peakIndex, lastIndex }
+    const labelEvery = chartData.length > 10 ? 2 : 1
+    const bars = chartData.map((item, index) => {
+      const amount = Number(item.amount ?? 0)
+      const ratio = maxValue > 0 ? amount / maxValue : 0
+      const heightPercent = ratio === 0 ? 4 : Math.max(8, ratio * 100)
+      return {
+        amount,
+        ratio,
+        heightPercent,
+        label: formatPointLabel(item.date),
+        showLabel: index % labelEvery === 0 || index === chartData.length - 1,
+        isPeak: index === peakIndex,
+      }
+    })
+    return { bars, maxValue }
   })()
-
-  const chartStartLabel = chartData[0]?.date ? formatRangeLabel(chartData[0].date) : ""
-  const lastChartItem = chartData[chartData.length - 1]
-  const chartEndLabel = lastChartItem?.date ? formatRangeLabel(lastChartItem.date) : ""
-  const labelEvery = chartData.length > 10 ? 2 : 1
-  const pointLabels = chartData.map((item, index) => ({
-    label: formatPointLabel(item.date),
-    show: index % labelEvery === 0 || index === chartData.length - 1,
-  }))
-  const chartViewHeight = chart ? chart.height + 8 : 40
-  const chartLabelY = chart ? chart.height + 2.5 : 0
 
   return (
     <div className="space-y-6">
@@ -235,94 +221,42 @@ export default function SalesTab({
               </div>
             </div>
 
-            <div className="mt-3 rounded-2xl border border-white/10 bg-ink-900/70 p-0 shadow-inner">
+            <div className="mt-3 rounded-2xl border border-white/10 bg-white/95 p-4 text-slate-900 shadow-inner">
               {chart ? (
-                <div className="space-y-2 px-3 pb-3 pt-2">
-                  <div className="space-y-2">
-                    <svg viewBox={`0 0 100 ${chartViewHeight}`} className="h-44 w-full">
-                      <defs>
-                        <linearGradient id="sales-area-gradient" x1="0" x2="0" y1="0" y2="1">
-                          <stop offset="0%" stopColor="#22c55e" stopOpacity="0.28" />
-                          <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
-                        </linearGradient>
-                      </defs>
-                      {chart.gridLines.map((y, idx) => (
-                        <line
-                          key={`grid-${idx}`}
-                          x1={chart.padX}
-                          x2={100 - chart.padX}
-                          y1={y}
-                          y2={y}
-                          stroke="#1f2a3a"
-                          strokeWidth="0.6"
-                        />
-                      ))}
-                      <path d={chart.area} fill="url(#sales-area-gradient)" />
-                      {chart.points.map((point, idx) => {
-                        const isFocus = idx === chart.lastIndex || idx === chart.peakIndex
-                        if (!isFocus) return null
-                        const valueText = String(point.amount)
-                        const valueWidth = Math.max(4, valueText.length * 2.3 + 1.6)
-                        const valueHeight = 3.8
-                        const labelY = Math.max(point.y - 4.2, chart.padTop - 0.4)
-                        const rectX = Math.min(
-                          Math.max(point.x - valueWidth / 2, chart.padX),
-                          100 - chart.padX - valueWidth,
-                        )
-                        const rectY = labelY - valueHeight / 2
-                        const textX = rectX + valueWidth / 2
-                        return (
-                          <g key={`val-${idx}`}>
-                            <rect
-                              x={rectX}
-                              y={rectY}
-                              width={valueWidth}
-                              height={valueHeight}
-                              rx="1.2"
-                              fill="#0b1512"
-                              stroke="#1f3a2a"
-                              strokeWidth="0.4"
-                            />
-                            <text
-                              x={textX}
-                              y={labelY}
-                              textAnchor="middle"
-                              fontSize="2.4"
-                              fontWeight="600"
-                              fill="#dcfce7"
-                              dominantBaseline="central"
-                            >
-                              {valueText}
-                            </text>
-                          </g>
-                        )
-                      })}
-                      {chart.points.map((point, idx) => {
-                        const label = pointLabels[idx]
-                        if (!label?.show) return null
-                        return (
-                          <text
-                            key={`lbl-${idx}`}
-                            x={point.x}
-                            y={chartLabelY}
-                            textAnchor="middle"
-                            fontSize="2.6"
-                            fill="#94a3b8"
-                            dominantBaseline="hanging"
-                          >
-                            {label.label}
-                          </text>
-                        )
-                      })}
-                    </svg>
-                    <div className="flex items-center justify-between text-xs text-slate-400">
-                      <span>{chartStartLabel || "-"}</span>
-                      <span>{chartEndLabel || "-"}</span>
-                    </div>
+                <div className="space-y-3">
+                  <div className="flex items-end gap-3">
+                    {chart.bars.map((bar, idx) => (
+                      <div key={`bar-${idx}`} className="flex flex-1 flex-col items-center justify-end gap-2">
+                        <span
+                          className={`text-[11px] font-semibold ${
+                            bar.isPeak ? "text-emerald-600" : "text-slate-500"
+                          }`}
+                        >
+                          {bar.amount}
+                        </span>
+                        <div className="flex h-36 w-full items-end">
+                          <div
+                            className={`w-full rounded-2xl ${
+                              bar.isPeak
+                                ? "bg-emerald-500 shadow-[0_10px_18px_rgba(16,185,129,0.3)]"
+                                : "bg-slate-300"
+                            }`}
+                            style={{ height: `${bar.heightPercent}%` }}
+                          />
+                        </div>
+                        <span
+                          className={`text-[11px] font-medium ${
+                            bar.showLabel ? "text-slate-600" : "text-transparent"
+                          }`}
+                        >
+                          {bar.label}
+                        </span>
+                      </div>
+                    ))}
                   </div>
                 </div>
               ) : (
-                <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-6 text-center text-sm text-slate-400">
+                <div className="rounded-xl border border-slate-200 bg-white px-4 py-6 text-center text-sm text-slate-500">
                   Henuz satis kaydi yok. Ilk satisi ekleyin.
                 </div>
               )}
