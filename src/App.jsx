@@ -86,6 +86,7 @@ function App() {
     isTasksTabLoading,
     taskCountText,
     taskStats,
+    ownedTaskStats,
     taskStatusMeta,
     taskGroups,
     taskDragState,
@@ -742,9 +743,10 @@ function App() {
               templateCountText={templateCountText}
               categoryCountText={categoryCountText}
               taskStats={taskStats}
-                salesSummary={salesSummary}
-                listCountText={listCountText}
-                stockSummary={stockSummary}
+              ownedTaskStats={ownedTaskStats}
+              salesSummary={salesSummary}
+              listCountText={listCountText}
+              stockSummary={stockSummary}
                 openProblems={openProblems}
                 resolvedProblems={resolvedProblems}
                 recentActivity={recentActivity}

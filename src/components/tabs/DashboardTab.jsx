@@ -4,6 +4,7 @@ export default function DashboardTab({
   templateCountText,
   categoryCountText,
   taskStats,
+  ownedTaskStats,
   salesSummary,
   listCountText,
   stockSummary,
@@ -19,7 +20,7 @@ export default function DashboardTab({
   onNavigate,
 }) {
   const summary = salesSummary || { total: 0, count: 0, average: 0, last7Total: 0, yesterdayTotal: 0 }
-  const tasks = taskStats || { total: 0, todo: 0, doing: 0, done: 0 }
+  const tasks = ownedTaskStats || taskStats || { total: 0, todo: 0, doing: 0, done: 0 }
   const openCount = Array.isArray(openProblems) ? openProblems.length : 0
   const resolvedCount = Array.isArray(resolvedProblems) ? resolvedProblems.length : 0
   const stocks = stockSummary || { total: 0, used: 0, empty: 0 }

@@ -813,6 +813,16 @@ export default function useAppData() {
     return { total, done, doing, todo }
   }, [tasks])
 
+  const ownedTaskStats = useMemo(() => {
+    if (!activeUser?.username) return { total: 0, done: 0, doing: 0, todo: 0 }
+    const ownedTasks = tasks.filter((task) => task.owner === activeUser.username)
+    const total = ownedTasks.length
+    const done = ownedTasks.filter((task) => task.status === "done").length
+    const doing = ownedTasks.filter((task) => task.status === "doing").length
+    const todo = ownedTasks.filter((task) => task.status === "todo").length
+    return { total, done, doing, todo }
+  }, [activeUser?.username, tasks])
+
   const taskGroups = useMemo(() => {
     const groups = { todo: [], doing: [], done: [] }
     tasks.forEach((task) => {
@@ -3602,6 +3612,7 @@ export default function useAppData() {
     isTasksTabLoading,
     taskCountText,
     taskStats,
+    ownedTaskStats,
     taskStatusMeta,
     taskGroups,
     taskDragState,
