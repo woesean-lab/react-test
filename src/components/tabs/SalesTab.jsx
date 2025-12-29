@@ -377,9 +377,13 @@ export default function SalesTab({
             <div className="mt-3 rounded-2xl border border-white/10 bg-ink-900/70 p-4 text-slate-100 shadow-inner">
               {chart ? (
                 <div className="space-y-3">
-                  <div className="flex items-end gap-3">
-                    {chart.bars.map((bar, idx) => (
-                      <div key={`bar-${idx}`} className="flex flex-1 flex-col items-center justify-end gap-2">
+                  <div className="-mx-2 overflow-x-auto px-2 pb-2">
+                    <div className="flex min-w-[560px] items-end gap-3">
+                      {chart.bars.map((bar, idx) => (
+                        <div
+                          key={`bar-${idx}`}
+                          className="flex min-w-[32px] flex-1 flex-col items-center justify-end gap-2"
+                        >
                         <div className="flex h-36 w-full items-end justify-center">
                           <div
                             className={`relative w-full rounded-2xl ${
@@ -401,8 +405,9 @@ export default function SalesTab({
                         <span className="text-[11px] font-medium text-slate-300">
                           {bar.label}
                         </span>
-                      </div>
-                    ))}
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               ) : (
