@@ -11,7 +11,6 @@ import {
   PERMISSIONS,
   PRODUCT_ORDER_STORAGE_KEY,
   STOCK_STATUS,
-  TASK_DETAIL_COMMENTS_STORAGE_KEY,
   THEME_STORAGE_KEY,
   categoryPalette,
   panelClass,
@@ -170,16 +169,7 @@ export default function useAppData() {
   const [isNoteModalOpen, setIsNoteModalOpen] = useState(false)
   const [noteModalDraft, setNoteModalDraft] = useState("")
   const [taskDetailTarget, setTaskDetailTarget] = useState(null)
-  const [taskDetailComments, setTaskDetailComments] = useState(() => {
-    if (typeof window === "undefined") return {}
-    try {
-      const stored = localStorage.getItem(TASK_DETAIL_COMMENTS_STORAGE_KEY)
-      return stored ? JSON.parse(stored) : {}
-    } catch (error) {
-      console.warn("Could not read task detail comments", error)
-      return {}
-    }
-  })
+  const [taskDetailComments, setTaskDetailComments] = useState({})
   const noteTextareaRef = useRef(null)
   const noteLineRef = useRef(null)
   const detailNoteRef = useRef(null)
@@ -188,14 +178,6 @@ export default function useAppData() {
   const [isTasksLoading, setIsTasksLoading] = useState(true)
   const taskLoadErrorRef = useRef(false)
 
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    try {
-      localStorage.setItem(TASK_DETAIL_COMMENTS_STORAGE_KEY, JSON.stringify(taskDetailComments))
-    } catch (error) {
-      console.warn("Could not persist task detail comments", error)
-    }
-  }, [taskDetailComments])
 
   const buildSalesForm = () => {
     const today = new Date()
@@ -1320,36 +1302,64 @@ export default function useAppData() {
     detailNoteLineRef.current.scrollTop = event.target.scrollTop
   }
 
+  const fetchTaskDetailComments = useCallback(
+    async (taskId) => {
+      if (!taskId) return
+      try {
+        const res = await apiFetch(`/api/tasks/${taskId}/comments`)
+        if (!res.ok) throw new Error("task_comments_failed")
+        const data = await res.json()
+        setTaskDetailComments((prev) => ({
+          ...prev,
+          [taskId]: Array.isArray(data) ? data : [],
+        }))
+      } catch (error) {
+        console.warn("Task comments fetch failed", error)
+        toast.error("Yorumlar alınamadı (API/DB kontrol edin).")
+      }
+    },
+    [apiFetch],
+  )
+
   const openTaskDetail = (task) => {
     setTaskDetailTarget(task)
+    if (task?.id) fetchTaskDetailComments(task.id)
   }
 
   const closeTaskDetail = () => {
     setTaskDetailTarget(null)
   }
 
-  const handleTaskDetailCommentAdd = (taskId, text) => {
+  const handleTaskDetailCommentAdd = async (taskId, text) => {
     if (!taskId) return null
     const trimmed = (text ?? "").trim()
     if (!trimmed) {
       toast.error("Yorum girin.")
       return null
     }
-    const newComment = {
-      id: `${taskId}-${Date.now()}`,
-      text: trimmed,
-      createdAt: new Date().toISOString(),
+    try {
+      const res = await apiFetch(`/api/tasks/${taskId}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: trimmed }),
+      })
+      if (!res.ok) throw new Error("task_comment_create_failed")
+      const created = await res.json()
+      setTaskDetailComments((prev) => {
+        const safePrev = prev && typeof prev === "object" ? prev : {}
+        const existing = Array.isArray(safePrev[taskId]) ? safePrev[taskId] : []
+        return {
+          ...safePrev,
+          [taskId]: [created, ...existing.filter((item) => item.id !== created.id)],
+        }
+      })
+      toast.success("Yorum eklendi")
+      return created
+    } catch (error) {
+      console.warn("Task comment create failed", error)
+      toast.error("Yorum kaydedilemedi (API/DB kontrol edin).")
+      return null
     }
-    setTaskDetailComments((prev) => {
-      const safePrev = prev && typeof prev === "object" ? prev : {}
-      const existing = Array.isArray(safePrev[taskId]) ? safePrev[taskId] : []
-      return {
-        ...safePrev,
-        [taskId]: [newComment, ...existing],
-      }
-    })
-    toast.success("Yorum eklendi")
-    return newComment
   }
 
   const openTaskEdit = (task) => {

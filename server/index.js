@@ -689,6 +689,25 @@ app.put("/api/profile", async (req, res) => {
 const allowedProblemStatus = new Set(["open", "resolved"])
 const allowedTaskStatus = new Set(["todo", "doing", "done"])
 const allowedTaskDueTypes = new Set(["today", "repeat", "date"])
+
+const canViewAllTasksForUser = (user) => {
+  const permissions = user?.role?.permissions || []
+  return (
+    permissions.includes("admin.roles.manage") ||
+    permissions.includes("admin.users.manage") ||
+    permissions.includes("admin.manage")
+  )
+}
+
+const getTaskForUser = async (user, taskId) => {
+  if (!taskId) return null
+  const task = await prisma.task.findUnique({ where: { id: taskId } })
+  if (!task) return null
+  if (!canViewAllTasksForUser(user) && user?.username && task.owner !== user.username) {
+    return null
+  }
+  return task
+}
 const allowedTaskRepeatDays = new Set(["0", "1", "2", "3", "4", "5", "6"])
 const allowedStockStatus = new Set(["available", "used"])
 
@@ -790,11 +809,7 @@ app.get(
 
 app.get("/api/tasks", async (req, res) => {
   const username = String(req.user?.username ?? "").trim()
-  const permissions = req.user?.role?.permissions || []
-  const canViewAllTasks =
-    permissions.includes("admin.roles.manage") ||
-    permissions.includes("admin.users.manage") ||
-    permissions.includes("admin.manage")
+  const canViewAllTasks = canViewAllTasksForUser(req.user)
   const tasks = await prisma.task.findMany({
     where: !canViewAllTasks && username ? { owner: username } : undefined,
     orderBy: { createdAt: "desc" },
@@ -1013,6 +1028,56 @@ app.put("/api/tasks/:id", async (req, res) => {
     }
     throw error
   }
+})
+
+app.get("/api/tasks/:id/comments", async (req, res) => {
+  const id = String(req.params.id ?? "").trim()
+  if (!id) {
+    res.status(400).json({ error: "invalid id" })
+    return
+  }
+
+  const task = await getTaskForUser(req.user, id)
+  if (!task) {
+    res.status(404).json({ error: "Task not found" })
+    return
+  }
+
+  const comments = await prisma.taskComment.findMany({
+    where: { taskId: id },
+    orderBy: { createdAt: "desc" },
+  })
+  res.json(comments)
+})
+
+app.post("/api/tasks/:id/comments", async (req, res) => {
+  const id = String(req.params.id ?? "").trim()
+  if (!id) {
+    res.status(400).json({ error: "invalid id" })
+    return
+  }
+
+  const text = String(req.body?.text ?? "").trim()
+  if (!text) {
+    res.status(400).json({ error: "text is required" })
+    return
+  }
+
+  const task = await getTaskForUser(req.user, id)
+  if (!task) {
+    res.status(404).json({ error: "Task not found" })
+    return
+  }
+
+  const created = await prisma.taskComment.create({
+    data: {
+      taskId: id,
+      text,
+      authorId: req.user?.id ?? null,
+      authorName: req.user?.username || "Bilinmiyor",
+    },
+  })
+  res.status(201).json(created)
 })
 
 app.delete("/api/tasks/:id", async (req, res) => {
