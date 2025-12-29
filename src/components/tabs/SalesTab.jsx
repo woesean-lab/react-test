@@ -265,6 +265,24 @@ export default function SalesTab({
                       />
                     ))}
                     {chart.points.map((point, idx) => {
+                      const value = chartData[idx]?.amount
+                      if (value === undefined || value === null) return null
+                      const labelY = Math.max(point.y - 3.2, 1.4)
+                      return (
+                        <text
+                          key={`val-${idx}`}
+                          x={point.x}
+                          y={labelY}
+                          textAnchor="middle"
+                          fontSize="2.6"
+                          fill="#cfe9ff"
+                          dominantBaseline="central"
+                        >
+                          {value}
+                        </text>
+                      )
+                    })}
+                    {chart.points.map((point, idx) => {
                       const label = pointLabels[idx]
                       if (!label?.show) return null
                       return (
