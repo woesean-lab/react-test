@@ -197,44 +197,60 @@ export default function DashboardTab({
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {kpisToShow.map((item) => (
-          <div
-            key={item.id}
-            className={`rounded-2xl border border-white/10 bg-gradient-to-br ${item.tone} px-4 py-4 shadow-inner`}
-          >
-            <p className="text-[10px] uppercase tracking-[0.22em] text-slate-200/70">{item.label}</p>
-            <p className="mt-2 text-3xl font-semibold text-white">{item.value}</p>
-            <p className="text-xs text-slate-200/70">{item.hint}</p>
-          </div>
-        ))}
-      </div>
-
-      <div className={`${panelClass} bg-ink-900/55`}>
-        <div className="flex items-center justify-between">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Aksiyonlar</p>
-          <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
-            Hizli giris
-          </span>
-        </div>
-        <div className="mt-4 space-y-2">
-          {actionItems.map((action) => (
-            <button
-              key={action.id}
-              type="button"
-              onClick={() => onOpenTab(action.tab)}
-              className="group flex w-full items-center gap-3 rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 text-left shadow-inner transition hover:border-white/20"
+      <div className="grid gap-4 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,0.9fr)]">
+        <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {kpisToShow.map((item) => (
+            <div
+              key={item.id}
+              className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br ${item.tone} px-4 py-4 shadow-inner`}
             >
-              <span className={`h-8 w-1 rounded-full ${action.accent}`} />
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-white">{action.label}</p>
-                <p className="text-xs text-slate-400">{action.detail}</p>
+              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-white/40 via-white/10 to-transparent opacity-70" />
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-slate-200/70">{item.label}</p>
+                  <p className="mt-2 text-3xl font-semibold text-white">{item.value}</p>
+                </div>
+                <span className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[9px] uppercase tracking-[0.2em] text-slate-200/80">
+                  Ozet
+                </span>
               </div>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500 transition group-hover:text-slate-200">
-                Git
-              </span>
-            </button>
+              <p className="mt-2 text-xs text-slate-200/70">{item.hint}</p>
+            </div>
           ))}
+        </div>
+
+        <div className={`${panelClass} bg-ink-900/55`}>
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Aksiyonlar</p>
+            <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
+              Hizli {actionItems.length}
+            </span>
+          </div>
+          <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70">
+            {actionItems.length === 0 ? (
+              <div className="px-4 py-4 text-sm text-slate-400">Aksiyon bulunamadi.</div>
+            ) : (
+              <div className="divide-y divide-white/5">
+                {actionItems.map((action) => (
+                  <button
+                    key={action.id}
+                    type="button"
+                    onClick={() => onOpenTab(action.tab)}
+                    className="group flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-white/5"
+                  >
+                    <span className={`h-2.5 w-2.5 rounded-full ${action.accent} shadow-glow`} />
+                    <div className="flex-1">
+                      <p className="text-sm font-semibold text-white">{action.label}</p>
+                      <p className="text-xs text-slate-400">{action.detail}</p>
+                    </div>
+                    <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500 transition group-hover:text-slate-200">
+                      Git
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
