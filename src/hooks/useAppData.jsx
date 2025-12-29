@@ -1201,6 +1201,21 @@ export default function useAppData() {
     return true
   }
 
+  const handleSaleUpdateByDate = (currentDate, nextDate, nextAmount) => {
+    const dateKey = String(currentDate ?? "").trim()
+    if (!dateKey) {
+      toast.error("Tarih secin.")
+      return false
+    }
+    const match = sales.find((sale) => String(sale?.date ?? "").trim() === dateKey)
+    if (!match) {
+      toast.error("Kayit bulunamadi.")
+      return false
+    }
+    const finalDate = String(nextDate ?? "").trim() || dateKey
+    return handleSaleUpdate(match.id, finalDate, nextAmount)
+  }
+
   const openNoteModal = (value, onSave) => {
     setNoteModalDraft(value ?? "")
     noteModalTargetRef.current = onSave
@@ -3494,8 +3509,8 @@ export default function useAppData() {
     salesForm,
     setSalesForm,
     handleSaleAdd,
-    handleSaleUpdate,
     salesRecords,
+    handleSaleUpdateByDate,
     isListsTabLoading,
     listCountText,
     activeList,
