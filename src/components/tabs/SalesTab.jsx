@@ -272,7 +272,7 @@ export default function SalesTab({
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
-                  Satis grafigi
+                  Satis Grafigi
                 </p>
                 <p className="text-sm text-slate-400">{activeRange.helper}.</p>
               </div>

@@ -1162,9 +1162,21 @@ export default function useAppData() {
     }
     const existing = sales.find((sale) => String(sale?.date ?? "").trim() === date)
     if (existing) {
-      setSales((prev) =>
-        prev.map((sale) => (sale.id === existing.id ? { ...sale, amount } : sale)),
-      )
+      setSales((prev) => {
+        let kept = false
+        return prev.reduce((acc, sale) => {
+          const saleDate = String(sale?.date ?? "").trim()
+          if (saleDate === date) {
+            if (!kept) {
+              kept = true
+              acc.push({ ...sale, amount })
+            }
+            return acc
+          }
+          acc.push(sale)
+          return acc
+        }, [])
+      })
       setSalesForm((prev) => ({ ...prev, amount: "" }))
       toast.success("Satis guncellendi")
       return
@@ -1222,11 +1234,21 @@ export default function useAppData() {
       toast.error("Kayit bulunamadi.")
       return false
     }
-    setSales((prev) =>
-      prev.map((sale) =>
-        String(sale?.date ?? "").trim() === dateKey ? { ...sale, amount } : sale,
-      ),
-    )
+    setSales((prev) => {
+      let kept = false
+      return prev.reduce((acc, sale) => {
+        const saleDate = String(sale?.date ?? "").trim()
+        if (saleDate === dateKey) {
+          if (!kept) {
+            kept = true
+            acc.push({ ...sale, amount })
+          }
+          return acc
+        }
+        acc.push(sale)
+        return acc
+      }, [])
+    })
     toast.success("Satis guncellendi")
     return true
   }
