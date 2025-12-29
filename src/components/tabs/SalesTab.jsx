@@ -109,7 +109,7 @@ export default function SalesTab({
     if (salesRange === "weekly") {
       const [year, month, day] = value.split("-")
       if (!year || !month || !day) return value
-      return `Wk ${day}.${month}`
+      return `Hafta ${day}.${month}`
     }
     const [year, month, day] = value.split("-")
     if (!year || !month || !day) return value
@@ -150,11 +150,22 @@ export default function SalesTab({
     if (salesList.length === 0) {
       return {
         bestDay: null,
+        worstDay: null,
         bestMonth: null,
         bestYear: null,
         averageDaily: 0,
         totalDays: 0,
         totalSales: 0,
+        last7Total: 0,
+        prev7Total: 0,
+        weeklyTrend: null,
+        last30Total: 0,
+        prev30Total: 0,
+        monthlyTrend: null,
+        peakDaysLast30: 0,
+        maxLast30: 0,
+        maxDeviation: 0,
+        minDeviation: 0,
       }
     }
     const dailyTotals = new Map()
@@ -170,18 +181,31 @@ export default function SalesTab({
     if (dailyTotals.size === 0) {
       return {
         bestDay: null,
+        worstDay: null,
         bestMonth: null,
         bestYear: null,
         averageDaily: 0,
         totalDays: 0,
         totalSales: 0,
+        last7Total: 0,
+        prev7Total: 0,
+        weeklyTrend: null,
+        last30Total: 0,
+        prev30Total: 0,
+        monthlyTrend: null,
+        peakDaysLast30: 0,
+        maxLast30: 0,
+        maxDeviation: 0,
+        minDeviation: 0,
       }
     }
     let bestDay = { date: "", total: -Infinity }
+    let worstDay = { date: "", total: Infinity }
     const monthTotals = new Map()
     const yearTotals = new Map()
     dailyTotals.forEach((total, date) => {
       if (total > bestDay.total) bestDay = { date, total }
+      if (total < worstDay.total) worstDay = { date, total }
       const [year, month] = date.split("-")
       if (year) {
         yearTotals.set(year, (yearTotals.get(year) ?? 0) + total)
@@ -205,13 +229,67 @@ export default function SalesTab({
     })
     const totalDays = dailyTotals.size
     const averageDaily = totalDays > 0 ? Math.round(totalSales / totalDays) : 0
+    const maxDeviation = bestDay.total > -Infinity ? Math.max(0, bestDay.total - averageDaily) : 0
+    const minDeviation = worstDay.total < Infinity ? Math.max(0, averageDaily - worstDay.total) : 0
+    const toKey = (value) => {
+      const year = value.getFullYear()
+      const month = String(value.getMonth() + 1).padStart(2, "0")
+      const day = String(value.getDate()).padStart(2, "0")
+      return `${year}-${month}-${day}`
+    }
+    const shiftDate = (value, days) => {
+      const next = new Date(value)
+      next.setDate(next.getDate() + days)
+      return next
+    }
+    const today = new Date()
+    const todayKey = toKey(today)
+    const last7Start = toKey(shiftDate(today, -6))
+    const prev7Start = toKey(shiftDate(today, -13))
+    const prev7End = toKey(shiftDate(today, -7))
+    const last30Start = toKey(shiftDate(today, -29))
+    const prev30Start = toKey(shiftDate(today, -59))
+    const prev30End = toKey(shiftDate(today, -30))
+    const sumRange = (startKey, endKey) => {
+      let total = 0
+      dailyTotals.forEach((value, date) => {
+        if (date >= startKey && date <= endKey) total += value
+      })
+      return total
+    }
+    const last7Total = sumRange(last7Start, todayKey)
+    const prev7Total = sumRange(prev7Start, prev7End)
+    const weeklyTrend =
+      prev7Total > 0 ? Math.round(((last7Total - prev7Total) / prev7Total) * 100) : null
+    const last30Total = sumRange(last30Start, todayKey)
+    const prev30Total = sumRange(prev30Start, prev30End)
+    const monthlyTrend =
+      prev30Total > 0 ? Math.round(((last30Total - prev30Total) / prev30Total) * 100) : null
+    const last30Values = []
+    dailyTotals.forEach((value, date) => {
+      if (date >= last30Start && date <= todayKey) last30Values.push(value)
+    })
+    const maxLast30 = last30Values.length > 0 ? Math.max(...last30Values) : 0
+    const peakDaysLast30 =
+      maxLast30 > 0 ? last30Values.filter((value) => value === maxLast30).length : 0
     return {
       bestDay: bestDay.total > -Infinity ? bestDay : null,
+      worstDay: worstDay.total < Infinity ? worstDay : null,
       bestMonth,
       bestYear,
       averageDaily,
       totalDays,
       totalSales,
+      last7Total,
+      prev7Total,
+      weeklyTrend,
+      last30Total,
+      prev30Total,
+      monthlyTrend,
+      peakDaysLast30,
+      maxLast30,
+      maxDeviation,
+      minDeviation,
     }
   }, [salesList])
 
@@ -346,19 +424,30 @@ export default function SalesTab({
                 <p className="text-xs text-slate-400">Kısa performans özeti.</p>
               </div>
               <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                Gun: {analytics.totalDays}
+                Gün: {analytics.totalDays}
               </span>
             </div>
-            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-                  En yüksek gun
+                  En yüksek gün
                 </p>
                 <p className="mt-1 text-sm font-semibold text-slate-100">
                   {analytics.bestDay ? formatDate(analytics.bestDay.date) : "-"}
                 </p>
                 <p className="text-xs text-accent-200">
                   {analytics.bestDay ? analytics.bestDay.total : 0}
+                </p>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                  En düşük gün
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-100">
+                  {analytics.worstDay ? formatDate(analytics.worstDay.date) : "-"}
+                </p>
+                <p className="text-xs text-accent-200">
+                  {analytics.worstDay ? analytics.worstDay.total : 0}
                 </p>
               </div>
               <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
@@ -374,7 +463,7 @@ export default function SalesTab({
               </div>
               <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-                  En yüksek yil
+                  En yüksek yıl
                 </p>
                 <p className="mt-1 text-sm font-semibold text-slate-100">
                   {analytics.bestYear ? analytics.bestYear.key : "-"}
@@ -388,15 +477,66 @@ export default function SalesTab({
                   Ortalama günlük
                 </p>
                 <p className="mt-1 text-sm font-semibold text-slate-100">{analytics.averageDaily}</p>
-                <p className="text-xs text-slate-400">Toplam: {analytics.totalSales}</p>
+                <p className="text-xs text-slate-400">
+                  Sapma: +{analytics.maxDeviation} / -{analytics.minDeviation}
+                </p>
               </div>
-              <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner sm:col-span-2">
+              <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                  Haftalık trend
+                </p>
+                <p
+                  className={`mt-1 text-sm font-semibold ${
+                    analytics.weeklyTrend === null
+                      ? "text-slate-200"
+                      : analytics.weeklyTrend >= 0
+                        ? "text-emerald-200"
+                        : "text-rose-200"
+                  }`}
+                >
+                  {analytics.weeklyTrend === null
+                    ? "-"
+                    : `${analytics.weeklyTrend > 0 ? "+" : ""}${analytics.weeklyTrend}%`}
+                </p>
+                <p className="text-xs text-slate-400">
+                  Son 7: {analytics.last7Total} · Önceki 7: {analytics.prev7Total}
+                </p>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                  Aylık trend
+                </p>
+                <p
+                  className={`mt-1 text-sm font-semibold ${
+                    analytics.monthlyTrend === null
+                      ? "text-slate-200"
+                      : analytics.monthlyTrend >= 0
+                        ? "text-emerald-200"
+                        : "text-rose-200"
+                  }`}
+                >
+                  {analytics.monthlyTrend === null
+                    ? "-"
+                    : `${analytics.monthlyTrend > 0 ? "+" : ""}${analytics.monthlyTrend}%`}
+                </p>
+                <p className="text-xs text-slate-400">
+                  Son 30: {analytics.last30Total} · Önceki 30: {analytics.prev30Total}
+                </p>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                  Zirve gün sayısı
+                </p>
+                <p className="mt-1 text-sm font-semibold text-slate-100">{analytics.peakDaysLast30}</p>
+                <p className="text-xs text-slate-400">Maks: {analytics.maxLast30}</p>
+              </div>
+              <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner lg:col-span-3">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
                   Son 7 gün
                 </p>
                 <div className="mt-1 flex items-baseline justify-between">
-                  <p className="text-sm font-semibold text-slate-100">{summary.last7Total}</p>
-                  <p className="text-xs text-slate-400">Kayıt: {summary.count}</p>
+                  <p className="text-sm font-semibold text-slate-100">{analytics.last7Total}</p>
+                  <p className="text-xs text-slate-400">Toplam: {analytics.totalSales}</p>
                 </div>
               </div>
             </div>
@@ -505,7 +645,7 @@ export default function SalesTab({
                       step="1"
                       value={updateAmount}
                       onChange={(e) => setUpdateAmount(e.target.value)}
-                      placeholder="Orn: 48"
+                      placeholder="Örn: 48"
                       className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                     />
                   </div>
