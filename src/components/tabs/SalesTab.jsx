@@ -252,9 +252,9 @@ export default function SalesTab({
                 <div className="space-y-2 px-3 pb-3 pt-1">
                   <svg viewBox={`0 0 100 ${chartViewHeight}`} className="h-52 w-full">
                     <defs>
-                      <linearGradient id="sales-gradient" x1="0" x2="0" y1="0" y2="1">
-                        <stop offset="0%" stopColor="#3ac7ff" stopOpacity="0.35" />
-                        <stop offset="100%" stopColor="#3ac7ff" stopOpacity="0" />
+                      <linearGradient id="sales-bar-gradient" x1="0" x2="0" y1="0" y2="1">
+                        <stop offset="0%" stopColor="#ffd36a" stopOpacity="0.95" />
+                        <stop offset="100%" stopColor="#ff7a45" stopOpacity="0.85" />
                       </linearGradient>
                       <filter id="bar-glow" x="-20%" y="-20%" width="140%" height="160%">
                         <feGaussianBlur stdDeviation="0.9" result="coloredBlur" />
@@ -283,8 +283,8 @@ export default function SalesTab({
                           width={bar.width}
                           height={bar.height}
                           rx={Math.min(1.6, bar.width / 2)}
-                          fill="#3ac7ff"
-                          fillOpacity={0.35 + bar.intensity * 0.55}
+                          fill="url(#sales-bar-gradient)"
+                          fillOpacity={0.65 + bar.intensity * 0.25}
                           filter={bar.isPeak || bar.isLast ? "url(#bar-glow)" : undefined}
                         />
                         <rect
@@ -293,7 +293,7 @@ export default function SalesTab({
                           width={bar.width}
                           height={Math.min(0.8, bar.height)}
                           rx={Math.min(1.6, bar.width / 2)}
-                          fill="#cfefff"
+                          fill="#ffe7b0"
                           fillOpacity={0.9}
                         />
                       </g>
