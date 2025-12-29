@@ -95,6 +95,23 @@ export default function SalesTab({
     }
     return formatDate(value)
   }
+  const formatPointLabel = (value) => {
+    if (!value) return ""
+    if (salesRange === "yearly") return value
+    if (salesRange === "monthly") {
+      const [year, month] = value.split("-")
+      if (!year || !month) return value
+      return `${month}/${year.slice(-2)}`
+    }
+    if (salesRange === "weekly") {
+      const [year, month, day] = value.split("-")
+      if (!year || !month || !day) return value
+      return `Wk ${day}.${month}`
+    }
+    const [year, month, day] = value.split("-")
+    if (!year || !month || !day) return value
+    return `${day}.${month}`
+  }
 
   const chart = (() => {
     if (chartData.length === 0) return null
@@ -113,12 +130,18 @@ export default function SalesTab({
     })
     const line = points.map((point, idx) => `${idx === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ")
     const area = `${line} L ${points[points.length - 1].x} ${height - pad} L ${points[0].x} ${height - pad} Z`
-    return { line, area, maxValue }
+    const gridLines = Array.from({ length: 4 }, (_, idx) => pad + (span / 3) * idx)
+    return { line, area, maxValue, points, gridLines, height, pad }
   })()
 
   const chartStartLabel = chartData[0]?.date ? formatRangeLabel(chartData[0].date) : ""
   const lastChartItem = chartData[chartData.length - 1]
   const chartEndLabel = lastChartItem?.date ? formatRangeLabel(lastChartItem.date) : ""
+  const labelEvery = chartData.length > 10 ? 2 : 1
+  const pointLabels = chartData.map((item, index) => ({
+    label: formatPointLabel(item.date),
+    show: index % labelEvery === 0 || index === chartData.length - 1,
+  }))
 
   return (
     <div className="space-y-6">
@@ -214,13 +237,47 @@ export default function SalesTab({
                         <stop offset="100%" stopColor="#3ac7ff" stopOpacity="0" />
                       </linearGradient>
                     </defs>
+                    {chart.gridLines.map((y, idx) => (
+                      <line
+                        key={`grid-${idx}`}
+                        x1={chart.pad}
+                        x2={100 - chart.pad}
+                        y1={y}
+                        y2={y}
+                        stroke="#1f2a3a"
+                        strokeWidth="0.6"
+                      />
+                    ))}
                     <path d={chart.area} fill="url(#sales-gradient)" />
                     <path d={chart.line} fill="none" stroke="#3ac7ff" strokeWidth="1.4" />
+                    {chart.points.map((point, idx) => (
+                      <circle
+                        key={`pt-${idx}`}
+                        cx={point.x}
+                        cy={point.y}
+                        r={idx === chart.points.length - 1 ? 2.2 : 1.6}
+                        fill="#3ac7ff"
+                        stroke="#0f1625"
+                        strokeWidth="0.6"
+                      />
+                    ))}
                   </svg>
                   <div className="flex items-center justify-between text-xs text-slate-400">
                     <span>{chartStartLabel || "-"}</span>
                     <span>{chartEndLabel || "-"}</span>
                   </div>
+                  {pointLabels.length > 0 && (
+                    <div
+                      className="mt-2 grid gap-1 text-[10px] text-slate-500"
+                      style={{ gridTemplateColumns: `repeat(${pointLabels.length}, minmax(0, 1fr))` }}
+                    >
+                      {pointLabels.map((item, idx) => (
+                        <span key={`lbl-${idx}`} className={item.show ? "" : "opacity-0"}>
+                          {item.label}
+                        </span>
+                      ))}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-6 text-center text-sm text-slate-400">
