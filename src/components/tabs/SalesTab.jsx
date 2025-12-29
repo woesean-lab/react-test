@@ -329,19 +329,30 @@ export default function SalesTab({
               </div>
             </div>
 
-            <div className="mt-4 max-h-72 space-y-3 overflow-auto text-sm text-slate-300">
+            <div className="mt-4 grid max-h-72 grid-cols-1 gap-3 overflow-auto text-sm text-slate-300 sm:grid-cols-2">
               {salesList.length === 0 ? (
-                <p className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-400">
+                <p className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-slate-400 sm:col-span-2">
                   Kayit bulunamadi.
                 </p>
               ) : (
                 salesList.map((sale) => (
                   <div
                     key={sale.id}
-                    className="flex items-center justify-between rounded-xl border border-white/10 bg-ink-900/70 px-3 py-2 text-sm text-slate-200 shadow-inner"
+                    className="group relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-200 shadow-inner"
                   >
-                    <span>{formatDate(sale.date)}</span>
-                    <span className="text-sm font-semibold text-slate-100">{sale.amount}</span>
+                    <div className="absolute inset-y-0 left-0 w-1 bg-emerald-400/70" />
+                    <div className="absolute -right-10 -top-12 h-24 w-24 rounded-full bg-emerald-500/10 opacity-0 blur-2xl transition group-hover:opacity-100" />
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                          Tarih
+                        </p>
+                        <p className="text-sm font-semibold text-slate-100">{formatDate(sale.date)}</p>
+                      </div>
+                      <div className="rounded-full border border-emerald-400/40 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">
+                        {sale.amount}
+                      </div>
+                    </div>
                   </div>
                 ))
               )}
