@@ -1031,6 +1031,39 @@ app.delete("/api/tasks/:id", async (req, res) => {
   }
 })
 
+app.get("/api/sales", async (_req, res) => {
+  const sales = await prisma.sale.findMany({ orderBy: { date: "asc" } })
+  res.json(sales)
+})
+
+app.post("/api/sales", async (req, res) => {
+  const date = String(req.body?.date ?? "").trim()
+  const amount = Number(req.body?.amount)
+  const parsed = new Date(`${date}T00:00:00`)
+
+  if (!date || Number.isNaN(parsed.getTime()) || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    res.status(400).json({ error: "invalid date" })
+    return
+  }
+  if (!Number.isFinite(amount) || !Number.isInteger(amount) || amount <= 0) {
+    res.status(400).json({ error: "invalid amount" })
+    return
+  }
+
+  const existing = await prisma.sale.findUnique({ where: { date } })
+  if (existing) {
+    const updated = await prisma.sale.update({
+      where: { id: existing.id },
+      data: { amount },
+    })
+    res.json(updated)
+    return
+  }
+
+  const created = await prisma.sale.create({ data: { date, amount } })
+  res.status(201).json(created)
+})
+
 app.get("/api/products", async (_req, res) => {
   const products = await prisma.product.findMany({
     orderBy: { createdAt: "desc" },

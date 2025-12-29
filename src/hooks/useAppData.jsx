@@ -10,7 +10,6 @@ import {
   LIST_CELL_TONE_CLASSES,
   PERMISSIONS,
   PRODUCT_ORDER_STORAGE_KEY,
-  SALES_STORAGE_KEY,
   STOCK_STATUS,
   THEME_STORAGE_KEY,
   categoryPalette,
@@ -25,7 +24,6 @@ import {
   fallbackTemplates,
   initialProblems,
   initialProducts,
-  initialSales,
   initialTasks,
 } from "../constants/appData"
 import {
@@ -910,37 +908,43 @@ export default function useAppData() {
     return () => controller.abort()
   }, [activeTab, isAuthed, loadTasks])
 
+  const loadSales = useCallback(
+    async (signal) => {
+      setIsSalesLoading(true)
+      try {
+        const res = await apiFetch("/api/sales", { signal })
+        if (!res.ok) throw new Error("sales_load_failed")
+        const payload = await res.json()
+        setSales(Array.isArray(payload) ? payload : [])
+      } catch (error) {
+        if (error?.name === "AbortError") return
+        console.warn("Could not load sales data", error)
+        toast.error("Satışlar alınamadı (API/DB kontrol edin).")
+        setSales([])
+      } finally {
+        setIsSalesLoading(false)
+      }
+    },
+    [apiFetch],
+  )
+
   useEffect(() => {
     if (!isAuthed || !canViewSales) {
       setSales([])
       setIsSalesLoading(false)
       return
     }
-    setIsSalesLoading(true)
-    try {
-      const stored = localStorage.getItem(SALES_STORAGE_KEY)
-      if (stored) {
-        const parsed = JSON.parse(stored)
-        setSales(Array.isArray(parsed) ? parsed : initialSales)
-      } else {
-        setSales(initialSales)
-      }
-    } catch (error) {
-      console.warn("Could not load sales data", error)
-      setSales(initialSales)
-    } finally {
-      setIsSalesLoading(false)
-    }
-  }, [isAuthed, canViewSales])
+    const controller = new AbortController()
+    loadSales(controller.signal)
+    return () => controller.abort()
+  }, [isAuthed, canViewSales, loadSales])
 
   useEffect(() => {
-    if (!isAuthed || !canViewSales) return
-    try {
-      localStorage.setItem(SALES_STORAGE_KEY, JSON.stringify(sales))
-    } catch (error) {
-      console.warn("Could not save sales data", error)
-    }
-  }, [sales, isAuthed, canViewSales])
+    if (!isAuthed || !canViewSales || activeTab !== "sales") return
+    const controller = new AbortController()
+    loadSales(controller.signal)
+    return () => controller.abort()
+  }, [activeTab, canViewSales, isAuthed, loadSales])
 
   useEffect(() => {
     if (!isAuthed) return
@@ -1148,7 +1152,7 @@ export default function useAppData() {
     return false
   }
 
-  const handleSaleAdd = () => {
+  const handleSaleAdd = async () => {
     const date = String(salesForm.date ?? "").trim()
     const amount = Number(salesForm.amount)
     const parsed = new Date(`${date}T00:00:00`)
@@ -1160,32 +1164,26 @@ export default function useAppData() {
       toast.error("Satış adedi girin.")
       return
     }
-    const existing = sales.find((sale) => String(sale?.date ?? "").trim() === date)
-    if (existing) {
+    try {
+      const res = await apiFetch("/api/sales", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ date, amount }),
+      })
+      if (!res.ok) throw new Error("sales_save_failed")
+      const saved = await res.json()
       setSales((prev) => {
-        let kept = false
-        return prev.reduce((acc, sale) => {
-          const saleDate = String(sale?.date ?? "").trim()
-          if (saleDate === date) {
-            if (!kept) {
-              kept = true
-              acc.push({ ...sale, amount })
-            }
-            return acc
-          }
-          acc.push(sale)
-          return acc
-        }, [])
+        const next = prev.filter(
+          (sale) => sale.id !== saved.id && String(sale?.date ?? "").trim() !== saved.date,
+        )
+        return [...next, saved]
       })
       setSalesForm((prev) => ({ ...prev, amount: "" }))
-      toast.success("Satış güncellendi")
-      return
+      toast.success("Satış kaydedildi")
+    } catch (error) {
+      console.error(error)
+      toast.error("Satış kaydedilemedi (API/DB kontrol edin).")
     }
-    const createdAt = new Date().toISOString()
-    const id = `sale-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
-    setSales((prev) => [...prev, { id, date, amount, createdAt }])
-    setSalesForm((prev) => ({ ...prev, amount: "" }))
-    toast.success("Satış eklendi")
   }
 
   const handleSaleUpdate = (saleId, nextDate, nextAmount) => {
@@ -1205,12 +1203,12 @@ export default function useAppData() {
       return false
     }
     if (sales.some((sale) => sale.id !== saleId && String(sale?.date ?? "").trim() === date)) {
-      toast.error("Ayni tarih zaten var.")
+      toast.error("Aynı tarih zaten var.")
       return false
     }
     const exists = sales.some((sale) => sale.id === saleId)
     if (!exists) {
-      toast.error("Kayit bulunamadi.")
+      toast.error("Kayıt bulunamadı.")
       return false
     }
     setSales((prev) => prev.map((sale) => (sale.id === saleId ? { ...sale, date, amount } : sale)))
