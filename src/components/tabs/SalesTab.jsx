@@ -78,6 +78,7 @@ export default function SalesTab({
   const summary = salesSummary || { total: 0, count: 0, average: 0, last7Total: 0 }
   const salesList = Array.isArray(recentSales) ? recentSales : []
   const chartData = Array.isArray(salesChartData) ? salesChartData : []
+  const chartList = chartData.slice(-6).reverse()
   const rangeMeta = {
     daily: { label: "Gunluk", helper: "Son 14 gunluk kayit" },
     weekly: { label: "Haftalik", helper: "Son 12 haftalik kayit" },
@@ -236,102 +237,127 @@ export default function SalesTab({
 
             <div className="mt-3 rounded-2xl border border-white/10 bg-ink-900/70 p-0 shadow-inner">
               {chart ? (
-                <div className="space-y-2 px-3 pb-3 pt-1">
-                  <svg viewBox={`0 0 100 ${chartViewHeight}`} className="h-44 w-full">
-                    <defs>
-                      <linearGradient id="sales-area-gradient" x1="0" x2="0" y1="0" y2="1">
-                        <stop offset="0%" stopColor="#22c55e" stopOpacity="0.28" />
-                        <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
-                      </linearGradient>
-                    </defs>
-                    {chart.gridLines.map((y, idx) => (
-                      <line
-                        key={`grid-${idx}`}
-                        x1={chart.padX}
-                        x2={100 - chart.padX}
-                        y1={y}
-                        y2={y}
-                        stroke="#1f2a3a"
-                        strokeWidth="0.6"
-                      />
-                    ))}
-                    <path d={chart.area} fill="url(#sales-area-gradient)" />
-                    <path d={chart.line} fill="none" stroke="#22c55e" strokeWidth="1.6" />
-                    {chart.points.map((point, idx) => {
-                      const isFocus = idx === chart.lastIndex || idx === chart.peakIndex
-                      if (!isFocus) return null
-                      return (
-                        <circle
-                          key={`dot-${idx}`}
-                          cx={point.x}
-                          cy={point.y}
-                          r={idx === chart.lastIndex ? 2.4 : 2}
-                          fill="#22c55e"
-                          stroke="#0f1625"
-                          strokeWidth="0.8"
+                <div className="grid gap-4 px-3 pb-3 pt-2 md:grid-cols-[minmax(0,1.6fr)_minmax(0,0.8fr)]">
+                  <div className="space-y-2">
+                    <svg viewBox={`0 0 100 ${chartViewHeight}`} className="h-44 w-full">
+                      <defs>
+                        <linearGradient id="sales-area-gradient" x1="0" x2="0" y1="0" y2="1">
+                          <stop offset="0%" stopColor="#22c55e" stopOpacity="0.28" />
+                          <stop offset="100%" stopColor="#22c55e" stopOpacity="0" />
+                        </linearGradient>
+                      </defs>
+                      {chart.gridLines.map((y, idx) => (
+                        <line
+                          key={`grid-${idx}`}
+                          x1={chart.padX}
+                          x2={100 - chart.padX}
+                          y1={y}
+                          y2={y}
+                          stroke="#1f2a3a"
+                          strokeWidth="0.6"
                         />
-                      )
-                    })}
-                    {chart.points.map((point, idx) => {
-                      const isFocus = idx === chart.lastIndex || idx === chart.peakIndex
-                      if (!isFocus) return null
-                      const valueText = String(point.amount)
-                      const valueWidth = Math.max(4, valueText.length * 2.3 + 1.6)
-                      const valueHeight = 3.8
-                      const labelY = Math.max(point.y - 4.2, chart.padTop - 0.4)
-                      const rectX = Math.min(
-                        Math.max(point.x - valueWidth / 2, chart.padX),
-                        100 - chart.padX - valueWidth,
-                      )
-                      const rectY = labelY - valueHeight / 2
-                      const textX = rectX + valueWidth / 2
-                      return (
-                        <g key={`val-${idx}`}>
-                          <rect
-                            x={rectX}
-                            y={rectY}
-                            width={valueWidth}
-                            height={valueHeight}
-                            rx="1.2"
-                            fill="#0b1512"
-                            stroke="#1f3a2a"
-                            strokeWidth="0.4"
+                      ))}
+                      <path d={chart.area} fill="url(#sales-area-gradient)" />
+                      <path d={chart.line} fill="none" stroke="#22c55e" strokeWidth="1.6" />
+                      {chart.points.map((point, idx) => {
+                        const isFocus = idx === chart.lastIndex || idx === chart.peakIndex
+                        if (!isFocus) return null
+                        return (
+                          <circle
+                            key={`dot-${idx}`}
+                            cx={point.x}
+                            cy={point.y}
+                            r={idx === chart.lastIndex ? 2.4 : 2}
+                            fill="#22c55e"
+                            stroke="#0f1625"
+                            strokeWidth="0.8"
                           />
+                        )
+                      })}
+                      {chart.points.map((point, idx) => {
+                        const isFocus = idx === chart.lastIndex || idx === chart.peakIndex
+                        if (!isFocus) return null
+                        const valueText = String(point.amount)
+                        const valueWidth = Math.max(4, valueText.length * 2.3 + 1.6)
+                        const valueHeight = 3.8
+                        const labelY = Math.max(point.y - 4.2, chart.padTop - 0.4)
+                        const rectX = Math.min(
+                          Math.max(point.x - valueWidth / 2, chart.padX),
+                          100 - chart.padX - valueWidth,
+                        )
+                        const rectY = labelY - valueHeight / 2
+                        const textX = rectX + valueWidth / 2
+                        return (
+                          <g key={`val-${idx}`}>
+                            <rect
+                              x={rectX}
+                              y={rectY}
+                              width={valueWidth}
+                              height={valueHeight}
+                              rx="1.2"
+                              fill="#0b1512"
+                              stroke="#1f3a2a"
+                              strokeWidth="0.4"
+                            />
+                            <text
+                              x={textX}
+                              y={labelY}
+                              textAnchor="middle"
+                              fontSize="2.4"
+                              fontWeight="600"
+                              fill="#dcfce7"
+                              dominantBaseline="central"
+                            >
+                              {valueText}
+                            </text>
+                          </g>
+                        )
+                      })}
+                      {chart.points.map((point, idx) => {
+                        const label = pointLabels[idx]
+                        if (!label?.show) return null
+                        return (
                           <text
-                            x={textX}
-                            y={labelY}
+                            key={`lbl-${idx}`}
+                            x={point.x}
+                            y={chartLabelY}
                             textAnchor="middle"
-                            fontSize="2.4"
-                            fontWeight="600"
-                            fill="#dcfce7"
-                            dominantBaseline="central"
+                            fontSize="2.6"
+                            fill="#94a3b8"
+                            dominantBaseline="hanging"
                           >
-                            {valueText}
+                            {label.label}
                           </text>
-                        </g>
-                      )
-                    })}
-                    {chart.points.map((point, idx) => {
-                      const label = pointLabels[idx]
-                      if (!label?.show) return null
-                      return (
-                        <text
-                          key={`lbl-${idx}`}
-                          x={point.x}
-                          y={chartLabelY}
-                          textAnchor="middle"
-                          fontSize="2.6"
-                          fill="#94a3b8"
-                          dominantBaseline="hanging"
-                        >
-                          {label.label}
-                        </text>
-                      )
-                    })}
-                  </svg>
-                  <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span>{chartStartLabel || "-"}</span>
-                    <span>{chartEndLabel || "-"}</span>
+                        )
+                      })}
+                    </svg>
+                    <div className="flex items-center justify-between text-xs text-slate-400">
+                      <span>{chartStartLabel || "-"}</span>
+                      <span>{chartEndLabel || "-"}</span>
+                    </div>
+                  </div>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between text-xs text-slate-400">
+                      <span className="uppercase tracking-[0.2em]">Mevcut veri</span>
+                      <span>{chartList.length}</span>
+                    </div>
+                    <div className="space-y-2">
+                      {chartList.length === 0 ? (
+                        <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-400">
+                          Veri yok.
+                        </div>
+                      ) : (
+                        chartList.map((item, idx) => (
+                          <div
+                            key={`chart-item-${idx}`}
+                            className="flex items-center justify-between rounded-xl border border-white/10 bg-ink-900/80 px-3 py-2 text-xs text-slate-200 shadow-inner"
+                          >
+                            <span>{formatRangeLabel(item.date)}</span>
+                            <span className="text-sm font-semibold text-emerald-100">{item.amount}</span>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </div>
                 </div>
               ) : (
