@@ -192,7 +192,7 @@ async function ensureDefaults() {
 const app = express()
 app.disable("x-powered-by")
 
-app.use(express.json({ limit: "12mb" }))
+app.use(express.json({ limit: "40mb" }))
 
 const requireAuth = async (req, res, next) => {
   try {
@@ -689,8 +689,8 @@ app.put("/api/profile", async (req, res) => {
 const allowedProblemStatus = new Set(["open", "resolved"])
 const allowedTaskStatus = new Set(["todo", "doing", "done"])
 const allowedTaskDueTypes = new Set(["today", "repeat", "date"])
-const MAX_COMMENT_IMAGES = 3
-const MAX_TASK_NOTE_IMAGES = 3
+const MAX_COMMENT_IMAGES = 10
+const MAX_TASK_NOTE_IMAGES = 10
 const MAX_IMAGE_CHARS = 3_000_000
 
 const normalizeImageList = (imagesRaw, maxImages) => {

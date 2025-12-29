@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { toast } from "react-hot-toast"
 
 export default function NoteModal({
@@ -15,7 +16,8 @@ export default function NoteModal({
 }) {
   if (!isOpen) return null
   const safeImages = Array.isArray(images) ? images : []
-  const maxImages = 3
+  const [zoomImage, setZoomImage] = useState("")
+  const maxImages = 10
   const maxImageBytes = 2_000_000
 
   const handlePaste = (event) => {
@@ -29,7 +31,7 @@ export default function NoteModal({
     }
     const availableSlots = maxImages - safeImages.length
     if (availableSlots <= 0) {
-      toast.error("En fazla 3 görsel ekleyebilirsin.")
+      toast.error("En fazla 10 görsel ekleyebilirsin.")
       return
     }
     const toProcess = imageItems.slice(0, availableSlots)
@@ -49,12 +51,17 @@ export default function NoteModal({
       reader.readAsDataURL(file)
     })
     if (imageItems.length > availableSlots) {
-      toast.error("En fazla 3 görsel ekleyebilirsin.")
+      toast.error("En fazla 10 görsel ekleyebilirsin.")
     }
   }
 
   const handleRemoveImage = (index) => {
     setImages((prev) => prev.filter((_, idx) => idx !== index))
+  }
+
+  const handleZoomClose = (event) => {
+    event.stopPropagation()
+    setZoomImage("")
   }
 
   return (
@@ -111,13 +118,20 @@ export default function NoteModal({
                   key={`${src}-${index}`}
                   className="group relative overflow-hidden rounded-lg border border-white/10 bg-ink-900/70"
                 >
-                  <img
-                    src={src}
-                    alt={`Not görseli ${index + 1}`}
-                    className="h-20 w-full object-cover"
-                    loading="lazy"
-                    decoding="async"
-                  />
+                  <button
+                    type="button"
+                    onClick={() => setZoomImage(src)}
+                    className="block w-full"
+                    aria-label="Görseli büyüt"
+                  >
+                    <img
+                      src={src}
+                      alt={`Not görseli ${index + 1}`}
+                      className="h-20 w-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  </button>
                   <button
                     type="button"
                     onClick={() => handleRemoveImage(index)}
@@ -151,6 +165,30 @@ export default function NoteModal({
           </div>
         </div>
       </div>
+      {zoomImage && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 px-4"
+          onClick={handleZoomClose}
+        >
+          <div
+            className="relative max-h-[90vh] w-full max-w-4xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <img
+              src={zoomImage}
+              alt="Buyutulmus gorsel"
+              className="max-h-[90vh] w-full rounded-2xl border border-white/10 object-contain"
+            />
+            <button
+              type="button"
+              onClick={() => setZoomImage("")}
+              className="absolute right-4 top-4 rounded-full border border-white/10 bg-ink-900/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200"
+            >
+              Kapat
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

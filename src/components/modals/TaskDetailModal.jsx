@@ -22,12 +22,13 @@ export default function TaskDetailModal({
   const comments = Array.isArray(detailComments) ? detailComments : []
   const [detailDraft, setDetailDraft] = useState("")
   const [pendingImages, setPendingImages] = useState([])
+  const [zoomImage, setZoomImage] = useState("")
   const [isSaving, setIsSaving] = useState(false)
   const canAddComment = Boolean(canEdit && onDetailCommentAdd)
   const canDeleteComment = Boolean(canEdit && onDetailCommentDelete)
   const hasContent = detailDraft.trim().length > 0 || pendingImages.length > 0
   const isDirty = hasContent
-  const maxImages = 3
+  const maxImages = 10
   const maxImageBytes = 2_000_000
 
   useEffect(() => {
@@ -57,7 +58,7 @@ export default function TaskDetailModal({
     }
     const availableSlots = maxImages - pendingImages.length
     if (availableSlots <= 0) {
-      toast.error("En fazla 3 görsel ekleyebilirsin.")
+      toast.error("En fazla 10 görsel ekleyebilirsin.")
       return
     }
     const toProcess = imageItems.slice(0, availableSlots)
@@ -77,12 +78,21 @@ export default function TaskDetailModal({
       reader.readAsDataURL(file)
     })
     if (imageItems.length > availableSlots) {
-      toast.error("En fazla 3 görsel ekleyebilirsin.")
+      toast.error("En fazla 10 görsel ekleyebilirsin.")
     }
   }
 
   const handleRemovePendingImage = (index) => {
     setPendingImages((prev) => prev.filter((_, idx) => idx !== index))
+  }
+
+  const handleZoomOpen = (src) => {
+    setZoomImage(src)
+  }
+
+  const handleZoomClose = (event) => {
+    event.stopPropagation()
+    setZoomImage("")
   }
 
   return (
@@ -162,14 +172,24 @@ export default function TaskDetailModal({
               <p className="text-xs uppercase tracking-[0.2em] text-slate-400">Not görselleri</p>
               <div className="mt-3 grid grid-cols-2 gap-2">
                 {detailNoteImages.map((src, index) => (
-                  <img
+                  <button
                     key={`${src}-${index}`}
-                    src={src}
-                    alt={`Not görseli ${index + 1}`}
-                    className="h-28 w-full rounded-lg border border-white/10 object-cover"
-                    loading="lazy"
-                    decoding="async"
-                  />
+                    type="button"
+                    onClick={() => handleZoomOpen(src)}
+                    className="group relative overflow-hidden rounded-lg border border-white/10"
+                    aria-label="Görseli büyüt"
+                  >
+                    <img
+                      src={src}
+                      alt={`Not görseli ${index + 1}`}
+                      className="h-28 w-full object-cover"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <span className="absolute right-2 top-2 rounded-full border border-white/10 bg-ink-900/80 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-200 opacity-0 transition group-hover:opacity-100">
+                      Buyut
+                    </span>
+                  </button>
                 ))}
               </div>
             </div>
@@ -201,13 +221,20 @@ export default function TaskDetailModal({
                     key={`${src}-${index}`}
                     className="group relative overflow-hidden rounded-lg border border-white/10 bg-ink-900/70"
                   >
-                    <img
-                      src={src}
-                      alt={`Yorum görseli ${index + 1}`}
-                      className="h-20 w-full object-cover"
-                      loading="lazy"
-                      decoding="async"
-                    />
+                    <button
+                      type="button"
+                      onClick={() => handleZoomOpen(src)}
+                      className="block w-full"
+                      aria-label="Görseli büyüt"
+                    >
+                      <img
+                        src={src}
+                        alt={`Yorum görseli ${index + 1}`}
+                        className="h-20 w-full object-cover"
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    </button>
                     <button
                       type="button"
                       onClick={() => handleRemovePendingImage(index)}
@@ -254,14 +281,24 @@ export default function TaskDetailModal({
                         {Array.isArray(comment.images) && comment.images.length > 0 && (
                           <div className="grid grid-cols-2 gap-2">
                             {comment.images.map((src, index) => (
-                              <img
+                              <button
                                 key={`${comment.id}-image-${index}`}
-                                src={src}
-                                alt={`Yorum görseli ${index + 1}`}
-                                className="h-24 w-full rounded-lg border border-white/10 object-cover"
-                                loading="lazy"
-                                decoding="async"
-                              />
+                                type="button"
+                                onClick={() => handleZoomOpen(src)}
+                                className="group relative overflow-hidden rounded-lg border border-white/10"
+                                aria-label="Görseli büyüt"
+                              >
+                                <img
+                                  src={src}
+                                  alt={`Yorum görseli ${index + 1}`}
+                                  className="h-24 w-full object-cover"
+                                  loading="lazy"
+                                  decoding="async"
+                                />
+                                <span className="absolute right-2 top-2 rounded-full border border-white/10 bg-ink-900/80 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-200 opacity-0 transition group-hover:opacity-100">
+                                  Buyut
+                                </span>
+                              </button>
                             ))}
                           </div>
                         )}
@@ -289,6 +326,30 @@ export default function TaskDetailModal({
           </div>
         </div>
       </div>
+      {zoomImage && (
+        <div
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/80 px-4"
+          onClick={handleZoomClose}
+        >
+          <div
+            className="relative max-h-[90vh] w-full max-w-4xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <img
+              src={zoomImage}
+              alt="Buyutulmus gorsel"
+              className="max-h-[90vh] w-full rounded-2xl border border-white/10 object-contain"
+            />
+            <button
+              type="button"
+              onClick={() => setZoomImage("")}
+              className="absolute right-4 top-4 rounded-full border border-white/10 bg-ink-900/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200"
+            >
+              Kapat
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
