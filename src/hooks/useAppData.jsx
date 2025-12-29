@@ -1212,13 +1212,23 @@ export default function useAppData() {
       toast.error("Tarih secin.")
       return false
     }
-    const match = sales.find((sale) => String(sale?.date ?? "").trim() === dateKey)
-    if (!match) {
+    const amount = Number(nextAmount)
+    if (!Number.isFinite(amount) || !Number.isInteger(amount) || amount <= 0) {
+      toast.error("Satis adedi girin.")
+      return false
+    }
+    const matches = sales.filter((sale) => String(sale?.date ?? "").trim() === dateKey)
+    if (matches.length === 0) {
       toast.error("Kayit bulunamadi.")
       return false
     }
-    const finalDate = String(nextDate ?? "").trim() || dateKey
-    return handleSaleUpdate(match.id, finalDate, nextAmount)
+    setSales((prev) =>
+      prev.map((sale) =>
+        String(sale?.date ?? "").trim() === dateKey ? { ...sale, amount } : sale,
+      ),
+    )
+    toast.success("Satis guncellendi")
+    return true
   }
 
   const openNoteModal = (value, onSave) => {
