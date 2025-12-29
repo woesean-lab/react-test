@@ -77,3 +77,10 @@ export const initialTasks = [
     status: "done",
   },
 ]
+
+export const initialSales = [
+  { id: "sale-1", date: "2025-12-20", amount: 12, createdAt: "2025-12-20T08:00:00.000Z" },
+  { id: "sale-2", date: "2025-12-21", amount: 18, createdAt: "2025-12-21T08:00:00.000Z" },
+  { id: "sale-3", date: "2025-12-22", amount: 9, createdAt: "2025-12-22T08:00:00.000Z" },
+  { id: "sale-4", date: "2025-12-23", amount: 21, createdAt: "2025-12-23T08:00:00.000Z" },
+]

@@ -11,6 +11,7 @@ import MessagesTab from "./components/tabs/MessagesTab"
 import ProblemsTab from "./components/tabs/ProblemsTab"
 import StockTab from "./components/tabs/StockTab"
 import TasksTab from "./components/tabs/TasksTab"
+import SalesTab from "./components/tabs/SalesTab"
 import AdminTab from "./components/tabs/AdminTab"
 import useAppData from "./hooks/useAppData"
 import { PERMISSIONS } from "./constants/appConstants"
@@ -112,6 +113,13 @@ function App() {
     handleTaskAdd,
     resetTaskForm,
     focusTask,
+    isSalesTabLoading,
+    salesSummary,
+    salesChartData,
+    salesForm,
+    setSalesForm,
+    handleSaleAdd,
+    recentSales,
     isListsTabLoading,
     listCountText,
     activeList,
@@ -325,6 +333,8 @@ function App() {
   const canUpdateTasks = hasAnyPermission([PERMISSIONS.tasksUpdate, PERMISSIONS.tasksEdit])
   const canProgressTasks = hasAnyPermission([PERMISSIONS.tasksProgress, PERMISSIONS.tasksEdit])
   const canDeleteTasks = hasAnyPermission([PERMISSIONS.tasksDelete, PERMISSIONS.tasksEdit])
+  const canViewSales = isAuthed
+  const canCreateSales = isAuthed
   const canViewProblems = hasPermission(PERMISSIONS.problemsView)
   const canCreateProblems = hasAnyPermission([PERMISSIONS.problemsCreate, PERMISSIONS.problemsManage])
   const canResolveProblems = hasAnyPermission([PERMISSIONS.problemsResolve, PERMISSIONS.problemsManage])
@@ -362,6 +372,7 @@ function App() {
     () => [
       { key: "messages", label: "Mesajlar", canView: canViewMessages },
       { key: "tasks", label: "G\u00f6rev", canView: canViewTasks },
+      { key: "sales", label: "Satis", canView: canViewSales },
       { key: "problems", label: "Problemli M\u00fc\u015fteriler", canView: canViewProblems },
       { key: "lists", label: "Listeler", canView: canViewLists },
       { key: "stock", label: "Stok", canView: canViewStock },
@@ -372,6 +383,7 @@ function App() {
       canViewLists,
       canViewMessages,
       canViewProblems,
+      canViewSales,
       canViewStock,
       canViewTasks,
     ],
@@ -787,6 +799,22 @@ function App() {
               handleTaskAdd={handleTaskAdd}
               resetTaskForm={resetTaskForm}
               focusTask={focusTask}
+            />
+          </div>
+        )}
+
+        {activeTab === "sales" && canViewSales && (
+          <div className={getTabSlideClass("sales")}>
+            <SalesTab
+              isLoading={isSalesTabLoading}
+              panelClass={panelClass}
+              canCreate={canCreateSales}
+              salesSummary={salesSummary}
+              salesChartData={salesChartData}
+              salesForm={salesForm}
+              setSalesForm={setSalesForm}
+              handleSaleAdd={handleSaleAdd}
+              recentSales={recentSales}
             />
           </div>
         )}

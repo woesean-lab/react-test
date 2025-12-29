@@ -10,6 +10,7 @@ import {
   LIST_CELL_TONE_CLASSES,
   PERMISSIONS,
   PRODUCT_ORDER_STORAGE_KEY,
+  SALES_STORAGE_KEY,
   STOCK_STATUS,
   THEME_STORAGE_KEY,
   categoryPalette,
@@ -24,6 +25,7 @@ import {
   fallbackTemplates,
   initialProblems,
   initialProducts,
+  initialSales,
   initialTasks,
 } from "../constants/appData"
 import {
@@ -177,6 +179,16 @@ export default function useAppData() {
   const [isTasksLoading, setIsTasksLoading] = useState(true)
   const taskLoadErrorRef = useRef(false)
 
+  const [sales, setSales] = useState([])
+  const [isSalesLoading, setIsSalesLoading] = useState(true)
+  const [salesForm, setSalesForm] = useState(() => {
+    const today = new Date()
+    const year = today.getFullYear()
+    const month = String(today.getMonth() + 1).padStart(2, "0")
+    const day = String(today.getDate()).padStart(2, "0")
+    return { date: `${year}-${month}-${day}`, amount: "" }
+  })
+
   const isLight = theme === "light"
   const permissions = useMemo(() => activeUser?.role?.permissions ?? [], [activeUser])
   const hasPermission = useCallback((permission) => permissions.includes(permission), [permissions])
@@ -190,16 +202,18 @@ export default function useAppData() {
   const canManageRoles = hasAnyPermission([PERMISSIONS.adminRolesManage, PERMISSIONS.adminManage])
   const canManageUsers = hasAnyPermission([PERMISSIONS.adminUsersManage, PERMISSIONS.adminManage])
   const canManageAdmin = canManageRoles || canManageUsers
+  const canViewSales = isAuthed
   const availableTabs = useMemo(() => {
     const tabs = []
     if (permissions.includes(PERMISSIONS.messagesView)) tabs.push("messages")
     if (permissions.includes(PERMISSIONS.tasksView)) tabs.push("tasks")
+    if (canViewSales) tabs.push("sales")
     if (permissions.includes(PERMISSIONS.problemsView)) tabs.push("problems")
     if (permissions.includes(PERMISSIONS.listsView)) tabs.push("lists")
     if (permissions.includes(PERMISSIONS.stockView)) tabs.push("stock")
     if (canManageAdmin) tabs.push("admin")
     return tabs
-  }, [permissions, canManageAdmin])
+  }, [permissions, canManageAdmin, canViewSales])
 
   useEffect(() => {
     const root = document.documentElement
@@ -894,6 +908,38 @@ export default function useAppData() {
   }, [activeTab, isAuthed, loadTasks])
 
   useEffect(() => {
+    if (!isAuthed || !canViewSales) {
+      setSales([])
+      setIsSalesLoading(false)
+      return
+    }
+    setIsSalesLoading(true)
+    try {
+      const stored = localStorage.getItem(SALES_STORAGE_KEY)
+      if (stored) {
+        const parsed = JSON.parse(stored)
+        setSales(Array.isArray(parsed) ? parsed : initialSales)
+      } else {
+        setSales(initialSales)
+      }
+    } catch (error) {
+      console.warn("Could not load sales data", error)
+      setSales(initialSales)
+    } finally {
+      setIsSalesLoading(false)
+    }
+  }, [isAuthed, canViewSales])
+
+  useEffect(() => {
+    if (!isAuthed || !canViewSales) return
+    try {
+      localStorage.setItem(SALES_STORAGE_KEY, JSON.stringify(sales))
+    } catch (error) {
+      console.warn("Could not save sales data", error)
+    }
+  }, [sales, isAuthed, canViewSales])
+
+  useEffect(() => {
     if (!isAuthed) return
     const tick = () => {
       const today = getLocalDateString(new Date())
@@ -974,6 +1020,47 @@ export default function useAppData() {
   const taskFormRepeatLabels = getRepeatDayLabels(taskForm.repeatDays)
   const taskEditRepeatLabels = getRepeatDayLabels(taskEditDraft?.repeatDays)
 
+  const salesByDate = useMemo(() => {
+    const totals = new Map()
+    sales.forEach((sale) => {
+      const date = String(sale?.date ?? "").trim()
+      const amount = Number(sale?.amount ?? 0)
+      if (!date || !Number.isFinite(amount)) return
+      totals.set(date, (totals.get(date) ?? 0) + amount)
+    })
+    return Array.from(totals.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([date, amount]) => ({ date, amount }))
+  }, [sales])
+
+  const salesChartData = useMemo(() => salesByDate.slice(-14), [salesByDate])
+
+  const salesSummary = useMemo(() => {
+    const total = sales.reduce((sum, sale) => sum + (Number(sale?.amount) || 0), 0)
+    const count = sales.length
+    const average = count > 0 ? Math.round(total / count) : 0
+    const start = new Date()
+    start.setDate(start.getDate() - 6)
+    const startYear = start.getFullYear()
+    const startMonth = String(start.getMonth() + 1).padStart(2, "0")
+    const startDay = String(start.getDate()).padStart(2, "0")
+    const startKey = `${startYear}-${startMonth}-${startDay}`
+    const last7Total = sales.reduce((sum, sale) => {
+      if (!sale?.date || sale.date < startKey) return sum
+      return sum + (Number(sale?.amount) || 0)
+    }, 0)
+    return { total, count, average, last7Total }
+  }, [sales])
+
+  const recentSales = useMemo(() => {
+    return [...sales]
+      .sort((a, b) => {
+        if (a?.date !== b?.date) return String(b?.date ?? "").localeCompare(String(a?.date ?? ""))
+        return String(b?.createdAt ?? "").localeCompare(String(a?.createdAt ?? ""))
+      })
+      .slice(0, 6)
+  }, [sales])
+
   const formatTaskDate = (value) => {
     if (!value) return ""
     const dateValue = new Date(`${value}T00:00:00`)
@@ -1020,6 +1107,25 @@ export default function useAppData() {
       return normalizeRepeatDays(task.repeatDays).includes(dayValue)
     }
     return false
+  }
+
+  const handleSaleAdd = () => {
+    const date = String(salesForm.date ?? "").trim()
+    const amount = Number(salesForm.amount)
+    const parsed = new Date(`${date}T00:00:00`)
+    if (!date || Number.isNaN(parsed.getTime()) || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      toast.error("Tarih girin.")
+      return
+    }
+    if (!Number.isFinite(amount) || !Number.isInteger(amount) || amount <= 0) {
+      toast.error("Satis adedi girin.")
+      return
+    }
+    const createdAt = new Date().toISOString()
+    const id = `sale-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
+    setSales((prev) => [...prev, { id, date, amount, createdAt }])
+    setSalesForm((prev) => ({ ...prev, amount: "" }))
+    toast.success("Satis eklendi")
   }
 
   const openNoteModal = (value, onSave) => {
@@ -2446,6 +2552,7 @@ export default function useAppData() {
 
   const showLoading = isLoading || !delayDone || (activeTab === "messages" && isTabLoading)
   const isTasksTabLoading = isTasksLoading || (activeTab === "tasks" && isTabLoading)
+  const isSalesTabLoading = isSalesLoading || (activeTab === "sales" && isTabLoading)
   const isListsTabLoading = isListsLoading || (activeTab === "lists" && isTabLoading)
   const isStockTabLoading = isProductsLoading || (activeTab === "stock" && isTabLoading)
   const isProblemsTabLoading = isProblemsLoading || (activeTab === "problems" && isTabLoading)
@@ -3306,6 +3413,13 @@ export default function useAppData() {
     handleTaskAdd,
     resetTaskForm,
     focusTask,
+    isSalesTabLoading,
+    salesSummary,
+    salesChartData,
+    salesForm,
+    setSalesForm,
+    handleSaleAdd,
+    recentSales,
     isListsTabLoading,
     listCountText,
     activeList,

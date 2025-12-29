@@ -1,6 +1,7 @@
-ï»¿export const PRODUCT_ORDER_STORAGE_KEY = "pulcipProductOrder"
+export const PRODUCT_ORDER_STORAGE_KEY = "pulcipProductOrder"
 export const THEME_STORAGE_KEY = "pulcipTheme"
 export const AUTH_TOKEN_STORAGE_KEY = "pulcipAuthToken"
+export const SALES_STORAGE_KEY = "pulcipSales"
 
 export const DEFAULT_LIST_ROWS = 8
 export const DEFAULT_LIST_COLS = 5
@@ -35,7 +36,7 @@ export const categoryPalette = [
 
 export const taskStatusMeta = {
   todo: {
-    label: "YapÄ±lacak",
+    label: "Yapýlacak",
     helper: "Planla",
     accent: "text-amber-200",
     badge: "border-amber-300/60 bg-amber-500/15 text-amber-50",
@@ -47,7 +48,7 @@ export const taskStatusMeta = {
     badge: "border-sky-300/60 bg-sky-500/15 text-sky-50",
   },
   done: {
-    label: "TamamlandÄ±",
+    label: "Tamamlandý",
     helper: "Bitenler",
     accent: "text-emerald-200",
     badge: "border-emerald-300/60 bg-emerald-500/15 text-emerald-50",
@@ -55,16 +56,16 @@ export const taskStatusMeta = {
 }
 
 export const taskDueTypeOptions = [
-  { value: "today", label: "BugÃ¼n" },
-  { value: "repeat", label: "Tekrarlanabilir gÃ¼n" },
-  { value: "date", label: "Ã–zel tarih" },
+  { value: "today", label: "Bugün" },
+  { value: "repeat", label: "Tekrarlanabilir gün" },
+  { value: "date", label: "Özel tarih" },
 ]
 
 export const taskRepeatDays = [
   { value: "1", label: "Pazartesi" },
-  { value: "2", label: "SalÄ±" },
-  { value: "3", label: "Ã‡arÅŸamba" },
-  { value: "4", label: "PerÅŸembe" },
+  { value: "2", label: "Salý" },
+  { value: "3", label: "Çarþamba" },
+  { value: "4", label: "Perþembe" },
   { value: "5", label: "Cuma" },
   { value: "6", label: "Cumartesi" },
   { value: "0", label: "Pazar" },
