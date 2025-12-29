@@ -377,14 +377,13 @@ function App() {
   const canManageUsers = hasAnyPermission([PERMISSIONS.adminUsersManage, PERMISSIONS.adminManage])
   const canViewAdmin = canManageRoles || canManageUsers
   const dashboardLabel = (
-    <span className="inline-flex items-center gap-2">
+    <span className="inline-flex items-center">
       <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4">
         <path
           d="M3 10.5 12 3l9 7.5V21a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1v-10.5Z"
           fill="currentColor"
         />
       </svg>
-      <span>Ana</span>
     </span>
   )
   const tabItems = useMemo(
