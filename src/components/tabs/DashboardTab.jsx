@@ -15,6 +15,7 @@ export default function DashboardTab({
   canViewProblems,
   canViewLists,
   canViewStock,
+  onNavigate,
 }) {
   const summary = salesSummary || { total: 0, count: 0, average: 0, last7Total: 0 }
   const tasks = taskStats || { total: 0, todo: 0, doing: 0, done: 0 }
@@ -37,66 +38,69 @@ export default function DashboardTab({
   const userInitial = userName.slice(0, 1).toUpperCase() || "K"
   const activeTaskCount = tasks.todo + tasks.doing
   const taskProgress = tasks.total > 0 ? Math.round((tasks.done / tasks.total) * 100) : 0
+  const taskTotal = tasks.total > 0 ? tasks.total : 1
   const stockUsage = stocks.total > 0 ? Math.round((stocks.used / stocks.total) * 100) : 0
+  const riskScore =
+    (canViewProblems ? openCount : 0) +
+    (canViewStock ? stocks.empty : 0) +
+    (canViewTasks ? tasks.todo : 0)
+  const riskStatus = riskScore > 0 ? "Takipte" : "Temiz"
+  const stockGaugeStyle = {
+    background: `conic-gradient(#34d399 ${stockUsage * 3.6}deg, rgba(148,163,184,0.18) 0deg)`,
+  }
+  const canNavigate = typeof onNavigate === "function"
   const headerMetrics = [
     canViewTasks && {
-      id: "active-tasks",
+      id: "tasks",
       label: "Aktif gorev",
       value: activeTaskCount,
-      note: `${tasks.todo} bekleyen`,
-    },
-    canViewProblems && {
-      id: "open-problems",
-      label: "Problemli musteri",
-      value: openCount,
-      note: openCount > 0 ? `${openCount} acik kayit` : "Sorun yok",
-    },
-    canViewSales && {
-      id: "last7-sales",
-      label: "Son 7 gun satis",
-      value: summary.last7Total,
-      note: `Ortalama ${summary.average}`,
-    },
-  ].filter(Boolean)
-  const fallbackMetrics = [
-    { id: "modules", label: "Erisim modulu", value: moduleCount, note: "Gorunur sekmeler" },
-    { id: "permissions", label: "Yetki seviyesi", value: permissionCount, note: "Rol kapsaminda" },
-    { id: "resolved", label: "Cozulen problem", value: resolvedCount, note: "Takip kaydi" },
-  ]
-  const metricsToShow = headerMetrics.length > 0 ? headerMetrics : fallbackMetrics
-  const moduleCards = [
-    canViewTasks && {
-      id: "tasks",
-      label: "Gorev akisi",
-      value: activeTaskCount,
       note: `Tamam ${tasks.done}`,
+      tone: "from-sky-500/20 to-sky-500/5 text-sky-100",
     },
-    canViewSales && {
-      id: "sales",
-      label: "Satis ozeti",
-      value: summary.total,
-      note: `Son 7 gun ${summary.last7Total}`,
+    (canViewProblems || canViewStock || canViewTasks) && {
+      id: "risk",
+      label: "Operasyon riski",
+      value: riskScore,
+      note: riskStatus,
+      tone: "from-rose-500/20 to-rose-500/5 text-rose-100",
     },
     canViewStock && {
       id: "stock",
-      label: "Stok kontrol",
-      value: stocks.total,
-      note: `Bosalan ${stocks.empty}`,
+      label: "Stok kullanim",
+      value: `${stockUsage}%`,
+      note: `Biten ${stocks.empty}`,
+      tone: "from-amber-500/20 to-amber-500/5 text-amber-100",
     },
-    canViewProblems && {
-      id: "problems",
-      label: "Problemli musteri",
-      value: openCount,
-      note: openCount > 0 ? `${openCount} acik kayit` : "Sorun yok",
-    },
-    canViewMessages && {
-      id: "messages",
-      label: "Sablonlar",
-      value: templateCountText,
-      note: `Kategori ${categoryCountText}`,
-    },
-    canViewLists && { id: "lists", label: "Listeler", value: listCountText, note: "Aktif listeler" },
   ].filter(Boolean)
+  const fallbackMetrics = [
+    {
+      id: "modules",
+      label: "Erisim modulu",
+      value: moduleCount,
+      note: "Gorunur sekmeler",
+      tone: "from-slate-500/15 to-slate-500/5 text-slate-100",
+    },
+    {
+      id: "permissions",
+      label: "Yetki seviyesi",
+      value: permissionCount,
+      note: "Rol kapsaminda",
+      tone: "from-slate-500/15 to-slate-500/5 text-slate-100",
+    },
+    {
+      id: "resolved",
+      label: "Cozulen problem",
+      value: resolvedCount,
+      note: "Takip kaydi",
+      tone: "from-slate-500/15 to-slate-500/5 text-slate-100",
+    },
+  ]
+  const metricsToShow = headerMetrics.length > 0 ? headerMetrics : fallbackMetrics
+  const taskBreakdown = [
+    { id: "todo", label: "Yapilacak", value: tasks.todo, color: "bg-sky-400/70" },
+    { id: "doing", label: "Devam", value: tasks.doing, color: "bg-amber-400/70" },
+    { id: "done", label: "Tamam", value: tasks.done, color: "bg-emerald-400/70" },
+  ]
   const riskItems = [
     canViewProblems && {
       id: "risk-problems",
@@ -123,7 +127,113 @@ export default function DashboardTab({
       dot: tasks.todo > 0 ? "bg-sky-400" : "bg-emerald-400",
     },
   ].filter(Boolean)
-  const showModuleCards = moduleCards.length > 0
+  const quickLinks = [
+    canViewTasks && {
+      id: "link-tasks",
+      label: "Gorevler",
+      detail: "Planlama ve akis",
+      tab: "tasks",
+      tone: "from-sky-500/25 to-sky-500/5",
+      icon: (
+        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4">
+          <path
+            d="M7 7h10M7 12h10M7 17h6M4 7h.01M4 12h.01M4 17h.01"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </svg>
+      ),
+    },
+    canViewSales && {
+      id: "link-sales",
+      label: "Satis",
+      detail: "Grafik ve girdi",
+      tab: "sales",
+      tone: "from-emerald-500/25 to-emerald-500/5",
+      icon: (
+        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4">
+          <path
+            d="M4 19h16M7 16l3-4 3 2 4-6"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ),
+    },
+    canViewProblems && {
+      id: "link-problems",
+      label: "Problemler",
+      detail: "Musteri kayitlari",
+      tab: "problems",
+      tone: "from-rose-500/25 to-rose-500/5",
+      icon: (
+        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4">
+          <path
+            d="M12 9v5M12 17h.01M10 3h4l6 18H4L10 3Z"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ),
+    },
+    canViewStock && {
+      id: "link-stock",
+      label: "Stok",
+      detail: "Urun kontrol",
+      tab: "stock",
+      tone: "from-amber-500/25 to-amber-500/5",
+      icon: (
+        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4">
+          <path
+            d="M3 7h18v10H3zM7 7v10M17 7v10"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ),
+    },
+    canViewMessages && {
+      id: "link-messages",
+      label: "Sablonlar",
+      detail: "Mesaj havuzu",
+      tab: "messages",
+      tone: "from-indigo-500/25 to-indigo-500/5",
+      icon: (
+        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4">
+          <path
+            d="M4 6h16v9H7l-3 3V6Z"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinejoin="round"
+          />
+        </svg>
+      ),
+    },
+    canViewLists && {
+      id: "link-lists",
+      label: "Listeler",
+      detail: "Gruplu veriler",
+      tab: "lists",
+      tone: "from-slate-500/25 to-slate-500/5",
+      icon: (
+        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4">
+          <path
+            d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+          />
+        </svg>
+      ),
+    },
+  ].filter(Boolean)
+  const showQuickLinks = quickLinks.length > 0
   const showComms = canViewMessages || canViewLists
 
   return (
@@ -163,7 +273,7 @@ export default function DashboardTab({
                   Durum stabil
                 </div>
                 <div className="mt-2 text-xs text-slate-400">Erisim modulu: {moduleCount}</div>
-                <div className="mt-1 text-xs text-slate-400">Cozulen problem: {resolvedCount}</div>
+                <div className="mt-1 text-xs text-slate-400">Risk skoru: {riskScore}</div>
               </div>
             </div>
           </div>
@@ -171,37 +281,50 @@ export default function DashboardTab({
             {metricsToShow.map((metric) => (
               <div
                 key={metric.id}
-                className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner"
+                className={`rounded-2xl border border-white/10 bg-gradient-to-br ${metric.tone} px-4 py-3 shadow-inner`}
               >
-                <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">{metric.label}</p>
+                <p className="text-[10px] uppercase tracking-[0.22em] text-slate-200/70">{metric.label}</p>
                 <p className="mt-1 text-2xl font-semibold text-white">{metric.value}</p>
-                <p className="text-xs text-slate-500">{metric.note}</p>
+                <p className="text-xs text-slate-200/70">{metric.note}</p>
               </div>
             ))}
           </div>
         </div>
       </div>
 
-      {showModuleCards && (
-        <div className={`${panelClass} bg-ink-900/60`}>
+      {showQuickLinks && (
+        <div className={`${panelClass} bg-ink-900/50`}>
           <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Modul ozetleri</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Hizli baglantilar</p>
             <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
-              Bugun
+              Tek tik
             </span>
           </div>
-          <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
-            {moduleCards.map((item) => (
-              <div
-                key={item.id}
-                className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner"
+          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+            {quickLinks.map((link) => (
+              <button
+                key={link.id}
+                type="button"
+                onClick={() => {
+                  if (canNavigate) onNavigate(link.tab)
+                }}
+                disabled={!canNavigate}
+                className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br ${link.tone} p-4 text-left shadow-inner transition hover:-translate-y-0.5 hover:border-white/20 disabled:cursor-not-allowed disabled:opacity-60`}
               >
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-                  {item.label}
-                </p>
-                <p className="mt-2 text-2xl font-semibold text-white">{item.value}</p>
-                <p className="mt-1 text-xs text-slate-400">{item.note}</p>
-              </div>
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-slate-100">
+                    {link.icon}
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-white">{link.label}</p>
+                    <p className="text-xs text-slate-300">{link.detail}</p>
+                  </div>
+                </div>
+                <div className="mt-4 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-200/80">
+                  Ac
+                  <span className="h-1 w-6 rounded-full bg-white/20 transition group-hover:w-10" />
+                </div>
+              </button>
             ))}
           </div>
         </div>
@@ -210,44 +333,46 @@ export default function DashboardTab({
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
         <div className="space-y-6">
           {canViewTasks && (
-            <div className={`${panelClass} bg-ink-900/60`}>
+            <div className={`${panelClass} bg-ink-900/55`}>
               <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Gorev akisi</p>
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Gorev ritmi</p>
                 <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
                   Aktif {activeTaskCount}
                 </span>
               </div>
-              <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs text-slate-400">
-                <div className="rounded-xl border border-white/10 bg-ink-900/70 px-3 py-3 shadow-inner">
-                  <p className="text-lg font-semibold text-white">{tasks.todo}</p>
-                  Yapilacak
-                </div>
-                <div className="rounded-xl border border-white/10 bg-ink-900/70 px-3 py-3 shadow-inner">
-                  <p className="text-lg font-semibold text-white">{tasks.doing}</p>
-                  Devam
-                </div>
-                <div className="rounded-xl border border-white/10 bg-ink-900/70 px-3 py-3 shadow-inner">
-                  <p className="text-lg font-semibold text-white">{tasks.done}</p>
-                  Tamam
-                </div>
-              </div>
-              <div className="mt-4">
-                <div className="flex items-center justify-between text-xs text-slate-400">
-                  <span>Tamamlanma</span>
-                  <span>{taskProgress}%</span>
-                </div>
-                <div className="mt-2 h-2 rounded-full bg-white/5">
-                  <div
-                    className="h-2 rounded-full bg-emerald-400/70"
-                    style={{ width: `${taskProgress}%` }}
-                  />
+              <div className="mt-4 space-y-3">
+                {taskBreakdown.map((item) => (
+                  <div key={item.id} className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3">
+                    <div className="flex items-center justify-between text-xs text-slate-400">
+                      <span>{item.label}</span>
+                      <span className="text-slate-200">{item.value}</span>
+                    </div>
+                    <div className="mt-2 h-2 rounded-full bg-white/5">
+                      <div
+                        className={`h-2 rounded-full ${item.color}`}
+                        style={{ width: `${Math.min(100, Math.round((item.value / taskTotal) * 100))}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+                <div className="rounded-2xl border border-dashed border-white/15 bg-ink-900/60 px-4 py-3">
+                  <div className="flex items-center justify-between text-xs text-slate-400">
+                    <span>Tamamlanma</span>
+                    <span className="text-slate-200">{taskProgress}%</span>
+                  </div>
+                  <div className="mt-2 h-2 rounded-full bg-white/5">
+                    <div
+                      className="h-2 rounded-full bg-emerald-400/70"
+                      style={{ width: `${taskProgress}%` }}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
           )}
 
           {canViewSales && (
-            <div className={`${panelClass} bg-ink-900/60`}>
+            <div className={`${panelClass} bg-ink-900/55`}>
               <div className="flex items-center justify-between">
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Satis ozeti</p>
                 <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
@@ -255,57 +380,23 @@ export default function DashboardTab({
                 </span>
               </div>
               <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Toplam</p>
-                  <p className="mt-2 text-2xl font-semibold text-white">{summary.total}</p>
-                  <p className="text-xs text-slate-400">Son 7 gun {summary.last7Total}</p>
+                <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-emerald-500/15 to-ink-900/60 px-4 py-4 shadow-inner">
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-emerald-100/80">Toplam</p>
+                  <p className="mt-2 text-3xl font-semibold text-white">{summary.total}</p>
+                  <p className="text-xs text-slate-300">Son 7 gun {summary.last7Total}</p>
                 </div>
-                <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
+                <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-4 shadow-inner">
                   <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Ortalama</p>
                   <p className="mt-2 text-2xl font-semibold text-white">{summary.average}</p>
-                  <p className="text-xs text-slate-400">Kayit {summary.count}</p>
+                  <div className="mt-3 h-1.5 rounded-full bg-white/5">
+                    <div className="h-1.5 rounded-full bg-emerald-400/70" style={{ width: "60%" }} />
+                  </div>
+                  <p className="mt-2 text-xs text-slate-400">Guncel ivme</p>
                 </div>
-                <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
+                <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-4 shadow-inner">
                   <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Son 7 gun</p>
                   <p className="mt-2 text-2xl font-semibold text-white">{summary.last7Total}</p>
-                  <p className="text-xs text-slate-400">Toplam performans</p>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {canViewStock && (
-            <div className={`${panelClass} bg-ink-900/60`}>
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Stok gorunumu</p>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
-                  Bosalan {stocks.empty}
-                </span>
-              </div>
-              <div className="mt-4 grid grid-cols-3 gap-2 text-center text-xs text-slate-400">
-                <div className="rounded-xl border border-white/10 bg-ink-900/70 px-3 py-3 shadow-inner">
-                  <p className="text-lg font-semibold text-white">{stocks.total}</p>
-                  Toplam
-                </div>
-                <div className="rounded-xl border border-white/10 bg-ink-900/70 px-3 py-3 shadow-inner">
-                  <p className="text-lg font-semibold text-white">{stocks.used}</p>
-                  Kullanilan
-                </div>
-                <div className="rounded-xl border border-white/10 bg-ink-900/70 px-3 py-3 shadow-inner">
-                  <p className="text-lg font-semibold text-white">{stocks.empty}</p>
-                  Biten
-                </div>
-              </div>
-              <div className="mt-4">
-                <div className="flex items-center justify-between text-xs text-slate-400">
-                  <span>Kullanim</span>
-                  <span>{stockUsage}%</span>
-                </div>
-                <div className="mt-2 h-2 rounded-full bg-white/5">
-                  <div
-                    className="h-2 rounded-full bg-emerald-400/70"
-                    style={{ width: `${stockUsage}%` }}
-                  />
+                  <p className="text-xs text-slate-400">Kisa vade performans</p>
                 </div>
               </div>
             </div>
@@ -313,46 +404,78 @@ export default function DashboardTab({
         </div>
 
         <div className="space-y-6">
-          <div className={`${panelClass} bg-ink-900/60`}>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Uyari ve riskler</p>
+          <div className={`${panelClass} bg-ink-900/55`}>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Uyari panosu</p>
             <div className="mt-4 space-y-3">
               {riskItems.length === 0 ? (
-                <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-300 shadow-inner">
+                <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-300 shadow-inner">
                   Kritik risk yok. Sistem dengeli.
                 </div>
               ) : (
                 riskItems.map((alert) => (
                   <div
                     key={alert.id}
-                    className="flex items-center justify-between rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner"
+                    className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner"
                   >
                     <div className="flex items-center gap-3">
                       <span className={`h-2.5 w-2.5 rounded-full ${alert.dot}`} />
-                      <div>
+                      <div className="flex-1">
                         <p className="text-sm font-semibold text-slate-100">{alert.title}</p>
                         <p className="text-xs text-slate-400">{alert.detail}</p>
                       </div>
+                      <div className={`text-sm font-semibold ${alert.tone}`}>{alert.value}</div>
                     </div>
-                    <div className={`text-sm font-semibold ${alert.tone}`}>{alert.value}</div>
                   </div>
                 ))
               )}
             </div>
           </div>
 
+          {canViewStock && (
+            <div className={`${panelClass} bg-ink-900/55`}>
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Stok nabzi</p>
+                <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
+                  Bosalan {stocks.empty}
+                </span>
+              </div>
+              <div className="mt-4 flex items-center gap-4">
+                <div className="relative flex h-20 w-20 items-center justify-center rounded-full" style={stockGaugeStyle}>
+                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-ink-900 text-sm font-semibold text-white">
+                    {stockUsage}%
+                  </div>
+                </div>
+                <div className="space-y-2 text-xs text-slate-400">
+                  <div className="flex items-center justify-between gap-6">
+                    <span>Toplam</span>
+                    <span className="text-slate-200">{stocks.total}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-6">
+                    <span>Kullanilan</span>
+                    <span className="text-slate-200">{stocks.used}</span>
+                  </div>
+                  <div className="flex items-center justify-between gap-6">
+                    <span>Biten</span>
+                    <span className="text-slate-200">{stocks.empty}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
           {showComms && (
-            <div className={`${panelClass} bg-ink-900/60`}>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Iletisim ve listeler</p>
-              <div className="mt-4 grid grid-cols-1 gap-3">
+            <div className={`${panelClass} bg-ink-900/55`}>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Iletisim odagi</p>
+              <div className="mt-4 space-y-3">
                 {canViewMessages && (
-                  <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
+                  <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
                     <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Sablonlar</p>
                     <p className="mt-2 text-2xl font-semibold text-white">{templateCountText}</p>
                     <p className="text-xs text-slate-400">Kategori {categoryCountText}</p>
                   </div>
                 )}
                 {canViewLists && (
-                  <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
+                  <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
                     <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Listeler</p>
                     <p className="mt-2 text-2xl font-semibold text-white">{listCountText}</p>
                     <p className="text-xs text-slate-400">Aktif listeler</p>

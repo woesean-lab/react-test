@@ -738,15 +738,16 @@ function App() {
               salesSummary={salesSummary}
               listCountText={listCountText}
               stockSummary={stockSummary}
-              openProblems={openProblems}
-              resolvedProblems={resolvedProblems}
-              canViewMessages={canViewMessages}
-              canViewTasks={canViewTasks}
-              canViewSales={canViewSales}
-              canViewProblems={canViewProblems}
-              canViewLists={canViewLists}
-              canViewStock={canViewStock}
-            />
+                openProblems={openProblems}
+                resolvedProblems={resolvedProblems}
+                canViewMessages={canViewMessages}
+                canViewTasks={canViewTasks}
+                canViewSales={canViewSales}
+                canViewProblems={canViewProblems}
+                canViewLists={canViewLists}
+                canViewStock={canViewStock}
+                onNavigate={handleTabSwitch}
+              />
           </div>
         )}
 
