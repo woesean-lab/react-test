@@ -123,17 +123,33 @@ export default function SalesTab({
     const maxValue = Math.max(...chartData.map((item) => item.amount), 0)
     const span = height - padTop - padBottom
     const count = chartData.length
-    const step = count > 1 ? (width - padX * 2) / (count - 1) : 0
-    const points = chartData.map((item, index) => {
-      const x = count > 1 ? padX + index * step : width / 2
-      const value = maxValue > 0 ? item.amount / maxValue : 0
-      const y = height - padBottom - value * span
-      return { x, y }
+    let gap = count > 10 ? 0.6 : count > 6 ? 0.9 : 1.2
+    let barWidth = (width - padX * 2 - gap * (count - 1)) / count
+    if (barWidth < 1.2) {
+      gap = 0.4
+      barWidth = (width - padX * 2 - gap * (count - 1)) / count
+    }
+    const bars = chartData.map((item, index) => {
+      const value = Number(item.amount ?? 0)
+      const ratio = maxValue > 0 ? value / maxValue : 0
+      const barHeight = Math.max(0, ratio * span)
+      const x = padX + index * (barWidth + gap)
+      const y = height - padBottom - barHeight
+      const center = x + barWidth / 2
+      return {
+        x,
+        y,
+        width: barWidth,
+        height: barHeight,
+        center,
+        amount: value,
+        isPeak: value === maxValue,
+        isLast: index === count - 1,
+        intensity: count > 1 ? index / (count - 1) : 1,
+      }
     })
-    const line = points.map((point, idx) => `${idx === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ")
-    const area = `${line} L ${points[points.length - 1].x} ${height - padBottom} L ${points[0].x} ${height - padBottom} Z`
     const gridLines = Array.from({ length: 4 }, (_, idx) => padTop + (span / 3) * idx)
-    return { line, area, maxValue, points, gridLines, height, padX, padTop, padBottom }
+    return { bars, maxValue, gridLines, height, padX, padTop, padBottom }
   })()
 
   const chartStartLabel = chartData[0]?.date ? formatRangeLabel(chartData[0].date) : ""
@@ -240,6 +256,13 @@ export default function SalesTab({
                         <stop offset="0%" stopColor="#3ac7ff" stopOpacity="0.35" />
                         <stop offset="100%" stopColor="#3ac7ff" stopOpacity="0" />
                       </linearGradient>
+                      <filter id="bar-glow" x="-20%" y="-20%" width="140%" height="160%">
+                        <feGaussianBlur stdDeviation="0.9" result="coloredBlur" />
+                        <feMerge>
+                          <feMergeNode in="coloredBlur" />
+                          <feMergeNode in="SourceGraphic" />
+                        </feMerge>
+                      </filter>
                     </defs>
                     {chart.gridLines.map((y, idx) => (
                       <line
@@ -252,28 +275,37 @@ export default function SalesTab({
                         strokeWidth="0.6"
                       />
                     ))}
-                    <path d={chart.area} fill="url(#sales-gradient)" />
-                    <path d={chart.line} fill="none" stroke="#3ac7ff" strokeWidth="1.4" />
-                    {chart.points.map((point, idx) => (
-                      <circle
-                        key={`pt-${idx}`}
-                        cx={point.x}
-                        cy={point.y}
-                        r={idx === chart.points.length - 1 ? 2.2 : 1.6}
-                        fill="#3ac7ff"
-                        stroke="#0f1625"
-                        strokeWidth="0.6"
-                      />
+                    {chart.bars.map((bar, idx) => (
+                      <g key={`bar-${idx}`}>
+                        <rect
+                          x={bar.x}
+                          y={bar.y}
+                          width={bar.width}
+                          height={bar.height}
+                          rx={Math.min(1.6, bar.width / 2)}
+                          fill="#3ac7ff"
+                          fillOpacity={0.35 + bar.intensity * 0.55}
+                          filter={bar.isPeak || bar.isLast ? "url(#bar-glow)" : undefined}
+                        />
+                        <rect
+                          x={bar.x}
+                          y={bar.y}
+                          width={bar.width}
+                          height={Math.min(0.8, bar.height)}
+                          rx={Math.min(1.6, bar.width / 2)}
+                          fill="#cfefff"
+                          fillOpacity={0.9}
+                        />
+                      </g>
                     ))}
-                    {chart.points.map((point, idx) => {
-                      const value = chartData[idx]?.amount
-                      if (value === undefined || value === null) return null
-                      const valueText = String(value)
+                    {chart.bars.map((bar, idx) => {
+                      if (bar.amount === undefined || bar.amount === null) return null
+                      const valueText = String(bar.amount)
                       const valueWidth = Math.max(3.8, valueText.length * 2.2 + 1.6)
                       const valueHeight = 3.6
-                      const labelY = Math.max(point.y - 4.6, chart.padTop - 0.6)
+                      const labelY = Math.max(bar.y - 3.8, chart.padTop - 0.6)
                       const rectX = Math.min(
-                        Math.max(point.x - valueWidth / 2, chart.padX),
+                        Math.max(bar.center - valueWidth / 2, chart.padX),
                         100 - chart.padX - valueWidth,
                       )
                       const rectY = labelY - valueHeight / 2
@@ -304,13 +336,13 @@ export default function SalesTab({
                         </g>
                       )
                     })}
-                    {chart.points.map((point, idx) => {
+                    {chart.bars.map((bar, idx) => {
                       const label = pointLabels[idx]
                       if (!label?.show) return null
                       return (
                         <text
                           key={`lbl-${idx}`}
-                          x={point.x}
+                          x={bar.center}
                           y={chartLabelY}
                           textAnchor="middle"
                           fontSize="2.6"
