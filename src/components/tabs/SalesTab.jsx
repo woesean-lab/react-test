@@ -108,7 +108,16 @@ export default function SalesTab({
     if (salesRange === "weekly") {
       const [year, month, day] = value.split("-")
       if (!year || !month || !day) return value
-      return `Hafta ${day}.${month}`
+      const start = new Date(`${value}T00:00:00`)
+      if (Number.isNaN(start.getTime())) return value
+      const end = new Date(start)
+      end.setDate(start.getDate() + 6)
+      const formatShort = (dateValue) => {
+        const dayValue = String(dateValue.getDate()).padStart(2, "0")
+        const monthValue = String(dateValue.getMonth() + 1).padStart(2, "0")
+        return `${dayValue}.${monthValue}`
+      }
+      return `${formatShort(start)}-${formatShort(end)}`
     }
     const [year, month, day] = value.split("-")
     if (!year || !month || !day) return value
