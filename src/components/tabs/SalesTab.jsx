@@ -237,7 +237,7 @@ export default function SalesTab({
 
             <div className="mt-3 rounded-2xl border border-white/10 bg-ink-900/70 p-0 shadow-inner">
               {chart ? (
-                <div className="grid gap-4 px-3 pb-3 pt-2 md:grid-cols-[minmax(0,1.6fr)_minmax(0,0.8fr)]">
+                <div className="space-y-2 px-3 pb-3 pt-2">
                   <div className="space-y-2">
                     <svg viewBox={`0 0 100 ${chartViewHeight}`} className="h-44 w-full">
                       <defs>
@@ -334,29 +334,6 @@ export default function SalesTab({
                     <div className="flex items-center justify-between text-xs text-slate-400">
                       <span>{chartStartLabel || "-"}</span>
                       <span>{chartEndLabel || "-"}</span>
-                    </div>
-                  </div>
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between text-xs text-slate-400">
-                      <span className="uppercase tracking-[0.2em]">Mevcut veri</span>
-                      <span>{chartList.length}</span>
-                    </div>
-                    <div className="space-y-2">
-                      {chartList.length === 0 ? (
-                        <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-400">
-                          Veri yok.
-                        </div>
-                      ) : (
-                        chartList.map((item, idx) => (
-                          <div
-                            key={`chart-item-${idx}`}
-                            className="flex items-center justify-between rounded-xl border border-white/10 bg-ink-900/80 px-3 py-2 text-xs text-slate-200 shadow-inner"
-                          >
-                            <span>{formatRangeLabel(item.date)}</span>
-                            <span className="text-sm font-semibold text-emerald-100">{item.amount}</span>
-                          </div>
-                        ))
-                      )}
                     </div>
                   </div>
                 </div>
