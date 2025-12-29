@@ -258,22 +258,6 @@ export default function SalesTab({
                         />
                       ))}
                       <path d={chart.area} fill="url(#sales-area-gradient)" />
-                      <path d={chart.line} fill="none" stroke="#22c55e" strokeWidth="1.6" />
-                      {chart.points.map((point, idx) => {
-                        const isFocus = idx === chart.lastIndex || idx === chart.peakIndex
-                        if (!isFocus) return null
-                        return (
-                          <circle
-                            key={`dot-${idx}`}
-                            cx={point.x}
-                            cy={point.y}
-                            r={idx === chart.lastIndex ? 2.4 : 2}
-                            fill="#22c55e"
-                            stroke="#0f1625"
-                            strokeWidth="0.8"
-                          />
-                        )
-                      })}
                       {chart.points.map((point, idx) => {
                         const isFocus = idx === chart.lastIndex || idx === chart.peakIndex
                         if (!isFocus) return null
