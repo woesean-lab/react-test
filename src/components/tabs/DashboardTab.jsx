@@ -42,48 +42,61 @@ export default function DashboardTab({
     if (typeof onNavigate === "function") onNavigate(tabKey)
   }
 
+  const attentionItems = [
+    canViewTasks && {
+      id: "focus-tasks",
+      text: `Tamamlanmasi gereken ${tasks.todo} goreviniz var.`,
+      accent: "bg-sky-400",
+    },
+    canViewProblems && {
+      id: "focus-problems",
+      text: `Cozulmesi gereken ${openCount} problemli musteri var.`,
+      accent: "bg-rose-400",
+    },
+  ].filter(Boolean)
+
   const kpiItems = [
     canViewSales && {
       id: "sales",
       label: "Son 7 gun satis",
       value: summary.last7Total,
       hint: `Ortalama ${summary.average}`,
-      tone: "from-emerald-500/20 to-emerald-500/5",
+      accent: "bg-emerald-400",
     },
     canViewTasks && {
       id: "tasks",
       label: "Aktif gorev",
       value: activeTaskCount,
       hint: `${tasks.todo} bekleyen`,
-      tone: "from-sky-500/20 to-sky-500/5",
+      accent: "bg-sky-400",
     },
     canViewProblems && {
       id: "problems",
       label: "Problemli musteri",
       value: openCount,
       hint: openCount > 0 ? "Takipte" : "Temiz",
-      tone: "from-rose-500/20 to-rose-500/5",
+      accent: "bg-rose-400",
     },
     canViewStock && {
       id: "stock",
       label: "Biten urun",
       value: stocks.empty,
       hint: `Kullanim ${stockUsage}%`,
-      tone: "from-amber-500/20 to-amber-500/5",
+      accent: "bg-amber-400",
     },
     canViewMessages && {
       id: "templates",
       label: "Sablon",
       value: templateCountText,
       hint: `Kategori ${categoryCountText}`,
-      tone: "from-indigo-500/20 to-indigo-500/5",
+      accent: "bg-indigo-400",
     },
     canViewLists && {
       id: "lists",
       label: "Listeler",
       value: listCountText,
       hint: "Aktif",
-      tone: "from-slate-500/20 to-slate-500/5",
+      accent: "bg-slate-400",
     },
   ].filter(Boolean)
   const fallbackKpis = [
@@ -92,21 +105,21 @@ export default function DashboardTab({
       label: "Erisim modulu",
       value: moduleCount,
       hint: "Gorunur sekmeler",
-      tone: "from-slate-500/15 to-slate-500/5",
+      accent: "bg-slate-400",
     },
     {
       id: "permissions",
       label: "Yetki seviyesi",
       value: permissionCount,
       hint: "Rol kapsaminda",
-      tone: "from-slate-500/15 to-slate-500/5",
+      accent: "bg-slate-400",
     },
     {
       id: "resolved",
       label: "Cozulen problem",
       value: resolvedCount,
       hint: "Takip kaydi",
-      tone: "from-slate-500/15 to-slate-500/5",
+      accent: "bg-slate-400",
     },
   ]
   const kpisToShow = kpiItems.length > 0 ? kpiItems : fallbackKpis
@@ -201,32 +214,41 @@ export default function DashboardTab({
         <div className={`${panelClass} bg-ink-900/55`}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Kilit metrikler</p>
-              <p className="mt-1 text-sm text-slate-300">Bugunun performans fotografindan ozet.</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Odak notlari</p>
+              <p className="mt-1 text-sm text-slate-300">Bugun onceliklendirilmesi gerekenler.</p>
             </div>
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
               Canli
             </span>
           </div>
+          <div className="mt-4 space-y-2">
+            {attentionItems.length === 0 ? (
+              <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-400">
+                Bugun kritik is bulunamadi.
+              </div>
+            ) : (
+              attentionItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="flex items-center gap-3 rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-200"
+                >
+                  <span className={`h-2.5 w-2.5 rounded-full ${item.accent}`} />
+                  <span>{item.text}</span>
+                </div>
+              ))
+            )}
+          </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {kpisToShow.map((item) => (
-              <div
-                key={item.id}
-                className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br ${item.tone} px-4 py-4 shadow-inner`}
-              >
-                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.18),transparent_60%)] opacity-60" />
-                <div className="relative">
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-[10px] uppercase tracking-[0.22em] text-slate-200/70">{item.label}</p>
-                    <span className="rounded-full border border-white/10 bg-white/10 px-2 py-1 text-[9px] uppercase tracking-[0.2em] text-slate-200/80">
-                      Ozet
-                    </span>
+              <div key={item.id} className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
+                    <span className={`h-2.5 w-2.5 rounded-full ${item.accent}`} />
+                    <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">{item.label}</p>
                   </div>
-                  <div className="mt-3 flex items-baseline justify-between gap-3">
-                    <p className="text-3xl font-semibold text-white">{item.value}</p>
-                    <span className="text-xs text-slate-200/80">{item.hint}</span>
-                  </div>
+                  <p className="text-lg font-semibold text-white">{item.value}</p>
                 </div>
+                <p className="mt-2 text-xs text-slate-400">{item.hint}</p>
               </div>
             ))}
           </div>
@@ -242,9 +264,9 @@ export default function DashboardTab({
               {actionItems.length} is
             </span>
           </div>
-          <div className="mt-4 space-y-2">
+          <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {actionItems.length === 0 ? (
-              <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-4 text-sm text-slate-400">
+              <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-4 text-sm text-slate-400 sm:col-span-2">
                 Aksiyon bulunamadi.
               </div>
             ) : (
@@ -253,19 +275,19 @@ export default function DashboardTab({
                   key={action.id}
                   type="button"
                   onClick={() => onOpenTab(action.tab)}
-                  className="group flex w-full items-center justify-between gap-3 rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 text-left shadow-inner transition hover:-translate-y-0.5 hover:border-white/20"
+                  className="group relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-4 text-left shadow-inner transition hover:-translate-y-0.5 hover:border-white/20"
                 >
-                  <div className="flex items-center gap-3">
-                    <span className={`h-8 w-1 rounded-full ${action.accent}`} />
+                  <span className={`absolute inset-x-0 top-0 h-1 ${action.accent}`} />
+                  <div className="flex items-center justify-between gap-3">
                     <div>
                       <p className="text-sm font-semibold text-white">{action.label}</p>
                       <p className="text-xs text-slate-400">{action.detail}</p>
                     </div>
+                    <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-slate-500 transition group-hover:text-slate-200">
+                      Git
+                      <span className="h-1 w-6 rounded-full bg-white/10 transition group-hover:w-10" />
+                    </span>
                   </div>
-                  <span className="inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-slate-500 transition group-hover:text-slate-200">
-                    Ac
-                    <span className="h-1 w-6 rounded-full bg-white/10 transition group-hover:w-10" />
-                  </span>
                 </button>
               ))
             )}
