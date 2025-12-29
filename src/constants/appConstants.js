@@ -36,7 +36,7 @@ export const categoryPalette = [
 
 export const taskStatusMeta = {
   todo: {
-    label: "Yapılacak",
+    label: "Yapilacak",
     helper: "Planla",
     accent: "text-amber-200",
     badge: "border-amber-300/60 bg-amber-500/15 text-amber-50",
@@ -48,29 +48,26 @@ export const taskStatusMeta = {
     badge: "border-sky-300/60 bg-sky-500/15 text-sky-50",
   },
   done: {
-    label: "Tamamlandı",
+    label: "Tamamlandi",
     helper: "Bitenler",
     accent: "text-emerald-200",
     badge: "border-emerald-300/60 bg-emerald-500/15 text-emerald-50",
   },
 }
-
 export const taskDueTypeOptions = [
-  { value: "today", label: "Bugün" },
-  { value: "repeat", label: "Tekrarlanabilir gün" },
-  { value: "date", label: "Özel tarih" },
+  { value: "today", label: "Bugun" },
+  { value: "repeat", label: "Tekrarlanabilir gun" },
+  { value: "date", label: "Ozel tarih" },
 ]
-
 export const taskRepeatDays = [
   { value: "1", label: "Pazartesi" },
-  { value: "2", label: "Salı" },
-  { value: "3", label: "Çarşamba" },
-  { value: "4", label: "Perşembe" },
+  { value: "2", label: "Sali" },
+  { value: "3", label: "Carsamba" },
+  { value: "4", label: "Persembe" },
   { value: "5", label: "Cuma" },
   { value: "6", label: "Cumartesi" },
   { value: "0", label: "Pazar" },
 ]
-
 export const taskRepeatDayValues = new Set(taskRepeatDays.map((day) => day.value))
 
 export const STOCK_STATUS = {
