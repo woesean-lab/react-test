@@ -59,7 +59,8 @@ export default function DashboardTab({
       id: "sales",
       label: "Son 7 gün satış",
       value: summary.last7Total,
-      hint: `Dün ${summary.yesterdayTotal}`,
+      subLabel: "Dün",
+      subValue: summary.yesterdayTotal,
       accent: "bg-emerald-400",
     },
     canViewTasks && {
@@ -80,7 +81,8 @@ export default function DashboardTab({
       id: "stock",
       label: "Stoksuz ürün",
       value: stocks.empty,
-      hint: `Stokta ${stocks.total}`,
+      subLabel: "Stokta",
+      subValue: stocks.total,
       accent: "bg-amber-400",
     },
     canViewLists && {
@@ -232,19 +234,25 @@ export default function DashboardTab({
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {kpisToShow.map((item) => (
-              <div key={item.id} className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
-                <div className="flex items-center justify-between gap-3">
-                  <div className="flex items-center gap-2">
-                    <span className={`h-2.5 w-2.5 rounded-full ${item.accent}`} />
-                    <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">{item.label}</p>
+                <div key={item.id} className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <span className={`h-2.5 w-2.5 rounded-full ${item.accent}`} />
+                      <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">{item.label}</p>
+                    </div>
+                    <p className="text-lg font-semibold text-white">{item.value}</p>
                   </div>
-                  <p className="text-lg font-semibold text-white">{item.value}</p>
+                  {item.hint && <p className="mt-2 text-xs text-slate-400">{item.hint}</p>}
+                  {item.subLabel && (
+                    <div className="mt-2 flex items-center justify-between rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-300">
+                      <span>{item.subLabel}</span>
+                      <span className="font-semibold text-white">{item.subValue}</span>
+                    </div>
+                  )}
                 </div>
-                <p className="mt-2 text-xs text-slate-400">{item.hint}</p>
-              </div>
-            ))}
+              ))}
+            </div>
           </div>
-        </div>
 
         <div className={`${panelClass} bg-ink-900/55`}>
           <div className="flex items-center justify-between">
