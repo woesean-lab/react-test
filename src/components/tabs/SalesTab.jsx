@@ -117,21 +117,22 @@ export default function SalesTab({
     if (chartData.length === 0) return null
     const width = 100
     const height = 40
-    const pad = 4
+    const padX = 2
+    const padY = 4
     const maxValue = Math.max(...chartData.map((item) => item.amount), 0)
-    const span = height - pad * 2
+    const span = height - padY * 2
     const count = chartData.length
-    const step = count > 1 ? (width - pad * 2) / (count - 1) : 0
+    const step = count > 1 ? (width - padX * 2) / (count - 1) : 0
     const points = chartData.map((item, index) => {
-      const x = count > 1 ? pad + index * step : width / 2
+      const x = count > 1 ? padX + index * step : width / 2
       const value = maxValue > 0 ? item.amount / maxValue : 0
-      const y = height - pad - value * span
+      const y = height - padY - value * span
       return { x, y }
     })
     const line = points.map((point, idx) => `${idx === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ")
-    const area = `${line} L ${points[points.length - 1].x} ${height - pad} L ${points[0].x} ${height - pad} Z`
-    const gridLines = Array.from({ length: 4 }, (_, idx) => pad + (span / 3) * idx)
-    return { line, area, maxValue, points, gridLines, height, pad }
+    const area = `${line} L ${points[points.length - 1].x} ${height - padY} L ${points[0].x} ${height - padY} Z`
+    const gridLines = Array.from({ length: 4 }, (_, idx) => padY + (span / 3) * idx)
+    return { line, area, maxValue, points, gridLines, height, padX, padY }
   })()
 
   const chartStartLabel = chartData[0]?.date ? formatRangeLabel(chartData[0].date) : ""
@@ -242,8 +243,8 @@ export default function SalesTab({
                     {chart.gridLines.map((y, idx) => (
                       <line
                         key={`grid-${idx}`}
-                        x1={chart.pad}
-                        x2={100 - chart.pad}
+                        x1={chart.padX}
+                        x2={100 - chart.padX}
                         y1={y}
                         y2={y}
                         stroke="#1f2a3a"
