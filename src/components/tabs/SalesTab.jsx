@@ -117,22 +117,23 @@ export default function SalesTab({
     if (chartData.length === 0) return null
     const width = 100
     const height = 40
-    const padX = 2
-    const padY = 4
+    const padX = 1
+    const padTop = 7
+    const padBottom = 5
     const maxValue = Math.max(...chartData.map((item) => item.amount), 0)
-    const span = height - padY * 2
+    const span = height - padTop - padBottom
     const count = chartData.length
     const step = count > 1 ? (width - padX * 2) / (count - 1) : 0
     const points = chartData.map((item, index) => {
       const x = count > 1 ? padX + index * step : width / 2
       const value = maxValue > 0 ? item.amount / maxValue : 0
-      const y = height - padY - value * span
+      const y = height - padBottom - value * span
       return { x, y }
     })
     const line = points.map((point, idx) => `${idx === 0 ? "M" : "L"} ${point.x} ${point.y}`).join(" ")
-    const area = `${line} L ${points[points.length - 1].x} ${height - padY} L ${points[0].x} ${height - padY} Z`
-    const gridLines = Array.from({ length: 4 }, (_, idx) => padY + (span / 3) * idx)
-    return { line, area, maxValue, points, gridLines, height, padX, padY }
+    const area = `${line} L ${points[points.length - 1].x} ${height - padBottom} L ${points[0].x} ${height - padBottom} Z`
+    const gridLines = Array.from({ length: 4 }, (_, idx) => padTop + (span / 3) * idx)
+    return { line, area, maxValue, points, gridLines, height, padX, padTop, padBottom }
   })()
 
   const chartStartLabel = chartData[0]?.date ? formatRangeLabel(chartData[0].date) : ""
@@ -267,19 +268,40 @@ export default function SalesTab({
                     {chart.points.map((point, idx) => {
                       const value = chartData[idx]?.amount
                       if (value === undefined || value === null) return null
-                      const labelY = Math.max(point.y - 3.2, 1.4)
+                      const valueText = String(value)
+                      const valueWidth = Math.max(3.8, valueText.length * 2.2 + 1.6)
+                      const valueHeight = 3.6
+                      const labelY = Math.max(point.y - 4.6, chart.padTop - 0.6)
+                      const rectX = Math.min(
+                        Math.max(point.x - valueWidth / 2, chart.padX),
+                        100 - chart.padX - valueWidth,
+                      )
+                      const rectY = labelY - valueHeight / 2
+                      const textX = rectX + valueWidth / 2
                       return (
-                        <text
-                          key={`val-${idx}`}
-                          x={point.x}
-                          y={labelY}
-                          textAnchor="middle"
-                          fontSize="2.6"
-                          fill="#cfe9ff"
-                          dominantBaseline="central"
-                        >
-                          {value}
-                        </text>
+                        <g key={`val-${idx}`}>
+                          <rect
+                            x={rectX}
+                            y={rectY}
+                            width={valueWidth}
+                            height={valueHeight}
+                            rx="1"
+                            fill="#0b1320"
+                            stroke="#263445"
+                            strokeWidth="0.4"
+                          />
+                          <text
+                            x={textX}
+                            y={labelY}
+                            textAnchor="middle"
+                            fontSize="2.4"
+                            fontWeight="600"
+                            fill="#e2f3ff"
+                            dominantBaseline="central"
+                          >
+                            {valueText}
+                          </text>
+                        </g>
                       )
                     })}
                     {chart.points.map((point, idx) => {
