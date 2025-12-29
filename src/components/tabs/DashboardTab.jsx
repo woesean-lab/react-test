@@ -37,204 +37,182 @@ export default function DashboardTab({
   ].filter(Boolean).length
   const userInitial = userName.slice(0, 1).toUpperCase() || "K"
   const activeTaskCount = tasks.todo + tasks.doing
-  const taskProgress = tasks.total > 0 ? Math.round((tasks.done / tasks.total) * 100) : 0
-  const taskTotal = tasks.total > 0 ? tasks.total : 1
   const stockUsage = stocks.total > 0 ? Math.round((stocks.used / stocks.total) * 100) : 0
-  const riskScore =
-    (canViewProblems ? openCount : 0) +
-    (canViewStock ? stocks.empty : 0) +
-    (canViewTasks ? tasks.todo : 0)
-  const riskStatus = riskScore > 0 ? "Takipte" : "Temiz"
-  const stockGaugeStyle = {
-    background: `conic-gradient(#34d399 ${stockUsage * 3.6}deg, rgba(148,163,184,0.18) 0deg)`,
+  const chartRaw = [
+    summary.last7Total,
+    summary.average,
+    tasks.todo,
+    tasks.doing,
+    tasks.done,
+    stocks.used,
+    stocks.empty,
+  ]
+  const fallbackSeries = [8, 14, 10, 18, 13, 20, 16]
+  const series = chartRaw.some((value) => value > 0) ? chartRaw : fallbackSeries
+  const minValue = Math.min(...series)
+  const maxValue = Math.max(...series)
+  const range = maxValue - minValue || 1
+  const points = series
+    .map((value, index) => {
+      const x = (index / (series.length - 1)) * 100
+      const y = 100 - ((value - minValue) / range) * 100
+      return `${x},${y}`
+    })
+    .join(" ")
+  const onOpenTab = (tabKey) => {
+    if (typeof onNavigate === "function") onNavigate(tabKey)
   }
-  const canNavigate = typeof onNavigate === "function"
-  const headerMetrics = [
+
+  const kpiItems = [
+    canViewSales && {
+      id: "sales",
+      label: "Son 7 gun satis",
+      value: summary.last7Total,
+      hint: `Ortalama ${summary.average}`,
+      tone: "from-emerald-500/20 to-emerald-500/5",
+    },
     canViewTasks && {
       id: "tasks",
       label: "Aktif gorev",
       value: activeTaskCount,
-      note: `Tamam ${tasks.done}`,
-      tone: "from-sky-500/20 to-sky-500/5 text-sky-100",
+      hint: `${tasks.todo} bekleyen`,
+      tone: "from-sky-500/20 to-sky-500/5",
     },
-    (canViewProblems || canViewStock || canViewTasks) && {
-      id: "risk",
-      label: "Operasyon riski",
-      value: riskScore,
-      note: riskStatus,
-      tone: "from-rose-500/20 to-rose-500/5 text-rose-100",
+    canViewProblems && {
+      id: "problems",
+      label: "Problemli musteri",
+      value: openCount,
+      hint: openCount > 0 ? "Takipte" : "Temiz",
+      tone: "from-rose-500/20 to-rose-500/5",
     },
     canViewStock && {
       id: "stock",
-      label: "Stok kullanim",
-      value: `${stockUsage}%`,
-      note: `Biten ${stocks.empty}`,
-      tone: "from-amber-500/20 to-amber-500/5 text-amber-100",
+      label: "Biten urun",
+      value: stocks.empty,
+      hint: `Kullanim ${stockUsage}%`,
+      tone: "from-amber-500/20 to-amber-500/5",
+    },
+    canViewMessages && {
+      id: "templates",
+      label: "Sablon",
+      value: templateCountText,
+      hint: `Kategori ${categoryCountText}`,
+      tone: "from-indigo-500/20 to-indigo-500/5",
+    },
+    canViewLists && {
+      id: "lists",
+      label: "Listeler",
+      value: listCountText,
+      hint: "Aktif",
+      tone: "from-slate-500/20 to-slate-500/5",
     },
   ].filter(Boolean)
-  const fallbackMetrics = [
+  const fallbackKpis = [
     {
       id: "modules",
       label: "Erisim modulu",
       value: moduleCount,
-      note: "Gorunur sekmeler",
-      tone: "from-slate-500/15 to-slate-500/5 text-slate-100",
+      hint: "Gorunur sekmeler",
+      tone: "from-slate-500/15 to-slate-500/5",
     },
     {
       id: "permissions",
       label: "Yetki seviyesi",
       value: permissionCount,
-      note: "Rol kapsaminda",
-      tone: "from-slate-500/15 to-slate-500/5 text-slate-100",
+      hint: "Rol kapsaminda",
+      tone: "from-slate-500/15 to-slate-500/5",
     },
     {
       id: "resolved",
       label: "Cozulen problem",
       value: resolvedCount,
-      note: "Takip kaydi",
-      tone: "from-slate-500/15 to-slate-500/5 text-slate-100",
+      hint: "Takip kaydi",
+      tone: "from-slate-500/15 to-slate-500/5",
     },
   ]
-  const metricsToShow = headerMetrics.length > 0 ? headerMetrics : fallbackMetrics
-  const taskBreakdown = [
-    { id: "todo", label: "Yapilacak", value: tasks.todo, color: "bg-sky-400/70" },
-    { id: "doing", label: "Devam", value: tasks.doing, color: "bg-amber-400/70" },
-    { id: "done", label: "Tamam", value: tasks.done, color: "bg-emerald-400/70" },
-  ]
-  const riskItems = [
-    canViewProblems && {
-      id: "risk-problems",
-      title: "Problemli musteri",
-      value: openCount,
-      detail: openCount > 0 ? `${openCount} acik kayit` : "Sorun yok",
-      tone: openCount > 0 ? "text-rose-200" : "text-emerald-200",
-      dot: openCount > 0 ? "bg-rose-400" : "bg-emerald-400",
-    },
-    canViewStock && {
-      id: "risk-stock",
-      title: "Biten urun",
-      value: stocks.empty,
-      detail: stocks.empty > 0 ? `${stocks.empty} urun` : "Stok stabil",
-      tone: stocks.empty > 0 ? "text-amber-200" : "text-emerald-200",
-      dot: stocks.empty > 0 ? "bg-amber-400" : "bg-emerald-400",
-    },
+  const kpisToShow = kpiItems.length > 0 ? kpiItems : fallbackKpis
+  const actionItems = [
     canViewTasks && {
-      id: "risk-tasks",
-      title: "Bekleyen gorev",
-      value: tasks.todo,
-      detail: tasks.todo > 0 ? `${tasks.todo} yapilacak` : "Dengeli",
-      tone: tasks.todo > 0 ? "text-sky-200" : "text-emerald-200",
-      dot: tasks.todo > 0 ? "bg-sky-400" : "bg-emerald-400",
-    },
-  ].filter(Boolean)
-  const quickLinks = [
-    canViewTasks && {
-      id: "link-tasks",
-      label: "Gorevler",
-      detail: "Planlama ve akis",
+      id: "act-tasks",
+      label: "Gorevleri planla",
+      detail: "Yeni aksiyon ekle",
       tab: "tasks",
       tone: "from-sky-500/25 to-sky-500/5",
-      icon: (
-        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4">
-          <path
-            d="M7 7h10M7 12h10M7 17h6M4 7h.01M4 12h.01M4 17h.01"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-        </svg>
-      ),
     },
     canViewSales && {
-      id: "link-sales",
-      label: "Satis",
-      detail: "Grafik ve girdi",
+      id: "act-sales",
+      label: "Satis girisi",
+      detail: "Yeni kayit ekle",
       tab: "sales",
       tone: "from-emerald-500/25 to-emerald-500/5",
-      icon: (
-        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4">
-          <path
-            d="M4 19h16M7 16l3-4 3 2 4-6"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      ),
     },
     canViewProblems && {
-      id: "link-problems",
-      label: "Problemler",
-      detail: "Musteri kayitlari",
+      id: "act-problems",
+      label: "Problemli musteriler",
+      detail: "Kayitlari guncelle",
       tab: "problems",
       tone: "from-rose-500/25 to-rose-500/5",
-      icon: (
-        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4">
-          <path
-            d="M12 9v5M12 17h.01M10 3h4l6 18H4L10 3Z"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
-      ),
     },
     canViewStock && {
-      id: "link-stock",
-      label: "Stok",
-      detail: "Urun kontrol",
+      id: "act-stock",
+      label: "Stok guncelle",
+      detail: "Urunleri kontrol et",
       tab: "stock",
       tone: "from-amber-500/25 to-amber-500/5",
-      icon: (
-        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4">
-          <path
-            d="M3 7h18v10H3zM7 7v10M17 7v10"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinejoin="round"
-          />
-        </svg>
-      ),
     },
     canViewMessages && {
-      id: "link-messages",
-      label: "Sablonlar",
+      id: "act-messages",
+      label: "Sablonlari yonet",
       detail: "Mesaj havuzu",
       tab: "messages",
       tone: "from-indigo-500/25 to-indigo-500/5",
-      icon: (
-        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4">
-          <path
-            d="M4 6h16v9H7l-3 3V6Z"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinejoin="round"
-          />
-        </svg>
-      ),
     },
     canViewLists && {
-      id: "link-lists",
-      label: "Listeler",
-      detail: "Gruplu veriler",
+      id: "act-lists",
+      label: "Listeleri ac",
+      detail: "Katilimlari guncelle",
       tab: "lists",
       tone: "from-slate-500/25 to-slate-500/5",
-      icon: (
-        <svg aria-hidden="true" viewBox="0 0 24 24" className="h-4 w-4">
-          <path
-            d="M8 6h12M8 12h12M8 18h12M4 6h.01M4 12h.01M4 18h.01"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
-        </svg>
-      ),
     },
   ].filter(Boolean)
-  const showQuickLinks = quickLinks.length > 0
-  const showComms = canViewMessages || canViewLists
+  const tableRows = [
+    canViewTasks && {
+      id: "row-tasks",
+      label: "Gorev toplam",
+      value: tasks.total,
+      status: tasks.total > 0 ? "Planli" : "Bos",
+    },
+    canViewSales && {
+      id: "row-sales",
+      label: "Satis kaydi",
+      value: summary.count,
+      status: summary.count > 0 ? "Aktif" : "Bos",
+    },
+    canViewStock && {
+      id: "row-stock",
+      label: "Stok urun",
+      value: stocks.total,
+      status: stocks.empty > 0 ? "Takip" : "Stabil",
+    },
+    canViewMessages && {
+      id: "row-templates",
+      label: "Sablonlar",
+      value: templateCountText,
+      status: "Hazir",
+    },
+    canViewLists && {
+      id: "row-lists",
+      label: "Listeler",
+      value: listCountText,
+      status: "Aktif",
+    },
+    canViewProblems && {
+      id: "row-resolved",
+      label: "Cozulen problem",
+      value: resolvedCount,
+      status: resolvedCount > 0 ? "Iyi" : "Yeni",
+    },
+  ].filter(Boolean)
 
   return (
     <div className="space-y-6">
@@ -242,248 +220,170 @@ export default function DashboardTab({
         <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(110%_120%_at_0%_0%,rgba(34,197,94,0.18),transparent)]" />
         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(148,163,184,0.08)_1px,transparent_1px),linear-gradient(rgba(148,163,184,0.08)_1px,transparent_1px)] bg-[size:32px_32px] opacity-40" />
         <div className="pointer-events-none absolute -right-28 -top-20 h-64 w-64 rounded-full bg-emerald-500/20 blur-3xl" />
-        <div className="relative space-y-6">
-          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
-            <div className="max-w-xl">
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
-                Is Yonetim Paneli
-              </span>
-              <h1 className="mt-3 font-display text-3xl font-semibold text-white">Akis</h1>
-              <p className="mt-2 text-sm text-slate-200/80">
-                Merhaba {userName}, bugunku operasyonlari tek bakista yonetebilirsin.
-              </p>
-            </div>
-            <div className="flex flex-wrap items-stretch gap-3">
-              <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
-                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400/90 to-emerald-200/40 text-lg font-semibold text-ink-900">
-                  {userInitial}
-                </div>
-                <div>
-                  <p className="text-sm font-semibold text-white">{userName}</p>
-                  <p className="text-xs text-slate-400">{userRole}</p>
-                  <p className="mt-1 text-[10px] uppercase tracking-[0.22em] text-slate-500">
-                    Yetki: {permissionCount}
-                  </p>
-                </div>
-              </div>
-              <div className="min-w-[200px] rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-slate-300">
-                <div className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Sistem</div>
-                <div className="mt-2 flex items-center gap-2 text-sm text-slate-100">
-                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                  Durum stabil
-                </div>
-                <div className="mt-2 text-xs text-slate-400">Erisim modulu: {moduleCount}</div>
-                <div className="mt-1 text-xs text-slate-400">Risk skoru: {riskScore}</div>
-              </div>
-            </div>
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="max-w-xl">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
+              Is Yonetim Paneli
+            </span>
+            <h1 className="mt-3 font-display text-3xl font-semibold text-white">Akis</h1>
+            <p className="mt-2 text-sm text-slate-200/80">
+              Merhaba {userName}, bugunku operasyonlari tek bakista yonetebilirsin.
+            </p>
           </div>
-          <div className="grid gap-3 sm:grid-cols-3">
-            {metricsToShow.map((metric) => (
-              <div
-                key={metric.id}
-                className={`rounded-2xl border border-white/10 bg-gradient-to-br ${metric.tone} px-4 py-3 shadow-inner`}
-              >
-                <p className="text-[10px] uppercase tracking-[0.22em] text-slate-200/70">{metric.label}</p>
-                <p className="mt-1 text-2xl font-semibold text-white">{metric.value}</p>
-                <p className="text-xs text-slate-200/70">{metric.note}</p>
+          <div className="flex flex-wrap items-stretch gap-3">
+            <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
+              <div className="flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400/90 to-emerald-200/40 text-lg font-semibold text-ink-900">
+                {userInitial}
               </div>
-            ))}
+              <div>
+                <p className="text-sm font-semibold text-white">{userName}</p>
+                <p className="text-xs text-slate-400">{userRole}</p>
+                <p className="mt-1 text-[10px] uppercase tracking-[0.22em] text-slate-500">
+                  Yetki: {permissionCount}
+                </p>
+              </div>
+            </div>
+            <div className="min-w-[200px] rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-slate-300">
+              <div className="text-[10px] uppercase tracking-[0.2em] text-slate-400">Sistem</div>
+              <div className="mt-2 flex items-center gap-2 text-sm text-slate-100">
+                <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                Durum stabil
+              </div>
+              <div className="mt-2 text-xs text-slate-400">Erisim modulu: {moduleCount}</div>
+              <div className="mt-1 text-xs text-slate-400">Cozulen problem: {resolvedCount}</div>
+            </div>
           </div>
         </div>
       </div>
 
-      {showQuickLinks && (
-        <div className={`${panelClass} bg-ink-900/50`}>
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Hizli baglantilar</p>
-            <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
-              Tek tik
-            </span>
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {kpisToShow.map((item) => (
+          <div
+            key={item.id}
+            className={`rounded-2xl border border-white/10 bg-gradient-to-br ${item.tone} px-4 py-4 shadow-inner`}
+          >
+            <p className="text-[10px] uppercase tracking-[0.22em] text-slate-200/70">{item.label}</p>
+            <p className="mt-2 text-3xl font-semibold text-white">{item.value}</p>
+            <p className="text-xs text-slate-200/70">{item.hint}</p>
           </div>
-          <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-            {quickLinks.map((link) => (
-              <button
-                key={link.id}
-                type="button"
-                onClick={() => {
-                  if (canNavigate) onNavigate(link.tab)
-                }}
-                disabled={!canNavigate}
-                className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br ${link.tone} p-4 text-left shadow-inner transition hover:-translate-y-0.5 hover:border-white/20 disabled:cursor-not-allowed disabled:opacity-60`}
-              >
-                <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-slate-100">
-                    {link.icon}
-                  </span>
-                  <div>
-                    <p className="text-sm font-semibold text-white">{link.label}</p>
-                    <p className="text-xs text-slate-300">{link.detail}</p>
-                  </div>
-                </div>
-                <div className="mt-4 inline-flex items-center gap-2 text-[11px] uppercase tracking-[0.2em] text-slate-200/80">
-                  Ac
-                  <span className="h-1 w-6 rounded-full bg-white/20 transition group-hover:w-10" />
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+        ))}
+      </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.6fr)]">
         <div className="space-y-6">
-          {canViewTasks && (
-            <div className={`${panelClass} bg-ink-900/55`}>
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Gorev ritmi</p>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
-                  Aktif {activeTaskCount}
-                </span>
-              </div>
-              <div className="mt-4 space-y-3">
-                {taskBreakdown.map((item) => (
-                  <div key={item.id} className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3">
-                    <div className="flex items-center justify-between text-xs text-slate-400">
-                      <span>{item.label}</span>
-                      <span className="text-slate-200">{item.value}</span>
-                    </div>
-                    <div className="mt-2 h-2 rounded-full bg-white/5">
-                      <div
-                        className={`h-2 rounded-full ${item.color}`}
-                        style={{ width: `${Math.min(100, Math.round((item.value / taskTotal) * 100))}%` }}
-                      />
-                    </div>
+          <div className={`${panelClass} bg-ink-900/55`}>
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Operasyon grafigi</p>
+              <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
+                Genel ivme
+              </span>
+            </div>
+            <div className="mt-4 rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
+              <svg viewBox="0 0 100 100" className="h-40 w-full">
+                <defs>
+                  <linearGradient id="trendLine" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#34d399" />
+                    <stop offset="100%" stopColor="#38bdf8" />
+                  </linearGradient>
+                  <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="rgba(52,211,153,0.35)" />
+                    <stop offset="100%" stopColor="rgba(52,211,153,0)" />
+                  </linearGradient>
+                </defs>
+                <polyline
+                  points={points}
+                  fill="none"
+                  stroke="url(#trendLine)"
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+                <polyline
+                  points={`${points} 100,100 0,100`}
+                  fill="url(#trendFill)"
+                  stroke="none"
+                />
+              </svg>
+              <div className="mt-3 grid grid-cols-7 gap-2 text-[10px] uppercase tracking-[0.2em] text-slate-400">
+                {["Pzt", "Sal", "Car", "Per", "Cum", "Cmt", "Paz"].map((day) => (
+                  <div key={day} className="text-center">
+                    {day}
                   </div>
                 ))}
-                <div className="rounded-2xl border border-dashed border-white/15 bg-ink-900/60 px-4 py-3">
-                  <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span>Tamamlanma</span>
-                    <span className="text-slate-200">{taskProgress}%</span>
-                  </div>
-                  <div className="mt-2 h-2 rounded-full bg-white/5">
-                    <div
-                      className="h-2 rounded-full bg-emerald-400/70"
-                      style={{ width: `${taskProgress}%` }}
-                    />
-                  </div>
-                </div>
               </div>
             </div>
-          )}
+          </div>
 
-          {canViewSales && (
-            <div className={`${panelClass} bg-ink-900/55`}>
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Satis ozeti</p>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
-                  Kayit {summary.count}
-                </span>
+          <div className={`${panelClass} bg-ink-900/55`}>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Durum tablosu</p>
+            <div className="mt-4 overflow-hidden rounded-2xl border border-white/10">
+              <div className="grid grid-cols-3 bg-ink-900/80 px-4 py-3 text-[10px] uppercase tracking-[0.22em] text-slate-400">
+                <div>Konu</div>
+                <div>Deger</div>
+                <div>Durum</div>
               </div>
-              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-emerald-500/15 to-ink-900/60 px-4 py-4 shadow-inner">
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-emerald-100/80">Toplam</p>
-                  <p className="mt-2 text-3xl font-semibold text-white">{summary.total}</p>
-                  <p className="text-xs text-slate-300">Son 7 gun {summary.last7Total}</p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-4 shadow-inner">
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Ortalama</p>
-                  <p className="mt-2 text-2xl font-semibold text-white">{summary.average}</p>
-                  <div className="mt-3 h-1.5 rounded-full bg-white/5">
-                    <div className="h-1.5 rounded-full bg-emerald-400/70" style={{ width: "60%" }} />
+              <div className="divide-y divide-white/5">
+                {tableRows.map((row, index) => (
+                  <div
+                    key={row.id}
+                    className={`grid grid-cols-3 px-4 py-3 text-sm ${
+                      index % 2 === 0 ? "bg-ink-900/60" : "bg-ink-900/40"
+                    }`}
+                  >
+                    <div className="text-slate-200">{row.label}</div>
+                    <div className="text-white">{row.value}</div>
+                    <div className="text-slate-300">{row.status}</div>
                   </div>
-                  <p className="mt-2 text-xs text-slate-400">Guncel ivme</p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-4 shadow-inner">
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Son 7 gun</p>
-                  <p className="mt-2 text-2xl font-semibold text-white">{summary.last7Total}</p>
-                  <p className="text-xs text-slate-400">Kisa vade performans</p>
-                </div>
+                ))}
               </div>
             </div>
-          )}
+          </div>
         </div>
 
         <div className="space-y-6">
           <div className={`${panelClass} bg-ink-900/55`}>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Uyari panosu</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Aksiyonlar</p>
             <div className="mt-4 space-y-3">
-              {riskItems.length === 0 ? (
-                <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-300 shadow-inner">
-                  Kritik risk yok. Sistem dengeli.
-                </div>
-              ) : (
-                riskItems.map((alert) => (
-                  <div
-                    key={alert.id}
-                    className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className={`h-2.5 w-2.5 rounded-full ${alert.dot}`} />
-                      <div className="flex-1">
-                        <p className="text-sm font-semibold text-slate-100">{alert.title}</p>
-                        <p className="text-xs text-slate-400">{alert.detail}</p>
-                      </div>
-                      <div className={`text-sm font-semibold ${alert.tone}`}>{alert.value}</div>
-                    </div>
+              {actionItems.map((action) => (
+                <button
+                  key={action.id}
+                  type="button"
+                  onClick={() => onOpenTab(action.tab)}
+                  className={`w-full rounded-2xl border border-white/10 bg-gradient-to-br ${action.tone} px-4 py-3 text-left shadow-inner transition hover:-translate-y-0.5 hover:border-white/20`}
+                >
+                  <p className="text-sm font-semibold text-white">{action.label}</p>
+                  <p className="text-xs text-slate-300">{action.detail}</p>
+                  <div className="mt-2 inline-flex items-center gap-2 text-[10px] uppercase tracking-[0.2em] text-slate-200/80">
+                    Ac
+                    <span className="h-1 w-6 rounded-full bg-white/20" />
                   </div>
-                ))
-              )}
+                </button>
+              ))}
             </div>
           </div>
 
-          {canViewStock && (
-            <div className={`${panelClass} bg-ink-900/55`}>
-              <div className="flex items-center justify-between">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Stok nabzi</p>
-                <span className="rounded-full bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
-                  Bosalan {stocks.empty}
-                </span>
+          <div className={`${panelClass} bg-ink-900/55`}>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Kisa notlar</p>
+            <div className="mt-4 space-y-3 text-sm text-slate-300">
+              <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3">
+                <p className="text-xs uppercase tracking-[0.22em] text-slate-400">Erisim</p>
+                <p className="text-lg font-semibold text-white">{moduleCount} modul</p>
+                <p className="text-xs text-slate-400">Yetki seviyesi {permissionCount}</p>
               </div>
-              <div className="mt-4 flex items-center gap-4">
-                <div className="relative flex h-20 w-20 items-center justify-center rounded-full" style={stockGaugeStyle}>
-                  <div className="flex h-14 w-14 items-center justify-center rounded-full bg-ink-900 text-sm font-semibold text-white">
-                    {stockUsage}%
-                  </div>
-                </div>
-                <div className="space-y-2 text-xs text-slate-400">
-                  <div className="flex items-center justify-between gap-6">
-                    <span>Toplam</span>
-                    <span className="text-slate-200">{stocks.total}</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-6">
-                    <span>Kullanilan</span>
-                    <span className="text-slate-200">{stocks.used}</span>
-                  </div>
-                  <div className="flex items-center justify-between gap-6">
-                    <span>Biten</span>
-                    <span className="text-slate-200">{stocks.empty}</span>
-                  </div>
-                </div>
+              <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3">
+                <p className="text-xs uppercase tracking-[0.22em] text-slate-400">Risk ozet</p>
+                <p className="text-lg font-semibold text-white">
+                  {openCount + stocks.empty + tasks.todo}
+                </p>
+                <p className="text-xs text-slate-400">Toplam acik nokta</p>
+              </div>
+              <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3">
+                <p className="text-xs uppercase tracking-[0.22em] text-slate-400">Stok</p>
+                <p className="text-lg font-semibold text-white">{stockUsage}%</p>
+                <p className="text-xs text-slate-400">Kullanim orani</p>
               </div>
             </div>
-          )}
-
-          {showComms && (
-            <div className={`${panelClass} bg-ink-900/55`}>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Iletisim odagi</p>
-              <div className="mt-4 space-y-3">
-                {canViewMessages && (
-                  <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
-                    <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Sablonlar</p>
-                    <p className="mt-2 text-2xl font-semibold text-white">{templateCountText}</p>
-                    <p className="text-xs text-slate-400">Kategori {categoryCountText}</p>
-                  </div>
-                )}
-                {canViewLists && (
-                  <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
-                    <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Listeler</p>
-                    <p className="mt-2 text-2xl font-semibold text-white">{listCountText}</p>
-                    <p className="text-xs text-slate-400">Aktif listeler</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
