@@ -84,13 +84,6 @@ export default function DashboardTab({
       hint: `Kullanim ${stockUsage}%`,
       accent: "bg-amber-400",
     },
-    canViewMessages && {
-      id: "templates",
-      label: "Sablon",
-      value: templateCountText,
-      hint: `Kategori ${categoryCountText}`,
-      accent: "bg-indigo-400",
-    },
     canViewLists && {
       id: "lists",
       label: "Listeler",
