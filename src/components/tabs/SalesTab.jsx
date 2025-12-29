@@ -223,7 +223,7 @@ export default function SalesTab({
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
               Satış
             </span>
-            <h1 className="font-display text-3xl font-semibold text-white">Satış</h1>
+            <h1 className="font-display text-3xl font-semibold text-white">Satış Grafiği</h1>
             <p className="max-w-2xl text-sm text-slate-200/80">
               Tarih bazlı satış gir, hareketi grafikte takip et.
             </p>
