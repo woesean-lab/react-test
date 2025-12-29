@@ -92,6 +92,7 @@ export default function TasksTab({
   focusTask,
 }) {
   const isTasksTabLoading = isLoading
+  const [expandedTaskId, setExpandedTaskId] = useState(null)
 
   if (isTasksTabLoading) {
     return <TasksSkeleton panelClass={panelClass} />
