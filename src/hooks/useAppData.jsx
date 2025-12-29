@@ -1119,6 +1119,25 @@ export default function useAppData() {
     })
   }, [sales])
 
+  const recentActivity = useMemo(() => {
+    const cutoff = Date.now() - 24 * 60 * 60 * 1000
+    const isRecent = (value) => {
+      if (!value) return false
+      const parsed = new Date(value)
+      if (Number.isNaN(parsed.getTime())) return false
+      return parsed.getTime() >= cutoff
+    }
+    const tasksUpdated = tasks.filter((task) => isRecent(task?.updatedAt || task?.createdAt)).length
+    const salesRecent = sales.filter((sale) => isRecent(sale?.createdAt))
+    const salesCount = salesRecent.length
+    const salesTotal = salesRecent.reduce((sum, sale) => sum + (Number(sale?.amount) || 0), 0)
+    const problemsOpened = problems.filter((problem) => isRecent(problem?.createdAt)).length
+    const problemsResolved = problems.filter(
+      (problem) => problem?.status === "resolved" && isRecent(problem?.updatedAt || problem?.createdAt),
+    ).length
+    return { salesCount, salesTotal, tasksUpdated, problemsOpened, problemsResolved }
+  }, [sales, tasks, problems])
+
   const formatTaskDate = (value) => {
     if (!value) return ""
     const dateValue = new Date(`${value}T00:00:00`)
@@ -3525,6 +3544,7 @@ export default function useAppData() {
     setSalesForm,
     handleSaleAdd,
     salesRecords,
+    recentActivity,
     isListsTabLoading,
     listCountText,
     activeList,

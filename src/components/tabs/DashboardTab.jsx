@@ -9,6 +9,7 @@ export default function DashboardTab({
   stockSummary,
   openProblems,
   resolvedProblems,
+  recentActivity,
   canViewMessages,
   canViewTasks,
   canViewSales,
@@ -41,6 +42,13 @@ export default function DashboardTab({
     if (typeof onNavigate === "function") onNavigate(tabKey)
   }
 
+  const activity = recentActivity || {
+    salesCount: 0,
+    salesTotal: 0,
+    tasksUpdated: 0,
+    problemsOpened: 0,
+    problemsResolved: 0,
+  }
   const attentionItems = [
     canViewTasks && {
       id: "focus-tasks",
@@ -50,6 +58,29 @@ export default function DashboardTab({
     canViewProblems && {
       id: "focus-problems",
       text: `Çözülmesi gereken ${openCount} problemli müşteri var.`,
+      accent: "bg-rose-400",
+    },
+  ].filter(Boolean)
+  const activityItems = [
+    canViewSales && {
+      id: "activity-sales",
+      label: "Satış girişi",
+      value: activity.salesCount,
+      hint: `Toplam ${activity.salesTotal}`,
+      accent: "bg-emerald-400",
+    },
+    canViewTasks && {
+      id: "activity-tasks",
+      label: "Görev güncellemesi",
+      value: activity.tasksUpdated,
+      hint: "Son 24 saat",
+      accent: "bg-sky-400",
+    },
+    canViewProblems && {
+      id: "activity-problems",
+      label: "Yeni problem",
+      value: activity.problemsOpened,
+      hint: `Çözülen ${activity.problemsResolved}`,
       accent: "bg-rose-400",
     },
   ].filter(Boolean)
@@ -208,7 +239,7 @@ export default function DashboardTab({
         <div className={`${panelClass} bg-ink-900/55`}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Odak notları</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Hatırlatıcılar</p>
               <p className="mt-1 text-sm text-slate-300">Bugün önceliklendirilmesi gerekenler.</p>
             </div>
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
@@ -234,9 +265,9 @@ export default function DashboardTab({
           </div>
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {kpisToShow.map((item) => (
-                <div key={item.id} className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2">
+              <div key={item.id} className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-2">
                       <span className={`h-2.5 w-2.5 rounded-full ${item.accent}`} />
                       <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">{item.label}</p>
                     </div>
@@ -251,6 +282,37 @@ export default function DashboardTab({
                   )}
                 </div>
               ))}
+            </div>
+            <div className="mt-4">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Son 24 saat</p>
+                <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-300">
+                  Hareket
+                </span>
+              </div>
+              <div className="mt-3 grid gap-2 sm:grid-cols-2">
+                {activityItems.length === 0 ? (
+                  <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-400 sm:col-span-2">
+                    Son 24 saatte hareket yok.
+                  </div>
+                ) : (
+                  activityItems.map((item) => (
+                    <div
+                      key={item.id}
+                      className="flex items-center justify-between rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3"
+                    >
+                      <div className="flex items-center gap-2 text-xs text-slate-400">
+                        <span className={`h-2.5 w-2.5 rounded-full ${item.accent}`} />
+                        <span>{item.label}</span>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-sm font-semibold text-white">{item.value}</p>
+                        <p className="text-[10px] uppercase tracking-[0.2em] text-slate-500">{item.hint}</p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
 

@@ -123,6 +123,7 @@ function App() {
     setSalesForm,
     handleSaleAdd,
     salesRecords,
+    recentActivity,
     isListsTabLoading,
     listCountText,
     activeList,
@@ -735,11 +736,12 @@ function App() {
               templateCountText={templateCountText}
               categoryCountText={categoryCountText}
               taskStats={taskStats}
-              salesSummary={salesSummary}
-              listCountText={listCountText}
-              stockSummary={stockSummary}
+                salesSummary={salesSummary}
+                listCountText={listCountText}
+                stockSummary={stockSummary}
                 openProblems={openProblems}
                 resolvedProblems={resolvedProblems}
+                recentActivity={recentActivity}
                 canViewMessages={canViewMessages}
                 canViewTasks={canViewTasks}
                 canViewSales={canViewSales}
