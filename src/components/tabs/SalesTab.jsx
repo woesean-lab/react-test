@@ -120,7 +120,6 @@ export default function SalesTab({
     chartData.forEach((item, index) => {
       if (Number(item.amount ?? 0) === maxValue) peakIndex = index
     })
-    const labelEvery = chartData.length > 10 ? 2 : 1
     const bars = chartData.map((item, index) => {
       const amount = Number(item.amount ?? 0)
       const ratio = maxValue > 0 ? amount / maxValue : 0
@@ -130,7 +129,7 @@ export default function SalesTab({
         ratio,
         heightPercent,
         label: formatPointLabel(item.date),
-        showLabel: index % labelEvery === 0 || index === chartData.length - 1,
+        showLabel: true,
         isPeak: index === peakIndex,
       }
     })
@@ -238,17 +237,13 @@ export default function SalesTab({
                           <div
                             className={`w-full rounded-2xl ${
                               bar.isPeak
-                                ? "bg-emerald-400 shadow-[0_10px_18px_rgba(16,185,129,0.3)]"
+                                ? "bg-emerald-400"
                                 : "bg-slate-600/80"
                             }`}
                             style={{ height: `${bar.heightPercent}%` }}
                           />
                         </div>
-                        <span
-                          className={`text-[11px] font-medium ${
-                            bar.showLabel ? "text-slate-300" : "text-transparent"
-                          }`}
-                        >
+                        <span className="text-[11px] font-medium text-slate-300">
                           {bar.label}
                         </span>
                       </div>
