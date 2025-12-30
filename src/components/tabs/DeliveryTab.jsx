@@ -271,7 +271,7 @@ export default function DeliveryTab({ panelClass }) {
                     : "Bu aramada not bulunamadi."}
                 </div>
               ) : (
-                <div className="space-y-3">
+                <div className="space-y-2">
                   {filteredNotes.map((note) => {
                     const isActive = isEditorOpen && note.id === activeNoteId
                     const primaryTag = note.tags[0]
@@ -286,17 +286,12 @@ export default function DeliveryTab({ panelClass }) {
                         key={note.id}
                         type="button"
                         onClick={() => handleNoteOpen(note)}
-                        className={`group relative w-full rounded-2xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent px-4 py-3 text-left transition hover:border-accent-300/60 hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-300/40 sm:px-5 ${
-                          isActive ? "border-accent-300/70 bg-accent-500/10 shadow-glow" : ""
+                        className={`group relative w-full border border-white/10 bg-transparent px-4 py-2.5 text-left transition hover:border-accent-300/60 hover:bg-white/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-300/40 sm:px-5 ${
+                          isActive ? "border-accent-300/70 bg-white/10" : ""
                         }`}
                       >
-                        <span
-                          className={`pointer-events-none absolute left-0 top-4 h-8 w-0.5 rounded-full bg-accent-400/70 transition ${
-                            isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"
-                          }`}
-                        />
                         <div className="flex items-start gap-3">
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-[11px] font-semibold text-slate-200">
+                          <div className="flex h-8 w-8 shrink-0 items-center justify-center border border-white/10 bg-white/5 text-[11px] font-semibold text-slate-200">
                             {noteInitial}
                           </div>
                           <div className="min-w-0 flex-1 space-y-1">
@@ -305,7 +300,7 @@ export default function DeliveryTab({ panelClass }) {
                                 {titleText}
                               </p>
                               {tagLabel && (
-                                <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] text-slate-300">
+                                <span className="border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] text-slate-300">
                                   {tagLabel}
                                 </span>
                               )}
