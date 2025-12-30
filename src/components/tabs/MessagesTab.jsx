@@ -277,15 +277,30 @@ export default function MessagesTab({
             </div>
 
             <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
-              <div className="flex h-11 flex-1 items-center gap-3 rounded-xl border border-white/10 bg-ink-900 px-4">
+              <div className="flex h-11 w-full items-center gap-3 rounded-[6px] border border-white/10 bg-ink-900 px-4 shadow-inner">
                 <span className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Ara</span>
-                <input
-                  type="text"
-                  value={templateQuery}
-                  onChange={(e) => setTemplateQuery(e.target.value)}
-                  placeholder="Sablon ara"
-                  className="w-full min-w-0 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
-                />
+                <div className="flex flex-1 items-center gap-2">
+                  <svg
+                    aria-hidden="true"
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4 text-slate-500"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="11" cy="11" r="7" />
+                    <line x1="16.5" y1="16.5" x2="21" y2="21" />
+                  </svg>
+                  <input
+                    type="text"
+                    value={templateQuery}
+                    onChange={(e) => setTemplateQuery(e.target.value)}
+                    placeholder="Sablon ara"
+                    className="w-full min-w-0 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
+                  />
+                </div>
               </div>
               {templateQuery.trim() && (
                 <button
