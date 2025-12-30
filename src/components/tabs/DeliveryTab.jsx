@@ -214,7 +214,7 @@ export default function DeliveryTab({ panelClass }) {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,0.9fr)]">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,2fr)]">
         <div className="space-y-6">
           <div className={`${panelClass} bg-ink-900/60`}>
             <div className="flex flex-col gap-4">
@@ -271,73 +271,50 @@ export default function DeliveryTab({ panelClass }) {
                     : "Bu aramada not bulunamadi."}
                 </div>
               ) : (
-                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-                  {filteredNotes.map((note) => {
+                <div className="overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60">
+                  {filteredNotes.map((note, index) => {
                     const isActive = isEditorOpen && note.id === activeNoteId
-                    const visibleTags = note.tags.slice(0, 3)
-                    const extraTagCount = Math.max(0, note.tags.length - visibleTags.length)
+                    const primaryTag = note.tags[0]
+                    const extraTagCount = Math.max(0, note.tags.length - 1)
+                    const tagLabel = primaryTag
+                      ? `#${primaryTag}${extraTagCount > 0 ? ` +${extraTagCount}` : ""}`
+                      : ""
                     return (
                       <button
                         key={note.id}
                         type="button"
                         onClick={() => handleNoteOpen(note)}
-                        className={`group flex h-full flex-col gap-2 rounded-2xl border border-white/10 bg-white/5 p-3 text-left shadow-inner transition hover:border-accent-300/60 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-accent-400/40 ${
-                          isActive ? "border-accent-300/70 bg-accent-500/10" : ""
-                        }`}
+                        className={`group flex w-full flex-col gap-1.5 px-4 py-3 text-left transition hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-accent-400/40 sm:px-5 ${
+                          index !== 0 ? "border-t border-white/10" : ""
+                        } ${isActive ? "bg-accent-500/10" : ""}`}
                       >
-                        <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-slate-500">
+                        <div className="flex items-center gap-3">
                           <span
                             className={`h-2 w-2 rounded-full ${
                               isActive ? "bg-accent-400 shadow-glow" : "bg-slate-500/70"
                             }`}
                           />
-                          <span>{formatNoteDate(note.updatedAt) || "Tarih yok"}</span>
-                          {note.tags.length > 0 && (
-                            <span className="ml-auto rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-300">
-                              #{note.tags[0]}
-                            </span>
-                          )}
-                        </div>
-                        <p className="truncate text-sm font-semibold text-slate-100">
-                          {note.title || "Basliksiz not"}
-                        </p>
-                        {note.body && (
-                          <p
-                            className="text-xs text-slate-400"
-                            style={{
-                              display: "-webkit-box",
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: "vertical",
-                              overflow: "hidden",
-                              overflowWrap: "anywhere",
-                              wordBreak: "break-word",
-                            }}
-                            title={note.body}
-                          >
-                            {note.body}
+                          <p className="min-w-0 flex-1 truncate text-sm font-semibold text-slate-100">
+                            {note.title || "Basliksiz not"}
                           </p>
-                        )}
-                        <div className="mt-auto flex flex-wrap gap-1.5">
-                          {visibleTags.length === 0 ? (
-                            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-400">
-                              Etiket yok
-                            </span>
-                          ) : (
-                            visibleTags.map((tag) => (
-                              <span
-                                key={`${note.id}-${tag}`}
-                                className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-200"
-                              >
-                                #{tag}
-                              </span>
-                            ))
-                          )}
-                          {extraTagCount > 0 && (
-                            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-400">
-                              +{extraTagCount}
-                            </span>
-                          )}
+                          <span className="shrink-0 text-[10px] uppercase tracking-[0.24em] text-slate-500">
+                            {formatNoteDate(note.updatedAt) || "Tarih yok"}
+                          </span>
                         </div>
+                        {(note.body || tagLabel) && (
+                          <div className="flex items-center gap-2">
+                            {note.body && (
+                              <p className="min-w-0 flex-1 truncate text-xs text-slate-400" title={note.body}>
+                                {note.body}
+                              </p>
+                            )}
+                            {tagLabel && (
+                              <span className="ml-auto shrink-0 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-300">
+                                {tagLabel}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </button>
                     )
                   })}
