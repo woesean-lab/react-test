@@ -271,8 +271,8 @@ export default function DeliveryTab({ panelClass }) {
                     : "Bu aramada not bulunamadi."}
                 </div>
               ) : (
-                <div className="overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60">
-                  {filteredNotes.map((note, index) => {
+                <div className="divide-y divide-white/10 overflow-hidden rounded-2xl border border-white/10 bg-white/5">
+                  {filteredNotes.map((note) => {
                     const isActive = isEditorOpen && note.id === activeNoteId
                     const primaryTag = note.tags[0]
                     const extraTagCount = Math.max(0, note.tags.length - 1)
@@ -284,9 +284,9 @@ export default function DeliveryTab({ panelClass }) {
                         key={note.id}
                         type="button"
                         onClick={() => handleNoteOpen(note)}
-                        className={`group flex w-full flex-col gap-1.5 px-4 py-3 text-left transition hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-accent-400/40 sm:px-5 ${
-                          index !== 0 ? "border-t border-white/10" : ""
-                        } ${isActive ? "bg-accent-500/10" : ""}`}
+                        className={`group flex w-full flex-col gap-1.5 px-4 py-2.5 text-left transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent-300/40 sm:px-5 ${
+                          isActive ? "bg-white/10" : ""
+                        }`}
                       >
                         <div className="flex items-center gap-3">
                           <span
