@@ -265,10 +265,14 @@ export default function DeliveryTab({ panelClass }) {
                     : "Bu aramada not bulunamadi."}
                 </div>
               ) : (
-                <div className="overflow-hidden rounded-2xl border border-white/10 bg-ink-900/40">
+                <div className="overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60">
                   {filteredNotes.map((note, index) => {
-                    const visibleTags = note.tags.slice(0, 4)
-                    const extraTagCount = Math.max(0, note.tags.length - visibleTags.length)
+                    const primaryTag = note.tags[0]
+                    const extraTagCount = Math.max(0, note.tags.length - 1)
+                    const tagLabel = primaryTag
+                      ? `#${primaryTag}${extraTagCount > 0 ? ` +${extraTagCount}` : ""}`
+                      : ""
+                    const snippet = note.body?.trim() || ""
                     return (
                       <div
                         key={note.id}
@@ -281,55 +285,32 @@ export default function DeliveryTab({ panelClass }) {
                             handleNoteOpen(note)
                           }
                         }}
-                        className={`group flex flex-col gap-1.5 px-4 py-3 text-left transition hover:bg-ink-800/70 focus:outline-none focus:ring-2 focus:ring-accent-400/40 sm:px-5 ${
+                        className={`group flex flex-col gap-1 px-3 py-2 text-left transition hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-accent-400/40 sm:px-4 ${
                           index !== 0 ? "border-t border-white/10" : ""
                         }`}
                       >
                         <div className="flex items-center justify-between gap-3">
-                          <p className="min-w-0 truncate text-sm font-semibold text-white">
+                          <p className="min-w-0 truncate text-sm font-semibold text-slate-100">
                             {note.title || "Basliksiz not"}
                           </p>
                           <span className="shrink-0 text-[10px] uppercase tracking-[0.24em] text-slate-500">
                             {formatNoteDate(note.updatedAt) || "Tarih yok"}
                           </span>
                         </div>
-                        {note.body && (
-                          <p
-                            className="text-xs text-slate-300"
-                            style={{
-                              display: "-webkit-box",
-                              WebkitLineClamp: 1,
-                              WebkitBoxOrient: "vertical",
-                              overflow: "hidden",
-                              overflowWrap: "anywhere",
-                              wordBreak: "break-word",
-                            }}
-                            title={note.body}
-                          >
-                            {note.body}
-                          </p>
-                        )}
-                        <div className="flex flex-wrap gap-1.5">
-                          {visibleTags.length === 0 ? (
-                            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-400">
-                              Etiket yok
-                            </span>
-                          ) : (
-                            visibleTags.map((tag) => (
-                              <span
-                                key={`${note.id}-${tag}`}
-                                className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-200"
-                              >
-                                #{tag}
+                        {(snippet || tagLabel) && (
+                          <div className="flex items-center gap-2">
+                            {snippet && (
+                              <p className="min-w-0 flex-1 truncate text-xs text-slate-400" title={note.body}>
+                                {note.body}
+                              </p>
+                            )}
+                            {tagLabel && (
+                              <span className="ml-auto shrink-0 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-300">
+                                {tagLabel}
                               </span>
-                            ))
-                          )}
-                          {extraTagCount > 0 && (
-                            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-400">
-                              +{extraTagCount}
-                            </span>
-                          )}
-                        </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )
                   })}
