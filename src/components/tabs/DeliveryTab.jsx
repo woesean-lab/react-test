@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { DELIVERY_NOTES_STORAGE_KEY } from "../../constants/appConstants"
-import DeliveryNoteModal from "../modals/DeliveryNoteModal"
 
 const createNoteId = () => `note-${Date.now()}-${Math.random().toString(16).slice(2)}`
 
@@ -55,11 +54,12 @@ export default function DeliveryTab({ panelClass }) {
     }
   })
   const [searchInput, setSearchInput] = useState("")
-  const [createDraft, setCreateDraft] = useState({ title: "", body: "", tags: "" })
-  const [editDraft, setEditDraft] = useState({ title: "", body: "", tags: "" })
-  const [isCreateOpen, setIsCreateOpen] = useState(false)
-  const [editingNoteId, setEditingNoteId] = useState(null)
+  const [draft, setDraft] = useState({ title: "", body: "", tags: "" })
+  const [activeNoteId, setActiveNoteId] = useState(null)
+  const [isEditorOpen, setIsEditorOpen] = useState(false)
   const [deleteConfirmId, setDeleteConfirmId] = useState(null)
+  const lineRef = useRef(null)
+  const textareaRef = useRef(null)
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -101,27 +101,32 @@ export default function DeliveryTab({ panelClass }) {
     })
   }, [notes])
 
-  const isEditing = Boolean(editingNoteId)
-  const activeDraft = isEditing ? editDraft : createDraft
-  const setActiveDraft = isEditing ? setEditDraft : setCreateDraft
-  const canSaveNote = Boolean(activeDraft.title.trim() || activeDraft.body.trim())
-  const hasDraft = Boolean(
-    createDraft.title.trim() || createDraft.body.trim() || createDraft.tags.trim(),
+  const isEditing = Boolean(activeNoteId)
+  const canSaveNote = Boolean(draft.title.trim() || draft.body.trim())
+  const lineCount = useMemo(() => Math.max(1, draft.body.split("\n").length), [draft.body])
+  const lineNumbers = useMemo(
+    () => Array.from({ length: lineCount }, (_, index) => index + 1),
+    [lineCount],
   )
   const handleSearchClear = () => {
     setSearchInput("")
   }
 
-  const handleCreateSave = () => {
-    const title = activeDraft.title.trim()
-    const body = activeDraft.body.trim()
+  const handleEditorScroll = () => {
+    if (!lineRef.current || !textareaRef.current) return
+    lineRef.current.scrollTop = textareaRef.current.scrollTop
+  }
+
+  const handleSave = () => {
+    const title = draft.title.trim()
+    const body = draft.body.trim()
     if (!title && !body) return
     const now = new Date().toISOString()
-    const tags = parseTags(activeDraft.tags)
+    const tags = parseTags(draft.tags)
     if (isEditing) {
       setNotes((prev) =>
         prev.map((note) =>
-          note.id === editingNoteId
+          note.id === activeNoteId
             ? {
               ...note,
               title,
@@ -132,9 +137,7 @@ export default function DeliveryTab({ panelClass }) {
             : note,
         ),
       )
-      setEditDraft({ title: "", body: "", tags: "" })
-      setEditingNoteId(null)
-      setDeleteConfirmId(null)
+      setDraft({ title, body, tags: tags.join(", ") })
     } else {
       const newNote = {
         id: createNoteId(),
@@ -145,42 +148,45 @@ export default function DeliveryTab({ panelClass }) {
         updatedAt: now,
       }
       setNotes((prev) => [newNote, ...prev])
-      setCreateDraft({ title: "", body: "", tags: "" })
+      setActiveNoteId(newNote.id)
+      setDraft({ title, body, tags: tags.join(", ") })
     }
-    setIsCreateOpen(false)
+    setDeleteConfirmId(null)
+    setIsEditorOpen(true)
   }
 
   const handleCreateOpen = () => {
-    setEditingNoteId(null)
+    setActiveNoteId(null)
     setDeleteConfirmId(null)
-    setIsCreateOpen(true)
+    setDraft({ title: "", body: "", tags: "" })
+    setIsEditorOpen(true)
   }
-  const handleCreateClose = () => {
-    setIsCreateOpen(false)
-    setEditingNoteId(null)
+  const handleEditorClose = () => {
+    setIsEditorOpen(false)
+    setActiveNoteId(null)
     setDeleteConfirmId(null)
   }
   const handleNoteOpen = (note) => {
-    setEditingNoteId(note.id)
+    setActiveNoteId(note.id)
     setDeleteConfirmId(null)
-    setEditDraft({
+    setDraft({
       title: note.title || "",
       body: note.body || "",
       tags: note.tags.join(", "),
     })
-    setIsCreateOpen(true)
+    setIsEditorOpen(true)
   }
   const handleDeleteRequest = () => {
-    if (!editingNoteId) return
-    if (deleteConfirmId === editingNoteId) {
-      setNotes((prev) => prev.filter((note) => note.id !== editingNoteId))
-      setEditDraft({ title: "", body: "", tags: "" })
-      setEditingNoteId(null)
+    if (!activeNoteId) return
+    if (deleteConfirmId === activeNoteId) {
+      setNotes((prev) => prev.filter((note) => note.id !== activeNoteId))
+      setDraft({ title: "", body: "", tags: "" })
+      setActiveNoteId(null)
       setDeleteConfirmId(null)
-      setIsCreateOpen(false)
+      setIsEditorOpen(false)
       return
     }
-    setDeleteConfirmId(editingNoteId)
+    setDeleteConfirmId(activeNoteId)
   }
 
   return (
@@ -265,53 +271,74 @@ export default function DeliveryTab({ panelClass }) {
                     : "Bu aramada not bulunamadi."}
                 </div>
               ) : (
-                <div className="overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60">
-                  {filteredNotes.map((note, index) => {
-                    const primaryTag = note.tags[0]
-                    const extraTagCount = Math.max(0, note.tags.length - 1)
-                    const tagLabel = primaryTag
-                      ? `#${primaryTag}${extraTagCount > 0 ? ` +${extraTagCount}` : ""}`
-                      : ""
-                    const snippet = note.body?.trim() || ""
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {filteredNotes.map((note) => {
+                    const isActive = isEditorOpen && note.id === activeNoteId
+                    const visibleTags = note.tags.slice(0, 3)
+                    const extraTagCount = Math.max(0, note.tags.length - visibleTags.length)
                     return (
-                      <div
+                      <button
                         key={note.id}
-                        role="button"
-                        tabIndex={0}
+                        type="button"
                         onClick={() => handleNoteOpen(note)}
-                        onKeyDown={(event) => {
-                          if (event.key === "Enter" || event.key === " ") {
-                            event.preventDefault()
-                            handleNoteOpen(note)
-                          }
-                        }}
-                        className={`group flex flex-col gap-1 px-3 py-2 text-left transition hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-accent-400/40 sm:px-4 ${
-                          index !== 0 ? "border-t border-white/10" : ""
+                        className={`group flex h-full flex-col gap-2 rounded-2xl border border-white/10 bg-white/5 p-3 text-left shadow-inner transition hover:border-accent-300/60 hover:bg-white/10 focus:outline-none focus:ring-2 focus:ring-accent-400/40 ${
+                          isActive ? "border-accent-300/70 bg-accent-500/10" : ""
                         }`}
                       >
-                        <div className="flex items-center justify-between gap-3">
-                          <p className="min-w-0 truncate text-sm font-semibold text-slate-100">
-                            {note.title || "Basliksiz not"}
-                          </p>
-                          <span className="shrink-0 text-[10px] uppercase tracking-[0.24em] text-slate-500">
-                            {formatNoteDate(note.updatedAt) || "Tarih yok"}
-                          </span>
+                        <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.24em] text-slate-500">
+                          <span
+                            className={`h-2 w-2 rounded-full ${
+                              isActive ? "bg-accent-400 shadow-glow" : "bg-slate-500/70"
+                            }`}
+                          />
+                          <span>{formatNoteDate(note.updatedAt) || "Tarih yok"}</span>
+                          {note.tags.length > 0 && (
+                            <span className="ml-auto rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-300">
+                              #{note.tags[0]}
+                            </span>
+                          )}
                         </div>
-                        {(snippet || tagLabel) && (
-                          <div className="flex items-center gap-2">
-                            {snippet && (
-                              <p className="min-w-0 flex-1 truncate text-xs text-slate-400" title={note.body}>
-                                {note.body}
-                              </p>
-                            )}
-                            {tagLabel && (
-                              <span className="ml-auto shrink-0 rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-300">
-                                {tagLabel}
-                              </span>
-                            )}
-                          </div>
+                        <p className="truncate text-sm font-semibold text-slate-100">
+                          {note.title || "Basliksiz not"}
+                        </p>
+                        {note.body && (
+                          <p
+                            className="text-xs text-slate-400"
+                            style={{
+                              display: "-webkit-box",
+                              WebkitLineClamp: 2,
+                              WebkitBoxOrient: "vertical",
+                              overflow: "hidden",
+                              overflowWrap: "anywhere",
+                              wordBreak: "break-word",
+                            }}
+                            title={note.body}
+                          >
+                            {note.body}
+                          </p>
                         )}
-                      </div>
+                        <div className="mt-auto flex flex-wrap gap-1.5">
+                          {visibleTags.length === 0 ? (
+                            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-400">
+                              Etiket yok
+                            </span>
+                          ) : (
+                            visibleTags.map((tag) => (
+                              <span
+                                key={`${note.id}-${tag}`}
+                                className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-200"
+                              >
+                                #{tag}
+                              </span>
+                            ))
+                          )}
+                          {extraTagCount > 0 && (
+                            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-400">
+                              +{extraTagCount}
+                            </span>
+                          )}
+                        </div>
+                      </button>
                     )
                   })}
                 </div>
@@ -325,41 +352,131 @@ export default function DeliveryTab({ panelClass }) {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
-                  Yeni not
+                  Not editoru
                 </p>
-                <p className="text-sm text-slate-400">Notu modalda olusturup listeye ekle.</p>
+                <p className="text-sm text-slate-400">
+                  {isEditorOpen
+                    ? isEditing
+                      ? "Secili notu guncelle"
+                      : "Yeni not olustur"
+                    : "Sag panelde notu ac"}
+                </p>
               </div>
-              <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                {notes.length} not
-              </span>
+              <button
+                type="button"
+                onClick={handleCreateOpen}
+                className="rounded-full border border-accent-400/70 bg-accent-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-[0.2em] text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
+              >
+                Yeni not
+              </button>
             </div>
 
-            <div className="mt-4 space-y-3 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
-              <p className="text-sm text-slate-300">Baslik, icerik ve etiket ekleyip kaydet.</p>
-              <p className="text-xs text-slate-400">
-                {hasDraft
-                  ? "Taslak hazir. Modal acinca kaldigin yerden devam edersin."
-                  : "Taslak bos. Yeni notu baslatmak icin ac."}
-              </p>
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={handleCreateOpen}
-                  className="min-w-[140px] rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
-                >
-                  Not olustur
-                </button>
-                {hasDraft && (
+            {isEditorOpen ? (
+              <div className="mt-4 space-y-4">
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-200" htmlFor="note-title">
+                      Not basligi
+                    </label>
+                    <input
+                      id="note-title"
+                      type="text"
+                      value={draft.title}
+                      onChange={(event) => setDraft((prev) => ({ ...prev, title: event.target.value }))}
+                      placeholder="Orn: Teslimat adimlari"
+                      className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-200" htmlFor="note-tags">
+                      Etiketler
+                    </label>
+                    <input
+                      id="note-tags"
+                      type="text"
+                      value={draft.tags}
+                      onChange={(event) => setDraft((prev) => ({ ...prev, tags: event.target.value }))}
+                      placeholder="Orn: kargo, kritik"
+                      className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                    />
+                    <p className="text-xs text-slate-500">Etiketleri virgul ile ayir.</p>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between text-xs font-semibold text-slate-200">
+                    <label htmlFor="note-body">Not editoru</label>
+                    <span className="text-[11px] font-medium text-slate-500">
+                      {lineCount} satir • {draft.body.length} karakter
+                    </span>
+                  </div>
+                  <div className="overflow-hidden rounded-xl border border-white/10 bg-ink-900/80 shadow-inner">
+                    <div className="flex max-h-[360px] min-h-[220px] overflow-hidden">
+                      <div
+                        ref={lineRef}
+                        className="w-12 shrink-0 overflow-hidden border-r border-white/10 bg-ink-900 px-2 py-3 text-right font-mono text-[11px] leading-6 text-slate-500"
+                      >
+                        {lineNumbers.map((line) => (
+                          <div key={line}>{line}</div>
+                        ))}
+                      </div>
+                      <textarea
+                        ref={textareaRef}
+                        id="note-body"
+                        rows={10}
+                        value={draft.body}
+                        onChange={(event) => setDraft((prev) => ({ ...prev, body: event.target.value }))}
+                        onScroll={handleEditorScroll}
+                        placeholder="Notunu buraya yaz..."
+                        className="flex-1 resize-none overflow-auto bg-ink-900 px-4 py-3 font-mono text-[13px] leading-6 text-slate-100 placeholder:text-slate-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-3 border-t border-white/10 pt-4">
+                  {isEditing && (
+                    <button
+                      type="button"
+                      onClick={handleDeleteRequest}
+                      className={`min-w-[120px] rounded-lg border px-4 py-2 text-xs font-semibold uppercase tracking-wide transition ${
+                        deleteConfirmId === activeNoteId
+                          ? "border-rose-300 bg-rose-500/25 text-rose-50"
+                          : "border-rose-400/60 bg-rose-500/10 text-rose-100 hover:border-rose-300 hover:bg-rose-500/20"
+                      }`}
+                    >
+                      {deleteConfirmId === activeNoteId ? "Emin misin?" : "Sil"}
+                    </button>
+                  )}
                   <button
                     type="button"
-                    onClick={() => setCreateDraft({ title: "", body: "", tags: "" })}
-                    className="min-w-[140px] rounded-lg border border-white/10 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
+                    onClick={handleSave}
+                    disabled={!canSaveNote}
+                    className="min-w-[140px] rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    Taslagi temizle
+                    {isEditing ? "Guncelle" : "Not olustur"}
                   </button>
-                )}
+                  <button
+                    type="button"
+                    onClick={() => setDraft({ title: "", body: "", tags: "" })}
+                    className="min-w-[120px] rounded-lg border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
+                  >
+                    Temizle
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleEditorClose}
+                    className="min-w-[120px] rounded-lg border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
+                  >
+                    Kapat
+                  </button>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="mt-4 rounded-xl border border-dashed border-white/10 bg-white/5 p-4 text-sm text-slate-400">
+                Listeden bir not sec veya yeni not olustur.
+              </div>
+            )}
           </div>
 
           <div className={`${panelClass} bg-ink-900/60`}>
@@ -397,17 +514,6 @@ export default function DeliveryTab({ panelClass }) {
           </div>
         </div>
       </div>
-      <DeliveryNoteModal
-        isOpen={isCreateOpen}
-        onClose={handleCreateClose}
-        onSave={handleCreateSave}
-        draft={activeDraft}
-        setDraft={setActiveDraft}
-        canSave={canSaveNote}
-        isEditing={isEditing}
-        onDelete={handleDeleteRequest}
-        deleteConfirm={deleteConfirmId === editingNoteId}
-      />
     </div>
   )
 }
