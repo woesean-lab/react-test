@@ -199,7 +199,7 @@ export default function StockTab({
                       <p className="text-sm text-slate-400">Stokları satır bazında yönet, toplu işlem yap.</p>
                     </div>
                     <div className="flex w-full flex-col gap-2">
-                      <div className="flex h-11 w-full items-center gap-3 rounded-[6px] border border-white/10 bg-ink-900 px-4 shadow-inner">
+                      <div className="flex h-11 w-full items-center gap-3 rounded border border-white/10 bg-ink-900 px-4 shadow-inner">
                         <span className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Ara</span>
                         <div className="flex flex-1 items-center gap-2">
                           <svg
