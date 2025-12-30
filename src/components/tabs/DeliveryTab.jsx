@@ -12,19 +12,6 @@ const parseTags = (raw) => {
     .filter(Boolean)
 }
 
-const mergeTags = (current, incoming) => {
-  const seen = new Set(current.map((tag) => tag.toLowerCase()))
-  const next = [...current]
-  incoming.forEach((tag) => {
-    const key = tag.toLowerCase()
-    if (!seen.has(key)) {
-      seen.add(key)
-      next.push(tag)
-    }
-  })
-  return next
-}
-
 const formatNoteDate = (value) => {
   if (!value) return ""
   const date = new Date(value)
@@ -70,7 +57,6 @@ export default function DeliveryTab({ panelClass }) {
   const [searchInput, setSearchInput] = useState("")
   const [createDraft, setCreateDraft] = useState({ title: "", body: "", tags: "" })
   const [editDraft, setEditDraft] = useState({ title: "", body: "", tags: "" })
-  const [tagDrafts, setTagDrafts] = useState({})
   const [isCreateOpen, setIsCreateOpen] = useState(false)
   const [editingNoteId, setEditingNoteId] = useState(null)
 
@@ -180,40 +166,6 @@ export default function DeliveryTab({ panelClass }) {
     setIsCreateOpen(true)
   }
 
-  const handleTagAdd = (noteId) => {
-    const raw = tagDrafts[noteId] || ""
-    const nextTags = parseTags(raw)
-    if (nextTags.length === 0) return
-    const now = new Date().toISOString()
-    setNotes((prev) =>
-      prev.map((note) =>
-        note.id === noteId
-          ? {
-            ...note,
-            tags: mergeTags(note.tags, nextTags),
-            updatedAt: now,
-          }
-          : note,
-      ),
-    )
-    setTagDrafts((prev) => ({ ...prev, [noteId]: "" }))
-  }
-
-  const handleTagRemove = (noteId, tagToRemove) => {
-    const now = new Date().toISOString()
-    setNotes((prev) =>
-      prev.map((note) =>
-        note.id === noteId
-          ? {
-            ...note,
-            tags: note.tags.filter((tag) => tag !== tagToRemove),
-            updatedAt: now,
-          }
-          : note,
-      ),
-    )
-  }
-
   return (
     <div className="space-y-6">
       <header className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-6 shadow-card">
@@ -289,7 +241,7 @@ export default function DeliveryTab({ panelClass }) {
                 )}
               </div>
 
-              <div className="grid gap-4 sm:grid-cols-2">
+              <div className="grid gap-3 sm:grid-cols-2">
                 {filteredNotes.length === 0 ? (
                   <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-4 py-4 text-sm text-slate-400">
                     {notes.length === 0
@@ -297,9 +249,12 @@ export default function DeliveryTab({ panelClass }) {
                       : "Bu aramada not bulunamadi."}
                   </div>
                 ) : (
-                  filteredNotes.map((note) => (
-                    <div
-                      key={note.id}
+                  filteredNotes.map((note) => {
+                    const visibleTags = note.tags.slice(0, 3)
+                    const extraTagCount = Math.max(0, note.tags.length - visibleTags.length)
+                    return (
+                      <div
+                        key={note.id}
                       role="button"
                       tabIndex={0}
                       onClick={() => handleNoteOpen(note)}
@@ -309,28 +264,30 @@ export default function DeliveryTab({ panelClass }) {
                           handleNoteOpen(note)
                         }
                       }}
-                      className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70 p-4 text-left shadow-inner transition hover:border-accent-300/40 hover:bg-ink-800/80"
+                      className="group relative overflow-hidden rounded-xl border border-white/10 bg-ink-900/60 p-3 text-left shadow-inner transition hover:border-accent-300/40 hover:bg-ink-800/80 hover:shadow-card focus:outline-none focus:ring-2 focus:ring-accent-400/40"
                     >
                       <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-accent-400/60 via-white/10 to-transparent" />
-                      <div className="flex flex-wrap items-start justify-between gap-3">
-                        <div className="space-y-1">
-                          <p className="text-base font-semibold text-white">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="min-w-0 space-y-1">
+                          <p className="truncate text-sm font-semibold text-white">
                             {note.title || "Basliksiz not"}
                           </p>
-                          <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">
+                          <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500">
                             Guncellendi: {formatNoteDate(note.updatedAt) || "Tarih yok"}
                           </p>
                         </div>
-                        <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-slate-200">
-                          {note.tags.length} etiket
-                        </span>
+                        {note.tags.length > 0 && (
+                          <span className="shrink-0 rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] text-slate-300">
+                            {note.tags.length} etiket
+                          </span>
+                        )}
                       </div>
                       {note.body && (
                         <p
-                          className="mt-3 text-sm text-slate-200/90 break-words"
+                          className="mt-2 text-[13px] text-slate-200/90 break-words"
                           style={{
                             display: "-webkit-box",
-                            WebkitLineClamp: 3,
+                            WebkitLineClamp: 2,
                             WebkitBoxOrient: "vertical",
                             overflow: "hidden",
                             overflowWrap: "anywhere",
@@ -342,66 +299,33 @@ export default function DeliveryTab({ panelClass }) {
                         </p>
                       )}
 
-                      <div className="mt-4 flex flex-wrap gap-2">
-                        {note.tags.length === 0 ? (
-                          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-slate-400">
+                      <div className="mt-3 flex flex-wrap gap-1.5">
+                        {visibleTags.length === 0 ? (
+                          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] text-slate-400">
                             Etiket yok
                           </span>
                         ) : (
-                          note.tags.map((tag) => (
+                          visibleTags.map((tag) => (
                             <span
                               key={`${note.id}-${tag}`}
-                              className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-slate-200"
+                              className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] text-slate-200"
                             >
                               #{tag}
-                              <button
-                                type="button"
-                                onClick={(event) => {
-                                  event.stopPropagation()
-                                  handleTagRemove(note.id, tag)
-                                }}
-                                className="text-slate-400 transition hover:text-rose-200"
-                                aria-label={`Etiketi kaldir: ${tag}`}
-                              >
-                                &times;
-                              </button>
                             </span>
                           ))
                         )}
+                        {extraTagCount > 0 && (
+                          <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-0.5 text-[10px] text-slate-400">
+                            +{extraTagCount}
+                          </span>
+                        )}
                       </div>
-
-                      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center">
-                        <input
-                          type="text"
-                          value={tagDrafts[note.id] ?? ""}
-                          onChange={(event) =>
-                            setTagDrafts((prev) => ({ ...prev, [note.id]: event.target.value }))
-                          }
-                          onKeyDown={(event) => {
-                            event.stopPropagation()
-                            if (event.key === "Enter") {
-                              event.preventDefault()
-                              handleTagAdd(note.id)
-                            }
-                          }}
-                          onClick={(event) => event.stopPropagation()}
-                          placeholder="Etiket ekle (virgul ile)"
-                          className="w-full flex-1 rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                        />
-                        <button
-                          type="button"
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            handleTagAdd(note.id)
-                          }}
-                          disabled={!tagDrafts[note.id]?.trim()}
-                          className="min-w-[120px] rounded-lg border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          Etiket ekle
-                        </button>
+                      <p className="mt-3 text-[10px] uppercase tracking-[0.22em] text-slate-500">
+                        Tikla ve duzenle
+                      </p>
                       </div>
-                    </div>
-                  ))
+                    )
+                  })
                 )}
               </div>
             </div>
