@@ -258,16 +258,16 @@ export default function DeliveryTab({ panelClass }) {
                 )}
               </div>
 
-              <div className="space-y-3">
-                {filteredNotes.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-4 py-4 text-sm text-slate-400">
-                    {notes.length === 0
-                      ? "Henuz not yok. Yeni not olusturabilirsin."
-                      : "Bu aramada not bulunamadi."}
-                  </div>
-                ) : (
-                  filteredNotes.map((note) => {
-                    const visibleTags = note.tags.slice(0, 6)
+              {filteredNotes.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-white/10 bg-white/5 px-4 py-4 text-sm text-slate-400">
+                  {notes.length === 0
+                    ? "Henuz not yok. Yeni not olusturabilirsin."
+                    : "Bu aramada not bulunamadi."}
+                </div>
+              ) : (
+                <div className="overflow-hidden rounded-2xl border border-white/10 bg-ink-900/40">
+                  {filteredNotes.map((note, index) => {
+                    const visibleTags = note.tags.slice(0, 4)
                     const extraTagCount = Math.max(0, note.tags.length - visibleTags.length)
                     return (
                       <div
@@ -281,28 +281,24 @@ export default function DeliveryTab({ panelClass }) {
                             handleNoteOpen(note)
                           }
                         }}
-                        className="group relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60 p-4 text-left shadow-inner transition hover:border-accent-300/40 hover:bg-ink-800/80 hover:shadow-card focus:outline-none focus:ring-2 focus:ring-accent-400/40 sm:p-5"
+                        className={`group flex flex-col gap-1.5 px-4 py-3 text-left transition hover:bg-ink-800/70 focus:outline-none focus:ring-2 focus:ring-accent-400/40 sm:px-5 ${
+                          index !== 0 ? "border-t border-white/10" : ""
+                        }`}
                       >
-                        <div className="pointer-events-none absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-accent-400/70 via-accent-400/10 to-transparent" />
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <div className="min-w-0 space-y-1">
-                            <p className="truncate text-base font-semibold text-white">
-                              {note.title || "Basliksiz not"}
-                            </p>
-                            <p className="text-[11px] uppercase tracking-[0.24em] text-slate-500">
-                              Guncellendi: {formatNoteDate(note.updatedAt) || "Tarih yok"}
-                            </p>
-                          </div>
-                          <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-slate-300">
-                            {note.tags.length} etiket
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="min-w-0 truncate text-sm font-semibold text-white">
+                            {note.title || "Basliksiz not"}
+                          </p>
+                          <span className="shrink-0 text-[10px] uppercase tracking-[0.24em] text-slate-500">
+                            {formatNoteDate(note.updatedAt) || "Tarih yok"}
                           </span>
                         </div>
                         {note.body && (
                           <p
-                            className="mt-3 text-sm text-slate-200/90 break-words"
+                            className="text-xs text-slate-300"
                             style={{
                               display: "-webkit-box",
-                              WebkitLineClamp: 3,
+                              WebkitLineClamp: 1,
                               WebkitBoxOrient: "vertical",
                               overflow: "hidden",
                               overflowWrap: "anywhere",
@@ -313,36 +309,32 @@ export default function DeliveryTab({ panelClass }) {
                             {note.body}
                           </p>
                         )}
-
-                        <div className="mt-4 flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-1.5">
                           {visibleTags.length === 0 ? (
-                            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-slate-400">
+                            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-400">
                               Etiket yok
                             </span>
                           ) : (
                             visibleTags.map((tag) => (
                               <span
                                 key={`${note.id}-${tag}`}
-                                className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-slate-200"
+                                className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-200"
                               >
                                 #{tag}
                               </span>
                             ))
                           )}
                           {extraTagCount > 0 && (
-                            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] text-slate-400">
+                            <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-400">
                               +{extraTagCount}
                             </span>
                           )}
                         </div>
-                        <div className="mt-4 flex items-center justify-end text-[11px] uppercase tracking-[0.24em] text-slate-500">
-                          <span className="text-accent-200/80">Duzenle</span>
-                        </div>
                       </div>
                     )
-                  })
-                )}
-              </div>
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>
