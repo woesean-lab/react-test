@@ -1179,6 +1179,7 @@ export default function useAppData() {
 
   const getTaskDueLabel = (task) => {
     if (task.dueType === "today") return "Bug\u00fcn"
+    if (task.dueType === "none") return "Tarih yok"
     if (task.dueType === "repeat") {
       const labels = getRepeatDayLabels(task.repeatDays)
       const todayTag = isTaskDueToday(task) ? " (Bug\u00fcn)" : ""
@@ -1193,6 +1194,7 @@ export default function useAppData() {
   const isTaskDueToday = (task) => {
     const today = getLocalDateString(new Date())
     if (task.dueType === "today") return true
+    if (task.dueType === "none") return false
     if (task.dueType === "date") return task.dueDate === today
     if (task.dueType === "repeat") {
       const dayValue = String(new Date().getDay())
@@ -1491,6 +1493,10 @@ export default function useAppData() {
       toast.error("Tekrarlanabilir g\u00FCn se\u00E7in.")
       return
     }
+    if (taskForm.dueType === "date" && !taskForm.dueDate) {
+      toast.error("Ozel tarih secin.")
+      return
+    }
     try {
       const res = await apiFetch("/api/tasks", {
         method: "POST",
@@ -1534,6 +1540,10 @@ export default function useAppData() {
     const repeatDays = normalizeRepeatDays(taskEditDraft.repeatDays)
     if (taskEditDraft.dueType === "repeat" && repeatDays.length === 0) {
       toast.error("Tekrarlanabilir g\u00FCn se\u00E7in.")
+      return
+    }
+    if (taskEditDraft.dueType === "date" && !taskEditDraft.dueDate) {
+      toast.error("Ozel tarih secin.")
       return
     }
     const updated = await saveTaskUpdate(taskEditDraft.id, {

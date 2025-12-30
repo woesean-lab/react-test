@@ -688,7 +688,7 @@ app.put("/api/profile", async (req, res) => {
 
 const allowedProblemStatus = new Set(["open", "resolved"])
 const allowedTaskStatus = new Set(["todo", "doing", "done"])
-const allowedTaskDueTypes = new Set(["today", "repeat", "date"])
+const allowedTaskDueTypes = new Set(["today", "none", "repeat", "date"])
 const MAX_COMMENT_IMAGES = 10
 const MAX_TASK_NOTE_IMAGES = 10
 const MAX_IMAGE_CHARS = 3_000_000
@@ -1034,7 +1034,7 @@ app.put("/api/tasks/:id", async (req, res) => {
       data.dueDate = dueDate
       data.repeatDays = []
     }
-    if (dueType === "today") {
+    if (dueType === "today" || dueType === "none") {
       data.repeatDays = []
       data.dueDate = null
     }

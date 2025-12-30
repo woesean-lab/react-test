@@ -57,6 +57,7 @@ export const taskStatusMeta = {
 }
 export const taskDueTypeOptions = [
   { value: "today", label: "Bugun" },
+  { value: "none", label: "Tarihsiz" },
   { value: "repeat", label: "Tekrarlanabilir gun" },
   { value: "date", label: "Ozel tarih" },
 ]
