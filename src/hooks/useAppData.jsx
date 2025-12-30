@@ -1179,7 +1179,7 @@ export default function useAppData() {
 
   const getTaskDueLabel = (task) => {
     if (task.dueType === "today") return "Bug\u00fcn"
-    if (task.dueType === "none") return "Tarih yok"
+    if (task.dueType === "none") return "Süresiz"
     if (task.dueType === "repeat") {
       const labels = getRepeatDayLabels(task.repeatDays)
       const todayTag = isTaskDueToday(task) ? " (Bug\u00fcn)" : ""
