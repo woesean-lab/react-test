@@ -4,14 +4,14 @@ export default {
   theme: {
     borderRadius: {
       none: '0px',
-      sm: '3px',
-      DEFAULT: '3px',
-      md: '3px',
-      lg: '3px',
-      xl: '3px',
-      '2xl': '3px',
-      '3xl': '3px',
-      full: '3px',
+      sm: '4px',
+      DEFAULT: '4px',
+      md: '4px',
+      lg: '4px',
+      xl: '4px',
+      '2xl': '4px',
+      '3xl': '4px',
+      full: '4px',
     },
     extend: {
       fontFamily: {
