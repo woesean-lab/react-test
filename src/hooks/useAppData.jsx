@@ -1491,10 +1491,6 @@ export default function useAppData() {
       toast.error("Tekrarlanabilir g\u00FCn se\u00E7in.")
       return
     }
-    if (taskForm.dueType === "date" && !taskForm.dueDate) {
-      toast.error("\u00D6zel tarih se\u00E7in.")
-      return
-    }
     try {
       const res = await apiFetch("/api/tasks", {
         method: "POST",
@@ -1538,10 +1534,6 @@ export default function useAppData() {
     const repeatDays = normalizeRepeatDays(taskEditDraft.repeatDays)
     if (taskEditDraft.dueType === "repeat" && repeatDays.length === 0) {
       toast.error("Tekrarlanabilir g\u00FCn se\u00E7in.")
-      return
-    }
-    if (taskEditDraft.dueType === "date" && !taskEditDraft.dueDate) {
-      toast.error("\u00D6zel tarih se\u00E7in.")
       return
     }
     const updated = await saveTaskUpdate(taskEditDraft.id, {

@@ -1,3 +1,5 @@
+import { useMemo, useState } from "react"
+
 function SkeletonBlock({ className = "" }) {
   return <div className={`animate-pulse rounded-lg bg-white/10 ${className}`} />
 }
@@ -94,6 +96,29 @@ export default function MessagesTab({
 }) {
   const showLoading = isLoading
   const showEditMode = Boolean(canEditTemplates && isEditingActiveTemplate)
+  const [templateQuery, setTemplateQuery] = useState("")
+  const normalizedTemplateQuery = templateQuery.trim().toLowerCase()
+  const filteredTemplateCount = useMemo(() => {
+    if (!normalizedTemplateQuery) return 0
+    return categories.reduce((sum, cat) => {
+      const list = groupedTemplates[cat] || []
+      return (
+        sum +
+        list.filter((tpl) =>
+          String(tpl?.label ?? "").toLowerCase().includes(normalizedTemplateQuery),
+        ).length
+      )
+    }, 0)
+  }, [categories, groupedTemplates, normalizedTemplateQuery])
+  const visibleCategories = useMemo(() => {
+    if (!normalizedTemplateQuery) return categories
+    return categories.filter((cat) => {
+      const list = groupedTemplates[cat] || []
+      return list.some((tpl) =>
+        String(tpl?.label ?? "").toLowerCase().includes(normalizedTemplateQuery),
+      )
+    })
+  }, [categories, groupedTemplates, normalizedTemplateQuery])
 
   if (showLoading) {
     return <MessagesSkeleton panelClass={panelClass} />
@@ -245,8 +270,32 @@ export default function MessagesTab({
               </div>
               <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
                 {showLoading && <span className="h-2 w-2 animate-pulse rounded-full bg-accent-400" />}
-                {templateCountText} {showLoading ? "" : "seçenek"}
+                {normalizedTemplateQuery
+                  ? `${filteredTemplateCount} sonuc`
+                  : `${templateCountText} ${showLoading ? "" : "seçenek"}`}
               </span>
+            </div>
+
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+              <div className="flex h-11 flex-1 items-center gap-3 rounded-xl border border-white/10 bg-ink-900 px-4">
+                <span className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Ara</span>
+                <input
+                  type="text"
+                  value={templateQuery}
+                  onChange={(e) => setTemplateQuery(e.target.value)}
+                  placeholder="Sablon ara"
+                  className="w-full min-w-0 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
+                />
+              </div>
+              {templateQuery.trim() && (
+                <button
+                  type="button"
+                  onClick={() => setTemplateQuery("")}
+                  className="min-w-[110px] rounded-lg border border-white/10 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
+                >
+                  Temizle
+                </button>
+              )}
             </div>
 
             <div className="mt-4 space-y-3">
@@ -269,9 +318,15 @@ export default function MessagesTab({
                   ))}
                 </div>
               ) : (
-                categories.map((cat) => {
+                visibleCategories.map((cat) => {
                   const list = groupedTemplates[cat] || []
-                  const isOpen = openCategories[cat] ?? true
+                  const filteredList = normalizedTemplateQuery
+                    ? list.filter((tpl) =>
+                        String(tpl?.label ?? "").toLowerCase().includes(normalizedTemplateQuery),
+                      )
+                    : list
+                  const isOpen = normalizedTemplateQuery ? true : openCategories[cat] ?? true
+                  const listCount = normalizedTemplateQuery ? filteredList.length : list.length
                   return (
                     <div key={cat} className="rounded-2xl border border-white/10 bg-ink-900/60 p-3 shadow-inner">
                       <button
@@ -285,7 +340,7 @@ export default function MessagesTab({
                           >
                             {cat}
                           </span>
-                          <span className="text-xs text-slate-400">{list.length} şablon</span>
+                          <span className="text-xs text-slate-400">{listCount} şablon</span>
                         </span>
                         <span
                           className={`inline-flex h-7 w-7 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-slate-200 transition ${
@@ -299,12 +354,12 @@ export default function MessagesTab({
 
                       {isOpen && (
                         <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-                          {list.length === 0 && (
+                          {filteredList.length === 0 && (
                             <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
                               Bu kategoride şablon yok.
                             </div>
                           )}
-                          {list.map((tpl) => (
+                          {filteredList.map((tpl) => (
                             <div key={tpl.label} className="relative">
                               <button
                                 type="button"
