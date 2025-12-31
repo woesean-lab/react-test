@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { KNOWLEDGE_DOCS_STORAGE_KEY } from "../../constants/appConstants"
 
 const createDocId = () => `doc-${Date.now()}-${Math.random().toString(16).slice(2)}`
@@ -280,7 +280,7 @@ const buildDocFromDraft = (draft, now) => {
   const tags = parseTags(draft.tags)
   const bullets = draft.body
     .split("\n")
-    .map((line) => line.trim())
+    .map((line) => line.replace(/^\s*[-*]\s+/, "").trim())
     .filter(Boolean)
   const sections = bullets.length > 0 ? [{ title: "Detaylar", bullets }] : []
   return {
@@ -302,6 +302,8 @@ export default function KnowledgeBaseTab({ panelClass }) {
   const [editingDocId, setEditingDocId] = useState(null)
   const [deleteConfirmId, setDeleteConfirmId] = useState(null)
   const [draft, setDraft] = useState(() => buildDraftFromDoc(null))
+  const lineRef = useRef(null)
+  const textareaRef = useRef(null)
 
   useEffect(() => {
     if (typeof window === "undefined") return
@@ -359,6 +361,10 @@ export default function KnowledgeBaseTab({ panelClass }) {
   const canEditActive = Boolean(activeDoc?.isCustom)
   const canSaveDoc = Boolean(draft.title.trim())
   const lineCount = useMemo(() => Math.max(1, draft.body.split("\n").length), [draft.body])
+  const lineNumbers = useMemo(
+    () => Array.from({ length: lineCount }, (_, index) => index + 1),
+    [lineCount],
+  )
 
   const handleDocSelect = (docId) => {
     setActiveDocId(docId)
@@ -387,6 +393,11 @@ export default function KnowledgeBaseTab({ panelClass }) {
     setIsEditorOpen(false)
     setEditingDocId(null)
     setDeleteConfirmId(null)
+  }
+
+  const handleEditorScroll = () => {
+    if (!lineRef.current || !textareaRef.current) return
+    lineRef.current.scrollTop = textareaRef.current.scrollTop
   }
 
   const handleSave = () => {
@@ -720,20 +731,39 @@ export default function KnowledgeBaseTab({ panelClass }) {
                 </div>
 
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between text-xs font-semibold text-slate-200">
-                    <label htmlFor="doc-body">Icerik</label>
-                    <span className="text-[11px] font-medium text-slate-500">
-                      {lineCount} satir / {draft.body.length} karakter
-                    </span>
+                  <div className="flex flex-wrap items-center justify-between gap-2 text-xs font-semibold text-slate-200">
+                    <label htmlFor="doc-body">Icerik editoru</label>
+                    <div className="flex items-center gap-3 text-[11px] font-medium text-slate-500">
+                      <span>{lineCount} satir</span>
+                      <span>{draft.body.length} karakter</span>
+                    </div>
                   </div>
-                  <textarea
-                    id="doc-body"
-                    rows={8}
-                    value={draft.body}
-                    onChange={(event) => setDraft((prev) => ({ ...prev, body: event.target.value }))}
-                    placeholder="Her satir yeni madde olarak kaydedilir."
-                    className="w-full resize-none border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none"
-                  />
+                  <div className="overflow-hidden border border-white/10 bg-ink-900/80">
+                    <div className="flex max-h-[360px] min-h-[220px] overflow-hidden">
+                      <div
+                        ref={lineRef}
+                        className="w-12 shrink-0 overflow-hidden border-r border-white/10 bg-ink-900 px-2 py-3 text-right font-mono text-[11px] leading-6 text-slate-500"
+                      >
+                        {lineNumbers.map((line) => (
+                          <div key={line}>{line}</div>
+                        ))}
+                      </div>
+                      <textarea
+                        ref={textareaRef}
+                        id="doc-body"
+                        rows={10}
+                        value={draft.body}
+                        onChange={(event) => setDraft((prev) => ({ ...prev, body: event.target.value }))}
+                        onScroll={handleEditorScroll}
+                        placeholder="Her satir yeni madde olarak kaydedilir."
+                        className="flex-1 resize-none overflow-auto bg-ink-900 px-4 py-3 font-mono text-[13px] leading-6 text-slate-100 placeholder:text-slate-500 focus:outline-none"
+                      />
+                    </div>
+                  </div>
+                  <div className="flex flex-wrap items-center justify-between gap-2 border border-white/10 bg-white/5 px-3 py-2 text-[10px] uppercase tracking-[0.2em] text-slate-400">
+                    <span>Madde satirlari</span>
+                    <span>Otomatik liste</span>
+                  </div>
                 </div>
               </div>
             </div>
