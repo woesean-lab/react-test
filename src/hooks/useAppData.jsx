@@ -3206,7 +3206,11 @@ export default function useAppData() {
   }
   const handleProductCopyMessage = async (productId) => {
     const product = products.find((p) => p.id === productId)
-    const message = product?.deliveryMessage?.trim()
+    const selectedTemplate = product?.deliveryTemplate?.trim()
+    const templateMessage = selectedTemplate
+      ? templates.find((tpl) => tpl.label === selectedTemplate)?.value?.trim()
+      : ""
+    const message = templateMessage || product?.deliveryMessage?.trim()
     if (!message) {
       toast.error("Bu \u00FCr\u00FCne teslimat mesaj\u0131 eklenmemi\u015F.")
       return
