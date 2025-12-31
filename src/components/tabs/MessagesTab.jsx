@@ -78,7 +78,6 @@ export default function MessagesTab({
   handleActiveTemplateEditSave,
   categories,
   groupedTemplates,
-  templateStars,
   handleTemplateStarToggle,
   openCategories,
   setOpenCategories,
@@ -370,7 +369,7 @@ export default function MessagesTab({
                             </div>
                           )}
                           {filteredList.map((tpl) => {
-                            const isStarred = Boolean(templateStars?.[tpl.label])
+                            const isStarred = Boolean(tpl.starred)
                             return (
                               <div key={tpl.label} className="relative">
                                 <button

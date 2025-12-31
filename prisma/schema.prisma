@@ -12,6 +12,7 @@ model Template {
   label     String   @unique
   value     String
   category  String   @default("Genel")
+  starred   Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

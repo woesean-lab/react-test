@@ -275,6 +275,13 @@ app.post("/api/templates", async (req, res) => {
   const label = String(req.body?.label ?? "").trim()
   const value = String(req.body?.value ?? "").trim()
   const category = String(req.body?.category ?? "Genel").trim() || "Genel"
+  const starredRaw = req.body?.starred
+  const starred =
+    starredRaw === undefined
+      ? undefined
+      : typeof starredRaw === "boolean"
+        ? starredRaw
+        : String(starredRaw).toLowerCase() === "true"
 
   if (!label || !value) {
     res.status(400).json({ error: "label and value are required" })
@@ -288,7 +295,14 @@ app.post("/api/templates", async (req, res) => {
   })
 
   try {
-    const created = await prisma.template.create({ data: { label, value, category } })
+    const created = await prisma.template.create({
+      data: {
+        label,
+        value,
+        category,
+        ...(starred === undefined ? {} : { starred }),
+      },
+    })
     res.status(201).json(created)
   } catch (error) {
     if (error?.code === "P2002") {
@@ -310,6 +324,13 @@ app.put("/api/templates/:id", async (req, res) => {
   const value = req.body?.value === undefined ? undefined : String(req.body.value).trim()
   const categoryRaw = req.body?.category === undefined ? undefined : String(req.body.category).trim()
   const category = categoryRaw === undefined ? undefined : categoryRaw || "Genel"
+  const starredRaw = req.body?.starred
+  const starred =
+    starredRaw === undefined
+      ? undefined
+      : typeof starredRaw === "boolean"
+        ? starredRaw
+        : String(starredRaw).toLowerCase() === "true"
 
   if (label !== undefined && !label) {
     res.status(400).json({ error: "label cannot be empty" })
@@ -331,7 +352,12 @@ app.put("/api/templates/:id", async (req, res) => {
   try {
     const updated = await prisma.template.update({
       where: { id },
-      data: { ...(label === undefined ? {} : { label }), ...(value === undefined ? {} : { value }), ...(category === undefined ? {} : { category }) },
+      data: {
+        ...(label === undefined ? {} : { label }),
+        ...(value === undefined ? {} : { value }),
+        ...(category === undefined ? {} : { category }),
+        ...(starred === undefined ? {} : { starred }),
+      },
     })
     res.json(updated)
   } catch (error) {

@@ -11,7 +11,6 @@ import {
   PERMISSIONS,
   PRODUCT_ORDER_STORAGE_KEY,
   STOCK_STATUS,
-  TEMPLATE_STARS_STORAGE_KEY,
   THEME_STORAGE_KEY,
   categoryPalette,
   panelClass,
@@ -77,19 +76,6 @@ export default function useAppData() {
   const [newCategory, setNewCategory] = useState("")
   const [categories, setCategories] = useState([])
   const [templates, setTemplates] = useState([])
-  const [templateStars, setTemplateStars] = useState(() => {
-    if (typeof window === "undefined") return {}
-    try {
-      const stored = localStorage.getItem(TEMPLATE_STARS_STORAGE_KEY)
-      if (!stored) return {}
-      const parsed = JSON.parse(stored)
-      if (!parsed || typeof parsed !== "object") return {}
-      return parsed
-    } catch (error) {
-      console.warn("Could not read template stars", error)
-      return {}
-    }
-  })
   const [selectedTemplate, setSelectedTemplate] = useState(null)
   const [lists, setLists] = useState([])
   const [activeListId, setActiveListId] = useState("")
@@ -249,28 +235,6 @@ export default function useAppData() {
       console.warn("Could not persist theme preference", error)
     }
   }, [theme])
-
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    try {
-      localStorage.setItem(TEMPLATE_STARS_STORAGE_KEY, JSON.stringify(templateStars))
-    } catch (error) {
-      console.warn("Could not persist template stars", error)
-    }
-  }, [templateStars])
-
-  useEffect(() => {
-    if (templates.length === 0) return
-    setTemplateStars((prev) => {
-      const next = {}
-      templates.forEach((tpl) => {
-        if (prev[tpl.label]) {
-          next[tpl.label] = true
-        }
-      })
-      return Object.keys(prev).length === Object.keys(next).length ? prev : next
-    })
-  }, [templates])
 
   useEffect(() => {
     let isMounted = true
@@ -799,7 +763,7 @@ export default function useAppData() {
       const starred = []
       const normal = []
       list.forEach((tpl) => {
-        if (templateStars[tpl.label]) {
+        if (tpl.starred) {
           starred.push(tpl)
         } else {
           normal.push(tpl)
@@ -808,7 +772,7 @@ export default function useAppData() {
       grouped[cat] = [...starred, ...normal]
     })
     return grouped
-  }, [templates, templateStars])
+  }, [templates])
 
   const stockSummary = useMemo(() => {
     let total = 0
@@ -2205,6 +2169,50 @@ export default function useAppData() {
   }, [activeTab, isAuthed, loadTemplates])
 
   useEffect(() => {
+    if (!isAuthed || templates.length === 0 || typeof window === "undefined") return
+    const legacyKey = "pulcipTemplateStars"
+    let legacyStars = null
+    try {
+      const stored = localStorage.getItem(legacyKey)
+      if (!stored) return
+      legacyStars = JSON.parse(stored)
+    } catch (error) {
+      console.warn("Could not read legacy template stars", error)
+      return
+    }
+    if (!legacyStars || typeof legacyStars !== "object") return
+    const labelsToStar = Object.keys(legacyStars).filter((label) => legacyStars[label])
+    if (labelsToStar.length === 0) {
+      localStorage.removeItem(legacyKey)
+      return
+    }
+    const targets = templates.filter((tpl) => labelsToStar.includes(tpl.label) && !tpl.starred)
+    if (targets.length === 0) {
+      localStorage.removeItem(legacyKey)
+      return
+    }
+    setTemplates((prev) =>
+      prev.map((tpl) =>
+        labelsToStar.includes(tpl.label) ? { ...tpl, starred: true } : tpl,
+      ),
+    )
+    Promise.all(
+      targets
+        .filter((tpl) => tpl.id)
+        .map((tpl) =>
+          apiFetch(`/api/templates/${tpl.id}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ starred: true }),
+          }),
+        ),
+    ).catch((error) => {
+      console.error(error)
+    })
+    localStorage.removeItem(legacyKey)
+  }, [apiFetch, isAuthed, templates])
+
+  useEffect(() => {
     setOpenProducts((prev) => {
       if (products.length === 0) return {}
       const next = {}
@@ -2255,18 +2263,35 @@ export default function useAppData() {
     }
   }
 
-  const handleTemplateStarToggle = (label) => {
+  const handleTemplateStarToggle = async (label) => {
     const safeLabel = String(label || "").trim()
     if (!safeLabel) return
-    setTemplateStars((prev) => {
-      const next = { ...prev }
-      if (next[safeLabel]) {
-        delete next[safeLabel]
-      } else {
-        next[safeLabel] = true
-      }
-      return next
-    })
+    const target = templates.find((tpl) => tpl.label === safeLabel)
+    if (!target) return
+    const nextStarred = !Boolean(target.starred)
+
+    setTemplates((prev) =>
+      prev.map((tpl) => (tpl.label === safeLabel ? { ...tpl, starred: nextStarred } : tpl)),
+    )
+
+    if (!target.id) return
+
+    try {
+      const res = await apiFetch(`/api/templates/${target.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ starred: nextStarred }),
+      })
+      if (!res.ok) throw new Error("template_star_failed")
+      const updated = await res.json()
+      setTemplates((prev) => prev.map((tpl) => (tpl.id === updated.id ? updated : tpl)))
+    } catch (error) {
+      console.error(error)
+      setTemplates((prev) =>
+        prev.map((tpl) => (tpl.label === safeLabel ? { ...tpl, starred: !nextStarred } : tpl)),
+      )
+      toast.error("Yildiz guncellenemedi (API/DB kontrol edin).")
+    }
   }
 
   const handleActiveTemplateEditStart = () => {
@@ -2381,12 +2406,6 @@ export default function useAppData() {
       const nextTemplates = templates.filter((tpl) => tpl.label !== targetLabel)
       const fallback = nextTemplates[0]
       setTemplates(nextTemplates)
-      setTemplateStars((prev) => {
-        if (!prev[targetLabel]) return prev
-        const next = { ...prev }
-        delete next[targetLabel]
-        return next
-      })
       const nextSelected = selectedTemplate === targetLabel ? fallback?.label ?? selectedTemplate : selectedTemplate
       if (nextSelected) {
         setSelectedTemplate(nextSelected)
@@ -3671,7 +3690,6 @@ export default function useAppData() {
     handleActiveTemplateEditSave,
     categories,
     groupedTemplates,
-    templateStars,
     handleTemplateStarToggle,
     openCategories,
     setOpenCategories,

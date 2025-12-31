@@ -349,7 +349,7 @@ export default function StockTab({
                                     Teslimat mesajını kopyala
                                   </button>
                                 )}
-                              {canEditProducts && !canEditProducts && editingProduct[product.id] && (
+                              {canEditProducts && !editingProduct[product.id] && (
                                 <button
                                   type="button"
                                   onClick={() => handleEditStart(product)}
