@@ -156,7 +156,7 @@ export default function MessagesTab({
             </div>
           </div>
 
-          <div className="relative w-full max-w-sm">
+          <div className="relative hidden w-full max-w-sm sm:block">
             <div className="absolute inset-x-4 -bottom-12 h-32 rounded-full bg-accent-400/30 blur-3xl sm:inset-x-6 sm:-bottom-16 sm:h-40" />
             <div className="relative rounded-2xl border border-white/10 bg-white/10 p-4 shadow-glow backdrop-blur-md sm:p-6">
               <div className="flex items-start justify-between gap-3">
@@ -178,38 +178,40 @@ export default function MessagesTab({
                   </div>
                 </div>
                 {(canEditTemplates || canDeleteTemplates) && (
-                <div className="flex shrink-0 items-center gap-2">
-                  {canEditTemplates && (
-                    <button
-                    type="button"
-                    onClick={
-                      isEditingActiveTemplate ? handleActiveTemplateEditCancel : handleActiveTemplateEditStart
-                    }
-                    className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition ${
-                      isEditingActiveTemplate
-                        ? "border-emerald-300/70 bg-emerald-500/20 text-emerald-50"
-                        : "border-white/10 bg-white/5 text-slate-200 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50"
-                    }`}
-                    disabled={!activeTemplate || showLoading || isTemplateSaving}
-                  >
-                    {isEditingActiveTemplate ? "Vazgeç" : "Mesajı düzenle"}
-                    </button>
-                  )}
-                  {canDeleteTemplates && (
-                    <button
-                      type="button"
-                      onClick={() => handleDeleteWithConfirm(selectedTemplate)}
-                      className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition ${
-                        confirmTarget === selectedTemplate
-                          ? "border-rose-300 bg-rose-500/25 text-rose-50"
-                          : "border-rose-500/60 bg-rose-500/15 text-rose-100 hover:border-rose-300 hover:bg-rose-500/25"
-                      }`}
-                      disabled={!selectedTemplate || isTemplateSaving}
-                    >
-                      {confirmTarget === selectedTemplate ? "Emin misin?" : "Sil"}
-                    </button>
-                  )}
-                </div>
+                  <div className="flex shrink-0 items-center gap-2">
+                    {canEditTemplates && (
+                      <button
+                        type="button"
+                        onClick={
+                          isEditingActiveTemplate
+                            ? handleActiveTemplateEditCancel
+                            : handleActiveTemplateEditStart
+                        }
+                        className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition ${
+                          isEditingActiveTemplate
+                            ? "border-emerald-300/70 bg-emerald-500/20 text-emerald-50"
+                            : "border-white/10 bg-white/5 text-slate-200 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50"
+                        }`}
+                        disabled={!activeTemplate || showLoading || isTemplateSaving}
+                      >
+                        {isEditingActiveTemplate ? "Vazgeç" : "Mesajı düzenle"}
+                      </button>
+                    )}
+                    {canDeleteTemplates && (
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteWithConfirm(selectedTemplate)}
+                        className={`rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition ${
+                          confirmTarget === selectedTemplate
+                            ? "border-rose-300 bg-rose-500/25 text-rose-50"
+                            : "border-rose-500/60 bg-rose-500/15 text-rose-100 hover:border-rose-300 hover:bg-rose-500/25"
+                        }`}
+                        disabled={!selectedTemplate || isTemplateSaving}
+                      >
+                        {confirmTarget === selectedTemplate ? "Emin misin?" : "Sil"}
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
               {showEditMode ? (
