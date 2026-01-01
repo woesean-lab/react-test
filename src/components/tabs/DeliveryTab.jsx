@@ -168,52 +168,72 @@ export default function DeliveryTab({ panelClass }) {
 
   return (
     <div className="space-y-6">
-      <header className="overflow-hidden rounded-3xl border border-white/10 bg-ink-900/60 p-4 shadow-card sm:p-6">
-        <div className="flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-1.5 sm:space-y-2">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
+      <header className="relative overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-ink-900/95 via-ink-900/70 to-ink-900/50 p-6 shadow-card">
+        <div
+          className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-accent-500/20 blur-3xl"
+          aria-hidden="true"
+        />
+        <div
+          className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-accent-400/40 via-transparent to-transparent"
+          aria-hidden="true"
+        />
+        <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div className="space-y-2">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.4em] text-accent-200">
               Teslimat
             </span>
             <h1 className="font-display text-2xl font-semibold text-white sm:text-3xl">
-              Teslimat Nasil Yapilir?
+              Teslimat Akislari
             </h1>
             <p className="max-w-2xl text-sm text-slate-200/80">
-              Urun bazli teslimat haritalari olustur, adim adim takip et.
+              Urun bazli teslimat haritalari olustur, adimlari ekiple standartlastir.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-              Harita: {maps.length}
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-              Adim: {activeStepsCount}
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-              Guncelleme: {activeUpdatedAt || "-"}
-            </span>
+          <div className="grid w-full grid-cols-2 gap-3 sm:max-w-md sm:grid-cols-3">
+            <div className="rounded-xl border border-white/10 bg-ink-900/70 px-3 py-2">
+              <p className="text-[10px] uppercase tracking-[0.35em] text-slate-500">Harita</p>
+              <p className="mt-1 text-lg font-semibold text-white">{maps.length}</p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-ink-900/70 px-3 py-2">
+              <p className="text-[10px] uppercase tracking-[0.35em] text-slate-500">Adim</p>
+              <p className="mt-1 text-lg font-semibold text-white">{activeStepsCount}</p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-ink-900/70 px-3 py-2">
+              <p className="text-[10px] uppercase tracking-[0.35em] text-slate-500">
+                Son guncelleme
+              </p>
+              <p className="mt-1 text-sm font-semibold text-white">{activeUpdatedAt || "-"}</p>
+            </div>
           </div>
         </div>
       </header>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)_minmax(0,0.9fr)]">
-        <div className={`${panelClass} bg-ink-900/55`}>
-          <div>
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <div className="space-y-1">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">
-                  Urunler
-                </p>
-                <p className="text-xs text-slate-400">Eklenen haritalar</p>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,0.95fr)_minmax(0,1.65fr)] lg:items-start">
+        <div className="space-y-6">
+          <div className={`${panelClass} bg-ink-900/60`}>
+            <div>
+              <div className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 pb-4">
+                <div className="space-y-1">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">
+                    Harita listesi
+                  </p>
+                  <p className="text-xs text-slate-400">Kayitli teslimat akislari</p>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="inline-flex items-center rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-slate-300">
+                    {maps.length} kayit
+                  </span>
+                  {listSearch && (
+                    <span className="inline-flex items-center rounded-full border border-accent-200/40 bg-accent-500/10 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-accent-100">
+                      Filtre
+                    </span>
+                  )}
+                </div>
               </div>
-              <span className="text-[11px] uppercase tracking-[0.24em] text-slate-500">
-                {maps.length} kayit
-              </span>
-            </div>
-            <div className="mt-4 space-y-3">
-              <div className="flex flex-wrap items-end justify-between gap-3">
-                <label className="flex w-full max-w-[260px] flex-col gap-1 text-[11px] uppercase tracking-[0.2em] text-slate-500">
+              <div className="mt-4 grid gap-3 sm:grid-cols-[minmax(0,1fr)_150px]">
+                <label className="flex flex-col gap-1 text-[11px] uppercase tracking-[0.2em] text-slate-500">
                   Ara
-                  <div className="flex h-10 items-center gap-2 rounded border border-white/10 bg-ink-900 px-3">
+                  <div className="flex h-11 items-center gap-2 rounded-lg border border-white/10 bg-ink-900 px-3">
                     <svg
                       aria-hidden="true"
                       viewBox="0 0 24 24"
@@ -241,7 +261,7 @@ export default function DeliveryTab({ panelClass }) {
                   <select
                     value={listSort}
                     onChange={(event) => setListSort(event.target.value)}
-                    className="h-10 rounded border border-white/10 bg-ink-900 px-3 text-xs text-slate-100 focus:outline-none"
+                    className="h-11 rounded-lg border border-white/10 bg-ink-900 px-3 text-xs text-slate-100 focus:outline-none"
                   >
                     <option value="recent">Son guncellenen</option>
                     <option value="title">Basliga gore</option>
@@ -249,22 +269,27 @@ export default function DeliveryTab({ panelClass }) {
                   </select>
                 </label>
               </div>
-              <div className="flex items-center justify-between text-[11px] text-slate-500">
+              <div className="mt-3 flex items-center justify-between text-[11px] text-slate-500">
                 <span>
                   {filteredMaps.length} / {maps.length} kayit
                 </span>
-                {listSearch && <span>Arama aktif</span>}
+                <span className="uppercase tracking-[0.2em] text-slate-600">
+                  {listSort === "recent"
+                    ? "Son guncellenen"
+                    : listSort === "title"
+                      ? "Basliga gore"
+                      : "En eski"}
+                </span>
               </div>
-              <div className="overflow-hidden rounded-xl border border-white/10 bg-ink-900/40">
-                <div className="grid grid-cols-[minmax(0,1fr)_88px_110px] gap-3 border-b border-white/10 px-3 py-2 text-[11px] uppercase tracking-[0.2em] text-slate-500">
-                  <span>Urun</span>
-                  <span className="text-right">Adim</span>
-                  <span className="text-right">Guncelleme</span>
-                </div>
+              <div className="mt-3 overflow-hidden rounded-xl border border-white/10 bg-ink-900/40">
                 {maps.length === 0 ? (
-                  <div className="px-3 py-3 text-xs text-slate-400">Henuz urun haritasi yok.</div>
+                  <div className="px-4 py-6 text-center text-xs text-slate-400">
+                    Henuz urun haritasi yok.
+                  </div>
                 ) : filteredMaps.length === 0 ? (
-                  <div className="px-3 py-3 text-xs text-slate-400">Eslesme bulunamadi.</div>
+                  <div className="px-4 py-6 text-center text-xs text-slate-400">
+                    Eslesme bulunamadi.
+                  </div>
                 ) : (
                   <div className="max-h-[420px] overflow-y-auto sm:max-h-[520px]">
                     {filteredMaps.map((item) => {
@@ -278,24 +303,41 @@ export default function DeliveryTab({ panelClass }) {
                             setActiveId(item.id)
                             setIsEditing(false)
                           }}
-                          className={`grid w-full grid-cols-[minmax(0,1fr)_88px_110px] items-center gap-3 border-b border-white/10 px-3 py-2 text-left text-sm transition last:border-b-0 ${
+                          className={`group relative flex w-full items-start justify-between gap-3 border-b border-white/10 px-4 py-3 text-left text-sm transition last:border-b-0 ${
                             isActive ? "bg-white/10 text-white" : "text-slate-300 hover:bg-white/5"
                           }`}
                         >
+                          <span
+                            className={`absolute left-0 top-0 h-full w-0.5 ${
+                              isActive ? "bg-accent-400" : "bg-transparent"
+                            }`}
+                            aria-hidden="true"
+                          />
                           <div className="min-w-0">
                             <div className="flex items-center gap-2">
                               <span
-                                className={`h-1.5 w-1.5 rounded-full ${
-                                  isActive ? "bg-slate-200" : "bg-slate-600"
+                                className={`h-2 w-2 rounded-full ${
+                                  isActive ? "bg-accent-200" : "bg-slate-600"
                                 }`}
                               />
-                              <span className="min-w-0 truncate font-medium">{item.title}</span>
+                              <span className="min-w-0 truncate font-semibold">{item.title}</span>
                             </div>
+                            <p className="mt-1 text-[11px] uppercase tracking-[0.2em] text-slate-500">
+                              {item.steps.length} adim
+                            </p>
                           </div>
-                          <span className="text-right text-[11px] uppercase tracking-[0.18em] text-slate-400">
-                            {item.steps.length}
-                          </span>
-                          <span className="text-right text-[11px] text-slate-500">{displayDate}</span>
+                          <div className="flex shrink-0 flex-col items-end gap-1 text-[11px] text-slate-500">
+                            <span>{displayDate}</span>
+                            <span
+                              className={`inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] uppercase tracking-[0.2em] ${
+                                isActive
+                                  ? "border-accent-200/50 bg-accent-500/15 text-accent-100"
+                                  : "border-white/10 bg-white/5 text-slate-400"
+                              }`}
+                            >
+                              {isActive ? "Secili" : "Harita"}
+                            </span>
+                          </div>
                         </button>
                       )
                     })}
@@ -304,14 +346,74 @@ export default function DeliveryTab({ panelClass }) {
               </div>
             </div>
           </div>
+
+          <div className={`${panelClass} bg-ink-900/60`}>
+            <div>
+              <div className="flex items-center justify-between border-b border-white/10 pb-4">
+                <div className="space-y-1">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">
+                    Yeni harita
+                  </p>
+                  <p className="text-xs text-slate-400">Urun teslimat akisi ekle</p>
+                </div>
+                <span className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Lokal</span>
+              </div>
+              <div className="mt-4 space-y-4">
+                <div className="space-y-3 rounded-xl border border-white/10 bg-ink-900/70 p-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-200" htmlFor="create-title">
+                      Urun basligi
+                    </label>
+                    <input
+                      id="create-title"
+                      type="text"
+                      value={createDraft.title}
+                      onChange={(event) =>
+                        setCreateDraft((prev) => ({ ...prev, title: event.target.value }))
+                      }
+                      placeholder="Orn: Pro surum teslimat"
+                      className="w-full rounded-lg border border-white/15 bg-ink-900/70 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-200 focus:outline-none focus:ring-2 focus:ring-accent-500/20"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-semibold text-slate-200" htmlFor="create-steps">
+                      Teslimat adimlari
+                    </label>
+                    <textarea
+                      id="create-steps"
+                      rows={7}
+                      value={createDraft.steps}
+                      onChange={(event) =>
+                        setCreateDraft((prev) => ({ ...prev, steps: event.target.value }))
+                      }
+                      placeholder="Her satir yeni adim"
+                      className="w-full resize-none rounded-lg border border-white/15 bg-ink-900/70 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-200 focus:outline-none focus:ring-2 focus:ring-accent-500/20"
+                    />
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleCreate}
+                  disabled={!canCreate}
+                  className="w-full rounded-lg border border-accent-200/70 bg-accent-500/15 px-4 py-2 text-xs font-semibold text-accent-50 transition hover:border-accent-200 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                >
+                  Harita ekle
+                </button>
+                <div className="rounded-xl border border-dashed border-white/10 bg-ink-900/70 px-4 py-3 text-[11px] text-slate-400">
+                  <span className="font-semibold text-slate-300">Ipucu:</span> Her satir yeni bir
+                  teslimat adimi olarak kaydedilir.
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div className={`${panelClass} bg-ink-900/55`}>
+        <div className={`${panelClass} bg-ink-900/60`}>
           <div>
-            <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/10 pb-3">
+            <div className="flex flex-wrap items-start justify-between gap-4 border-b border-white/10 pb-4">
               <div className="space-y-1">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">
-                  Teslimat haritasi
+                  Teslimat akisi
                 </p>
                 <h2 className="text-lg font-semibold text-white">
                   {activeMap ? activeMap.title : "Secili urun yok"}
@@ -322,66 +424,91 @@ export default function DeliveryTab({ panelClass }) {
                   <span>Guncelleme: {activeUpdatedAt || "-"}</span>
                 </div>
               </div>
-              {activeMap && !isEditing && (
-                <button
-                  type="button"
-                  onClick={handleEditStart}
-                  className="border border-cyan-300/60 bg-cyan-500/10 px-3 py-1.5 text-xs font-semibold text-cyan-50 transition hover:border-cyan-200 hover:bg-cyan-500/20"
-                >
-                  Duzenle
-                </button>
-              )}
+              <div className="flex flex-wrap items-center gap-2">
+                {isEditing && (
+                  <span className="inline-flex items-center rounded-full border border-amber-300/50 bg-amber-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] text-amber-100">
+                    Duzenleme
+                  </span>
+                )}
+                {activeMap && !isEditing && (
+                  <button
+                    type="button"
+                    onClick={handleEditStart}
+                    className="rounded-lg border border-accent-200/60 bg-accent-500/10 px-3 py-2 text-xs font-semibold text-accent-50 transition hover:border-accent-200 hover:bg-accent-500/20"
+                  >
+                    Duzenle
+                  </button>
+                )}
+              </div>
             </div>
 
-            <div className="mt-4">
+            <div className="mt-5">
               {!activeMap ? (
-                <div className="border border-dashed border-white/10 bg-white/5 px-3 py-3 text-xs text-slate-400">
-                  Soldan bir urun sec veya sagdan yeni harita ekle.
+                <div className="flex flex-col items-center justify-center gap-3 rounded-xl border border-dashed border-white/10 bg-white/5 px-4 py-8 text-center text-xs text-slate-400">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-ink-900/70">
+                    <svg
+                      aria-hidden="true"
+                      viewBox="0 0 24 24"
+                      className="h-5 w-5 text-slate-300"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M9 18l-6 3V6l6-3 6 3 6-3v15l-6 3-6-3z" />
+                      <path d="M9 3v15" />
+                      <path d="M15 6v15" />
+                    </svg>
+                  </div>
+                  <p>Soldan bir urun sec, alttan yeni harita ekle.</p>
                 </div>
               ) : isEditing ? (
-                <div className="space-y-3">
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-200" htmlFor="edit-title">
-                      Urun basligi
-                    </label>
-                    <input
-                      id="edit-title"
-                      type="text"
-                      value={editDraft.title}
-                      onChange={(event) =>
-                        setEditDraft((prev) => ({ ...prev, title: event.target.value }))
-                      }
-                      className="w-full border border-white/15 bg-ink-900/70 px-3 py-2 text-sm text-slate-100 focus:border-cyan-300 focus:outline-none"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-slate-200" htmlFor="edit-steps">
-                      Teslimat adimlari
-                    </label>
-                    <textarea
-                      id="edit-steps"
-                      rows={8}
-                      value={editDraft.steps}
-                      onChange={(event) =>
-                        setEditDraft((prev) => ({ ...prev, steps: event.target.value }))
-                      }
-                      placeholder="Her satir yeni adim"
-                      className="w-full resize-none border border-white/15 bg-ink-900/70 px-3 py-2 text-sm text-slate-100 focus:border-cyan-300 focus:outline-none"
-                    />
+                <div className="space-y-4">
+                  <div className="space-y-3 rounded-xl border border-white/10 bg-ink-900/70 p-4">
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-200" htmlFor="edit-title">
+                        Urun basligi
+                      </label>
+                      <input
+                        id="edit-title"
+                        type="text"
+                        value={editDraft.title}
+                        onChange={(event) =>
+                          setEditDraft((prev) => ({ ...prev, title: event.target.value }))
+                        }
+                        className="w-full rounded-lg border border-white/15 bg-ink-900/70 px-3 py-2 text-sm text-slate-100 focus:border-accent-200 focus:outline-none focus:ring-2 focus:ring-accent-500/20"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <label className="text-xs font-semibold text-slate-200" htmlFor="edit-steps">
+                        Teslimat adimlari
+                      </label>
+                      <textarea
+                        id="edit-steps"
+                        rows={8}
+                        value={editDraft.steps}
+                        onChange={(event) =>
+                          setEditDraft((prev) => ({ ...prev, steps: event.target.value }))
+                        }
+                        placeholder="Her satir yeni adim"
+                        className="w-full resize-none rounded-lg border border-white/15 bg-ink-900/70 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-200 focus:outline-none focus:ring-2 focus:ring-accent-500/20"
+                      />
+                    </div>
                   </div>
                   <div className="flex flex-wrap gap-2">
                     <button
                       type="button"
                       onClick={handleEditSave}
                       disabled={!canSave}
-                      className="min-w-[120px] border border-cyan-300/70 bg-cyan-500/10 px-4 py-2 text-xs font-semibold text-cyan-50 transition hover:border-cyan-200 hover:bg-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="min-w-[140px] rounded-lg border border-accent-200/70 bg-accent-500/15 px-4 py-2 text-xs font-semibold text-accent-50 transition hover:border-accent-200 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       Kaydet
                     </button>
                     <button
                       type="button"
                       onClick={handleEditCancel}
-                      className="min-w-[120px] border border-white/15 px-4 py-2 text-xs font-semibold text-slate-200 transition hover:border-cyan-300/60 hover:text-slate-100"
+                      className="min-w-[140px] rounded-lg border border-white/15 px-4 py-2 text-xs font-semibold text-slate-200 transition hover:border-white/30 hover:text-slate-100"
                     >
                       Vazgec
                     </button>
@@ -390,20 +517,23 @@ export default function DeliveryTab({ panelClass }) {
               ) : (
                 <div className="space-y-3">
                   {activeMap.steps.length === 0 ? (
-                    <div className="border border-dashed border-white/10 bg-white/5 px-3 py-3 text-xs text-slate-400">
+                    <div className="rounded-xl border border-dashed border-white/10 bg-white/5 px-4 py-6 text-center text-xs text-slate-400">
                       Bu harita icin adim yok.
                     </div>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="relative space-y-4">
+                      <span
+                        className="absolute left-4 top-4 bottom-4 w-px bg-white/10"
+                        aria-hidden="true"
+                      />
                       {activeMap.steps.map((step, index) => (
-                        <div
-                          key={`${activeMap.id}-step-${index}`}
-                          className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2"
-                        >
-                          <span className="flex h-7 w-7 shrink-0 items-center justify-center border border-white/15 bg-white/10 text-[11px] font-semibold text-slate-100">
+                        <div key={`${activeMap.id}-step-${index}`} className="relative pl-12">
+                          <span className="absolute left-0 top-0 flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-ink-900/80 text-[11px] font-semibold text-accent-100">
                             {index + 1}
                           </span>
-                          <span className="text-sm leading-relaxed text-slate-200">{step}</span>
+                          <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3">
+                            <p className="text-sm leading-relaxed text-slate-200">{step}</p>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -413,64 +543,8 @@ export default function DeliveryTab({ panelClass }) {
             </div>
           </div>
         </div>
-
-        <div className={`${panelClass} bg-ink-900/55`}>
-          <div>
-            <div className="flex items-center justify-between border-b border-white/10 pb-3">
-              <div className="space-y-1">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">
-                  Yeni urun haritasi
-                </p>
-                <p className="text-xs text-slate-400">Sag panelden ekle</p>
-              </div>
-              <span className="text-[11px] uppercase tracking-[0.24em] text-slate-500">Lokal</span>
-            </div>
-            <div className="mt-4 space-y-3">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-200" htmlFor="create-title">
-                  Urun basligi
-                </label>
-                <input
-                  id="create-title"
-                  type="text"
-                  value={createDraft.title}
-                  onChange={(event) =>
-                    setCreateDraft((prev) => ({ ...prev, title: event.target.value }))
-                  }
-                  placeholder="Orn: Pro surum teslimat"
-                  className="w-full border border-white/15 bg-ink-900/70 px-3 py-2 text-sm text-slate-100 focus:border-cyan-300 focus:outline-none"
-                />
-              </div>
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-200" htmlFor="create-steps">
-                  Teslimat adimlari
-                </label>
-                <textarea
-                  id="create-steps"
-                  rows={8}
-                  value={createDraft.steps}
-                  onChange={(event) =>
-                    setCreateDraft((prev) => ({ ...prev, steps: event.target.value }))
-                  }
-                  placeholder="Her satir yeni adim"
-                  className="w-full resize-none border border-white/15 bg-ink-900/70 px-3 py-2 text-sm text-slate-100 focus:border-cyan-300 focus:outline-none"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={handleCreate}
-                disabled={!canCreate}
-                className="w-full border border-cyan-300/70 bg-cyan-500/10 px-4 py-2 text-xs font-semibold text-cyan-50 transition hover:border-cyan-200 hover:bg-cyan-500/20 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                Harita ekle
-              </button>
-              <div className="border border-dashed border-white/10 bg-ink-900/60 px-3 py-2 text-[11px] text-slate-400">
-                Ipucu: Her satir yeni bir teslimat adimi olarak kaydedilir.
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   )
 }
+
