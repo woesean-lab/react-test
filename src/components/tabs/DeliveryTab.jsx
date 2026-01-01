@@ -53,6 +53,8 @@ export default function DeliveryTab({ panelClass }) {
   const [maps, setMaps] = useState(() => getInitialMaps())
   const [activeId, setActiveId] = useState("")
   const [isEditing, setIsEditing] = useState(false)
+  const [listSearch, setListSearch] = useState("")
+  const [listSort, setListSort] = useState("recent")
   const [createDraft, setCreateDraft] = useState({ title: "", steps: "" })
   const [editDraft, setEditDraft] = useState({ title: "", steps: "" })
 
@@ -71,6 +73,31 @@ export default function DeliveryTab({ panelClass }) {
   }, [activeId, maps])
 
   const activeMap = useMemo(() => maps.find((item) => item.id === activeId) || null, [activeId, maps])
+  const filteredMaps = useMemo(() => {
+    const query = listSearch.trim().toLowerCase()
+    const source = query
+      ? maps.filter((item) => {
+          const titleMatch = item.title.toLowerCase().includes(query)
+          if (titleMatch) return true
+          return item.steps.some((step) => step.toLowerCase().includes(query))
+        })
+      : maps
+    const getTimestamp = (item) => {
+      const value = item.updatedAt || item.createdAt
+      const time = Date.parse(value)
+      return Number.isNaN(time) ? 0 : time
+    }
+    const sorted = [...source].sort((a, b) => {
+      if (listSort === "title") {
+        return a.title.localeCompare(b.title)
+      }
+      if (listSort === "oldest") {
+        return getTimestamp(a) - getTimestamp(b)
+      }
+      return getTimestamp(b) - getTimestamp(a)
+    })
+    return sorted
+  }, [listSearch, listSort, maps])
 
   useEffect(() => {
     if (!activeMap || isEditing) return
@@ -182,11 +209,52 @@ export default function DeliveryTab({ panelClass }) {
                 {maps.length} kayit
               </span>
             </div>
-            <div className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-ink-900/50">
-              {maps.length === 0 ? (
-                <div className="px-3 py-3 text-xs text-slate-400">Henuz urun haritasi yok.</div>
-              ) : (
-                maps.map((item, index) => {
+            <div className="mt-4 space-y-3">
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="flex h-10 flex-1 items-center gap-3 rounded border border-white/10 bg-ink-900 px-3">
+                  <span className="text-[11px] uppercase tracking-[0.18em] text-slate-500">Ara</span>
+                  <input
+                    type="text"
+                    value={listSearch}
+                    onChange={(event) => setListSearch(event.target.value)}
+                    placeholder="Baslik veya adim ara"
+                    className="min-w-0 flex-1 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
+                  />
+                </div>
+                <div className="flex items-center gap-1 rounded border border-white/10 bg-ink-900/60 p-1 text-[11px] uppercase tracking-[0.2em] text-slate-400">
+                  {[
+                    { value: "recent", label: "Son" },
+                    { value: "title", label: "A-Z" },
+                    { value: "oldest", label: "Eski" },
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() => setListSort(option.value)}
+                      className={`rounded px-2 py-1 text-[10px] transition ${
+                        listSort === option.value
+                          ? "bg-white/10 text-slate-100"
+                          : "text-slate-500 hover:text-slate-300"
+                      }`}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-[11px] text-slate-500">
+                <span>
+                  {filteredMaps.length} / {maps.length} kayit
+                </span>
+                {listSearch && <span>Arama aktif</span>}
+              </div>
+              <div className="overflow-hidden rounded-xl border border-white/10 bg-ink-900/50">
+                {maps.length === 0 ? (
+                  <div className="px-3 py-3 text-xs text-slate-400">Henuz urun haritasi yok.</div>
+                ) : filteredMaps.length === 0 ? (
+                  <div className="px-3 py-3 text-xs text-slate-400">Eslesme bulunamadi.</div>
+                ) : (
+                  filteredMaps.map((item, index) => {
                   const isActive = item.id === activeId
                   const displayDate = formatMapDate(item.updatedAt || item.createdAt) || "-"
                   return (
@@ -222,7 +290,8 @@ export default function DeliveryTab({ panelClass }) {
                     </button>
                   )
                 })
-              )}
+                )}
+              </div>
             </div>
           </div>
         </div>
