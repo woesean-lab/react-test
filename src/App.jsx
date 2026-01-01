@@ -14,6 +14,7 @@ import TasksTab from "./components/tabs/TasksTab"
 import SalesTab from "./components/tabs/SalesTab"
 import DashboardTab from "./components/tabs/DashboardTab"
 import AdminTab from "./components/tabs/AdminTab"
+import DeliveryTab from "./components/tabs/DeliveryTab"
 import useAppData from "./hooks/useAppData"
 import { PERMISSIONS } from "./constants/appConstants"
 
@@ -333,6 +334,7 @@ function App() {
   }, [])
 
   const canViewDashboard = isAuthed
+  const canViewDelivery = isAuthed
   const canViewMessages = hasPermission(PERMISSIONS.messagesView)
   const canCreateMessages = hasAnyPermission([PERMISSIONS.messagesCreate, PERMISSIONS.messagesEdit])
   const canEditMessages = hasAnyPermission([PERMISSIONS.messagesTemplateEdit, PERMISSIONS.messagesEdit])
@@ -388,6 +390,7 @@ function App() {
   const tabItems = useMemo(
     () => [
       { key: "messages", label: "Mesaj", canView: canViewMessages },
+      { key: "delivery", label: "Teslimat", canView: canViewDelivery },
       { key: "tasks", label: "G\u00f6rev", canView: canViewTasks },
       { key: "sales", label: "Satış", canView: canViewSales },
       { key: "problems", label: "Problem", canView: canViewProblems },
@@ -398,6 +401,7 @@ function App() {
     [
       canViewAdmin,
       canViewDashboard,
+      canViewDelivery,
       canViewLists,
       canViewMessages,
       canViewProblems,
@@ -807,6 +811,12 @@ function App() {
               handleAdd={handleAdd}
               setSelectedCategory={setSelectedCategory}
             />
+          </div>
+        )}
+
+        {activeTab === "delivery" && canViewDelivery && (
+          <div className={getTabSlideClass("delivery")}>
+            <DeliveryTab panelClass={panelClass} />
           </div>
         )}
 
