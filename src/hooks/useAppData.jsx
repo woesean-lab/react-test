@@ -2244,6 +2244,40 @@ export default function useAppData() {
     setSelectedTemplate(nextTemplate)
     const tpl = templates.find((item) => item.label === nextTemplate)
     if (tpl && options.shouldCopy) {
+      if (tpl.id) {
+        setTemplates((prev) =>
+          prev.map((item) =>
+            item.id === tpl.id
+              ? { ...item, clickCount: (item.clickCount ?? 0) + 1 }
+              : item,
+          ),
+        )
+        apiFetch(`/api/templates/${tpl.id}/click`, { method: "POST" })
+          .then(async (res) => {
+            if (!res.ok) throw new Error("template_click_failed")
+            const updated = await res.json()
+            setTemplates((prev) =>
+              prev.map((item) => {
+                if (item.id !== updated.id) return item
+                const currentCount = item.clickCount ?? 0
+                const serverCount = updated.clickCount ?? currentCount
+                return serverCount > currentCount
+                  ? { ...item, clickCount: serverCount }
+                  : item
+              }),
+            )
+          })
+          .catch((error) => {
+            console.error(error)
+            setTemplates((prev) =>
+              prev.map((item) => {
+                if (item.id !== tpl.id) return item
+                const currentCount = item.clickCount ?? 0
+                return { ...item, clickCount: Math.max(0, currentCount - 1) }
+              }),
+            )
+          })
+      }
       try {
         await navigator.clipboard.writeText(tpl.value)
         toast.success("\u015Eablon kopyaland\u0131", { duration: 1600, position: "top-right" })

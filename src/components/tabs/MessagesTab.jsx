@@ -370,6 +370,7 @@ export default function MessagesTab({
                           )}
                           {filteredList.map((tpl) => {
                             const isStarred = Boolean(tpl.starred)
+                            const clickCount = typeof tpl.clickCount === "number" ? tpl.clickCount : 0
                             return (
                               <div key={tpl.label} className="relative">
                                 <button
@@ -410,6 +411,9 @@ export default function MessagesTab({
                                     <path d="M12 3.5l2.9 5.88 6.5.94-4.7 4.58 1.1 6.45L12 18.7l-5.8 3.05 1.1-6.45-4.7-4.58 6.5-.94L12 3.5z" />
                                   </svg>
                                 </button>
+                                <span className="pointer-events-none absolute bottom-2 right-2 text-[10px] text-slate-500">
+                                  {clickCount} tiklama
+                                </span>
                               </div>
                             )
                           })}

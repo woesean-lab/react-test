@@ -13,6 +13,7 @@ model Template {
   value     String
   category  String   @default("Genel")
   starred   Boolean  @default(false)
+  clickCount Int     @default(0)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

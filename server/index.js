@@ -373,6 +373,28 @@ app.put("/api/templates/:id", async (req, res) => {
   }
 })
 
+app.post("/api/templates/:id/click", async (req, res) => {
+  const id = Number(req.params.id)
+  if (!Number.isFinite(id)) {
+    res.status(400).json({ error: "invalid id" })
+    return
+  }
+
+  try {
+    const updated = await prisma.template.update({
+      where: { id },
+      data: { clickCount: { increment: 1 } },
+    })
+    res.json(updated)
+  } catch (error) {
+    if (error?.code === "P2025") {
+      res.status(404).json({ error: "Template not found" })
+      return
+    }
+    throw error
+  }
+})
+
 app.delete("/api/templates/:id", async (req, res) => {
   const id = Number(req.params.id)
   if (!Number.isFinite(id)) {
