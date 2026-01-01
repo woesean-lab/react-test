@@ -220,7 +220,10 @@ export default function useAppData() {
     if (canViewSales) tabs.push("sales")
     if (permissions.includes(PERMISSIONS.problemsView)) tabs.push("problems")
     if (permissions.includes(PERMISSIONS.listsView)) tabs.push("lists")
-    if (permissions.includes(PERMISSIONS.stockView)) tabs.push("stock")
+    if (permissions.includes(PERMISSIONS.stockView)) {
+      tabs.push("stock")
+      tabs.push("delivery")
+    }
     if (canManageAdmin) tabs.push("admin")
     return tabs
   }, [permissions, canManageAdmin, canViewSales, isAuthed])
@@ -2912,6 +2915,7 @@ export default function useAppData() {
   const isSalesTabLoading = isSalesLoading || (activeTab === "sales" && isTabLoading)
   const isListsTabLoading = isListsLoading || (activeTab === "lists" && isTabLoading)
   const isStockTabLoading = isProductsLoading || (activeTab === "stock" && isTabLoading)
+  const isDeliveryTabLoading = isProductsLoading || (activeTab === "delivery" && isTabLoading)
   const isProblemsTabLoading = isProblemsLoading || (activeTab === "problems" && isTabLoading)
   const isAdminTabLoading = isAdminLoading || (activeTab === "admin" && isTabLoading)
 
@@ -3833,6 +3837,7 @@ export default function useAppData() {
     handleListInsertColumn,
     handleListDeleteColumn,
     isStockTabLoading,
+    isDeliveryTabLoading,
     stockSummary,
     products,
     productSearch,

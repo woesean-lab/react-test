@@ -10,6 +10,7 @@ import ListsTab from "./components/tabs/ListsTab"
 import MessagesTab from "./components/tabs/MessagesTab"
 import ProblemsTab from "./components/tabs/ProblemsTab"
 import StockTab from "./components/tabs/StockTab"
+import DeliveryTab from "./components/tabs/DeliveryTab"
 import TasksTab from "./components/tabs/TasksTab"
 import SalesTab from "./components/tabs/SalesTab"
 import DashboardTab from "./components/tabs/DashboardTab"
@@ -173,6 +174,7 @@ function App() {
     handleListInsertColumn,
     handleListDeleteColumn,
     isStockTabLoading,
+    isDeliveryTabLoading,
     stockSummary,
     products,
     productSearch,
@@ -366,6 +368,7 @@ function App() {
     PERMISSIONS.listsEdit,
   ])
   const canViewStock = hasPermission(PERMISSIONS.stockView)
+  const canViewDelivery = canViewStock
   const canCreateProducts = hasAnyPermission([PERMISSIONS.stockProductCreate, PERMISSIONS.stockManage])
   const canEditProducts = hasAnyPermission([PERMISSIONS.stockProductEdit, PERMISSIONS.stockManage])
   const canDeleteProducts = hasAnyPermission([PERMISSIONS.stockProductDelete, PERMISSIONS.stockManage])
@@ -393,11 +396,13 @@ function App() {
       { key: "problems", label: "Problem", canView: canViewProblems },
       { key: "lists", label: "Liste", canView: canViewLists },
       { key: "stock", label: "Stok", canView: canViewStock },
+      { key: "delivery", label: "Teslimat", canView: canViewDelivery },
       { key: "admin", label: "Admin", canView: canViewAdmin },
     ],
     [
       canViewAdmin,
       canViewDashboard,
+      canViewDelivery,
       canViewLists,
       canViewMessages,
       canViewProblems,
@@ -1001,6 +1006,18 @@ function App() {
               setStockForm={setStockForm}
               handleStockAdd={handleStockAdd}
               resetStockForm={resetStockForm}
+            />
+          </div>
+        )}
+
+        {activeTab === "delivery" && canViewDelivery && (
+          <div className={getTabSlideClass("delivery")}>
+            <DeliveryTab
+              isLoading={isDeliveryTabLoading}
+              panelClass={panelClass}
+              products={products}
+              templates={templates}
+              handleProductCopyMessage={handleProductCopyMessage}
             />
           </div>
         )}
