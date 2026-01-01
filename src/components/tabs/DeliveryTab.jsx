@@ -169,9 +169,8 @@ export default function DeliveryTab({ panelClass }) {
       </header>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.4fr)_minmax(0,0.9fr)]">
-        <div className={`${panelClass} relative overflow-hidden bg-ink-900/60`}>
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_120%_at_0%_0%,rgba(14,165,233,0.12),transparent)]" />
-          <div className="relative">
+        <div className={`${panelClass} bg-ink-900/55`}>
+          <div>
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="space-y-1">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">
@@ -200,15 +199,12 @@ export default function DeliveryTab({ panelClass }) {
                         setActiveId(item.id)
                         setIsEditing(false)
                       }}
-                      className={`group relative w-full rounded-xl border px-3 py-3 text-left text-sm transition ${
+                      className={`group w-full rounded-xl border px-3 py-3 text-left text-sm transition ${
                         isActive
-                          ? "border-cyan-300/70 bg-cyan-500/10 text-white shadow-glow"
-                          : "border-white/10 bg-ink-900/70 text-slate-300 hover:border-white/20 hover:bg-white/5"
+                          ? "border-white/20 bg-white/10 text-white"
+                          : "border-white/10 bg-ink-900/55 text-slate-300 hover:border-white/20 hover:bg-white/5"
                       }`}
                     >
-                      {isActive && (
-                        <span className="absolute left-0 top-0 h-full w-1 bg-cyan-400/80" />
-                      )}
                       <div className="flex items-center justify-between gap-2">
                         <span className="min-w-0 flex-1 truncate font-medium">{item.title}</span>
                         <span className="text-[10px] font-mono text-slate-500">
@@ -228,9 +224,8 @@ export default function DeliveryTab({ panelClass }) {
           </div>
         </div>
 
-        <div className={`${panelClass} relative overflow-hidden bg-ink-900/65`}>
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_100%_at_80%_0%,rgba(56,189,248,0.12),transparent)]" />
-          <div className="relative">
+        <div className={`${panelClass} bg-ink-900/55`}>
+          <div>
             <div className="flex flex-wrap items-start justify-between gap-3 border-b border-white/10 pb-3">
               <div className="space-y-1">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">
@@ -321,9 +316,9 @@ export default function DeliveryTab({ panelClass }) {
                       {activeMap.steps.map((step, index) => (
                         <div
                           key={`${activeMap.id}-step-${index}`}
-                          className="flex items-start gap-3 rounded-xl border border-white/10 bg-ink-900/70 px-3 py-2"
+                          className="flex items-start gap-3 rounded-xl border border-white/10 bg-white/5 px-3 py-2"
                         >
-                          <span className="flex h-7 w-7 shrink-0 items-center justify-center border border-cyan-300/40 bg-cyan-500/10 text-[11px] font-semibold text-cyan-100">
+                          <span className="flex h-7 w-7 shrink-0 items-center justify-center border border-white/15 bg-white/10 text-[11px] font-semibold text-slate-100">
                             {index + 1}
                           </span>
                           <span className="text-sm leading-relaxed text-slate-200">{step}</span>
@@ -337,9 +332,8 @@ export default function DeliveryTab({ panelClass }) {
           </div>
         </div>
 
-        <div className={`${panelClass} relative overflow-hidden bg-ink-900/60`}>
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_120%_at_0%_100%,rgba(14,165,233,0.1),transparent)]" />
-          <div className="relative">
+        <div className={`${panelClass} bg-ink-900/55`}>
+          <div>
             <div className="flex items-center justify-between border-b border-white/10 pb-3">
               <div className="space-y-1">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">
