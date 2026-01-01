@@ -182,11 +182,9 @@ export default function DeliveryTab({ panelClass }) {
                 {maps.length} kayit
               </span>
             </div>
-            <div className="mt-4 space-y-2">
+            <div className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-ink-900/50">
               {maps.length === 0 ? (
-                <div className="border border-dashed border-white/10 bg-white/5 px-3 py-3 text-xs text-slate-400">
-                  Henuz urun haritasi yok.
-                </div>
+                <div className="px-3 py-3 text-xs text-slate-400">Henuz urun haritasi yok.</div>
               ) : (
                 maps.map((item, index) => {
                   const isActive = item.id === activeId
@@ -199,22 +197,27 @@ export default function DeliveryTab({ panelClass }) {
                         setActiveId(item.id)
                         setIsEditing(false)
                       }}
-                      className={`group w-full rounded-xl border px-3 py-3 text-left text-sm transition ${
-                        isActive
-                          ? "border-white/20 bg-white/10 text-white"
-                          : "border-white/10 bg-ink-900/55 text-slate-300 hover:border-white/20 hover:bg-white/5"
+                      className={`group flex w-full items-start gap-3 border-b border-white/10 px-3 py-2 text-left text-sm transition last:border-b-0 ${
+                        isActive ? "bg-white/10 text-white" : "text-slate-300 hover:bg-white/5"
                       }`}
                     >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="min-w-0 flex-1 truncate font-medium">{item.title}</span>
-                        <span className="text-[10px] font-mono text-slate-500">
-                          {String(index + 1).padStart(2, "0")}
-                        </span>
-                      </div>
-                      <div className="mt-2 flex items-center gap-2 text-[11px] text-slate-500">
-                        <span className="uppercase tracking-[0.2em]">{item.steps.length} adim</span>
-                        <span className="h-3 w-px bg-white/10" />
-                        <span>{displayDate}</span>
+                      <span
+                        className={`mt-1.5 h-1.5 w-1.5 rounded-full ${
+                          isActive ? "bg-slate-200" : "bg-slate-600"
+                        }`}
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="min-w-0 flex-1 truncate font-medium">{item.title}</span>
+                          <span className="text-[10px] font-mono text-slate-500">
+                            {String(index + 1).padStart(2, "0")}
+                          </span>
+                        </div>
+                        <div className="mt-1 flex items-center gap-2 text-[11px] text-slate-500">
+                          <span className="uppercase tracking-[0.2em]">{item.steps.length} adim</span>
+                          <span className="h-3 w-px bg-white/10" />
+                          <span>{displayDate}</span>
+                        </div>
                       </div>
                     </button>
                   )
