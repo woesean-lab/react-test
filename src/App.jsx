@@ -1016,8 +1016,6 @@ function App() {
               isLoading={isDeliveryTabLoading}
               panelClass={panelClass}
               products={products}
-              templates={templates}
-              handleProductCopyMessage={handleProductCopyMessage}
             />
           </div>
         )}

@@ -23,8 +23,6 @@ export default function DeliveryTab({
   isLoading,
   panelClass,
   products = [],
-  templates = [],
-  handleProductCopyMessage,
 }) {
   const [search, setSearch] = useState("")
   const [deliveryNotes, setDeliveryNotes] = useState({})
@@ -57,30 +55,13 @@ export default function DeliveryTab({
     }
   }, [])
 
-  const getDeliveryMessage = useCallback(
-    (product) => {
-      const templateLabel = product?.deliveryTemplate?.trim()
-      if (templateLabel) {
-        const templateMessage = templates
-          ?.find((tpl) => tpl.label === templateLabel)
-          ?.value?.trim()
-        if (templateMessage) return templateMessage
-      }
-      return product?.deliveryMessage?.trim() || ""
-    },
-    [templates],
-  )
-
   const filteredProducts = useMemo(() => {
     const query = search.trim().toLowerCase()
     if (!query) return products
     return products.filter((product) => {
       const note = normalizeNote(deliveryNotes[product.id])
-      const deliveryMessage = getDeliveryMessage(product)
       const haystack = [
         product?.name,
-        product?.deliveryTemplate,
-        deliveryMessage,
         note.title,
         note.body,
         note.tags,
@@ -94,22 +75,16 @@ export default function DeliveryTab({
 
   const stats = useMemo(() => {
     const total = products.length
-    let withMessage = 0
     let withNotes = 0
-    let missing = 0
 
     products.forEach((product) => {
-      const deliveryMessage = getDeliveryMessage(product)
       const note = normalizeNote(deliveryNotes[product.id])
-      const hasMessage = Boolean(deliveryMessage)
       const hasNote = hasNoteContent(note)
-      if (hasMessage) withMessage += 1
       if (hasNote) withNotes += 1
-      if (!hasMessage && !hasNote) missing += 1
     })
 
-    return { total, withMessage, withNotes, missing }
-  }, [products, deliveryNotes, getDeliveryMessage])
+    return { total, withNotes, missing: Math.max(0, total - withNotes) }
+  }, [products, deliveryNotes])
 
   const openNoteModal = (product) => {
     if (!product) return
@@ -183,10 +158,6 @@ export default function DeliveryTab({
               {"\u00dcr\u00fcn: "}
               {stats.total}
             </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-              {"Mesajl\u0131: "}
-              {stats.withMessage}
-            </span>
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/40 bg-emerald-500/10 px-3 py-1 text-xs text-emerald-100">
               {"Notlu: "}
               {stats.withNotes}
@@ -210,7 +181,7 @@ export default function DeliveryTab({
                   Teslimat arama
                 </p>
                 <p className="text-sm text-slate-400">
-                  {"\u00dcr\u00fcn, mesaj veya not i\u00e7inde ara."}
+                  {"\u00dcr\u00fcn veya not i\u00e7inde ara."}
                 </p>
               </div>
               <div className="flex w-full flex-col gap-2">
@@ -234,7 +205,7 @@ export default function DeliveryTab({
                       type="text"
                       value={search}
                       onChange={(event) => setSearch(event.target.value)}
-                      placeholder={"\u00dcr\u00fcn ad\u0131, mesaj, not"}
+                      placeholder={"\u00dcr\u00fcn ad\u0131, not"}
                       className="w-full min-w-0 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
                     />
                   </div>
@@ -251,10 +222,6 @@ export default function DeliveryTab({
                 filteredProducts.map((product) => {
                   const note = normalizeNote(deliveryNotes[product.id])
                   const hasNote = hasNoteContent(note)
-                  const deliveryMessage = getDeliveryMessage(product)
-                  const deliveryTemplate = product?.deliveryTemplate?.trim()
-                  const canCopy =
-                    Boolean(deliveryMessage) && typeof handleProductCopyMessage === "function"
 
                   return (
                     <div
@@ -265,27 +232,12 @@ export default function DeliveryTab({
                         <div className="min-w-0 space-y-2">
                           <div className="flex flex-wrap items-center gap-2">
                             <span className="text-base font-semibold text-white">{product.name}</span>
-                            {deliveryTemplate && (
-                              <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-200">
-                                {deliveryTemplate}
-                              </span>
-                            )}
                             {hasNote && (
                               <span className="rounded-full border border-emerald-300/60 bg-emerald-500/15 px-2.5 py-1 text-[11px] font-semibold text-emerald-50">
                                 {"Not var"}
                               </span>
                             )}
                           </div>
-
-                          {deliveryMessage ? (
-                            <p className="text-sm text-slate-200/80 whitespace-pre-wrap">
-                              {deliveryMessage}
-                            </p>
-                          ) : (
-                            <p className="text-sm text-slate-400">
-                              {"Teslimat mesaj\u0131 yok. Stok sekmesinden \u015fablon se\u00e7."}
-                            </p>
-                          )}
 
                           {hasNote && (
                             <div className="rounded-xl border border-white/10 bg-ink-900/60 p-3">
@@ -309,18 +261,15 @@ export default function DeliveryTab({
                               )}
                             </div>
                           )}
+
+                          {!hasNote && (
+                            <p className="text-sm text-slate-400">
+                              {"Teslimat notu eklenmemi\u015f. \u00dcr\u00fcne \u00f6zel ad\u0131m ekle."}
+                            </p>
+                          )}
                         </div>
 
                         <div className="flex flex-wrap gap-2">
-                          {canCopy && (
-                            <button
-                              type="button"
-                              onClick={() => handleProductCopyMessage(product.id)}
-                              className="rounded-md border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
-                            >
-                              {"Mesaj\u0131 kopyala"}
-                            </button>
-                          )}
                           <button
                             type="button"
                             onClick={() => openNoteModal(product)}
@@ -346,9 +295,9 @@ export default function DeliveryTab({
                 {"Teslimat Nas\u0131l Yap\u0131l\u0131r?"}
               </p>
               <ol className="space-y-2 text-sm text-slate-200/80">
-                <li>{"1) \u00dcr\u00fcn\u00fc ara ve teslimat mesaj\u0131n\u0131 kontrol et."}</li>
-                <li>{"2) \u00dcr\u00fcn\u00fcn \u00f6zel ad\u0131mlar\u0131n\u0131 Yerel Not olarak ekle."}</li>
-                <li>{"3) Teslimat \u00e7\u0131kt\u0131s\u0131nda mesaj\u0131 kopyala ve uygula."}</li>
+                <li>{"1) \u00dcr\u00fcn\u00fc ara ve teslimat notunu kontrol et."}</li>
+                <li>{"2) \u00dcr\u00fcne \u00f6zel ad\u0131mlar\u0131 Yerel Not olarak ekle."}</li>
+                <li>{"3) \u0130htiyaca g\u00f6re notu g\u00fcncelle ve ekip i\u00e7inde uygula."}</li>
               </ol>
             </div>
           </div>
