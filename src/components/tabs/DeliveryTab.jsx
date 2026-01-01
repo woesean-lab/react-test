@@ -141,35 +141,29 @@ export default function DeliveryTab({ panelClass }) {
 
   return (
     <div className="space-y-6">
-      <header className="relative overflow-hidden rounded-3xl border border-white/10 bg-ink-900/70 px-5 py-5 sm:px-6 sm:py-6">
-        <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,rgba(56,189,248,0.16),transparent_50%)]" />
-        <div className="pointer-events-none absolute -right-12 -top-16 h-40 w-40 rounded-full bg-cyan-500/20 blur-3xl" />
-        <div className="pointer-events-none absolute left-0 top-0 h-full w-1 bg-cyan-400/70" />
-        <div className="relative flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div className="space-y-2">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] uppercase tracking-[0.28em] text-slate-300">
+      <header className="overflow-hidden rounded-3xl border border-white/10 bg-ink-900/60 p-4 shadow-card sm:p-6">
+        <div className="flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-1.5 sm:space-y-2">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
               Teslimat
             </span>
             <h1 className="font-display text-2xl font-semibold text-white sm:text-3xl">
               Teslimat Nasil Yapilir?
             </h1>
-            <p className="max-w-2xl text-sm text-slate-300/80">
+            <p className="max-w-2xl text-sm text-slate-200/80">
               Urun bazli teslimat haritalari olustur, adim adim takip et.
             </p>
           </div>
-          <div className="grid w-full max-w-sm grid-cols-2 gap-3 text-xs sm:grid-cols-3">
-            <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-3 py-2">
-              <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500">Harita</p>
-              <p className="text-base font-semibold text-slate-100">{maps.length}</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-3 py-2">
-              <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500">Adim</p>
-              <p className="text-base font-semibold text-slate-100">{activeStepsCount}</p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-3 py-2">
-              <p className="text-[10px] uppercase tracking-[0.24em] text-slate-500">Guncelleme</p>
-              <p className="text-sm font-semibold text-slate-100">{activeUpdatedAt || "-"}</p>
-            </div>
+          <div className="flex flex-wrap gap-2">
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
+              Harita: {maps.length}
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
+              Adim: {activeStepsCount}
+            </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
+              Guncelleme: {activeUpdatedAt || "-"}
+            </span>
           </div>
         </div>
       </header>
