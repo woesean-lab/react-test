@@ -55,37 +55,35 @@ export default function ProductsTab({ panelClass = "" }) {
       </header>
 
       <div className={`${panelClass} bg-ink-900/60`}>
-        <div className="flex flex-wrap gap-2">
-          {categories.map((category) => {
-            const isActive = category.key === activeCategoryKey
-            return (
-              <button
-                key={category.key}
-                type="button"
-                onClick={() => setActiveCategoryKey(category.key)}
-                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold transition ${
-                  isActive
-                    ? "border-accent-300/70 bg-accent-500/20 text-accent-50 shadow-glow"
-                    : "border-white/10 bg-white/5 text-slate-200 hover:border-accent-300/60 hover:bg-accent-500/10"
-                }`}
-              >
-                <span>{category.label}</span>
-                <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-200">
-                  {category.items.length}
-                </span>
-              </button>
-            )
-          })}
-        </div>
-
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
               Urun listesi
             </p>
             <p className="text-sm text-slate-400">Urun adlarini gor.</p>
           </div>
-          <div className="flex w-full max-w-md flex-col gap-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex flex-wrap items-center gap-1 rounded-full border border-white/10 bg-ink-900/60 p-1">
+              {categories.map((category) => (
+                <button
+                  key={category.key}
+                  type="button"
+                  onClick={() => setActiveCategoryKey(category.key)}
+                  className={`rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] transition ${
+                    activeCategoryKey === category.key
+                      ? "bg-accent-400 text-ink-900 shadow-glow"
+                      : "text-slate-300 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  {category.label}
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex w-full max-w-md flex-col gap-2 sm:ml-auto">
             <div className="flex h-11 w-full items-center gap-3 rounded border border-white/10 bg-ink-900 px-4 shadow-inner">
               <span className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Ara</span>
               <div className="flex flex-1 items-center gap-2">
