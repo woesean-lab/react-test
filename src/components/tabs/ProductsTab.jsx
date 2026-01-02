@@ -7,28 +7,22 @@ export default function ProductsTab({ panelClass = "" }) {
       id: "sample-1",
       name: "Cyber Drift DLC",
       note: "Hizli teslim paketi",
-      stockCount: 12,
-      deliveryTemplate: "Aninda teslim sablonu",
     },
     {
       id: "sample-2",
       name: "Galaxy Pass",
       note: "Deneme surumu",
-      stockCount: 4,
       deliveryMessage: "Teslimat 24 saat icinde.",
     },
     {
       id: "sample-3",
       name: "Indie Bundle",
       note: "Hediye kuponu",
-      stockCount: 8,
     },
     {
       id: "sample-4",
       name: "Support Plus",
       note: "Oncelikli destek",
-      stockCount: 3,
-      deliveryTemplate: "VIP teslimat",
       deliveryMessage: "Islem tamamlaninca bilgi verilir.",
     },
   ]
@@ -39,20 +33,14 @@ export default function ProductsTab({ panelClass = "" }) {
     return list.filter((product) => {
       const name = String(product?.name ?? "").toLowerCase()
       const note = String(product?.note ?? "").toLowerCase()
-      const deliveryTemplate = String(product?.deliveryTemplate ?? "").toLowerCase()
       const deliveryMessage = String(product?.deliveryMessage ?? "").toLowerCase()
       return (
         name.includes(normalizedQuery) ||
         note.includes(normalizedQuery) ||
-        deliveryTemplate.includes(normalizedQuery) ||
         deliveryMessage.includes(normalizedQuery)
       )
     })
   }, [list, normalizedQuery])
-  const getStockCount = (product) => {
-    const fallback = Number(product?.stockCount ?? 0)
-    return Number.isFinite(fallback) ? fallback : 0
-  }
 
   return (
     <div className="space-y-6">
@@ -86,7 +74,7 @@ export default function ProductsTab({ panelClass = "" }) {
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
               Urun listesi
             </p>
-            <p className="text-sm text-slate-400">Urun, stok ve teslimat detaylarini gor.</p>
+            <p className="text-sm text-slate-400">Urun detaylarini gor.</p>
           </div>
           <div className="flex w-full max-w-md flex-col gap-2">
             <div className="flex h-11 w-full items-center gap-3 rounded border border-white/10 bg-ink-900 px-4 shadow-inner">
@@ -109,7 +97,7 @@ export default function ProductsTab({ panelClass = "" }) {
                   type="text"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Urun, not veya stok kodu"
+                  placeholder="Urun veya not"
                   className="w-full min-w-0 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
                 />
               </div>
@@ -126,7 +114,6 @@ export default function ProductsTab({ panelClass = "" }) {
             filteredList.map((product, index) => {
               const name = String(product?.name ?? "").trim() || "Isimsiz urun"
               const note = String(product?.note ?? "").trim() || "Not eklenmedi."
-              const deliveryTemplate = String(product?.deliveryTemplate ?? "").trim()
               const deliveryMessage = String(product?.deliveryMessage ?? "").trim()
               const key = product?.id ?? `${name}-${index}`
               return (
@@ -141,33 +128,18 @@ export default function ProductsTab({ panelClass = "" }) {
                       </p>
                       <p className="mt-2 text-lg font-semibold text-white">{name}</p>
                     </div>
-                    <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-xs font-semibold text-slate-200">
-                      Stok: {getStockCount(product)}
-                    </span>
                   </div>
                   <p className="text-sm text-slate-300/80">{note}</p>
-                  <div className="grid gap-2 text-xs text-slate-400">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="uppercase tracking-[0.18em] text-slate-500">ID</span>
-                      <span className="text-slate-200">{product?.id || "N/A"}</span>
-                    </div>
-                    {deliveryTemplate && (
-                      <div className="flex items-center justify-between gap-3">
-                        <span className="uppercase tracking-[0.18em] text-slate-500">
-                          Teslimat sablonu
-                        </span>
-                        <span className="text-slate-200">{deliveryTemplate}</span>
-                      </div>
-                    )}
-                    {deliveryMessage && (
+                  {deliveryMessage && (
+                    <div className="grid gap-2 text-xs text-slate-400">
                       <div className="flex items-center justify-between gap-3">
                         <span className="uppercase tracking-[0.18em] text-slate-500">
                           Teslimat mesaji
                         </span>
                         <span className="text-slate-200">{deliveryMessage}</span>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
                 </div>
               )
             })
