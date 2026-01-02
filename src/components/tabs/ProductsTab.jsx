@@ -64,61 +64,59 @@ export default function ProductsTab({ panelClass = "" }) {
           </div>
         </div>
 
-        <div className="mt-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="flex flex-wrap items-center gap-2">
-            {categories.map((category) => (
-              <button
-                key={category.key}
-                type="button"
-                onClick={() => setActiveCategoryKey(category.key)}
-                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] transition ${
-                  activeCategoryKey === category.key
-                    ? "border-accent-300/70 bg-accent-500/20 text-accent-50 shadow-glow"
-                    : "border-white/10 bg-ink-900/40 text-slate-200 hover:border-white/20 hover:bg-white/5"
-                }`}
-              >
-                <span>{category.label}</span>
-                <span
-                  className={`rounded-full px-2 py-0.5 text-[9px] font-semibold ${
+        <div className="mt-3 grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,0.8fr)]">
+          <div className="flex h-11 items-center rounded-xl border border-white/10 bg-gradient-to-b from-ink-900/80 to-ink-900/40 px-2 shadow-inner">
+            <div className="flex w-full items-center gap-1 overflow-x-auto">
+              {categories.map((category) => (
+                <button
+                  key={category.key}
+                  type="button"
+                  onClick={() => setActiveCategoryKey(category.key)}
+                  className={`inline-flex items-center gap-2 rounded-lg px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.22em] transition ${
                     activeCategoryKey === category.key
-                      ? "bg-accent-400 text-ink-900"
-                      : "bg-white/10 text-slate-300"
+                      ? "bg-accent-400 text-ink-900 shadow-glow"
+                      : "text-slate-300 hover:bg-white/5 hover:text-white"
                   }`}
                 >
-                  {category.items.length}
-                </span>
-              </button>
-            ))}
-          </div>
-          <div className="flex w-full max-w-md">
-            <div className="flex h-10 w-full items-center gap-3 rounded-xl border border-white/10 bg-ink-900/50 px-3">
-              <span className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Ara</span>
-              <div className="flex flex-1 items-center gap-2">
-                <svg
-                  aria-hidden="true"
-                  viewBox="0 0 24 24"
-                  className="h-4 w-4 text-slate-500"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <circle cx="11" cy="11" r="7" />
-                  <line x1="16.5" y1="16.5" x2="21" y2="21" />
-                </svg>
-                <input
-                  type="text"
-                  value={query}
-                  onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Urun adi ara"
-                  className="w-full min-w-0 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
-                />
-              </div>
-              <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
-                {activeCategory?.label ?? "Items"}
-              </span>
+                  <span>{category.label}</span>
+                  <span
+                    className={`rounded-md px-2 py-0.5 text-[9px] font-semibold ${
+                      activeCategoryKey === category.key
+                        ? "bg-ink-900/20 text-ink-900"
+                        : "bg-white/10 text-slate-400"
+                    }`}
+                  >
+                    {category.items.length}
+                  </span>
+                </button>
+              ))}
             </div>
+          </div>
+          <div className="flex h-11 items-center rounded-xl border border-white/10 bg-gradient-to-b from-ink-900/80 to-ink-900/40 px-3 shadow-inner">
+            <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+              Ara
+            </span>
+            <span className="mx-3 h-5 w-px bg-white/10" aria-hidden="true" />
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              className="h-4 w-4 text-slate-500"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="11" cy="11" r="7" />
+              <line x1="16.5" y1="16.5" x2="21" y2="21" />
+            </svg>
+            <input
+              type="text"
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Urun adi ara"
+              className="w-full min-w-0 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
+            />
           </div>
         </div>
 
