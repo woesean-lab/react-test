@@ -64,9 +64,9 @@ export default function ProductsTab({ panelClass = "" }) {
           </div>
         </div>
 
-        <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex flex-wrap items-center gap-2">
-            <div className="flex flex-wrap items-center gap-1 rounded-full border border-white/10 bg-ink-900/60 p-1">
+        <div className="mt-3 flex items-center gap-3">
+          <div className="flex min-w-0 flex-1 items-center gap-2">
+            <div className="flex w-full items-center gap-1 overflow-x-auto rounded-full border border-white/10 bg-ink-900/60 p-1">
               {categories.map((category) => (
                 <button
                   key={category.key}
