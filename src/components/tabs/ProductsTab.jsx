@@ -61,6 +61,34 @@ export default function ProductsTab({
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
               Kategori: {activeCategory?.label ?? "Items"}
             </span>
+            {canRefresh && (
+              <button
+                type="button"
+                onClick={onRefresh}
+                disabled={isRefreshing}
+                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold uppercase tracking-[0.2em] transition ${
+                  isRefreshing
+                    ? "cursor-not-allowed border-white/10 bg-white/5 text-slate-500"
+                    : "border-white/10 bg-white/5 text-slate-200 hover:border-accent-300/60 hover:text-accent-100"
+                }`}
+                title="Urunleri yenile"
+              >
+                <svg
+                  viewBox="0 0 24 24"
+                  aria-hidden="true"
+                  className="h-3.5 w-3.5"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M4 12a8 8 0 1 0 2.35-5.65" />
+                  <path d="M4 4v4h4" />
+                </svg>
+                {isRefreshing ? "Yenileniyor" : "Yenile"}
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -120,18 +148,6 @@ export default function ProductsTab({
                 />
               </div>
             </div>
-            <button
-              type="button"
-              onClick={canRefresh ? onRefresh : undefined}
-              disabled={!canRefresh || isRefreshing}
-              className={`h-11 shrink-0 rounded border border-white/10 px-4 text-[11px] font-semibold uppercase tracking-[0.2em] transition ${
-                !canRefresh || isRefreshing
-                  ? "cursor-not-allowed bg-white/5 text-slate-500"
-                  : "bg-white/5 text-slate-200 hover:border-accent-300/60 hover:text-accent-100"
-              }`}
-            >
-              {isRefreshing ? "Yenileniyor" : "Yenile"}
-            </button>
           </div>
         </div>
 
