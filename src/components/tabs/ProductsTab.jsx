@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react"
 
-export default function ProductsTab({ panelClass = "", products = [] }) {
+export default function ProductsTab({ panelClass = "" }) {
   const [query, setQuery] = useState("")
   const sampleProducts = [
     {
@@ -32,8 +32,7 @@ export default function ProductsTab({ panelClass = "", products = [] }) {
       deliveryMessage: "Islem tamamlaninca bilgi verilir.",
     },
   ]
-  const list = Array.isArray(products) && products.length > 0 ? products : sampleProducts
-  const isSampleList = list === sampleProducts
+  const list = sampleProducts
   const normalizedQuery = query.trim().toLowerCase()
   const filteredList = useMemo(() => {
     if (!normalizedQuery) return list
@@ -42,22 +41,15 @@ export default function ProductsTab({ panelClass = "", products = [] }) {
       const note = String(product?.note ?? "").toLowerCase()
       const deliveryTemplate = String(product?.deliveryTemplate ?? "").toLowerCase()
       const deliveryMessage = String(product?.deliveryMessage ?? "").toLowerCase()
-      const stockMatch =
-        Array.isArray(product?.stocks) &&
-        product.stocks.some((stock) =>
-          String(stock?.code ?? "").toLowerCase().includes(normalizedQuery),
-        )
       return (
         name.includes(normalizedQuery) ||
         note.includes(normalizedQuery) ||
         deliveryTemplate.includes(normalizedQuery) ||
-        deliveryMessage.includes(normalizedQuery) ||
-        stockMatch
+        deliveryMessage.includes(normalizedQuery)
       )
     })
   }, [list, normalizedQuery])
   const getStockCount = (product) => {
-    if (Array.isArray(product?.stocks)) return product.stocks.length
     const fallback = Number(product?.stockCount ?? 0)
     return Number.isFinite(fallback) ? fallback : 0
   }
@@ -81,11 +73,9 @@ export default function ProductsTab({ panelClass = "", products = [] }) {
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
               Gosterilen: {filteredList.length}
             </span>
-            {isSampleList && (
-              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
-                Ornek veri
-              </span>
-            )}
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+              Ornek veri
+            </span>
           </div>
         </div>
       </header>

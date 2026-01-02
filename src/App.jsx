@@ -936,7 +936,7 @@ function App() {
 
         {activeTab === "products" && canViewStock && (
           <div className={getTabSlideClass("products")}>
-            <ProductsTab panelClass={panelClass} products={products} />
+            <ProductsTab panelClass={panelClass} />
           </div>
         )}
 
