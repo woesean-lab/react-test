@@ -1,37 +1,15 @@
 import { useMemo, useState } from "react"
+import productsData from "../../data/eldorado-products.json"
 
 export default function ProductsTab({ panelClass = "" }) {
   const [query, setQuery] = useState("")
-  const sampleProducts = [
-    {
-      id: "sample-1",
-      name: "Cyber Drift DLC",
-      note: "Hizli teslim paketi",
-    },
-    {
-      id: "sample-2",
-      name: "Galaxy Pass",
-      note: "Deneme surumu",
-    },
-    {
-      id: "sample-3",
-      name: "Indie Bundle",
-      note: "Hediye kuponu",
-    },
-    {
-      id: "sample-4",
-      name: "Support Plus",
-      note: "Oncelikli destek",
-    },
-  ]
-  const list = sampleProducts
+  const list = Array.isArray(productsData) ? productsData : []
   const normalizedQuery = query.trim().toLowerCase()
   const filteredList = useMemo(() => {
     if (!normalizedQuery) return list
     return list.filter((product) => {
       const name = String(product?.name ?? "").toLowerCase()
-      const note = String(product?.note ?? "").toLowerCase()
-      return name.includes(normalizedQuery) || note.includes(normalizedQuery)
+      return name.includes(normalizedQuery)
     })
   }, [list, normalizedQuery])
 
@@ -54,9 +32,6 @@ export default function ProductsTab({ panelClass = "" }) {
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
               Gosterilen: {filteredList.length}
             </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
-              Ornek veri
-            </span>
           </div>
         </div>
       </header>
@@ -67,7 +42,7 @@ export default function ProductsTab({ panelClass = "" }) {
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
               Urun listesi
             </p>
-            <p className="text-sm text-slate-400">Urun detaylarini gor.</p>
+            <p className="text-sm text-slate-400">Urun adlarini gor.</p>
           </div>
           <div className="flex w-full max-w-md flex-col gap-2">
             <div className="flex h-11 w-full items-center gap-3 rounded border border-white/10 bg-ink-900 px-4 shadow-inner">
@@ -90,7 +65,7 @@ export default function ProductsTab({ panelClass = "" }) {
                   type="text"
                   value={query}
                   onChange={(event) => setQuery(event.target.value)}
-                  placeholder="Urun veya not"
+                  placeholder="Urun adi ara"
                   className="w-full min-w-0 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
                 />
               </div>
@@ -106,7 +81,6 @@ export default function ProductsTab({ panelClass = "" }) {
           ) : (
             filteredList.map((product, index) => {
               const name = String(product?.name ?? "").trim() || "Isimsiz urun"
-              const note = String(product?.note ?? "").trim() || "Not eklenmedi."
               const key = product?.id ?? `${name}-${index}`
               return (
                 <div
@@ -121,7 +95,6 @@ export default function ProductsTab({ panelClass = "" }) {
                       <p className="mt-2 text-lg font-semibold text-white">{name}</p>
                     </div>
                   </div>
-                  <p className="text-sm text-slate-300/80">{note}</p>
                 </div>
               )
             })
