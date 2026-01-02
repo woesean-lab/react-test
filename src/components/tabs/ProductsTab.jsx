@@ -82,8 +82,8 @@ export default function ProductsTab({ panelClass = "" }) {
                   <span
                     className={`rounded-md px-2 py-0.5 text-[9px] font-semibold ${
                       activeCategoryKey === category.key
-                        ? "bg-ink-900/20 text-ink-900"
-                        : "bg-white/10 text-slate-400"
+                        ? "bg-ink-900/80 text-accent-100"
+                        : "bg-ink-950/60 text-slate-300"
                     }`}
                   >
                     {category.items.length}
@@ -92,31 +92,30 @@ export default function ProductsTab({ panelClass = "" }) {
               ))}
             </div>
           </div>
-          <div className="flex h-11 items-center rounded-xl border border-white/10 bg-ink-900/60 px-3 shadow-inner">
-            <span className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-400">
-              Ara
-            </span>
-            <span className="mx-3 h-5 w-px bg-white/10" aria-hidden="true" />
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              className="h-4 w-4 text-slate-500"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="7" />
-              <line x1="16.5" y1="16.5" x2="21" y2="21" />
-            </svg>
-            <input
-              type="text"
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Urun adi ara"
-              className="w-full min-w-0 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
-            />
+          <div className="flex h-11 w-full items-center gap-3 rounded border border-white/10 bg-ink-900 px-4 shadow-inner">
+            <span className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Ara</span>
+            <div className="flex flex-1 items-center gap-2">
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className="h-4 w-4 text-slate-500"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="11" cy="11" r="7" />
+                <line x1="16.5" y1="16.5" x2="21" y2="21" />
+              </svg>
+              <input
+                type="text"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Urun adi ara"
+                className="w-full min-w-0 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
+              />
+            </div>
           </div>
         </div>
 
