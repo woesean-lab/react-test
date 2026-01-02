@@ -2126,21 +2126,27 @@ export default function useAppData() {
   )
 
   const refreshEldoradoCatalog = useCallback(async () => {
-    if (isEldoradoRefreshing) return
+    if (isEldoradoRefreshing) {
+      toast.error("Yenileme islemi zaten calisiyor.")
+      return
+    }
     setIsEldoradoRefreshing(true)
+    const toastId = toast.loading("Urunler taraniyor...")
     try {
       const res = await apiFetch("/api/eldorado/refresh", { method: "POST" })
       if (!res.ok) {
         if (res.status === 409) {
-          toast.error("Yenileme islemi zaten calisiyor.")
+          toast.error("Yenileme islemi zaten calisiyor.", { id: toastId })
           return
         }
         throw new Error("refresh_failed")
       }
       const data = await res.json()
+      toast.loading("Urunler ekleniyor...", { id: toastId })
       setEldoradoCatalog(normalizeEldoradoCatalog(data?.catalog ?? data))
+      toast.success("Urunler guncellendi", { id: toastId })
     } catch (error) {
-      toast.error("Urunler yenilenemedi (API/Server kontrol edin).")
+      toast.error("Urunler yenilenemedi (API/Server kontrol edin).", { id: toastId })
     } finally {
       setIsEldoradoRefreshing(false)
     }

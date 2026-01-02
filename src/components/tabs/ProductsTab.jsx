@@ -98,8 +98,10 @@ export default function ProductsTab({
                 type="button"
                 onClick={onRefresh}
                 disabled={isRefreshing}
-                className={`ml-2 inline-flex h-7 w-7 items-center justify-center text-slate-400 transition ${
-                  isRefreshing ? "cursor-not-allowed text-slate-600" : "hover:text-white"
+                className={`ml-2 inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate-400 transition ${
+                  isRefreshing
+                    ? "cursor-not-allowed text-slate-600"
+                    : "hover:bg-accent-400 hover:text-ink-900 focus-visible:bg-accent-400 focus-visible:text-ink-900"
                 }`}
                 title="Urunleri yenile"
                 aria-label="Urunleri yenile"
