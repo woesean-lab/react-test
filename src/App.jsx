@@ -175,6 +175,10 @@ function App() {
     handleListDeleteColumn,
     isStockTabLoading,
     stockSummary,
+    eldoradoCatalog,
+    isEldoradoLoading,
+    isEldoradoRefreshing,
+    refreshEldoradoCatalog,
     products,
     productSearch,
     setProductSearch,
@@ -936,7 +940,13 @@ function App() {
 
         {activeTab === "products" && canViewStock && (
           <div className={getTabSlideClass("products")}>
-            <ProductsTab panelClass={panelClass} />
+            <ProductsTab
+              panelClass={panelClass}
+              catalog={eldoradoCatalog}
+              isLoading={isEldoradoLoading}
+              isRefreshing={isEldoradoRefreshing}
+              onRefresh={refreshEldoradoCatalog}
+            />
           </div>
         )}
 

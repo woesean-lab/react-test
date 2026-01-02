@@ -148,6 +148,15 @@ export default function useAppData() {
   const [deletingStocks, setDeletingStocks] = useState({})
   const [usingStocks, setUsingStocks] = useState({})
   const [highlightStocks, setHighlightStocks] = useState({})
+  const [eldoradoCatalog, setEldoradoCatalog] = useState({
+    items: [],
+    topups: [],
+    currency: [],
+    accounts: [],
+    giftCards: [],
+  })
+  const [isEldoradoLoading, setIsEldoradoLoading] = useState(true)
+  const [isEldoradoRefreshing, setIsEldoradoRefreshing] = useState(false)
   const stockModalTextareaRef = useRef(null)
   const stockModalLineRef = useRef(null)
   const isStockTextSelectingRef = useRef(false)
@@ -2089,6 +2098,72 @@ export default function useAppData() {
     return () => controller.abort()
   }, [activeTab, isAuthed, loadProducts])
 
+  const normalizeEldoradoCatalog = (value) => ({
+    items: Array.isArray(value?.items) ? value.items : [],
+    topups: Array.isArray(value?.topups) ? value.topups : [],
+    currency: Array.isArray(value?.currency) ? value.currency : [],
+    accounts: Array.isArray(value?.accounts) ? value.accounts : [],
+    giftCards: Array.isArray(value?.giftCards) ? value.giftCards : [],
+  })
+
+  const loadEldoradoCatalog = useCallback(
+    async (signal) => {
+      setIsEldoradoLoading(true)
+      try {
+        const res = await apiFetch("/api/eldorado/products", { signal })
+        if (!res.ok) throw new Error("api_error")
+        const data = await res.json()
+        setEldoradoCatalog(normalizeEldoradoCatalog(data?.catalog ?? data))
+      } catch (error) {
+        if (error?.name === "AbortError") return
+        setEldoradoCatalog(normalizeEldoradoCatalog(null))
+        toast.error("Eldorado urunleri alinamadi (API/Server kontrol edin).")
+      } finally {
+        setIsEldoradoLoading(false)
+      }
+    },
+    [apiFetch],
+  )
+
+  const refreshEldoradoCatalog = useCallback(async () => {
+    if (isEldoradoRefreshing) return
+    setIsEldoradoRefreshing(true)
+    try {
+      const res = await apiFetch("/api/eldorado/refresh", { method: "POST" })
+      if (!res.ok) {
+        if (res.status === 409) {
+          toast.error("Yenileme islemi zaten calisiyor.")
+          return
+        }
+        throw new Error("refresh_failed")
+      }
+      const data = await res.json()
+      setEldoradoCatalog(normalizeEldoradoCatalog(data?.catalog ?? data))
+    } catch (error) {
+      toast.error("Urunler yenilenemedi (API/Server kontrol edin).")
+    } finally {
+      setIsEldoradoRefreshing(false)
+    }
+  }, [apiFetch, isEldoradoRefreshing])
+
+  useEffect(() => {
+    if (!isAuthed || !permissions.includes(PERMISSIONS.stockView)) {
+      setEldoradoCatalog(normalizeEldoradoCatalog(null))
+      setIsEldoradoLoading(false)
+      return
+    }
+    const controller = new AbortController()
+    loadEldoradoCatalog(controller.signal)
+    return () => controller.abort()
+  }, [isAuthed, loadEldoradoCatalog, permissions])
+
+  useEffect(() => {
+    if (!isAuthed || activeTab !== "products" || !permissions.includes(PERMISSIONS.stockView)) return
+    const controller = new AbortController()
+    loadEldoradoCatalog(controller.signal)
+    return () => controller.abort()
+  }, [activeTab, isAuthed, loadEldoradoCatalog, permissions])
+
   useEffect(() => {
     const timer = window.setTimeout(() => setDelayDone(true), 1200)
     return () => window.clearTimeout(timer)
@@ -3835,6 +3910,10 @@ export default function useAppData() {
     handleListDeleteColumn,
     isStockTabLoading,
     stockSummary,
+    eldoradoCatalog,
+    isEldoradoLoading,
+    isEldoradoRefreshing,
+    refreshEldoradoCatalog,
     products,
     productSearch,
     setProductSearch,

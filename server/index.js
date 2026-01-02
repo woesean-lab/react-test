@@ -1,4 +1,6 @@
 import crypto from "node:crypto"
+import { spawn } from "node:child_process"
+import fs from "node:fs/promises"
 import path from "node:path"
 import { fileURLToPath } from "node:url"
 
@@ -11,6 +13,24 @@ const prisma = new PrismaClient()
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 const distDir = path.resolve(__dirname, "..", "dist")
+const eldoradoItemsUrl =
+  process.env.ELDORADO_ITEMS_URL ??
+  "https://www.eldorado.gg/users/PulcipStore?tab=Offers&category=CustomItem&pageIndex=1"
+const eldoradoTopupsUrl =
+  process.env.ELDORADO_TOPUPS_URL ??
+  "https://www.eldorado.gg/users/PulcipStore?tab=Offers&category=TopUp&pageIndex=1"
+const eldoradoItemsPagesRaw = Number(process.env.ELDORADO_ITEMS_PAGES ?? 15)
+const eldoradoTopupsPagesRaw = Number(process.env.ELDORADO_TOPUPS_PAGES ?? 1)
+const eldoradoItemsPages =
+  Number.isFinite(eldoradoItemsPagesRaw) && eldoradoItemsPagesRaw > 0 ? eldoradoItemsPagesRaw : 15
+const eldoradoTopupsPages =
+  Number.isFinite(eldoradoTopupsPagesRaw) && eldoradoTopupsPagesRaw > 0 ? eldoradoTopupsPagesRaw : 1
+const eldoradoTitleSelector = process.env.ELDORADO_TITLE_SELECTOR ?? ".offer-title"
+const eldoradoDataDir = path.resolve(__dirname, "..", "src", "data")
+const eldoradoItemsPath = path.join(eldoradoDataDir, "eldorado-products.json")
+const eldoradoTopupsPath = path.join(eldoradoDataDir, "eldorado-topups.json")
+const eldoradoScriptPath = path.resolve(__dirname, "..", "scripts", "eldorado-scrape.mjs")
+let eldoradoRefreshInFlight = false
 
 const port = Number(process.env.PORT ?? 3000)
 const adminUsername = String(process.env.ADMIN_USERNAME ?? "admin").trim() || "admin"
@@ -73,6 +93,66 @@ const normalizePermissions = (value) => {
   return rawList
     .map((perm) => String(perm ?? "").trim())
     .filter((perm) => perm && allowedPermissions.has(perm))
+}
+
+const readJsonFile = async (filePath) => {
+  try {
+    const raw = await fs.readFile(filePath, "utf8")
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : []
+  } catch (error) {
+    if (error?.code !== "ENOENT") {
+      console.warn("Failed to read eldorado data", error)
+    }
+    return []
+  }
+}
+
+const normalizeEldoradoCatalog = (value) => ({
+  items: Array.isArray(value?.items) ? value.items : [],
+  topups: Array.isArray(value?.topups) ? value.topups : [],
+  currency: Array.isArray(value?.currency) ? value.currency : [],
+  accounts: Array.isArray(value?.accounts) ? value.accounts : [],
+  giftCards: Array.isArray(value?.giftCards) ? value.giftCards : [],
+})
+
+const loadEldoradoCatalog = async () => {
+  await fs.mkdir(eldoradoDataDir, { recursive: true })
+  const [items, topups] = await Promise.all([
+    readJsonFile(eldoradoItemsPath),
+    readJsonFile(eldoradoTopupsPath),
+  ])
+  return normalizeEldoradoCatalog({
+    items,
+    topups,
+    currency: [],
+    accounts: [],
+    giftCards: [],
+  })
+}
+
+const runEldoradoScrape = ({ url, pages, outputPath }) => {
+  return new Promise((resolve, reject) => {
+    const env = {
+      ...process.env,
+      ELDORADO_URL: url,
+      ELDORADO_PAGES: String(pages),
+      ELDORADO_OUTPUT: outputPath,
+      ELDORADO_TITLE_SELECTOR: eldoradoTitleSelector,
+    }
+    const child = spawn(process.execPath, [eldoradoScriptPath], { env })
+    let stderr = ""
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk.toString()
+    })
+    child.on("close", (code) => {
+      if (code === 0) {
+        resolve()
+      } else {
+        reject(new Error(stderr || "eldorado scrape failed"))
+      }
+    })
+  })
 }
 
 const issueAuthToken = (userId) => {
@@ -1486,6 +1566,42 @@ app.post("/api/stocks/bulk-delete", async (req, res) => {
 
   const result = await prisma.stock.deleteMany({ where: { id: { in: ids } } })
   res.json({ deleted: result.count })
+})
+
+app.get("/api/eldorado/products", async (_req, res, next) => {
+  try {
+    const catalog = await loadEldoradoCatalog()
+    res.json({ catalog })
+  } catch (error) {
+    next(error)
+  }
+})
+
+app.post("/api/eldorado/refresh", async (_req, res, next) => {
+  if (eldoradoRefreshInFlight) {
+    res.status(409).json({ error: "refresh_in_progress" })
+    return
+  }
+  eldoradoRefreshInFlight = true
+  try {
+    await runEldoradoScrape({
+      url: eldoradoItemsUrl,
+      pages: eldoradoItemsPages,
+      outputPath: eldoradoItemsPath,
+    })
+    await runEldoradoScrape({
+      url: eldoradoTopupsUrl,
+      pages: eldoradoTopupsPages,
+      outputPath: eldoradoTopupsPath,
+    })
+    const catalog = await loadEldoradoCatalog()
+    res.json({ ok: true, catalog })
+  } catch (error) {
+    console.error("Eldorado refresh failed", error)
+    res.status(500).json({ error: "refresh_failed" })
+  } finally {
+    eldoradoRefreshInFlight = false
+  }
 })
 
 const normalizeListCellFormat = (format) => {
