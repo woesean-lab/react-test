@@ -1,9 +1,24 @@
 import { useMemo, useState } from "react"
-import productsData from "../../data/eldorado-products.json"
+import itemsData from "../../data/eldorado-products.json"
+import topupsData from "../../data/eldorado-topups.json"
 
 export default function ProductsTab({ panelClass = "" }) {
   const [query, setQuery] = useState("")
-  const list = Array.isArray(productsData) ? productsData : []
+  const items = Array.isArray(itemsData) ? itemsData : []
+  const topups = Array.isArray(topupsData) ? topupsData : []
+  const categories = useMemo(
+    () => [
+      { key: "currency", label: "Currency", items: [] },
+      { key: "accounts", label: "Accounts", items: [] },
+      { key: "items", label: "Items", items },
+      { key: "topups", label: "Top Ups", items: topups },
+      { key: "gift-cards", label: "Gift Cards", items: [] },
+    ],
+    [items, topups],
+  )
+  const [activeCategoryKey, setActiveCategoryKey] = useState("items")
+  const activeCategory = categories.find((category) => category.key === activeCategoryKey) ?? categories[0]
+  const list = activeCategory?.items ?? []
   const normalizedQuery = query.trim().toLowerCase()
   const filteredList = useMemo(() => {
     if (!normalizedQuery) return list
@@ -32,11 +47,37 @@ export default function ProductsTab({ panelClass = "" }) {
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
               Gosterilen: {filteredList.length}
             </span>
+            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+              Kategori: {activeCategory?.label ?? "Items"}
+            </span>
           </div>
         </div>
       </header>
 
       <div className={`${panelClass} bg-ink-900/60`}>
+        <div className="flex flex-wrap gap-2">
+          {categories.map((category) => {
+            const isActive = category.key === activeCategoryKey
+            return (
+              <button
+                key={category.key}
+                type="button"
+                onClick={() => setActiveCategoryKey(category.key)}
+                className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                  isActive
+                    ? "border-accent-300/70 bg-accent-500/20 text-accent-50 shadow-glow"
+                    : "border-white/10 bg-white/5 text-slate-200 hover:border-accent-300/60 hover:bg-accent-500/10"
+                }`}
+              >
+                <span>{category.label}</span>
+                <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] text-slate-200">
+                  {category.items.length}
+                </span>
+              </button>
+            )
+          })}
+        </div>
+
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
