@@ -9,6 +9,56 @@ const TOTAL_PAGES = Number(process.env.ELDORADO_PAGES ?? 15)
 const OUTPUT_PATH = process.env.ELDORADO_OUTPUT ?? "src/data/eldorado-products.json"
 const TITLE_SELECTOR = process.env.ELDORADO_TITLE_SELECTOR ?? ".offer-title"
 
+const normalizeHref = (href) => {
+  if (!href) return ""
+  const raw = String(href).trim()
+  if (!raw) return ""
+  const cleaned = raw.split("#")[0].split("?")[0]
+  if (!cleaned) return ""
+  if (cleaned.startsWith("http://") || cleaned.startsWith("https://")) {
+    try {
+      return new URL(cleaned).pathname
+    } catch (error) {
+      return cleaned
+    }
+  }
+  return cleaned
+}
+
+const extractIdFromHref = (href) => {
+  const path = normalizeHref(href)
+  const parts = path.split("/").filter(Boolean)
+  return parts.length > 0 ? parts[parts.length - 1] : ""
+}
+
+const extractCategoryFromHref = (href) => {
+  const path = normalizeHref(href)
+  const parts = path.split("/").filter(Boolean)
+  return parts.length > 0 ? parts[0] : ""
+}
+
+const slugifyName = (value) => {
+  const slug = String(value ?? "")
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "")
+  return slug ? `name-${slug}` : ""
+}
+
+const readExistingProducts = async () => {
+  try {
+    const raw = await fs.readFile(OUTPUT_PATH, "utf8")
+    const parsed = JSON.parse(raw)
+    return Array.isArray(parsed) ? parsed : []
+  } catch (error) {
+    if (error?.code !== "ENOENT") {
+      console.warn("[eldorado] failed to read existing data:", error)
+    }
+    return []
+  }
+}
+
 const buildPageUrl = (url, pageIndex) => {
   const nextUrl = new URL(url)
   nextUrl.searchParams.set("pageIndex", String(pageIndex))
@@ -20,9 +70,26 @@ const run = async () => {
     throw new Error("ELDORADO_PAGES must be a positive number")
   }
 
+  const existing = (await readExistingProducts())
+    .map((item) => ({
+      id: String(item?.id ?? "").trim(),
+      name: String(item?.name ?? "").trim(),
+      href: normalizeHref(item?.href ?? ""),
+      category: String(item?.category ?? "").trim(),
+    }))
+    .filter((item) => item.id || item.name)
+  const existingById = new Map()
+  const legacyByName = new Map()
+  existing.forEach((item) => {
+    if (item.id) existingById.set(item.id, item)
+    if (!item.href && item.name) {
+      legacyByName.set(item.name.toLowerCase(), item)
+    }
+  })
+
   const browser = await chromium.launch({ headless: true })
   const page = await browser.newPage()
-  const names = []
+  const scraped = []
 
   for (let pageIndex = 1; pageIndex <= TOTAL_PAGES; pageIndex += 1) {
     const pageUrl = buildPageUrl(START_URL, pageIndex)
@@ -31,22 +98,66 @@ const run = async () => {
     await page.waitForSelector(TITLE_SELECTOR, { timeout: 30000 })
     await page.waitForTimeout(300)
 
-    const pageNames = await page.$$eval(TITLE_SELECTOR, (nodes) =>
+    const pageItems = await page.$$eval(TITLE_SELECTOR, (nodes) =>
       nodes
-        .map((node) => node.textContent?.trim())
-        .filter((value) => Boolean(value)),
+        .map((node) => {
+          const name = node.textContent?.trim() ?? ""
+          const direct = node.closest("a[href]")
+          const parent = node.parentElement
+          const parentLink = parent ? parent.querySelector("a[href]") : null
+          const grandLink = parent?.parentElement ? parent.parentElement.querySelector("a[href]") : null
+          const link = direct || parentLink || grandLink
+          const href = link?.getAttribute("href") ?? ""
+          return { name, href }
+        })
+        .filter((item) => item.name),
     )
-    console.log(`[eldorado] found ${pageNames.length} items`)
-    names.push(...pageNames)
+    console.log(`[eldorado] found ${pageItems.length} items`)
+    scraped.push(...pageItems)
   }
 
   await browser.close()
 
+  const merged = []
+  const usedExisting = new Set()
+  const seenIds = new Set()
+
+  scraped.forEach((item) => {
+    const name = String(item?.name ?? "").trim()
+    const href = normalizeHref(item?.href ?? "")
+    const derivedId = extractIdFromHref(href) || slugifyName(name)
+    if (!derivedId) return
+    if (seenIds.has(derivedId)) return
+    const category = extractCategoryFromHref(href)
+    let existingItem = existingById.get(derivedId)
+    if (!existingItem && name) {
+      existingItem = legacyByName.get(name.toLowerCase())
+    }
+    if (existingItem) {
+      existingItem.id = derivedId
+      existingItem.name = name
+      existingItem.href = href
+      existingItem.category = category
+      usedExisting.add(existingItem)
+      merged.push(existingItem)
+    } else {
+      merged.push({ id: derivedId, name, href, category })
+    }
+    seenIds.add(derivedId)
+  })
+
+  existing.forEach((item) => {
+    if (usedExisting.has(item)) return
+    if (item.id && seenIds.has(item.id)) return
+    const isLegacy = !item.href && String(item.id ?? "").startsWith("eld-")
+    if (isLegacy) return
+    merged.push(item)
+  })
+
   const outputDir = path.dirname(OUTPUT_PATH)
   await fs.mkdir(outputDir, { recursive: true })
-  const payload = names.map((name, index) => ({ id: `eld-${index + 1}`, name }))
-  await fs.writeFile(OUTPUT_PATH, `${JSON.stringify(payload, null, 2)}\n`, "utf8")
-  console.log(`[eldorado] saved ${payload.length} items to ${OUTPUT_PATH}`)
+  await fs.writeFile(OUTPUT_PATH, `${JSON.stringify(merged, null, 2)}\n`, "utf8")
+  console.log(`[eldorado] saved ${merged.length} items to ${OUTPUT_PATH}`)
 }
 
 run().catch((error) => {

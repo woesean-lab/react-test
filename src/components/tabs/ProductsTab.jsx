@@ -4,6 +4,13 @@ function SkeletonBlock({ className = "" }) {
   return <div className={`animate-pulse rounded-lg bg-white/10 ${className}`} />
 }
 
+const formatCategoryLabel = (value) =>
+  value
+    .split("-")
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(" ")
+
 function ProductsSkeleton({ panelClass }) {
   return (
     <div className="space-y-6">
@@ -50,17 +57,24 @@ export default function ProductsTab({
   const [query, setQuery] = useState("")
   const items = Array.isArray(catalog?.items) ? catalog.items : []
   const topups = Array.isArray(catalog?.topups) ? catalog.topups : []
-  const categories = useMemo(
-    () => [
-      { key: "currency", label: "Currency", items: [] },
-      { key: "accounts", label: "Accounts", items: [] },
-      { key: "items", label: "Items", items },
-      { key: "topups", label: "Top Ups", items: topups },
-      { key: "gift-cards", label: "Gift Cards", items: [] },
-    ],
-    [items, topups],
-  )
-  const [activeCategoryKey, setActiveCategoryKey] = useState("items")
+  const allProducts = useMemo(() => [...items, ...topups], [items, topups])
+  const categories = useMemo(() => {
+    const bucket = new Map()
+    allProducts.forEach((product) => {
+      const rawCategory = String(product?.category ?? "").trim().toLowerCase()
+      const key = rawCategory || "diger"
+      if (!bucket.has(key)) bucket.set(key, [])
+      bucket.get(key).push(product)
+    })
+    const list = Array.from(bucket.entries()).map(([key, bucketItems]) => ({
+      key,
+      label: key === "diger" ? "Diger" : formatCategoryLabel(key),
+      items: bucketItems,
+    }))
+    list.sort((a, b) => a.label.localeCompare(b.label, "tr"))
+    return [{ key: "all", label: "Tumu", items: allProducts }, ...list]
+  }, [allProducts])
+  const [activeCategoryKey, setActiveCategoryKey] = useState("all")
   const activeCategory = categories.find((category) => category.key === activeCategoryKey) ?? categories[0]
   const canRefresh = typeof onRefresh === "function"
   const list = activeCategory?.items ?? []
