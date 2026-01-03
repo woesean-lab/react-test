@@ -80,28 +80,6 @@ export default function ProductsTab({
     const start = (page - 1) * pageSize
     return filteredList.slice(start, start + pageSize)
   }, [filteredList, page, pageSize])
-  const paginationItems = useMemo(() => {
-    if (totalPages <= 7) {
-      return Array.from({ length: totalPages }, (_, index) => ({
-        type: "page",
-        value: index + 1,
-      }))
-    }
-    const rawPages = [1, totalPages, page - 1, page, page + 1]
-    const uniquePages = Array.from(new Set(rawPages.filter((value) => value >= 1 && value <= totalPages))).sort(
-      (a, b) => a - b,
-    )
-    const items = []
-    let prev = null
-    uniquePages.forEach((value) => {
-      if (prev && value - prev > 1) {
-        items.push({ type: "ellipsis", value: `gap-${prev}` })
-      }
-      items.push({ type: "page", value })
-      prev = value
-    })
-    return items
-  }, [page, totalPages])
   const pageStart = totalItems === 0 ? 0 : (page - 1) * pageSize + 1
   const pageEnd = totalItems === 0 ? 0 : Math.min(totalItems, page * pageSize)
 
@@ -272,74 +250,55 @@ export default function ProductsTab({
             )}
           </div>
           {filteredList.length > 0 && totalPages > 1 && (
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 text-xs text-slate-400 shadow-inner">
-              <div className="flex flex-wrap items-center gap-3">
-                <span className="rounded-lg border border-white/10 bg-ink-900/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-                  Sayfa
-                </span>
-                <span className="text-sm text-slate-200">
-                  {pageStart}-{pageEnd} / {totalItems}
-                </span>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => setPage(1)}
-                  disabled={page === 1}
-                  className="rounded-xl border border-white/10 bg-ink-900/80 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  Ilk
-                </button>
+            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+              <span className="text-slate-400">
+                {pageStart}-{pageEnd} / {totalItems}
+              </span>
+              <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={() => setPage((current) => Math.max(1, current - 1))}
                   disabled={page === 1}
-                  className="rounded-xl border border-white/10 bg-ink-900/80 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-slate-400 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                  aria-label="Onceki sayfa"
+                  title="Onceki sayfa"
                 >
-                  Geri
+                  <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="m15 18-6-6 6-6" />
+                  </svg>
                 </button>
-                <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-ink-900/80 p-1">
-                  {paginationItems.map((item) => {
-                    if (item.type === "ellipsis") {
-                      return (
-                        <span key={item.value} className="px-2 text-xs text-slate-500">
-                          ...
-                        </span>
-                      )
-                    }
-                    const isActive = item.value === page
-                    return (
-                      <button
-                        key={`page-${item.value}`}
-                        type="button"
-                        onClick={() => setPage(item.value)}
-                        aria-current={isActive ? "page" : undefined}
-                        className={`min-w-[32px] rounded-lg px-2 py-1 text-xs font-semibold transition ${
-                          isActive
-                            ? "bg-accent-400 text-ink-900 shadow-glow"
-                            : "text-slate-200 hover:bg-white/10"
-                        }`}
-                      >
-                        {item.value}
-                      </button>
-                    )
-                  })}
-                </div>
+                <span className="px-2 text-[11px] uppercase tracking-[0.2em] text-slate-400">
+                  {page} / {totalPages}
+                </span>
                 <button
                   type="button"
                   onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
                   disabled={page === totalPages}
-                  className="rounded-xl border border-white/10 bg-ink-900/80 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-slate-400 transition hover:border-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-40"
+                  aria-label="Sonraki sayfa"
+                  title="Sonraki sayfa"
                 >
-                  Ileri
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPage(totalPages)}
-                  disabled={page === totalPages}
-                  className="rounded-xl border border-white/10 bg-ink-900/80 px-3 py-1.5 text-xs font-semibold text-slate-200 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  Son
+                  <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="m9 18 6-6-6-6" />
+                  </svg>
                 </button>
               </div>
             </div>
