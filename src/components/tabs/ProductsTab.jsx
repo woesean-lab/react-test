@@ -174,7 +174,7 @@ export default function ProductsTab({
                       <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
                         Urun
                       </p>
-                      <p className="mt-2 text-lg font-semibold text-white">{name}</p>
+                      <p className="mt-2 text-base font-semibold text-white">{name}</p>
                     </div>
                   </div>
                 </div>
