@@ -9,6 +9,7 @@ const isLinux = os.platform() === "linux"
 const shouldSkip =
   process.env.SKIP_PLAYWRIGHT_INSTALL === "1" ||
   process.env.PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD === "1"
+const shouldInstallDeps = process.env.SKIP_PLAYWRIGHT_DEPS !== "1"
 
 if (!isLinux || shouldSkip) {
   process.exit(0)
@@ -53,7 +54,6 @@ if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
 
 const browsersPath = process.env.PLAYWRIGHT_BROWSERS_PATH
 const depsMarkerPath = path.join(browsersPath, ".deps-installed")
-const shouldInstallDeps = process.env.PLAYWRIGHT_WITH_DEPS === "1"
 
 const runPlaywright = (args) =>
   new Promise((resolve, reject) => {
