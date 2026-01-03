@@ -141,15 +141,23 @@ const runEldoradoScrape = ({ url, pages, outputPath }) => {
       ELDORADO_TITLE_SELECTOR: eldoradoTitleSelector,
     }
     const child = spawn(process.execPath, [eldoradoScriptPath], { env })
+    let stdout = ""
     let stderr = ""
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk.toString()
+    })
     child.stderr.on("data", (chunk) => {
       stderr += chunk.toString()
+    })
+    child.on("error", (error) => {
+      reject(error)
     })
     child.on("close", (code) => {
       if (code === 0) {
         resolve()
       } else {
-        reject(new Error(stderr || "eldorado scrape failed"))
+        const detail = stderr || stdout || `eldorado scrape failed with code ${code}`
+        reject(new Error(detail.trim()))
       }
     })
   })
@@ -1597,8 +1605,9 @@ app.post("/api/eldorado/refresh", async (_req, res, next) => {
     const catalog = await loadEldoradoCatalog()
     res.json({ ok: true, catalog })
   } catch (error) {
+    const message = String(error?.message || "refresh_failed").trim()
     console.error("Eldorado refresh failed", error)
-    res.status(500).json({ error: "refresh_failed" })
+    res.status(500).json({ error: "refresh_failed", message })
   } finally {
     eldoradoRefreshInFlight = false
   }
