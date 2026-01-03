@@ -75,10 +75,35 @@ export default function ProductsTab({
     })
   }, [list, normalizedQuery])
   const totalPages = Math.max(1, Math.ceil(filteredList.length / pageSize))
+  const totalItems = filteredList.length
   const paginatedList = useMemo(() => {
     const start = (page - 1) * pageSize
     return filteredList.slice(start, start + pageSize)
   }, [filteredList, page, pageSize])
+  const paginationItems = useMemo(() => {
+    if (totalPages <= 7) {
+      return Array.from({ length: totalPages }, (_, index) => ({
+        type: "page",
+        value: index + 1,
+      }))
+    }
+    const rawPages = [1, totalPages, page - 1, page, page + 1]
+    const uniquePages = Array.from(new Set(rawPages.filter((value) => value >= 1 && value <= totalPages))).sort(
+      (a, b) => a - b,
+    )
+    const items = []
+    let prev = null
+    uniquePages.forEach((value) => {
+      if (prev && value - prev > 1) {
+        items.push({ type: "ellipsis", value: `gap-${prev}` })
+      }
+      items.push({ type: "page", value })
+      prev = value
+    })
+    return items
+  }, [page, totalPages])
+  const pageStart = totalItems === 0 ? 0 : (page - 1) * pageSize + 1
+  const pageEnd = totalItems === 0 ? 0 : Math.min(totalItems, page * pageSize)
 
   useEffect(() => {
     if (!categories.some((category) => category.key === activeCategoryKey)) {
@@ -247,9 +272,16 @@ export default function ProductsTab({
             )}
           </div>
           {filteredList.length > 0 && totalPages > 1 && (
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-ink-900/60 px-4 py-3 text-xs text-slate-400">
-              <span>Sayfa {page} / {totalPages}</span>
-              <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 text-xs text-slate-400 shadow-inner">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="rounded-lg border border-white/10 bg-ink-900/80 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                  Sayfa
+                </span>
+                <span className="text-sm text-slate-200">
+                  {pageStart}-{pageEnd} / {totalItems}
+                </span>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
                   onClick={() => setPage(1)}
@@ -266,6 +298,33 @@ export default function ProductsTab({
                 >
                   Geri
                 </button>
+                <div className="flex items-center gap-1 rounded-xl border border-white/10 bg-ink-900/80 p-1">
+                  {paginationItems.map((item) => {
+                    if (item.type === "ellipsis") {
+                      return (
+                        <span key={item.value} className="px-2 text-xs text-slate-500">
+                          ...
+                        </span>
+                      )
+                    }
+                    const isActive = item.value === page
+                    return (
+                      <button
+                        key={`page-${item.value}`}
+                        type="button"
+                        onClick={() => setPage(item.value)}
+                        aria-current={isActive ? "page" : undefined}
+                        className={`min-w-[32px] rounded-lg px-2 py-1 text-xs font-semibold transition ${
+                          isActive
+                            ? "bg-accent-400 text-ink-900 shadow-glow"
+                            : "text-slate-200 hover:bg-white/10"
+                        }`}
+                      >
+                        {item.value}
+                      </button>
+                    )
+                  })}
+                </div>
                 <button
                   type="button"
                   onClick={() => setPage((current) => Math.min(totalPages, current + 1))}
