@@ -1,5 +1,45 @@
 import { useEffect, useMemo, useState } from "react"
 
+function SkeletonBlock({ className = "" }) {
+  return <div className={`animate-pulse rounded-lg bg-white/10 ${className}`} />
+}
+
+function ProductsSkeleton({ panelClass }) {
+  return (
+    <div className="space-y-6">
+      <div className="grid gap-6 lg:grid-cols-[minmax(0,240px)_minmax(0,1fr)]">
+        <aside className={`${panelClass} bg-ink-900/80`}>
+          <SkeletonBlock className="h-3 w-24 rounded-full" />
+          <SkeletonBlock className="mt-3 h-3 w-32 rounded-full" />
+          <div className="mt-4 space-y-2">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <SkeletonBlock key={`product-category-${index}`} className="h-9 w-full rounded-xl" />
+            ))}
+          </div>
+        </aside>
+        <div className="space-y-4">
+          <div className="rounded-3xl border border-white/10 bg-ink-900/60 p-5 shadow-card">
+            <SkeletonBlock className="h-3 w-16 rounded-full" />
+            <SkeletonBlock className="mt-3 h-7 w-40" />
+            <SkeletonBlock className="mt-3 h-4 w-56" />
+            <div className="mt-4 flex flex-wrap gap-2">
+              <SkeletonBlock className="h-8 w-28 rounded-xl" />
+              <SkeletonBlock className="h-8 w-32 rounded-xl" />
+              <SkeletonBlock className="h-8 w-36 rounded-xl" />
+            </div>
+            <SkeletonBlock className="mt-4 h-11 w-full rounded-lg" />
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <SkeletonBlock key={`product-card-${index}`} className="h-28 w-full rounded-2xl" />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function ProductsTab({
   panelClass = "",
   catalog,
@@ -38,6 +78,10 @@ export default function ProductsTab({
       setActiveCategoryKey(categories[0]?.key ?? "items")
     }
   }, [activeCategoryKey, categories])
+
+  if (isLoading) {
+    return <ProductsSkeleton panelClass={panelClass} />
+  }
 
   return (
     <div className="space-y-6">
@@ -158,12 +202,8 @@ export default function ProductsTab({
             </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-            {isLoading ? (
-              <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
-                Urunler yukleniyor...
-              </div>
-            ) : filteredList.length === 0 ? (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredList.length === 0 ? (
               <div className="col-span-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
                 Gosterilecek urun bulunamadi.
               </div>
