@@ -413,10 +413,7 @@ function App() {
     ],
   )
   const visibleTabs = useMemo(() => tabItems.filter((item) => item.canView), [tabItems])
-  const nonAdminTabs = useMemo(
-    () => visibleTabs.filter((item) => item.key !== "admin" && item.key !== "products"),
-    [visibleTabs],
-  )
+  const nonAdminTabs = useMemo(() => visibleTabs.filter((item) => item.key !== "admin"), [visibleTabs])
   const tabOrder = useMemo(() => visibleTabs.map((item) => item.key), [visibleTabs])
 
   const handleTabSwitch = (nextTab) => {
