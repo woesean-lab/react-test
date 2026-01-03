@@ -1,3 +1,4 @@
+import fs from "node:fs"
 import { spawn } from "node:child_process"
 import { createRequire } from "node:module"
 import os from "node:os"
@@ -14,11 +15,34 @@ if (!isLinux || shouldSkip) {
 }
 
 const require = createRequire(import.meta.url)
-let cliPath = ""
+const resolvePlaywrightCli = () => {
+  const candidates = []
+  try {
+    candidates.push(require.resolve("playwright/cli"))
+  } catch (error) {
+    // noop
+  }
+  try {
+    candidates.push(require.resolve("playwright/cli.js"))
+  } catch (error) {
+    // noop
+  }
+  try {
+    const pkgPath = require.resolve("playwright/package.json")
+    const pkgDir = path.dirname(pkgPath)
+    candidates.push(path.join(pkgDir, "cli.js"))
+    candidates.push(path.join(pkgDir, "lib", "cli", "cli.js"))
+  } catch (error) {
+    // noop
+  }
+  for (const candidate of candidates) {
+    if (candidate && fs.existsSync(candidate)) return candidate
+  }
+  return ""
+}
 
-try {
-  cliPath = require.resolve("playwright/cli")
-} catch (error) {
+const cliPath = resolvePlaywrightCli()
+if (!cliPath) {
   console.warn("Playwright CLI not found, skipping browser install.")
   process.exit(0)
 }

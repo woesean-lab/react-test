@@ -68,20 +68,46 @@ const readExistingProducts = async () => {
   }
 }
 
-const installPlaywrightChromium = () =>
-  new Promise((resolve, reject) => {
-    const require = createRequire(import.meta.url)
-    let cliPath = ""
+const resolvePlaywrightCli = async () => {
+  const require = createRequire(import.meta.url)
+  const candidates = []
+  try {
+    candidates.push(require.resolve("playwright/cli"))
+  } catch (error) {
+    // noop
+  }
+  try {
+    candidates.push(require.resolve("playwright/cli.js"))
+  } catch (error) {
+    // noop
+  }
+  try {
+    const pkgPath = require.resolve("playwright/package.json")
+    const pkgDir = path.dirname(pkgPath)
+    candidates.push(path.join(pkgDir, "cli.js"))
+    candidates.push(path.join(pkgDir, "lib", "cli", "cli.js"))
+  } catch (error) {
+    // noop
+  }
+  for (const candidate of candidates) {
+    if (!candidate) continue
     try {
-      cliPath = require.resolve("playwright/cli")
+      await fs.access(candidate)
+      return candidate
     } catch (error) {
-      reject(new Error("Playwright CLI not found."))
-      return
+      // try next
     }
-    const args = [cliPath, "install", "chromium"]
-    if (process.env.PLAYWRIGHT_WITH_DEPS === "1") {
-      args.push("--with-deps")
-    }
+  }
+  throw new Error("Playwright CLI not found.")
+}
+
+const installPlaywrightChromium = async () => {
+  const cliPath = await resolvePlaywrightCli()
+  const args = [cliPath, "install", "chromium"]
+  if (process.env.PLAYWRIGHT_WITH_DEPS === "1") {
+    args.push("--with-deps")
+  }
+  await new Promise((resolve, reject) => {
     const child = spawn(process.execPath, args, { stdio: "inherit", env: process.env })
     child.on("error", (error) => reject(error))
     child.on("exit", (code) => {
@@ -92,6 +118,7 @@ const installPlaywrightChromium = () =>
       }
     })
   })
+}
 
 const ensurePlaywrightChromium = async () => {
   const executablePath = chromium.executablePath()
