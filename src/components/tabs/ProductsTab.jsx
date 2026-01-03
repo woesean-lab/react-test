@@ -162,16 +162,22 @@ export default function ProductsTab({
               Urun adlarini gor ve filtrele.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-              Toplam: {list.length}
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-              Gosterilen: {paginatedList.length}
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
-              Sayfa: {page} / {totalPages}
-            </span>
+          <div className="flex w-full justify-start md:w-auto md:justify-end">
+            <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+                Kategori
+              </p>
+              <p className="mt-2 text-lg font-semibold text-white">
+                {activeCategory?.label ?? "Tumu"}
+              </p>
+              <div className="mt-2 flex flex-wrap gap-3 text-xs text-slate-400">
+                <span>{list.length} urun</span>
+                <span>{paginatedList.length} gosterilen</span>
+                <span>
+                  {page}/{totalPages}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </header>
