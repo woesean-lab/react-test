@@ -311,27 +311,33 @@ export default function ProductsTab({
               paginatedList.map((product, index) => {
                 const name = String(product?.name ?? "").trim() || "Isimsiz urun"
                 const price = String(product?.price ?? "").trim()
+                const cardCategory = formatCategoryLabel(getCategoryKey(product))
                 const key = product?.id ?? `${name}-${index}`
                 return (
                   <div
                     key={key}
-                    className="group flex h-full flex-col gap-3 rounded-2xl border border-white/10 bg-ink-900/80 p-3 shadow-inner transition hover:border-accent-300/40"
+                    className="group relative flex h-full flex-col gap-3 overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner transition hover:border-accent-300/40 hover:bg-ink-900/90 hover:shadow-card"
                   >
-                    <div className="flex items-start justify-between gap-3">
-                      <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500">
-                          Urun
-                        </p>
-                        <p className="mt-2 text-base font-semibold text-white">{name}</p>
-                        {price ? (
-                          <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-white/10 bg-ink-950/80 px-2.5 py-1 text-xs text-slate-200">
-                            <span className="text-[10px] uppercase tracking-[0.2em] text-slate-400">
-                              Fiyat
-                            </span>
-                            <span className="text-sm font-semibold text-white">{price}</span>
-                          </div>
-                        ) : null}
+                    <div className="pointer-events-none absolute -right-12 -top-12 h-24 w-24 rounded-full bg-white/5 opacity-0 blur-2xl transition group-hover:opacity-100" />
+                    <div className="pointer-events-none absolute inset-y-0 left-0 w-0.5 bg-accent-500/40 opacity-0 transition group-hover:opacity-100" />
+                    <div className="relative flex items-start justify-between gap-4">
+                      <div className="space-y-3">
+                        <div className="flex flex-wrap items-center gap-2 text-[10px] uppercase tracking-[0.18em] text-slate-400">
+                          <span className="inline-flex items-center rounded-full border border-white/10 bg-ink-950/80 px-2 py-1 text-[10px] font-semibold text-slate-300">
+                            {cardCategory}
+                          </span>
+                          <span className="text-slate-500">Eldorado</span>
+                        </div>
+                        <p className="text-base font-semibold leading-snug text-white">{name}</p>
                       </div>
+                      {price ? (
+                        <div className="flex flex-col items-end gap-2 text-right">
+                          <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500">Fiyat</span>
+                          <span className="rounded-full border border-white/10 bg-ink-950/80 px-3 py-1 text-sm font-semibold text-white">
+                            {price}
+                          </span>
+                        </div>
+                      ) : null}
                     </div>
                   </div>
                 )
