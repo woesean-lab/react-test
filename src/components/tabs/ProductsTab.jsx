@@ -310,70 +310,74 @@ export default function ProductsTab({
                 Gosterilecek urun bulunamadi.
               </div>
             ) : (
-              <>
-                <div className="hidden items-center justify-between rounded-xl border border-white/5 bg-ink-950/60 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500 sm:flex">
+              <div className="overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60">
+                <div className="hidden grid-cols-[minmax(0,1fr)_minmax(0,180px)_minmax(0,140px)] items-center gap-4 border-b border-white/10 bg-ink-950/70 px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-500 sm:grid">
                   <span>Urun</span>
-                  <span>Fiyat</span>
+                  <span>Kategori</span>
+                  <span className="text-right">Fiyat</span>
                 </div>
-                {paginatedList.map((product, index) => {
-                  const name = String(product?.name ?? "").trim() || "Isimsiz urun"
-                  const price = String(product?.price ?? "").trim()
-                  const cardCategory = formatCategoryLabel(getCategoryKey(product))
-                  const isMissing = Boolean(product?.missing)
-                  const key = product?.id ?? `${name}-${index}`
-                  return (
-                    <div
-                      key={key}
-                      className={`flex flex-col gap-2 rounded-xl border px-4 py-3 shadow-inner transition sm:flex-row sm:items-center sm:justify-between ${
-                        isMissing
-                          ? "border-rose-500/50 bg-rose-950/40 hover:border-rose-400/60 hover:bg-rose-950/50"
-                          : "border-white/10 bg-ink-900/70 hover:border-white/20 hover:bg-ink-900/80"
-                      }`}
-                    >
-                      <div className="min-w-0 flex-1">
-                        <p
-                          className={`text-[10px] font-semibold uppercase tracking-[0.24em] ${
-                            isMissing ? "text-rose-300/80" : "text-slate-500"
-                          }`}
-                        >
-                          {cardCategory}
-                        </p>
-                        <p
-                          className={`mt-1 line-clamp-2 text-sm font-semibold ${
-                            isMissing ? "text-rose-100" : "text-white"
-                          }`}
-                        >
-                          {name}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-4 sm:justify-end">
-                        <div
-                          className={`hidden h-9 w-px sm:block ${
-                            isMissing ? "bg-rose-500/30" : "bg-white/10"
-                          }`}
-                          aria-hidden="true"
-                        />
-                        <div className="text-left sm:text-right">
+                <div className="divide-y divide-white/10">
+                  {paginatedList.map((product, index) => {
+                    const name = String(product?.name ?? "").trim() || "Isimsiz urun"
+                    const price = String(product?.price ?? "").trim()
+                    const cardCategory = formatCategoryLabel(getCategoryKey(product))
+                    const isMissing = Boolean(product?.missing)
+                    const key = product?.id ?? `${name}-${index}`
+                    return (
+                      <div
+                        key={key}
+                        className={`grid gap-3 px-5 py-3 transition sm:grid-cols-[minmax(0,1fr)_minmax(0,180px)_minmax(0,140px)] sm:items-center ${
+                          isMissing
+                            ? "border-l-2 border-rose-500/60 bg-rose-950/30 hover:bg-rose-950/45"
+                            : "border-l-2 border-transparent hover:bg-ink-900/70"
+                        }`}
+                      >
+                        <div className="min-w-0">
                           <p
-                            className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${
+                            className={`line-clamp-2 text-sm font-semibold ${
+                              isMissing ? "text-rose-100" : "text-white"
+                            }`}
+                          >
+                            {name}
+                          </p>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-2 text-xs">
+                          <span
+                            className={`inline-flex items-center rounded-full border px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${
+                              isMissing
+                                ? "border-rose-500/40 bg-rose-950/40 text-rose-200"
+                                : "border-white/10 bg-ink-950/60 text-slate-300"
+                            }`}
+                          >
+                            {cardCategory}
+                          </span>
+                          {isMissing ? (
+                            <span className="inline-flex items-center rounded-full border border-rose-500/40 bg-rose-950/50 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-rose-200">
+                              Eksik
+                            </span>
+                          ) : null}
+                        </div>
+                        <div className="flex items-center justify-between sm:justify-end">
+                          <span
+                            className={`text-[10px] font-semibold uppercase tracking-[0.2em] sm:hidden ${
                               isMissing ? "text-rose-300/80" : "text-slate-500"
                             }`}
                           >
                             Fiyat
-                          </p>
-                          <p
-                            className={`mt-1 text-sm font-semibold ${
+                          </span>
+                          <span
+                            className={`text-sm font-semibold ${
                               isMissing ? "text-rose-100" : "text-white"
                             }`}
                           >
                             {price || "-"}
-                          </p>
+                          </span>
                         </div>
                       </div>
-                    </div>
-                  )
-                })}
-              </>
+                    )
+                  })}
+                </div>
+              </div>
             )}
           </div>
           {filteredList.length > 0 && totalPages > 1 && (
