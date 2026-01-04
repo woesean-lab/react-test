@@ -153,13 +153,13 @@ export default function ProductsTab({
         <div className="flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-1.5 sm:space-y-2">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
-              Kategori
+              Urun listesi
             </span>
             <h1 className="font-display text-2xl font-semibold text-white sm:text-3xl">
-              {activeCategory?.label ?? "Tumu"}
+              Urun listesi
             </h1>
             <p className="max-w-2xl text-sm text-slate-200/80">
-              {list.length} urun bu kategoride.
+              Urun adlarini gor ve filtrele.
             </p>
           </div>
           <div className="flex w-full justify-start md:w-auto md:justify-end">
@@ -256,10 +256,12 @@ export default function ProductsTab({
             <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-                  Urunler
+                  Kategori
                 </p>
-                <h2 className="mt-2 text-xl font-semibold text-white">Urun listesi</h2>
-                <p className="mt-1 text-sm text-slate-400">Urun adlarini gor.</p>
+                <h2 className="mt-2 text-xl font-semibold text-white">
+                  {activeCategory?.label ?? "Tumu"}
+                </h2>
+                <p className="mt-1 text-sm text-slate-400">{list.length} urun bu kategoride.</p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <span className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-ink-900/80 px-3 py-2 text-xs text-slate-200">
