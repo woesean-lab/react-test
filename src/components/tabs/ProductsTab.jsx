@@ -310,8 +310,8 @@ export default function ProductsTab({
                 Gosterilecek urun bulunamadi.
               </div>
             ) : (
-              <div className="overflow-hidden rounded-2xl bg-slate-700/25 shadow-inner ring-1 ring-white/5">
-                <div className="hidden grid-cols-[minmax(0,1fr)_minmax(0,140px)] items-center gap-4 border-b border-white/10 bg-slate-700/35 px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400 sm:grid">
+              <div className="overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60 shadow-card">
+                <div className="hidden grid-cols-[minmax(0,1fr)_minmax(0,140px)] items-center gap-4 border-b border-white/10 bg-ink-900/80 px-5 py-3 text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400 sm:grid">
                   <span>Urun</span>
                   <span className="text-right">Fiyat</span>
                 </div>
@@ -326,8 +326,8 @@ export default function ProductsTab({
                         key={key}
                         className={`grid gap-3 px-5 py-3 transition sm:grid-cols-[minmax(0,1fr)_minmax(0,140px)] sm:items-center ${
                           isMissing
-                            ? "bg-rose-500/10 hover:bg-rose-500/15"
-                            : "odd:bg-white/0 even:bg-white/5 hover:bg-white/10"
+                            ? "bg-rose-950/40 hover:bg-rose-950/55"
+                            : "odd:bg-ink-900/40 even:bg-ink-900/60 hover:bg-ink-800/70"
                         }`}
                       >
                         <div className="min-w-0">
@@ -339,7 +339,7 @@ export default function ProductsTab({
                             {name}
                           </p>
                           {isMissing ? (
-                            <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-rose-300/80">
+                            <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.24em] text-rose-200/80">
                               Eksik urun
                             </p>
                           ) : null}
@@ -347,7 +347,7 @@ export default function ProductsTab({
                         <div className="flex items-center justify-between sm:justify-end">
                           <span
                             className={`text-[10px] font-semibold uppercase tracking-[0.2em] sm:hidden ${
-                              isMissing ? "text-rose-300/80" : "text-slate-400"
+                              isMissing ? "text-rose-200/80" : "text-slate-400"
                             }`}
                           >
                             Fiyat
