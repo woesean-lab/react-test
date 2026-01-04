@@ -1,6 +1,20 @@
+import { useEffect, useMemo, useRef, useState } from "react"
 import { createPortal } from "react-dom"
-import { useEffect, useMemo, useState } from "react"
 import { toast } from "react-hot-toast"
+
+const createTokenNode = ({ type, label, value, productId }) => {
+  const node = document.createElement("span")
+  node.dataset.token = type
+  if (label) node.dataset.label = label
+  if (value) node.dataset.value = value
+  if (productId) node.dataset.productId = productId
+  node.setAttribute("contenteditable", "false")
+  node.setAttribute("draggable", "true")
+  node.className =
+    "inline-flex items-center gap-2 rounded-full border border-white/10 bg-ink-950/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-200"
+  node.textContent = label || "Islev"
+  return node
+}
 
 export default function DeliveryMapModal({
   isOpen,
@@ -20,129 +34,15 @@ export default function DeliveryMapModal({
   const selectedTemplate = safeTemplates.find((tpl) => tpl.label === draft.template)
   const hasTemplate = Boolean(selectedTemplate?.value)
   const safeProducts = Array.isArray(products) ? products : []
+
+  const editorRef = useRef(null)
+  const hydratedRef = useRef(false)
+  const draggingTokenRef = useRef(null)
+  const [editorEmpty, setEditorEmpty] = useState(true)
   const [showTemplatePicker, setShowTemplatePicker] = useState(false)
   const [showStockPicker, setShowStockPicker] = useState(false)
   const [selectedProductId, setSelectedProductId] = useState("")
-  const [messageTokens, setMessageTokens] = useState([])
-  const [stockTokens, setStockTokens] = useState([])
-
-  const handleChange = (key) => (event) => {
-    const value = event.target.value
-    setDraft((prev) => ({ ...prev, [key]: value }))
-  }
-
-  const parseJsonArray = (value) => {
-    if (!value) return null
-    try {
-      const parsed = JSON.parse(value)
-      return Array.isArray(parsed) ? parsed : null
-    } catch (error) {
-      return null
-    }
-  }
-
-  const buildMessageTokens = (value) => {
-    const parsed = parseJsonArray(value)
-    if (parsed) {
-      return parsed
-        .map((item) => ({
-          label: String(item?.label ?? "").trim() || "Mesaj",
-          value: String(item?.value ?? "").trim(),
-        }))
-        .filter((item) => item.value)
-    }
-    const raw = String(value ?? "").trim()
-    return raw ? [{ label: "Mesaj", value: raw }] : []
-  }
-
-  const buildStockTokens = (value) => {
-    const parsed = parseJsonArray(value)
-    if (parsed) {
-      return parsed
-        .map((item) => ({
-          productId: String(item?.productId ?? "").trim(),
-          productName: String(item?.productName ?? "").trim() || "Stok",
-          codes: Array.isArray(item?.codes) ? item.codes.filter(Boolean) : [],
-        }))
-        .filter((item) => item.codes.length > 0)
-    }
-    const raw = String(value ?? "").trim()
-    const codes = raw ? raw.split(/\r?\n/).filter(Boolean) : []
-    return codes.length > 0 ? [{ productId: "", productName: "Stok", codes }] : []
-  }
-
-  useEffect(() => {
-    setMessageTokens(buildMessageTokens(draft.message))
-    setStockTokens(buildStockTokens(draft.stock))
-    setShowTemplatePicker(false)
-    setShowStockPicker(false)
-    setSelectedProductId("")
-  }, [draft.message, draft.stock])
-
-  const persistMessageTokens = (tokens) => {
-    const value = tokens.length > 0 ? JSON.stringify(tokens) : ""
-    setDraft((prev) => ({ ...prev, message: value }))
-  }
-
-  const persistStockTokens = (tokens) => {
-    const value = tokens.length > 0 ? JSON.stringify(tokens) : ""
-    setDraft((prev) => ({ ...prev, stock: value }))
-  }
-
-  const handleTemplateInsert = () => {
-    if (!selectedTemplate?.value) return
-    const next = [
-      ...messageTokens,
-      { label: selectedTemplate.label, value: selectedTemplate.value },
-    ]
-    setMessageTokens(next)
-    persistMessageTokens(next)
-    setShowTemplatePicker(false)
-  }
-
-  const handleTemplateRemove = (index) => {
-    const next = messageTokens.filter((_, idx) => idx !== index)
-    setMessageTokens(next)
-    persistMessageTokens(next)
-  }
-
-  const handleStockInsert = () => {
-    const target = safeProducts.find((item) => item.id === selectedProductId)
-    if (!target) {
-      toast.error("Stok urunu secmelisin.")
-      return
-    }
-    const list = Array.isArray(target.stocks) ? target.stocks : []
-    const available = splitStocks ? splitStocks(list).available : list.filter((stk) => stk?.status !== "used")
-    const codes = available.map((stk) => String(stk?.code ?? "").trim()).filter(Boolean)
-    if (codes.length === 0) {
-      toast.error("Secilen urunde kullanilabilir stok yok.")
-      return
-    }
-    const next = [
-      ...stockTokens,
-      { productId: target.id, productName: target.name || "Stok", codes },
-    ]
-    setStockTokens(next)
-    persistStockTokens(next)
-    setShowStockPicker(false)
-  }
-
-  const handleStockRemove = (index) => {
-    const next = stockTokens.filter((_, idx) => idx !== index)
-    setStockTokens(next)
-    persistStockTokens(next)
-  }
-
-  const handleCopy = async (text) => {
-    if (!text) return
-    try {
-      await navigator.clipboard.writeText(text)
-      toast.success("Kopyalandi.")
-    } catch (error) {
-      toast.error("Kopyalanamadi.")
-    }
-  }
+  const [stockPreview, setStockPreview] = useState(null)
 
   const stockOptions = useMemo(
     () =>
@@ -154,6 +54,163 @@ export default function DeliveryMapModal({
         .filter((item) => item.id && item.name),
     [safeProducts],
   )
+
+  const getAvailableStockCodes = (productId) => {
+    const target = safeProducts.find((item) => item.id === productId)
+    if (!target) return []
+    const list = Array.isArray(target.stocks) ? target.stocks : []
+    const available = splitStocks ? splitStocks(list).available : list.filter((stk) => stk?.status !== "used")
+    return available.map((stk) => String(stk?.code ?? "").trim()).filter(Boolean)
+  }
+
+  const updateEditorEmpty = () => {
+    const editor = editorRef.current
+    if (!editor) return
+    const hasTokens = Boolean(editor.querySelector("[data-token]"))
+    const text = editor.textContent?.trim() ?? ""
+    setEditorEmpty(!hasTokens && !text)
+  }
+
+  const hydrateEditor = () => {
+    const editor = editorRef.current
+    if (!editor) return
+    editor.innerHTML = draft.note || ""
+    updateEditorEmpty()
+  }
+
+  useEffect(() => {
+    if (!isOpen) {
+      hydratedRef.current = false
+      return
+    }
+    if (hydratedRef.current) return
+    hydrateEditor()
+    hydratedRef.current = true
+  }, [draft.note, isOpen])
+
+  const handleEditorInput = () => {
+    const editor = editorRef.current
+    if (!editor) return
+    setDraft((prev) => ({ ...prev, note: editor.innerHTML }))
+    updateEditorEmpty()
+  }
+
+  const handleEditorClick = (event) => {
+    const token = event.target?.closest?.("[data-token]")
+    if (!token) return
+    const type = token.dataset.token
+    if (type === "message") {
+      const value = token.dataset.value || ""
+      if (!value) return
+      navigator.clipboard
+        .writeText(value)
+        .then(() => toast.success("Mesaj kopyalandi."))
+        .catch(() => toast.error("Kopyalanamadi."))
+      return
+    }
+    if (type === "stock") {
+      const productId = token.dataset.productId || ""
+      const productLabel = token.dataset.label || "Stok"
+      if (!productId) return
+      const codes = getAvailableStockCodes(productId)
+      setStockPreview({ productId, label: productLabel, codes })
+    }
+  }
+
+  const insertTokenAtCursor = (node) => {
+    const editor = editorRef.current
+    if (!editor) return
+    editor.focus()
+    const selection = window.getSelection()
+    if (!selection || selection.rangeCount === 0) {
+      editor.appendChild(node)
+      editor.appendChild(document.createTextNode(" "))
+      handleEditorInput()
+      return
+    }
+    const range = selection.getRangeAt(0)
+    if (!editor.contains(range.startContainer)) {
+      editor.appendChild(node)
+      editor.appendChild(document.createTextNode(" "))
+      handleEditorInput()
+      return
+    }
+    range.deleteContents()
+    range.insertNode(node)
+    const spacer = document.createTextNode(" ")
+    node.after(spacer)
+    range.setStartAfter(spacer)
+    range.setEndAfter(spacer)
+    selection.removeAllRanges()
+    selection.addRange(range)
+    handleEditorInput()
+  }
+
+  const handleTemplateInsert = () => {
+    if (!selectedTemplate?.value) return
+    const token = createTokenNode({
+      type: "message",
+      label: selectedTemplate.label,
+      value: selectedTemplate.value,
+    })
+    insertTokenAtCursor(token)
+    setShowTemplatePicker(false)
+  }
+
+  const handleStockInsert = () => {
+    const target = safeProducts.find((item) => item.id === selectedProductId)
+    if (!target) {
+      toast.error("Stok urunu secmelisin.")
+      return
+    }
+    const token = createTokenNode({
+      type: "stock",
+      label: `Stok: ${target.name || "Urun"}`,
+      productId: target.id,
+    })
+    insertTokenAtCursor(token)
+    setShowStockPicker(false)
+  }
+
+  const handleEditorDragStart = (event) => {
+    const token = event.target?.closest?.("[data-token]")
+    if (!token) return
+    draggingTokenRef.current = token
+    const payload = JSON.stringify({
+      token: token.dataset.token,
+      label: token.dataset.label,
+      value: token.dataset.value,
+      productId: token.dataset.productId,
+    })
+    event.dataTransfer?.setData("text/plain", payload)
+  }
+
+  const handleEditorDrop = (event) => {
+    event.preventDefault()
+    const payload = event.dataTransfer?.getData("text/plain")
+    if (!payload) return
+    try {
+      const parsed = JSON.parse(payload)
+      if (!parsed?.token) return
+      if (draggingTokenRef.current) {
+        draggingTokenRef.current.remove()
+        draggingTokenRef.current = null
+      }
+      const token = createTokenNode({
+        type: parsed.token,
+        label: parsed.label,
+        value: parsed.value,
+        productId: parsed.productId,
+      })
+      insertTokenAtCursor(token)
+    } catch (error) {
+      // ignore
+    }
+  }
+
+  const handleEditorDragEnd = () => {
+    draggingTokenRef.current = null
+  }
 
   const modal = (
     <div
@@ -187,7 +244,9 @@ export default function DeliveryMapModal({
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
                   Ozel islev ekle
                 </p>
-                <p className="text-xs text-slate-500">Secilenler editor icinde buton olarak gorunur.</p>
+                <p className="text-xs text-slate-500">
+                  Mesaj ve stok butonlarini editor icine yerlestirebilirsin.
+                </p>
               </div>
               <div className="flex flex-wrap gap-2">
                 <button
@@ -208,7 +267,7 @@ export default function DeliveryMapModal({
                   }}
                   className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
                 >
-                  Stok dosyasi getir
+                  Stok goster
                 </button>
               </div>
             </div>
@@ -218,7 +277,9 @@ export default function DeliveryMapModal({
                 <div className="flex flex-wrap items-center gap-2">
                   <select
                     value={draft.template}
-                    onChange={handleChange("template")}
+                    onChange={(event) =>
+                      setDraft((prev) => ({ ...prev, template: event.target.value }))
+                    }
                     className="min-w-[200px] flex-1 rounded-xl border border-white/10 bg-ink-900 px-3 py-2 text-xs text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-1 focus:ring-accent-500/30"
                   >
                     <option value="">Sablon sec</option>
@@ -260,72 +321,77 @@ export default function DeliveryMapModal({
                     onClick={handleStockInsert}
                     className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
                   >
-                    Getir
+                    Ekle
                   </button>
                 </div>
               </div>
             )}
 
             <div className="mt-4 space-y-3">
-              {messageTokens.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {messageTokens.map((token, index) => (
-                    <div
-                      key={`${token.label}-${index}`}
-                      className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-ink-950/70 px-3 py-1 text-xs text-slate-200"
+              <div className="relative">
+                {editorEmpty && (
+                  <div className="pointer-events-none absolute left-4 top-3 text-sm text-slate-500">
+                    Teslimat notunu buraya yaz...
+                  </div>
+                )}
+                <div
+                  ref={editorRef}
+                  role="textbox"
+                  contentEditable
+                  onInput={handleEditorInput}
+                  onClick={handleEditorClick}
+                  onDragStart={handleEditorDragStart}
+                  onDragEnd={handleEditorDragEnd}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={handleEditorDrop}
+                  className="min-h-[240px] rounded-xl border border-white/10 bg-ink-900 px-4 py-3 text-sm text-slate-100 outline-none focus:border-accent-400 focus:ring-1 focus:ring-accent-500/30"
+                />
+              </div>
+
+              {stockPreview && (
+                <div className="rounded-xl border border-white/10 bg-ink-900/70 p-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-300">
+                      {stockPreview.label}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setStockPreview(null)}
+                      className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400"
                     >
-                      <button
-                        type="button"
-                        onClick={() => handleCopy(token.value)}
-                        className="text-xs font-semibold uppercase tracking-[0.18em] text-accent-100"
-                      >
-                        {token.label}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleTemplateRemove(index)}
-                        className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400"
-                      >
-                        Kaldir
-                      </button>
-                    </div>
-                  ))}
+                      Kapat
+                    </button>
+                  </div>
+                  <div className="mt-2 max-h-40 overflow-y-auto rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-xs text-slate-200">
+                    {stockPreview.codes.length > 0 ? (
+                      <ul className="space-y-1">
+                        {stockPreview.codes.map((code, index) => (
+                          <li key={`${code}-${index}`} className="font-mono text-[11px] text-slate-200">
+                            {code}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <p className="text-slate-500">Kullanilabilir stok yok.</p>
+                    )}
+                  </div>
+                  <div className="mt-2 flex items-center justify-end">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (stockPreview.codes.length === 0) return
+                        navigator.clipboard
+                          .writeText(stockPreview.codes.join("\n"))
+                          .then(() => toast.success("Stok kopyalandi."))
+                          .catch(() => toast.error("Kopyalanamadi."))
+                      }}
+                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
+                    >
+                      Kopyala
+                    </button>
+                  </div>
                 </div>
               )}
-
-              {stockTokens.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {stockTokens.map((token, index) => (
-                    <div
-                      key={`${token.productId || token.productName}-${index}`}
-                      className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-ink-950/70 px-3 py-1 text-xs text-slate-200"
-                    >
-                      <button
-                        type="button"
-                        onClick={() => handleCopy(token.codes.join("\n"))}
-                        className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-100"
-                      >
-                        {token.productName}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleStockRemove(index)}
-                        className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-400"
-                      >
-                        Kaldir
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <textarea
-                rows={12}
-                value={draft.note}
-                onChange={handleChange("note")}
-                placeholder="Teslimat notunu buraya yaz..."
-                className="w-full resize-none rounded-xl border border-white/10 bg-ink-900 px-4 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-1 focus:ring-accent-500/30"
-              />
             </div>
           </div>
         </div>

@@ -184,9 +184,9 @@ export default function ProductsTab({
     try {
       await onSaveDeliveryMap(deliveryTarget.id, {
         note: deliveryDraft.note,
-        message: deliveryDraft.message,
-        template: deliveryDraft.template,
-        stock: deliveryDraft.stock,
+        message: "",
+        template: "",
+        stock: "",
       })
       setDeliveryTarget(null)
     } finally {
