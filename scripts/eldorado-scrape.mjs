@@ -280,6 +280,7 @@ const run = async () => {
       href: normalizeHref(item?.href ?? ""),
       category: String(item?.category ?? "").trim(),
       price: String(item?.price ?? "").trim(),
+      missing: Boolean(item?.missing),
     }))
     .filter((item) => item.id || item.name)
   const existingById = new Map()
@@ -331,10 +332,11 @@ const run = async () => {
       if (price) {
         existingItem.price = price
       }
+      existingItem.missing = false
       usedExisting.add(existingItem)
       merged.push(existingItem)
     } else {
-      merged.push({ id: derivedId, name, href, category, price })
+      merged.push({ id: derivedId, name, href, category, price, missing: false })
     }
     seenIds.add(derivedId)
   })
@@ -353,6 +355,9 @@ const run = async () => {
     if (item.id && seenIds.has(item.id)) return
     const isLegacy = !item.href && String(item.id ?? "").startsWith("eld-")
     if (isLegacy && !shouldKeepLegacy) return
+    if (!shouldKeepLegacy) {
+      item.missing = true
+    }
     merged.push(item)
   })
 

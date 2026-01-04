@@ -121,12 +121,14 @@ const normalizeEldoradoOffer = (item) => {
   const href = hrefRaw === undefined || hrefRaw === null ? "" : String(hrefRaw).trim()
   const categoryRaw = item?.category
   const category = categoryRaw === undefined || categoryRaw === null ? "" : String(categoryRaw).trim()
+  const missing = Boolean(item?.missing)
   return {
     id,
     name,
     price,
     href,
     category,
+    missing,
   }
 }
 
@@ -153,7 +155,9 @@ const mapEldoradoOffersToCatalog = (offers, syncByKind) => {
     const kind = String(offer.kind ?? "items")
     const lastSyncAt = syncByKind?.get(kind)
     const seenAt = offer.lastSeenAt instanceof Date ? offer.lastSeenAt : null
-    normalized.missing = Boolean(lastSyncAt && (!seenAt || seenAt < lastSyncAt))
+    if (!normalized.missing) {
+      normalized.missing = Boolean(lastSyncAt && (!seenAt || seenAt < lastSyncAt))
+    }
     if (kind === "topups") {
       topups.push(normalized)
     } else {
@@ -208,7 +212,7 @@ const syncEldoradoOffers = async (kind, offers, seenAtOverride) => {
   if (normalized.length === 0) return 0
   const seenAt = seenAtOverride instanceof Date ? seenAtOverride : new Date()
   const operations = normalized.map((offer) => {
-    const update = { name: offer.name, kind, lastSeenAt: seenAt }
+    const update = { name: offer.name, kind, lastSeenAt: seenAt, missing: offer.missing === true }
     if (offer.href) update.href = offer.href
     if (offer.category) update.category = offer.category
     if (offer.price) update.price = offer.price
@@ -222,6 +226,7 @@ const syncEldoradoOffers = async (kind, offers, seenAtOverride) => {
         category: offer.category || null,
         href: offer.href || null,
         kind,
+        missing: offer.missing === true,
         lastSeenAt: seenAt,
       },
     })
