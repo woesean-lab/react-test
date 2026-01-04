@@ -65,6 +65,13 @@ model EldoradoOffer {
   updatedAt DateTime @updatedAt
 }
 
+model EldoradoSync {
+  kind       String   @id
+  lastSyncAt DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
 model List {
   id        String   @id @default(cuid())
   name      String

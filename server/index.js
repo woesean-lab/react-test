@@ -127,7 +127,6 @@ const normalizeEldoradoOffer = (item) => {
     price,
     href,
     category,
-    missing: Boolean(item?.missing),
   }
 }
 
@@ -144,28 +143,17 @@ const normalizeEldoradoCatalog = (value) => ({
   giftCards: Array.isArray(value?.giftCards) ? value.giftCards : [],
 })
 
-const mapEldoradoOffersToCatalog = (offers) => {
+const mapEldoradoOffersToCatalog = (offers, syncByKind) => {
   const items = []
   const topups = []
-  const latestSeenByKind = new Map()
-
-  offers.forEach((offer) => {
-    const kind = String(offer.kind ?? "items")
-    const seenAt = offer.lastSeenAt instanceof Date ? offer.lastSeenAt : null
-    if (!seenAt) return
-    const current = latestSeenByKind.get(kind)
-    if (!current || seenAt > current) {
-      latestSeenByKind.set(kind, seenAt)
-    }
-  })
 
   offers.forEach((offer) => {
     const normalized = normalizeEldoradoOffer(offer)
     if (!normalized) return
     const kind = String(offer.kind ?? "items")
-    const latestSeen = latestSeenByKind.get(kind)
+    const lastSyncAt = syncByKind?.get(kind)
     const seenAt = offer.lastSeenAt instanceof Date ? offer.lastSeenAt : null
-    normalized.missing = Boolean(latestSeen && (!seenAt || seenAt < latestSeen))
+    normalized.missing = Boolean(lastSyncAt && (!seenAt || seenAt < lastSyncAt))
     if (kind === "topups") {
       topups.push(normalized)
     } else {
@@ -184,9 +172,18 @@ const mapEldoradoOffersToCatalog = (offers) => {
 
 const loadEldoradoCatalog = async () => {
   try {
-    const offers = await prisma.eldoradoOffer.findMany({ orderBy: { name: "asc" } })
+    const [offers, syncs] = await Promise.all([
+      prisma.eldoradoOffer.findMany({ orderBy: { name: "asc" } }),
+      prisma.eldoradoSync.findMany(),
+    ])
     if (offers.length > 0) {
-      return mapEldoradoOffersToCatalog(offers)
+      const syncByKind = new Map()
+      syncs.forEach((entry) => {
+        if (entry?.kind && entry?.lastSyncAt instanceof Date) {
+          syncByKind.set(entry.kind, entry.lastSyncAt)
+        }
+      })
+      return mapEldoradoOffersToCatalog(offers, syncByKind)
     }
   } catch (error) {
     console.warn("Failed to load Eldorado offers from database, falling back to JSON.", error)
@@ -206,10 +203,10 @@ const loadEldoradoCatalog = async () => {
   })
 }
 
-const syncEldoradoOffers = async (kind, offers) => {
+const syncEldoradoOffers = async (kind, offers, seenAtOverride) => {
   const normalized = normalizeEldoradoList(offers)
   if (normalized.length === 0) return 0
-  const seenAt = new Date()
+  const seenAt = seenAtOverride instanceof Date ? seenAtOverride : new Date()
   const operations = normalized.map((offer) => {
     const update = { name: offer.name, kind, lastSeenAt: seenAt }
     if (offer.href) update.href = offer.href
@@ -231,6 +228,14 @@ const syncEldoradoOffers = async (kind, offers) => {
   })
   await prisma.$transaction(operations)
   return normalized.length
+}
+
+const markEldoradoSync = async (kind, syncedAt) => {
+  await prisma.eldoradoSync.upsert({
+    where: { kind },
+    update: { lastSyncAt: syncedAt },
+    create: { kind, lastSyncAt: syncedAt },
+  })
 }
 
 const runEldoradoScrape = ({ url, pages, outputPath }) => {
@@ -1710,8 +1715,14 @@ app.post("/api/eldorado/refresh", async (_req, res, next) => {
         readJsonFile(eldoradoItemsPath),
         readJsonFile(eldoradoTopupsPath),
       ])
-      await syncEldoradoOffers("items", items)
-      await syncEldoradoOffers("topups", topups)
+      const itemsSyncedAt = new Date()
+      const topupsSyncedAt = new Date()
+      await syncEldoradoOffers("items", items, itemsSyncedAt)
+      await syncEldoradoOffers("topups", topups, topupsSyncedAt)
+      await Promise.all([
+        markEldoradoSync("items", itemsSyncedAt),
+        markEldoradoSync("topups", topupsSyncedAt),
+      ])
     } catch (error) {
       console.warn("Failed to persist Eldorado offers to database.", error)
     }
