@@ -315,7 +315,7 @@ export default function ProductsTab({
                   <span>Urun</span>
                   <span className="text-right">Fiyat</span>
                 </div>
-                <div>
+                <div className="divide-y divide-white/5">
                   {paginatedList.map((product, index) => {
                     const name = String(product?.name ?? "").trim() || "Isimsiz urun"
                     const price = String(product?.price ?? "").trim()
