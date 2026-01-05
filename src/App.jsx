@@ -14,6 +14,7 @@ import TasksTab from "./components/tabs/TasksTab"
 import SalesTab from "./components/tabs/SalesTab"
 import DashboardTab from "./components/tabs/DashboardTab"
 import AdminTab from "./components/tabs/AdminTab"
+import ProductsTab from "./components/tabs/ProductsTab"
 import useAppData from "./hooks/useAppData"
 import { PERMISSIONS } from "./constants/appConstants"
 
@@ -173,7 +174,11 @@ function App() {
     handleListInsertColumn,
     handleListDeleteColumn,
     isStockTabLoading,
+    isProductsTabLoading,
     stockSummary,
+    eldoradoCatalog,
+    isEldoradoRefreshing,
+    refreshEldoradoCatalog,
     products,
     productSearch,
     setProductSearch,
@@ -392,6 +397,7 @@ function App() {
       { key: "sales", label: "Satış", canView: canViewSales },
       { key: "problems", label: "Problem", canView: canViewProblems },
       { key: "lists", label: "Liste", canView: canViewLists },
+      { key: "products", label: "Ürünler", canView: canViewStock },
       { key: "stock", label: "Stok", canView: canViewStock },
       { key: "admin", label: "Admin", canView: canViewAdmin },
     ],
@@ -928,6 +934,18 @@ function App() {
               handleListDeleteRow={handleListDeleteRow}
               handleListInsertColumn={handleListInsertColumn}
               handleListDeleteColumn={handleListDeleteColumn}
+            />
+          </div>
+        )}
+
+        {activeTab === "products" && canViewStock && (
+          <div className={getTabSlideClass("products")}>
+            <ProductsTab
+              panelClass={panelClass}
+              catalog={eldoradoCatalog}
+              isLoading={isProductsTabLoading}
+              isRefreshing={isEldoradoRefreshing}
+              onRefresh={refreshEldoradoCatalog}
             />
           </div>
         )}
