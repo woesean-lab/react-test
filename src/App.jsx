@@ -177,8 +177,16 @@ function App() {
     isProductsTabLoading,
     stockSummary,
     eldoradoCatalog,
+    eldoradoKeysByOffer,
+    eldoradoKeysLoading,
+    eldoradoKeysSaving,
+    eldoradoKeysDeleting,
     isEldoradoRefreshing,
     refreshEldoradoCatalog,
+    loadEldoradoKeys,
+    handleEldoradoKeysAdd,
+    handleEldoradoKeyDelete,
+    handleEldoradoKeyCopy,
     products,
     productSearch,
     setProductSearch,
@@ -946,6 +954,17 @@ function App() {
               isLoading={isProductsTabLoading}
               isRefreshing={isEldoradoRefreshing}
               onRefresh={refreshEldoradoCatalog}
+              keysByOffer={eldoradoKeysByOffer}
+              keysLoading={eldoradoKeysLoading}
+              keysSaving={eldoradoKeysSaving}
+              keysDeleting={eldoradoKeysDeleting}
+              onLoadKeys={loadEldoradoKeys}
+              onAddKeys={handleEldoradoKeysAdd}
+              onDeleteKey={handleEldoradoKeyDelete}
+              onCopyKey={handleEldoradoKeyCopy}
+              canAddKeys={canAddStocks}
+              canDeleteKeys={canDeleteStocks}
+              canCopyKeys={canCopyStocks}
             />
           </div>
         )}
