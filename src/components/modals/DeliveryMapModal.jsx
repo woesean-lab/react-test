@@ -3,13 +3,13 @@ import { createPortal } from "react-dom"
 import { toast } from "react-hot-toast"
 
 const tokenBaseClass =
-  "inline-flex items-center gap-2 rounded-lg border border-white/10 bg-ink-900/80 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-200 shadow-inner transition hover:border-accent-300/60 hover:text-accent-100"
+  "inline-flex items-center gap-2 rounded-lg border border-white/10 bg-ink-900/70 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-200/90 transition hover:border-white/30 hover:text-white"
 const tokenNodeClass = tokenBaseClass
 const tokenButtonClass = tokenBaseClass
 const actionButtonClass =
-  "inline-flex items-center justify-center rounded-lg border border-white/10 bg-ink-900/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50 disabled:cursor-not-allowed disabled:opacity-50"
+  "inline-flex items-center justify-center rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-200 transition hover:border-accent-300/60 hover:bg-accent-500/10 hover:text-accent-50 disabled:cursor-not-allowed disabled:opacity-50"
 const selectTriggerClass =
-  "flex min-w-[200px] flex-col items-start gap-1 rounded-xl border border-white/10 bg-ink-900/80 px-3 py-2 text-left transition hover:border-accent-300 hover:bg-ink-900/95 disabled:cursor-not-allowed disabled:opacity-50"
+  "flex w-full flex-col items-start gap-1 rounded-xl border border-white/10 bg-ink-900/70 px-3 py-2 text-left transition hover:border-white/30 hover:bg-ink-900/90 disabled:cursor-not-allowed disabled:opacity-50"
 
 const createTokenNode = ({ type, label, value, productId }) => {
   const node = document.createElement("span")
@@ -65,7 +65,7 @@ export default function DeliveryMapModal({
     [safeProducts],
   )
   const selectedStockLabel =
-    stockOptions.find((option) => option.id === selectedProductId)?.name || "Sec"
+    stockOptions.find((option) => option.id === selectedProductId)?.name || "Urun sec"
 
   const getAvailableStockCodes = (productId) => {
     const target = safeProducts.find((item) => item.id === productId)
@@ -283,233 +283,270 @@ export default function DeliveryMapModal({
 
   const modal = (
     <div
-      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 px-4 py-6"
+      className="fixed inset-0 z-[70] flex items-center justify-center bg-black/70 px-4 py-6 backdrop-blur-sm"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-3xl overflow-hidden rounded-2xl border border-white/10 bg-ink-900 shadow-card"
+        className="w-full max-w-4xl overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-900 to-ink-800 shadow-card"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex items-center justify-between border-b border-white/10 bg-ink-800 px-4 py-3">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-300/80">
-              Teslimat haritasi
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 bg-ink-900/80 px-6 py-4">
+          <div className="space-y-1">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400">
+              Teslimat sablonu
             </p>
-            <p className="text-xs text-slate-400">
-              {productName || "Urun"} | {charCount} karakter
-            </p>
+            <p className="font-display text-2xl font-semibold text-white">{productName || "Urun"}</p>
+            <p className="text-xs text-slate-500">Notu ve tokenleri tek yerde duzenle.</p>
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
-          >
-            Kapat
-          </button>
+          <div className="flex flex-wrap items-center gap-2">
+            <span
+              className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] ${
+                isEditing
+                  ? "border-accent-300/60 bg-accent-500/10 text-accent-50"
+                  : "border-white/10 bg-white/5 text-slate-300"
+              }`}
+            >
+              {isEditing ? "Duzenleme acik" : "Salt okuma"}
+            </span>
+            <button
+              type="button"
+              onClick={handleEnableEditing}
+              disabled={isEditing}
+              className={actionButtonClass}
+            >
+              Duzenle
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-200 transition hover:border-white/30 hover:text-white"
+            >
+              Kapat
+            </button>
+          </div>
         </div>
 
         <div className="max-h-[70vh] overflow-y-auto">
-          <div className="border-b border-white/10 bg-ink-900 px-4 py-3">
-            <div className="flex flex-wrap items-start gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowTemplatePicker((prev) => !prev)
-                  setShowStockPicker(false)
-                }}
-                disabled={!isEditing}
-                aria-expanded={showTemplatePicker}
-                className={`${selectTriggerClass} ${
-                  showTemplatePicker ? "border-accent-300/60" : ""
-                }`}
-              >
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+          <div className="grid gap-6 px-6 py-5 lg:grid-cols-[minmax(0,240px)_minmax(0,1fr)]">
+            <div className="space-y-4">
+              <div className="rounded-2xl border border-white/10 bg-ink-900/70 p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-400">
                   Mesaj sablonu
-                </span>
-                <span className="flex w-full items-center justify-between gap-3 text-xs font-semibold text-slate-100">
-                  <span className="truncate">{draft.template || "Sec"}</span>
-                  <svg
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                    className="h-3 w-3 text-slate-400"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="m6 9 6 6 6-6" />
-                  </svg>
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setShowStockPicker((prev) => !prev)
-                  setShowTemplatePicker(false)
-                }}
-                disabled={!isEditing}
-                aria-expanded={showStockPicker}
-                className={`${selectTriggerClass} ${showStockPicker ? "border-accent-300/60" : ""}`}
-              >
-                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-                  Stok ekle
-                </span>
-                <span className="flex w-full items-center justify-between gap-3 text-xs font-semibold text-slate-100">
-                  <span className="truncate">{selectedStockLabel}</span>
-                  <svg
-                    viewBox="0 0 24 24"
-                    aria-hidden="true"
-                    className="h-3 w-3 text-slate-400"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  >
-                    <path d="m6 9 6 6 6-6" />
-                  </svg>
-                </span>
-              </button>
-              <div className="ml-auto flex flex-wrap items-center gap-2">
-                <span
-                  className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${
-                    isEditing
-                      ? "border-accent-400/60 bg-accent-500/15 text-accent-100"
-                      : "border-white/10 bg-white/5 text-slate-300"
-                  }`}
-                >
-                  {isEditing ? "Duzenleme acik" : "Salt okuma"}
-                </span>
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  Secilen sablon notun icine token olarak eklenir.
+                </p>
                 <button
                   type="button"
-                  onClick={handleEnableEditing}
-                  disabled={isEditing}
-                  className={actionButtonClass}
+                  onClick={() => {
+                    setShowTemplatePicker((prev) => !prev)
+                    setShowStockPicker(false)
+                  }}
+                  disabled={!isEditing}
+                  aria-expanded={showTemplatePicker}
+                  className={`${selectTriggerClass} mt-3 ${
+                    showTemplatePicker ? "border-accent-300/60 bg-ink-900/90" : ""
+                  }`}
                 >
-                  Duzenle
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                    Sablon sec
+                  </span>
+                  <span className="flex w-full items-center justify-between gap-3 text-xs font-semibold text-slate-100">
+                    <span className="truncate">{draft.template || "Sec"}</span>
+                    <svg
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                      className="h-3 w-3 text-slate-400"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </span>
                 </button>
-              </div>
-            </div>
 
-            {showTemplatePicker && (
-              <div className="mt-3 rounded-2xl border border-white/10 bg-ink-900/80 p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                    Mesaj sablonlari
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setShowTemplatePicker(false)}
-                    className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 transition hover:text-slate-200"
-                  >
-                    Kapat
-                  </button>
-                </div>
-                <div className="mt-3 flex max-h-40 flex-wrap gap-2 overflow-auto">
-                  {safeTemplates.length > 0 ? (
-                    safeTemplates.map((tpl) => (
+                {showTemplatePicker && (
+                  <div className="mt-3 rounded-xl border border-white/10 bg-ink-900/90 p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                        Sablonlar
+                      </p>
                       <button
-                        key={tpl.id ?? tpl.label}
                         type="button"
-                        onClick={() => handleTemplateInsert(tpl)}
-                        className={tokenButtonClass}
+                        onClick={() => setShowTemplatePicker(false)}
+                        className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 transition hover:text-slate-200"
                       >
-                        {tpl.label}
+                        Kapat
                       </button>
-                    ))
-                  ) : (
-                    <p className="text-xs text-slate-500">Sablon bulunamadi.</p>
-                  )}
-                </div>
+                    </div>
+                    <div className="mt-3 flex max-h-40 flex-wrap gap-2 overflow-auto">
+                      {safeTemplates.length > 0 ? (
+                        safeTemplates.map((tpl) => (
+                          <button
+                            key={tpl.id ?? tpl.label}
+                            type="button"
+                            onClick={() => handleTemplateInsert(tpl)}
+                            className={tokenButtonClass}
+                          >
+                            {tpl.label}
+                          </button>
+                        ))
+                      ) : (
+                        <p className="text-xs text-slate-500">Sablon bulunamadi.</p>
+                      )}
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
 
-            {showStockPicker && (
-              <div className="mt-3 rounded-2xl border border-white/10 bg-ink-900/80 p-3">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                    Stok ekle
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setShowStockPicker(false)}
-                    className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 transition hover:text-slate-200"
-                  >
-                    Kapat
-                  </button>
-                </div>
-                <div className="mt-3 flex flex-wrap items-center gap-2">
-                  <select
-                    value={selectedProductId}
-                    onChange={(event) => setSelectedProductId(event.target.value)}
-                    className="min-w-[200px] flex-1 rounded-xl border border-white/10 bg-ink-900 px-3 py-2 text-xs text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-1 focus:ring-accent-500/30"
-                  >
-                    <option value="">Urun sec</option>
-                    {stockOptions.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.name}
-                      </option>
-                    ))}
-                  </select>
-                  <button type="button" onClick={handleStockInsert} className={actionButtonClass}>
-                    Ekle
-                  </button>
-                </div>
+              <div className="rounded-2xl border border-white/10 bg-ink-900/70 p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.28em] text-slate-400">
+                  Stok ekle
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  Stok tokeni tiklaninca kodlar kopyalanir.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowStockPicker((prev) => !prev)
+                    setShowTemplatePicker(false)
+                  }}
+                  disabled={!isEditing}
+                  aria-expanded={showStockPicker}
+                  className={`${selectTriggerClass} mt-3 ${
+                    showStockPicker ? "border-accent-300/60 bg-ink-900/90" : ""
+                  }`}
+                >
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                    Urun sec
+                  </span>
+                  <span className="flex w-full items-center justify-between gap-3 text-xs font-semibold text-slate-100">
+                    <span className="truncate">{selectedStockLabel}</span>
+                    <svg
+                      viewBox="0 0 24 24"
+                      aria-hidden="true"
+                      className="h-3 w-3 text-slate-400"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="m6 9 6 6 6-6" />
+                    </svg>
+                  </span>
+                </button>
+
+                {showStockPicker && (
+                  <div className="mt-3 rounded-xl border border-white/10 bg-ink-900/90 p-3">
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                        Stok secimi
+                      </p>
+                      <button
+                        type="button"
+                        onClick={() => setShowStockPicker(false)}
+                        className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 transition hover:text-slate-200"
+                      >
+                        Kapat
+                      </button>
+                    </div>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <select
+                        value={selectedProductId}
+                        onChange={(event) => setSelectedProductId(event.target.value)}
+                        className="min-w-[200px] flex-1 rounded-xl border border-white/10 bg-ink-900 px-3 py-2 text-xs text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-1 focus:ring-accent-500/30"
+                      >
+                        <option value="">Urun sec</option>
+                        {stockOptions.map((option) => (
+                          <option key={option.id} value={option.id}>
+                            {option.name}
+                          </option>
+                        ))}
+                      </select>
+                      <button type="button" onClick={handleStockInsert} className={actionButtonClass}>
+                        Ekle
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
 
-          <div className="flex max-h-[420px] overflow-hidden">
-            <div
-              ref={lineRef}
-              className="w-12 shrink-0 overflow-hidden border-r border-white/10 bg-ink-800 px-2 py-3 text-right font-mono text-[11px] leading-6 text-slate-500"
-            >
-              {Array.from({ length: lineCount }, (_, index) => (
-                <div key={index}>{index + 1}</div>
-              ))}
+              <div className="rounded-2xl border border-white/10 bg-ink-900/60 p-4">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                  Ipuclari
+                </p>
+                <p className="mt-2 text-xs text-slate-500">
+                  Tokenlere tiklayarak mesaj veya stok kodlarini kopyalayabilirsin.
+                </p>
+              </div>
             </div>
-            <div className="relative flex-1">
-              {editorEmpty && (
-                <div className="pointer-events-none absolute left-4 top-3 text-sm text-slate-500">
-                  Teslimat notunu buraya yaz...
+
+            <div className="overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70 shadow-inner">
+              <div className="flex items-center justify-between border-b border-white/10 bg-ink-900/80 px-4 py-2">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                  Teslimat notu
+                </p>
+                <span className="text-[11px] text-slate-500">
+                  {charCount} karakter | {lineCount} satir
+                </span>
+              </div>
+              <div className="flex max-h-[420px] overflow-hidden">
+                <div
+                  ref={lineRef}
+                  className="w-12 shrink-0 overflow-hidden border-r border-white/10 bg-ink-900/80 px-2 py-3 text-right font-mono text-[11px] leading-6 text-slate-500/80"
+                >
+                  {Array.from({ length: lineCount }, (_, index) => (
+                    <div key={index}>{index + 1}</div>
+                  ))}
                 </div>
-              )}
-              <div
-                ref={editorRef}
-                role="textbox"
-                contentEditable={isEditing}
-                aria-readonly={!isEditing}
-                onInput={handleEditorInput}
-                onClick={handleEditorClick}
-                onScroll={handleEditorScroll}
-                onDragStart={handleEditorDragStart}
-                onDragEnd={handleEditorDragEnd}
-                onDragOver={(event) => event.preventDefault()}
-                onDrop={handleEditorDrop}
-                className={`h-full min-h-[360px] overflow-auto bg-ink-900 px-4 py-3 font-mono text-[13px] leading-6 outline-none transition ${
-                  isEditing ? "text-slate-100" : "text-slate-300"
-                }`}
-              />
+                <div className="relative flex-1">
+                  {editorEmpty && (
+                    <div className="pointer-events-none absolute left-4 top-3 text-sm text-slate-500">
+                      Teslimat notunu yaz veya sablon ekle.
+                    </div>
+                  )}
+                  <div
+                    ref={editorRef}
+                    role="textbox"
+                    contentEditable={isEditing}
+                    aria-readonly={!isEditing}
+                    onInput={handleEditorInput}
+                    onClick={handleEditorClick}
+                    onScroll={handleEditorScroll}
+                    onDragStart={handleEditorDragStart}
+                    onDragEnd={handleEditorDragEnd}
+                    onDragOver={(event) => event.preventDefault()}
+                    onDrop={handleEditorDrop}
+                    className={`h-full min-h-[360px] overflow-auto bg-ink-900/70 px-4 py-3 font-mono text-[13px] leading-6 outline-none transition ${
+                      isEditing ? "text-slate-100" : "text-slate-300"
+                    }`}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-ink-800 px-4 py-3">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-white/10 bg-ink-900/80 px-6 py-4">
           <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400">Esc ile kapat</p>
           <div className="flex flex-wrap gap-3">
             <button
               type="button"
               onClick={onSave}
               disabled={isSaving}
-              className="min-w-[140px] rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+              className="min-w-[140px] rounded-lg border border-accent-300/70 bg-accent-500/15 px-4 py-2 text-center text-xs font-semibold uppercase tracking-[0.2em] text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-200 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
             >
               Kaydet
             </button>
             <button
               type="button"
               onClick={onClose}
-              className="min-w-[120px] rounded-lg border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
+              className="min-w-[120px] rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 transition hover:border-white/30 hover:text-white"
             >
               Iptal
             </button>
