@@ -273,17 +273,19 @@ export default function DeliveryMapModal({
         className="w-full max-w-4xl overflow-hidden rounded-xl border border-white/10 bg-ink-900 shadow-card"
         onClick={(event) => event.stopPropagation()}
       >
-        <div className="flex flex-wrap items-start justify-between gap-4 border-b border-white/10 px-5 py-4">
+        <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/10 bg-ink-900/70 px-6 py-4">
           <div className="space-y-1">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-slate-400">
-              Teslimat notu
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-400">
+              Teslimat duzeni
             </p>
-            <p className="text-lg font-semibold text-white">{productName || "Urun"}</p>
-            <p className="text-xs text-slate-500">Sablon ve stok tokenlerini nota ekleyebilirsin.</p>
+            <p className="text-xl font-semibold text-white">{productName || "Urun"}</p>
+            <p className="text-xs text-slate-500">
+              Sablon, stok ve notu tek akista yonet.
+            </p>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <span
-              className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] ${
+              className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] ${
                 isEditing
                   ? "border-accent-300/50 bg-accent-500/10 text-accent-50"
                   : "border-white/10 bg-white/5 text-slate-300"
@@ -309,83 +311,97 @@ export default function DeliveryMapModal({
           </div>
         </div>
 
-        <div className="max-h-[70vh] overflow-y-auto">
-          <div className="grid gap-4 px-5 py-5 lg:grid-cols-[minmax(0,180px)_minmax(0,1fr)]">
-            <div className="space-y-3">
-              <div className="rounded-lg border border-white/10 bg-ink-900/70 p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-                  Mesaj sablonu
+        <div className="max-h-[70vh] overflow-y-auto px-6 py-5">
+          <div className="space-y-5">
+            <div className="rounded-xl border border-white/10 bg-ink-900/70 p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-slate-400">
+                    Kontroller
+                  </p>
+                  <p className="text-xs text-slate-500">
+                    Secim yap, token ekle, notu hazirla.
+                  </p>
+                </div>
+                <p className="text-[11px] text-slate-500">
+                  Tokenleri tikla kopyala, surukle birak sirayi degistir.
                 </p>
-                <div className="mt-2 space-y-2">
-                  <select
-                    value={draft.template || ""}
-                    onChange={(event) =>
-                      setDraft((prev) => ({ ...prev, template: event.target.value }))
-                    }
-                    disabled={!isEditing}
-                    className="w-full rounded-md border border-white/10 bg-ink-900 px-3 py-2 text-xs text-slate-100 focus:border-white/30 focus:outline-none focus:ring-1 focus:ring-white/10 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="">Sablon sec</option>
-                    {safeTemplates.map((tpl) => (
-                      <option key={tpl.id ?? tpl.label} value={tpl.label}>
-                        {tpl.label}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const selectedTemplate = safeTemplates.find(
-                        (tpl) => tpl.label === draft.template,
-                      )
-                      if (!selectedTemplate) {
-                        toast.error("Sablon secmelisin.")
-                        return
+              </div>
+
+              <div className="mt-4 grid gap-3 md:grid-cols-2">
+                <div className="rounded-lg border border-white/10 bg-ink-900/60 p-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                    Mesaj sablonu
+                  </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <select
+                      value={draft.template || ""}
+                      onChange={(event) =>
+                        setDraft((prev) => ({ ...prev, template: event.target.value }))
                       }
-                      handleTemplateInsert(selectedTemplate)
-                    }}
-                    disabled={!isEditing}
-                    className={`${actionButtonClass} w-full`}
-                  >
-                    Ekle
-                  </button>
+                      disabled={!isEditing}
+                      className="min-w-[180px] flex-1 rounded-md border border-white/10 bg-ink-900 px-3 py-2 text-xs text-slate-100 focus:border-white/30 focus:outline-none focus:ring-1 focus:ring-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="">Sablon sec</option>
+                      {safeTemplates.map((tpl) => (
+                        <option key={tpl.id ?? tpl.label} value={tpl.label}>
+                          {tpl.label}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const selectedTemplate = safeTemplates.find(
+                          (tpl) => tpl.label === draft.template,
+                        )
+                        if (!selectedTemplate) {
+                          toast.error("Sablon secmelisin.")
+                          return
+                        }
+                        handleTemplateInsert(selectedTemplate)
+                      }}
+                      disabled={!isEditing}
+                      className={actionButtonClass}
+                    >
+                      Ekle
+                    </button>
+                  </div>
+                </div>
+
+                <div className="rounded-lg border border-white/10 bg-ink-900/60 p-3">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                    Stok
+                  </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-2">
+                    <select
+                      value={selectedProductId}
+                      onChange={(event) => setSelectedProductId(event.target.value)}
+                      disabled={!isEditing}
+                      className="min-w-[180px] flex-1 rounded-md border border-white/10 bg-ink-900 px-3 py-2 text-xs text-slate-100 focus:border-white/30 focus:outline-none focus:ring-1 focus:ring-white/10 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      <option value="">Urun sec</option>
+                      {stockOptions.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.name}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      onClick={handleStockInsert}
+                      disabled={!isEditing}
+                      className={actionButtonClass}
+                    >
+                      Ekle
+                    </button>
+                  </div>
                 </div>
               </div>
-
-              <div className="rounded-lg border border-white/10 bg-ink-900/70 p-3">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Stok</p>
-                <div className="mt-2 space-y-2">
-                  <select
-                    value={selectedProductId}
-                    onChange={(event) => setSelectedProductId(event.target.value)}
-                    disabled={!isEditing}
-                    className="w-full rounded-md border border-white/10 bg-ink-900 px-3 py-2 text-xs text-slate-100 focus:border-white/30 focus:outline-none focus:ring-1 focus:ring-white/10 disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    <option value="">Urun sec</option>
-                    {stockOptions.map((option) => (
-                      <option key={option.id} value={option.id}>
-                        {option.name}
-                      </option>
-                    ))}
-                  </select>
-                  <button
-                    type="button"
-                    onClick={handleStockInsert}
-                    disabled={!isEditing}
-                    className={`${actionButtonClass} w-full`}
-                  >
-                    Ekle
-                  </button>
-                </div>
-              </div>
-
-              <p className="text-[11px] text-slate-500">
-                Tokenleri tikla kopyala, surukle birak sirayi degistir.
-              </p>
             </div>
 
-            <div className="overflow-hidden rounded-lg border border-white/10 bg-ink-900/70">
-              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 px-4 py-2">
+            <div className="overflow-hidden rounded-xl border border-white/10 bg-ink-900/70">
+              <div className="flex flex-wrap items-center justify-between gap-2 border-b border-white/10 px-4 py-3">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
                   Teslimat notu
                 </p>
@@ -393,7 +409,7 @@ export default function DeliveryMapModal({
                   {charCount} karakter | {lineCount} satir
                 </span>
               </div>
-              <div className="flex max-h-[480px] overflow-hidden">
+              <div className="flex max-h-[520px] overflow-hidden">
                 <div
                   ref={lineRef}
                   className="w-8 shrink-0 overflow-hidden border-r border-white/10 bg-ink-900 px-2 py-3 text-right font-mono text-[11px] leading-6 text-slate-500"
@@ -420,7 +436,7 @@ export default function DeliveryMapModal({
                     onDragEnd={handleEditorDragEnd}
                     onDragOver={(event) => event.preventDefault()}
                     onDrop={handleEditorDrop}
-                    className={`h-full min-h-[420px] overflow-auto bg-ink-900/60 px-4 py-3 font-mono text-[13px] leading-6 outline-none transition ${
+                    className={`h-full min-h-[460px] overflow-auto bg-ink-900/60 px-4 py-4 font-mono text-[13px] leading-6 outline-none transition ${
                       isEditing ? "text-slate-100" : "text-slate-300"
                     }`}
                   />
