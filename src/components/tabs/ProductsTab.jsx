@@ -97,11 +97,10 @@ export default function ProductsTab({
   canCopyKeys = false,
 }) {
   const [query, setQuery] = useState("")
-  const [activeStockOffer, setActiveStockOffer] = useState(null)
   const [openOffers, setOpenOffers] = useState({})
   const [keyDrafts, setKeyDrafts] = useState({})
   const [confirmKeyTarget, setConfirmKeyTarget] = useState(null)
-  const [groupDraft, setGroupDraft] = useState("")
+  const [groupDrafts, setGroupDrafts] = useState({})
   const [bulkCounts, setBulkCounts] = useState({})
   const canManageGroups = canAddKeys
   const canUpdateKeys = typeof onUpdateKeyStatus === "function" && canCopyKeys
@@ -151,60 +150,31 @@ export default function ProductsTab({
   }, [filteredList, page, pageSize])
   const pageStart = totalItems === 0 ? 0 : (page - 1) * pageSize + 1
   const pageEnd = totalItems === 0 ? 0 : Math.min(totalItems, page * pageSize)
-  const activeOfferId = activeStockOffer?.id ? String(activeStockOffer.id).trim() : ""
-  const activeKeys = activeOfferId && Array.isArray(keysByOffer?.[activeOfferId])
-    ? keysByOffer[activeOfferId]
-    : []
-  const activeGroupId = String(
-    groupAssignments?.[activeOfferId] ?? activeStockOffer?.stockGroupId ?? "",
-  ).trim()
-  const activeGroup = activeGroupId ? groups.find((group) => group.id === activeGroupId) : null
-  const activeGroupName = String(activeGroup?.name ?? activeStockOffer?.stockGroupName ?? "").trim()
-  const activeStockCount = Number(activeStockOffer?.stockCount)
-  const activeStockUsedCount = Number(activeStockOffer?.stockUsedCount)
-  const activeStockTotalCount = Number(activeStockOffer?.stockTotalCount)
-  const activeUsedKeys = activeKeys.filter((item) => item?.status === "used")
-  const activeAvailableKeys = activeKeys.filter((item) => item?.status !== "used")
-  const hasLoadedKeys =
-    Boolean(activeOfferId) && Object.prototype.hasOwnProperty.call(keysByOffer, activeOfferId)
-  const activeTotalCount = hasLoadedKeys
-    ? activeKeys.length
-    : Number.isFinite(activeStockTotalCount)
-      ? activeStockTotalCount
-      : activeKeys.length
-  const activeUsedCount = hasLoadedKeys
-    ? activeUsedKeys.length
-    : Number.isFinite(activeStockUsedCount)
-      ? activeStockUsedCount
-      : activeUsedKeys.length
-  const activeAvailableCount = hasLoadedKeys
-    ? activeAvailableKeys.length
-    : Number.isFinite(activeStockCount)
-      ? activeStockCount
-      : Math.max(0, activeTotalCount - activeUsedCount)
-  const isKeysLoadingActive = activeOfferId ? Boolean(keysLoading?.[activeOfferId]) : false
-  const isKeysSavingActive = activeOfferId ? Boolean(keysSaving?.[activeOfferId]) : false
 
-  const openStockModal = (product) => {
-    if (!product?.id) return
-    setActiveStockOffer(product)
-    setGroupDraft("")
+  const openOfferDetails = (offerId) => {
+    const normalizedId = String(offerId ?? "").trim()
+    if (!normalizedId) return
     setConfirmKeyTarget(null)
-    if (typeof onLoadKeys === "function") {
-      onLoadKeys(product.id)
-    }
-  }
-
-  const closeStockModal = () => {
-    setActiveStockOffer(null)
-    setConfirmKeyTarget(null)
-    setGroupDraft("")
+    setOpenOffers((prev) => {
+      if (prev[normalizedId]) return prev
+      if (typeof onLoadKeys === "function") {
+        onLoadKeys(normalizedId)
+      }
+      return { ...prev, [normalizedId]: true }
+    })
   }
 
   const toggleOfferOpen = (offerId) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
-    setOpenOffers((prev) => ({ ...prev, [normalizedId]: !prev[normalizedId] }))
+    setConfirmKeyTarget(null)
+    setOpenOffers((prev) => {
+      const nextOpen = !prev[normalizedId]
+      if (nextOpen && typeof onLoadKeys === "function") {
+        onLoadKeys(normalizedId)
+      }
+      return { ...prev, [normalizedId]: nextOpen }
+    })
   }
 
   const handleKeyDraftChange = (offerId, value) => {
@@ -239,17 +209,28 @@ export default function ProductsTab({
     onBulkCopy(normalizedId, rawCount, { markUsed })
   }
 
+  const handleGroupDraftChange = (offerId, value) => {
+    const normalizedId = String(offerId ?? "").trim()
+    if (!normalizedId) return
+    setGroupDrafts((prev) => ({ ...prev, [normalizedId]: value }))
+  }
+
   const handleGroupCreate = (offerId) => {
     if (typeof onCreateGroup !== "function" || typeof onAssignGroup !== "function") return
-    const created = onCreateGroup(groupDraft)
+    const normalizedId = String(offerId ?? "").trim()
+    if (!normalizedId) return
+    const draft = groupDrafts[normalizedId] ?? ""
+    const created = onCreateGroup(draft)
     if (!created) return
-    setGroupDraft("")
-    onAssignGroup(offerId, created.id)
+    setGroupDrafts((prev) => ({ ...prev, [normalizedId]: "" }))
+    onAssignGroup(normalizedId, created.id)
   }
 
   const handleGroupAssign = (offerId, groupId) => {
     if (typeof onAssignGroup !== "function") return
-    onAssignGroup(offerId, groupId)
+    const normalizedId = String(offerId ?? "").trim()
+    if (!normalizedId) return
+    onAssignGroup(normalizedId, groupId)
   }
 
   const handleKeyDelete = (offerId, keyId) => {
@@ -285,23 +266,6 @@ export default function ProductsTab({
     if (!normalizedId) return
     onLoadKeys(normalizedId, { force: true })
   }
-
-  useEffect(() => {
-    if (!activeStockOffer) return
-    const handleKeyDown = (event) => {
-      if (event.key === "Escape") closeStockModal()
-    }
-    window.addEventListener("keydown", handleKeyDown)
-    return () => window.removeEventListener("keydown", handleKeyDown)
-  }, [activeStockOffer])
-
-  useEffect(() => {
-    if (!activeStockOffer?.id) return
-    const latest = allProducts.find((product) => product?.id === activeStockOffer.id)
-    if (latest && latest !== activeStockOffer) {
-      setActiveStockOffer(latest)
-    }
-  }, [activeStockOffer, allProducts])
 
   useEffect(() => {
     if (!categories.some((category) => category.key === activeCategoryKey)) {
@@ -496,17 +460,34 @@ export default function ProductsTab({
                   const stockCountRaw = Number(product?.stockCount)
                   const stockUsedRaw = Number(product?.stockUsedCount)
                   const stockTotalRaw = Number(product?.stockTotalCount)
-                  const usedCountFallback = keyList.filter((item) => item?.status === "used").length
-                  const totalCount = Number.isFinite(stockTotalRaw) ? stockTotalRaw : keyList.length
-                  const usedCount = Number.isFinite(stockUsedRaw) ? stockUsedRaw : usedCountFallback
-                  const availableCount = Number.isFinite(stockCountRaw)
+                  const usedKeys = keyList.filter((item) => item?.status === "used")
+                  const availableKeys = keyList.filter((item) => item?.status !== "used")
+                  const usedCountFromKeys = usedKeys.length
+                  const availableCountFromKeys = availableKeys.length
+                  const totalCountFromKeys = keyList.length
+                  const rawTotalCount = Number.isFinite(stockTotalRaw) ? stockTotalRaw : totalCountFromKeys
+                  const rawUsedCount = Number.isFinite(stockUsedRaw) ? stockUsedRaw : usedCountFromKeys
+                  const rawAvailableCount = Number.isFinite(stockCountRaw)
                     ? stockCountRaw
-                    : Math.max(0, totalCount - usedCount)
-                  const groupName = String(product?.stockGroupName ?? "").trim()
+                    : Math.max(0, rawTotalCount - rawUsedCount)
+                  const hasLoadedKeys = Object.prototype.hasOwnProperty.call(keysByOffer, offerId)
+                  const totalCount = hasLoadedKeys ? totalCountFromKeys : rawTotalCount
+                  const usedCount = hasLoadedKeys ? usedCountFromKeys : rawUsedCount
+                  const availableCount = hasLoadedKeys ? availableCountFromKeys : rawAvailableCount
+                  const groupId = String(
+                    groupAssignments?.[offerId] ?? product?.stockGroupId ?? "",
+                  ).trim()
+                  const group = groupId ? groups.find((entry) => entry.id === groupId) : null
+                  const groupName = String(group?.name ?? product?.stockGroupName ?? "").trim()
                   const categoryKey = getCategoryKey(product)
                   const categoryLabel =
                     categoryKey === "diger" ? "Diger" : formatCategoryLabel(categoryKey)
                   const isOpen = Boolean(openOffers[offerId])
+                  const isKeysLoading = Boolean(keysLoading?.[offerId])
+                  const isKeysSaving = Boolean(keysSaving?.[offerId])
+                  const keyDraftValue = keyDrafts[offerId] ?? ""
+                  const groupDraftValue = groupDrafts[offerId] ?? ""
+                  const bulkCountValue = bulkCounts[offerId] ?? ""
                   const rawHref = String(product?.href ?? "").trim()
                   const href = rawHref
                     ? rawHref.startsWith("http://") || rawHref.startsWith("https://")
@@ -571,7 +552,7 @@ export default function ProductsTab({
                         <div className="flex items-center gap-1.5">
                           <button
                             type="button"
-                            onClick={() => openStockModal(product)}
+                            onClick={() => openOfferDetails(offerId)}
                             disabled={!offerId}
                             className="inline-flex h-8 items-center justify-center rounded-md border border-white/10 bg-white/5 px-3 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/15 hover:text-emerald-50 disabled:cursor-not-allowed disabled:opacity-60"
                           >
@@ -592,39 +573,338 @@ export default function ProductsTab({
                       </div>
 
                       {isOpen && (
-                        <div className="mt-4 space-y-3">
-                          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-white/10 bg-ink-900/60 px-3 py-2 text-xs text-slate-300">
-                            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-200">
-                              Kategori: {categoryLabel}
-                            </span>
-                            {groupName ? (
-                              <span className="rounded-full border border-sky-300/60 bg-sky-500/15 px-2.5 py-1 text-[11px] font-semibold text-sky-50">
-                                Grup: {groupName}
+                        <div className="mt-4 space-y-4">
+                          <div className="flex flex-wrap items-center justify-between gap-3">
+                            <div className="flex flex-wrap items-center gap-2 rounded-xl border border-white/10 bg-ink-900/60 px-3 py-2 text-xs text-slate-300">
+                              <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-200">
+                                Kategori: {categoryLabel}
                               </span>
-                            ) : (
-                              <span className="text-slate-400">Grup secilmedi.</span>
-                            )}
-                            {href && (
-                              <a
-                                href={href}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
-                              >
-                                Urun linki
-                              </a>
-                            )}
-                          </div>
-                          <div className="flex flex-wrap items-center gap-2 rounded-xl border border-white/10 bg-ink-900/60 px-3 py-2 text-xs text-slate-300">
+                              {groupName ? (
+                                <span className="rounded-full border border-sky-300/60 bg-sky-500/15 px-2.5 py-1 text-[11px] font-semibold text-sky-50">
+                                  Grup: {groupName}
+                                </span>
+                              ) : (
+                                <span className="text-slate-400">Grup secilmedi.</span>
+                              )}
+                              {href && (
+                                <a
+                                  href={href}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="rounded-md border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
+                                >
+                                  Urun linki
+                                </a>
+                              )}
+                            </div>
                             <button
                               type="button"
-                              onClick={() => openStockModal(product)}
-                              disabled={!offerId}
-                              className="rounded-md border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50 disabled:cursor-not-allowed disabled:opacity-60"
+                              onClick={() => handleKeysRefresh(offerId)}
+                              disabled={!offerId || isKeysLoading}
+                              className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-accent-300 hover:text-accent-100 disabled:cursor-not-allowed disabled:opacity-60"
                             >
-                              Stoklari ac
+                              {isKeysLoading ? "Yukleniyor..." : "Yenile"}
                             </button>
-                            <span className="text-slate-400">Stoklari modalda yonet.</span>
+                          </div>
+
+                          <div className="grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
+                            <div className="space-y-4">
+                              <div className="rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
+                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                  <div>
+                                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                                      Stok listesi
+                                    </p>
+                                    <p className="text-sm text-slate-300">
+                                      {groupId ? "Secili stok grubunun kayitlari." : "Stok grubu secilmedi."}
+                                    </p>
+                                  </div>
+                                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold text-slate-200">
+                                    {hasLoadedKeys ? keyList.length : totalCount} kayit
+                                  </span>
+                                </div>
+
+                                {!groupId && (
+                                  <div className="mt-4 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-slate-400">
+                                    Stok eklemek ve gormek icin once bir grup sec.
+                                  </div>
+                                )}
+
+                                {groupId && (
+                                  <div className="mt-4 space-y-3">
+                                    {isKeysLoading && (
+                                      <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-slate-400">
+                                        Stoklar yukleniyor...
+                                      </div>
+                                    )}
+                                    {!isKeysLoading && keyList.length === 0 && (
+                                      <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-slate-400">
+                                        Bu grupta stok yok.
+                                      </div>
+                                    )}
+                                    {!isKeysLoading && keyList.length > 0 && (
+                                      <div className="space-y-2">
+                                        {availableKeys.map((item, index) => {
+                                          const isDeleting = Boolean(keysDeleting?.[item.id])
+                                          return (
+                                            <div
+                                              key={item.id}
+                                              className={`flex flex-col gap-3 rounded-xl border border-emerald-300/30 bg-emerald-500/10 px-3 py-2 shadow-inner sm:flex-row sm:items-center ${
+                                                isDeleting ? "opacity-60" : ""
+                                              }`}
+                                            >
+                                              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[11px] font-semibold text-slate-200">
+                                                #{index + 1}
+                                              </span>
+                                              <p className="w-full flex-1 select-text break-all font-mono text-sm text-slate-100">
+                                                {item.code}
+                                              </p>
+                                              <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em]">
+                                                {canCopyKeys && (
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => handleKeyCopy(item.code)}
+                                                    className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-slate-200 transition hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
+                                                  >
+                                                    Kopyala
+                                                  </button>
+                                                )}
+                                                {canUpdateKeys && (
+                                                  <button
+                                                    type="button"
+                                                    onClick={() =>
+                                                      handleKeyStatusUpdate(offerId, item.id, "used")
+                                                    }
+                                                    className="rounded-md border border-emerald-300/60 bg-emerald-500/15 px-2 py-1 text-emerald-50 transition hover:border-emerald-200 hover:bg-emerald-500/25"
+                                                  >
+                                                    Kullanildi
+                                                  </button>
+                                                )}
+                                                {canDeleteKeys && (
+                                                  <button
+                                                    type="button"
+                                                    onClick={() => handleKeyDelete(offerId, item.id)}
+                                                    disabled={isDeleting}
+                                                    className={`rounded-md border px-2 py-1 text-rose-50 transition ${
+                                                      confirmKeyTarget === `${offerId}-${item.id}`
+                                                        ? "border-rose-300 bg-rose-500/25"
+                                                        : "border-rose-400/60 bg-rose-500/10 hover:border-rose-300 hover:bg-rose-500/20"
+                                                    }`}
+                                                  >
+                                                    {confirmKeyTarget === `${offerId}-${item.id}` ? "Onayla" : "Sil"}
+                                                  </button>
+                                                )}
+                                              </div>
+                                            </div>
+                                          )
+                                        })}
+                                        {usedKeys.length > 0 && (
+                                          <div className="mt-4 space-y-2">
+                                            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                                              Kullanilanlar
+                                            </p>
+                                            {usedKeys.map((item, index) => {
+                                              const isDeleting = Boolean(keysDeleting?.[item.id])
+                                              return (
+                                                <div
+                                                  key={item.id}
+                                                  className={`flex flex-col gap-3 rounded-xl border border-amber-300/40 bg-amber-500/10 px-3 py-2 shadow-inner sm:flex-row sm:items-center ${
+                                                    isDeleting ? "opacity-60" : ""
+                                                  }`}
+                                                >
+                                                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[11px] font-semibold text-slate-200">
+                                                    #{availableKeys.length + index + 1}
+                                                  </span>
+                                                  <p className="w-full flex-1 select-text break-all font-mono text-sm text-slate-100">
+                                                    {item.code}
+                                                  </p>
+                                                  <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em]">
+                                                    {canCopyKeys && (
+                                                      <button
+                                                        type="button"
+                                                        onClick={() => handleKeyCopy(item.code)}
+                                                        className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-slate-200 transition hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
+                                                      >
+                                                        Kopyala
+                                                      </button>
+                                                    )}
+                                                    {canUpdateKeys && (
+                                                      <button
+                                                        type="button"
+                                                        onClick={() =>
+                                                          handleKeyStatusUpdate(
+                                                            offerId,
+                                                            item.id,
+                                                            "available",
+                                                          )
+                                                        }
+                                                        className="rounded-md border border-emerald-300/60 bg-emerald-500/15 px-2 py-1 text-emerald-50 transition hover:border-emerald-200 hover:bg-emerald-500/25"
+                                                      >
+                                                        Geri al
+                                                      </button>
+                                                    )}
+                                                    {canDeleteKeys && (
+                                                      <button
+                                                        type="button"
+                                                        onClick={() => handleKeyDelete(offerId, item.id)}
+                                                        disabled={isDeleting}
+                                                        className={`rounded-md border px-2 py-1 text-rose-50 transition ${
+                                                          confirmKeyTarget === `${offerId}-${item.id}`
+                                                            ? "border-rose-300 bg-rose-500/25"
+                                                            : "border-rose-400/60 bg-rose-500/10 hover:border-rose-300 hover:bg-rose-500/20"
+                                                        }`}
+                                                      >
+                                                        {confirmKeyTarget === `${offerId}-${item.id}` ? "Onayla" : "Sil"}
+                                                      </button>
+                                                    )}
+                                                  </div>
+                                                </div>
+                                              )
+                                            })}
+                                          </div>
+                                        )}
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+
+                              {canAddKeys && groupId && (
+                                <div className="rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
+                                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                                    Stok ekle
+                                  </p>
+                                  <p className="text-sm text-slate-400">
+                                    Her satira bir stok yaz. Tekrar edenler eklenmez.
+                                  </p>
+                                  <textarea
+                                    rows={4}
+                                    value={keyDraftValue}
+                                    onChange={(event) => handleKeyDraftChange(offerId, event.target.value)}
+                                    placeholder="XXXX-XXXX-XXXX-XXXX"
+                                    className="mt-3 w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 font-mono text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                                  />
+                                  <div className="mt-3 flex flex-wrap gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleKeyAdd(offerId)}
+                                      disabled={!keyDraftValue.trim() || isKeysSaving || isKeysLoading}
+                                      className="rounded-lg border border-accent-300/70 bg-accent-500/15 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-accent-50 transition hover:border-accent-200 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                                    >
+                                      {isKeysSaving ? "Kaydediliyor..." : "Stok ekle"}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleKeyDraftChange(offerId, "")}
+                                      className="rounded-lg border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
+                                    >
+                                      Temizle
+                                    </button>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+
+                            <div className="space-y-4">
+                              <div className="rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
+                                <div className="flex items-start justify-between gap-3">
+                                  <div>
+                                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                                      Stok grubu
+                                    </p>
+                                    <p className="text-sm text-slate-200">
+                                      {groupName || "Grup secilmedi"}
+                                    </p>
+                                  </div>
+                                  {groupId && canManageGroups && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleGroupAssign(offerId, "")}
+                                      className="rounded-lg border border-rose-400/60 bg-rose-500/10 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-100 transition hover:border-rose-300 hover:bg-rose-500/20"
+                                    >
+                                      Baglantiyi kaldir
+                                    </button>
+                                  )}
+                                </div>
+                                <div className="mt-3 space-y-3">
+                                  <select
+                                    value={groupId}
+                                    onChange={(event) => handleGroupAssign(offerId, event.target.value)}
+                                    disabled={!canManageGroups}
+                                    className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                                  >
+                                    <option value="">Grup sec</option>
+                                    {groups.map((groupOption) => (
+                                      <option key={groupOption.id} value={groupOption.id}>
+                                        {groupOption.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  {canManageGroups && (
+                                    <div className="flex flex-wrap items-center gap-2">
+                                      <input
+                                        type="text"
+                                        value={groupDraftValue}
+                                        onChange={(event) =>
+                                          handleGroupDraftChange(offerId, event.target.value)
+                                        }
+                                        placeholder="Yeni grup adi"
+                                        className="min-w-[160px] flex-1 rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                                      />
+                                      <button
+                                        type="button"
+                                        onClick={() => handleGroupCreate(offerId)}
+                                        disabled={!groupDraftValue.trim()}
+                                        className="rounded-lg border border-accent-300/70 bg-accent-500/15 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-accent-50 transition hover:border-accent-200 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                                      >
+                                        Grup olustur
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+
+                              {canCopyKeys && groupId && (
+                                <div className="rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
+                                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                                    Toplu kopyala
+                                  </p>
+                                  <p className="text-sm text-slate-400">
+                                    Adet bos ise tum kullanilabilir stoklari kopyalar.
+                                  </p>
+                                  <div className="mt-3 space-y-3">
+                                    <input
+                                      type="text"
+                                      inputMode="numeric"
+                                      value={bulkCountValue}
+                                      onChange={(event) => handleBulkCountChange(offerId, event.target.value)}
+                                      placeholder="Adet"
+                                      className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                                    />
+                                    <div className="flex flex-wrap gap-2">
+                                      <button
+                                        type="button"
+                                        onClick={() => handleBulkCopy(offerId, false)}
+                                        disabled={isKeysLoading}
+                                        className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                      >
+                                        Toplu kopyala
+                                      </button>
+                                      {canUpdateKeys && (
+                                        <button
+                                          type="button"
+                                          onClick={() => handleBulkCopy(offerId, true)}
+                                          disabled={isKeysLoading}
+                                          className="rounded-lg border border-emerald-300/60 bg-emerald-500/15 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-50 transition hover:border-emerald-200 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                                        >
+                                          Kopyala + kullanildi
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
                           </div>
                         </div>
                       )}
@@ -691,357 +971,6 @@ export default function ProductsTab({
         </div>
       </div>
 
-      {activeStockOffer && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-8"
-          onClick={closeStockModal}
-        >
-          <div
-            className="w-full max-w-4xl rounded-3xl border border-white/10 bg-ink-900/95 p-6 shadow-card backdrop-blur"
-            onClick={(event) => event.stopPropagation()}
-          >
-            <div className="flex flex-wrap items-start justify-between gap-4">
-              <div className="space-y-1">
-                <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-300/80">
-                  Stok detaylari
-                </p>
-                <h2 className="text-lg font-semibold text-white">
-                  {activeStockOffer?.name || "Isimsiz urun"}
-                </h2>
-                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-slate-300">
-                  <span className="rounded-full border border-emerald-300/50 bg-emerald-500/15 px-3 py-1 text-emerald-100">
-                    Kullanilabilir: {activeAvailableCount}
-                  </span>
-                  <span className="rounded-full border border-amber-300/50 bg-amber-500/15 px-3 py-1 text-amber-100">
-                    Kullanildi: {activeUsedCount}
-                  </span>
-                  <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-slate-200">
-                    Toplam: {activeTotalCount}
-                  </span>
-                  {activeGroupName && (
-                    <span className="rounded-full border border-sky-300/50 bg-sky-500/15 px-3 py-1 text-sky-100">
-                      Grup: {activeGroupName}
-                    </span>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleKeysRefresh(activeOfferId)}
-                  disabled={!activeOfferId || isKeysLoadingActive}
-                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-accent-300 hover:text-accent-100 disabled:cursor-not-allowed disabled:opacity-60"
-                >
-                  {isKeysLoadingActive ? "Yukleniyor..." : "Yenile"}
-                </button>
-                <button
-                  type="button"
-                  onClick={closeStockModal}
-                  className="rounded-lg border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
-                >
-                  Kapat
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-5 grid gap-5 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
-              <div className="space-y-4">
-                <div className="rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                        Stok listesi
-                      </p>
-                      <p className="text-sm text-slate-300">
-                        {activeGroupId ? "Secili stok grubunun kayitlari." : "Stok grubu secilmedi."}
-                      </p>
-                    </div>
-                    <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold text-slate-200">
-                      {activeKeys.length} kayit
-                    </span>
-                  </div>
-
-                  {!activeGroupId && (
-                    <div className="mt-4 rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-slate-400">
-                      Stok eklemek ve gormek icin once bir grup sec.
-                    </div>
-                  )}
-
-                  {activeGroupId && (
-                    <div className="mt-4 space-y-3">
-                      {isKeysLoadingActive && (
-                        <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-slate-400">
-                          Stoklar yukleniyor...
-                        </div>
-                      )}
-                      {!isKeysLoadingActive && activeKeys.length === 0 && (
-                        <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-xs text-slate-400">
-                          Bu grupta stok yok.
-                        </div>
-                      )}
-                      {!isKeysLoadingActive && activeKeys.length > 0 && (
-                        <div className="space-y-2">
-                          {activeAvailableKeys.map((item, index) => {
-                            const isDeleting = Boolean(keysDeleting?.[item.id])
-                            return (
-                              <div
-                                key={item.id}
-                                className={`flex flex-col gap-3 rounded-xl border border-emerald-300/30 bg-emerald-500/10 px-3 py-2 shadow-inner sm:flex-row sm:items-center ${
-                                  isDeleting ? "opacity-60" : ""
-                                }`}
-                              >
-                                <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[11px] font-semibold text-slate-200">
-                                  #{index + 1}
-                                </span>
-                                <p className="w-full flex-1 select-text break-all font-mono text-sm text-slate-100">
-                                  {item.code}
-                                </p>
-                                <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em]">
-                                  {canCopyKeys && (
-                                    <button
-                                      type="button"
-                                      onClick={() => handleKeyCopy(item.code)}
-                                      className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-slate-200 transition hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
-                                    >
-                                      Kopyala
-                                    </button>
-                                  )}
-                                  {canUpdateKeys && (
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handleKeyStatusUpdate(activeOfferId, item.id, "used")
-                                      }
-                                      className="rounded-md border border-emerald-300/60 bg-emerald-500/15 px-2 py-1 text-emerald-50 transition hover:border-emerald-200 hover:bg-emerald-500/25"
-                                    >
-                                      Kullanildi
-                                    </button>
-                                  )}
-                                  {canDeleteKeys && (
-                                    <button
-                                      type="button"
-                                      onClick={() => handleKeyDelete(activeOfferId, item.id)}
-                                      disabled={isDeleting}
-                                      className={`rounded-md border px-2 py-1 text-rose-50 transition ${
-                                        confirmKeyTarget === `${activeOfferId}-${item.id}`
-                                          ? "border-rose-300 bg-rose-500/25"
-                                          : "border-rose-400/60 bg-rose-500/10 hover:border-rose-300 hover:bg-rose-500/20"
-                                      }`}
-                                    >
-                                      {confirmKeyTarget === `${activeOfferId}-${item.id}` ? "Onayla" : "Sil"}
-                                    </button>
-                                  )}
-                                </div>
-                              </div>
-                            )
-                          })}
-                          {activeUsedKeys.length > 0 && (
-                            <div className="mt-4 space-y-2">
-                              <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                                Kullanilanlar
-                              </p>
-                              {activeUsedKeys.map((item, index) => {
-                                const isDeleting = Boolean(keysDeleting?.[item.id])
-                                return (
-                                  <div
-                                    key={item.id}
-                                    className={`flex flex-col gap-3 rounded-xl border border-amber-300/40 bg-amber-500/10 px-3 py-2 shadow-inner sm:flex-row sm:items-center ${
-                                      isDeleting ? "opacity-60" : ""
-                                    }`}
-                                  >
-                                    <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-white/5 text-[11px] font-semibold text-slate-200">
-                                      #{activeAvailableKeys.length + index + 1}
-                                    </span>
-                                    <p className="w-full flex-1 select-text break-all font-mono text-sm text-slate-100">
-                                      {item.code}
-                                    </p>
-                                    <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.18em]">
-                                      {canCopyKeys && (
-                                        <button
-                                          type="button"
-                                          onClick={() => handleKeyCopy(item.code)}
-                                          className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-slate-200 transition hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
-                                        >
-                                          Kopyala
-                                        </button>
-                                      )}
-                                      {canUpdateKeys && (
-                                        <button
-                                          type="button"
-                                          onClick={() =>
-                                            handleKeyStatusUpdate(activeOfferId, item.id, "available")
-                                          }
-                                          className="rounded-md border border-emerald-300/60 bg-emerald-500/15 px-2 py-1 text-emerald-50 transition hover:border-emerald-200 hover:bg-emerald-500/25"
-                                        >
-                                          Geri al
-                                        </button>
-                                      )}
-                                      {canDeleteKeys && (
-                                        <button
-                                          type="button"
-                                          onClick={() => handleKeyDelete(activeOfferId, item.id)}
-                                          disabled={isDeleting}
-                                          className={`rounded-md border px-2 py-1 text-rose-50 transition ${
-                                            confirmKeyTarget === `${activeOfferId}-${item.id}`
-                                              ? "border-rose-300 bg-rose-500/25"
-                                              : "border-rose-400/60 bg-rose-500/10 hover:border-rose-300 hover:bg-rose-500/20"
-                                          }`}
-                                        >
-                                          {confirmKeyTarget === `${activeOfferId}-${item.id}` ? "Onayla" : "Sil"}
-                                        </button>
-                                      )}
-                                    </div>
-                                  </div>
-                                )
-                              })}
-                            </div>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                {canAddKeys && activeGroupId && (
-                  <div className="rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                      Stok ekle
-                    </p>
-                    <p className="text-sm text-slate-400">
-                      Her satira bir stok yaz. Tekrar edenler eklenmez.
-                    </p>
-                    <textarea
-                      rows={4}
-                      value={keyDrafts[activeOfferId] ?? ""}
-                      onChange={(event) => handleKeyDraftChange(activeOfferId, event.target.value)}
-                      placeholder="XXXX-XXXX-XXXX-XXXX"
-                      className="mt-3 w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 font-mono text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                    />
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      <button
-                        type="button"
-                        onClick={() => handleKeyAdd(activeOfferId)}
-                        disabled={
-                          !keyDrafts[activeOfferId]?.trim() || isKeysSavingActive || isKeysLoadingActive
-                        }
-                        className="rounded-lg border border-accent-300/70 bg-accent-500/15 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-accent-50 transition hover:border-accent-200 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
-                      >
-                        {isKeysSavingActive ? "Kaydediliyor..." : "Stok ekle"}
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleKeyDraftChange(activeOfferId, "")}
-                        className="rounded-lg border border-white/10 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-300 hover:text-accent-100"
-                      >
-                        Temizle
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-4">
-                <div className="rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
-                  <div className="flex items-start justify-between gap-3">
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                        Stok grubu
-                      </p>
-                      <p className="text-sm text-slate-200">
-                        {activeGroupName || "Grup secilmedi"}
-                      </p>
-                    </div>
-                    {activeGroupId && canManageGroups && (
-                      <button
-                        type="button"
-                        onClick={() => handleGroupAssign(activeOfferId, "")}
-                        className="rounded-lg border border-rose-400/60 bg-rose-500/10 px-2 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-rose-100 transition hover:border-rose-300 hover:bg-rose-500/20"
-                      >
-                        Baglantiyi kaldir
-                      </button>
-                    )}
-                  </div>
-                  <div className="mt-3 space-y-3">
-                    <select
-                      value={activeGroupId}
-                      onChange={(event) => handleGroupAssign(activeOfferId, event.target.value)}
-                      disabled={!canManageGroups}
-                      className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      <option value="">Grup sec</option>
-                      {groups.map((group) => (
-                        <option key={group.id} value={group.id}>
-                          {group.name}
-                        </option>
-                      ))}
-                    </select>
-                    {canManageGroups && (
-                      <div className="flex flex-wrap items-center gap-2">
-                        <input
-                          type="text"
-                          value={groupDraft}
-                          onChange={(event) => setGroupDraft(event.target.value)}
-                          placeholder="Yeni grup adi"
-                          className="min-w-[160px] flex-1 rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleGroupCreate(activeOfferId)}
-                          disabled={!groupDraft.trim()}
-                          className="rounded-lg border border-accent-300/70 bg-accent-500/15 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-accent-50 transition hover:border-accent-200 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          Grup olustur
-                        </button>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                {canCopyKeys && activeGroupId && (
-                  <div className="rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
-                    <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                      Toplu kopyala
-                    </p>
-                    <p className="text-sm text-slate-400">
-                      Adet bos ise tum kullanilabilir stoklari kopyalar.
-                    </p>
-                    <div className="mt-3 space-y-3">
-                      <input
-                        type="text"
-                        inputMode="numeric"
-                        value={bulkCounts[activeOfferId] ?? ""}
-                        onChange={(event) => handleBulkCountChange(activeOfferId, event.target.value)}
-                        placeholder="Adet"
-                        className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                      />
-                      <div className="flex flex-wrap gap-2">
-                        <button
-                          type="button"
-                          onClick={() => handleBulkCopy(activeOfferId, false)}
-                          disabled={isKeysLoadingActive}
-                          className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50 disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          Toplu kopyala
-                        </button>
-                        {canUpdateKeys && (
-                          <button
-                            type="button"
-                            onClick={() => handleBulkCopy(activeOfferId, true)}
-                            disabled={isKeysLoadingActive}
-                            className="rounded-lg border border-emerald-300/60 bg-emerald-500/15 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-50 transition hover:border-emerald-200 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-60"
-                          >
-                            Kopyala + kullanildi
-                          </button>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
