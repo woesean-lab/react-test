@@ -49,19 +49,22 @@ function ProductsSkeleton({ panelClass }) {
             ))}
           </div>
         </aside>
-        <div className="space-y-4">
-          <div className="rounded-3xl border border-white/10 bg-ink-900/60 p-5 shadow-card">
-            <SkeletonBlock className="h-3 w-16 rounded-full" />
-            <SkeletonBlock className="mt-3 h-7 w-40" />
-            <SkeletonBlock className="mt-3 h-4 w-56" />
-            <div className="mt-4 flex flex-wrap gap-2">
-              <SkeletonBlock className="h-8 w-28 rounded-xl" />
-              <SkeletonBlock className="h-8 w-32 rounded-xl" />
-              <SkeletonBlock className="h-8 w-36 rounded-xl" />
+        <div className={`${panelClass} bg-ink-800/60`}>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <SkeletonBlock className="h-3 w-32 rounded-full" />
+              <SkeletonBlock className="mt-3 h-4 w-48 rounded-full" />
+              <div className="mt-4 flex flex-wrap gap-2">
+                <SkeletonBlock className="h-7 w-24 rounded-full" />
+                <SkeletonBlock className="h-7 w-28 rounded-full" />
+                <SkeletonBlock className="h-7 w-32 rounded-full" />
+              </div>
             </div>
-            <SkeletonBlock className="mt-4 h-11 w-full rounded-lg" />
+            <div className="flex w-full flex-col gap-2">
+              <SkeletonBlock className="h-11 w-full rounded-lg" />
+            </div>
           </div>
-          <div className="space-y-2">
+          <div className="mt-4 space-y-2">
             {Array.from({ length: 6 }).map((_, index) => (
               <SkeletonBlock key={`product-card-${index}`} className="h-14 w-full rounded-xl" />
             ))}
@@ -378,31 +381,28 @@ export default function ProductsTab({
           </div>
         </aside>
 
-        <div className="space-y-4">
-          <div className="rounded-3xl border border-white/10 bg-ink-900/60 p-5 shadow-card">
-            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-                  Kategori
-                </p>
-                <h2 className="mt-2 text-xl font-semibold text-white">
-                  {activeCategory?.label ?? "Tumu"}
-                </h2>
-                <p className="mt-1 text-sm text-slate-400">{list.length} urun bu kategoride.</p>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                <span className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-ink-900/80 px-3 py-2 text-xs text-slate-200">
+        <div className={`${panelClass} bg-ink-800/60`}>
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <div>
+              <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
+                Urun katalogu
+              </p>
+              <p className="mt-1 text-sm text-slate-400">
+                {activeCategory?.label ?? "Tumu"} - {list.length} urun
+              </p>
+              <div className="mt-3 flex flex-wrap gap-2">
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-ink-900/80 px-3 py-1 text-xs text-slate-200">
                   Toplam: {list.length}
                 </span>
-                <span className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-ink-900/80 px-3 py-2 text-xs text-slate-200">
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-ink-900/80 px-3 py-1 text-xs text-slate-200">
                   Gosterilen: {paginatedList.length}
                 </span>
-                <span className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-ink-900/80 px-3 py-2 text-xs text-slate-200">
-                  Kategori: {activeCategory?.label ?? "Tumu"}
+                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-ink-900/80 px-3 py-1 text-xs text-slate-200">
+                  Sayfa: {page}/{totalPages}
                 </span>
               </div>
             </div>
-            <div className="mt-4">
+            <div className="flex w-full flex-col gap-2">
               <div className="flex h-11 w-full items-center gap-3 rounded border border-white/10 bg-ink-900 px-4 shadow-inner">
                 <span className="text-[11px] uppercase tracking-[0.18em] text-slate-400">Ara</span>
                 <div className="flex flex-1 items-center gap-2">
@@ -431,7 +431,7 @@ export default function ProductsTab({
             </div>
           </div>
 
-          <div key={activeCategoryKey} className="space-y-2">
+          <div key={activeCategoryKey} className="mt-4 space-y-2">
             {filteredList.length === 0 ? (
               <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
                 Gosterilecek urun bulunamadi.
@@ -862,7 +862,7 @@ export default function ProductsTab({
             )}
           </div>
           {filteredList.length > 0 && totalPages > 1 && (
-            <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
+            <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-xs text-slate-500">
               <span className="text-slate-400">
                 {pageStart}-{pageEnd} / {totalItems}
               </span>
