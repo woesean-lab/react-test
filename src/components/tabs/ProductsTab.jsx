@@ -482,74 +482,148 @@ export default function ProductsTab({
                       : `https://www.eldorado.gg${rawHref.startsWith("/") ? "" : "/"}${rawHref}`
                     : ""
                   const totalCapacity = Math.max(totalCount || 0, availableCount + usedCount)
+                  const stockRatio =
+                    totalCapacity > 0
+                      ? Math.min(100, Math.round((availableCount / totalCapacity) * 100))
+                      : 0
                   const statusLabel = isStockEnabled ? (isOutOfStock ? "Tukendi" : "Acik") : "Kapali"
                   const statusClass = isStockEnabled
                     ? isOutOfStock
                       ? "border-rose-300/60 bg-rose-500/15 text-rose-50"
                       : "border-emerald-300/60 bg-emerald-500/15 text-emerald-50"
                     : "border-white/20 bg-white/5 text-slate-200"
+                  const cardTone = isMissing
+                    ? "border-orange-300/50 bg-gradient-to-br from-orange-500/15 via-ink-950/90 to-ink-900/80"
+                    : isOutOfStock
+                      ? "border-rose-300/50 bg-gradient-to-br from-rose-500/15 via-ink-950/90 to-ink-900/80"
+                      : "border-white/10 bg-gradient-to-br from-ink-950 via-ink-900/90 to-ink-800/80"
+                  const highlightLineClass = isMissing
+                    ? "via-orange-300/60"
+                    : isOutOfStock
+                      ? "via-rose-300/60"
+                      : "via-accent-400/60"
                   return (
                     <div
                       key={key}
-                      className={`rounded-xl border border-white/10 bg-ink-950/60 p-4 shadow-inner transition hover:border-accent-400/60 hover:bg-ink-900 ${
-                        isMissing
-                          ? "border-orange-300/30 bg-orange-500/5"
-                          : isOutOfStock
-                            ? "border-rose-300/30 bg-rose-500/5"
-                            : "border-white/10 bg-ink-900/70"
-                      }`}
+                      className={`group relative overflow-hidden rounded-2xl border p-5 shadow-card transition duration-300 hover:-translate-y-0.5 hover:border-accent-400/60 hover:shadow-glow ${cardTone}`}
                     >
-                      <div className="grid gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto] md:items-center">
-                        <button
-                          type="button"
-                          onClick={() => toggleOfferOpen(offerId)}
-                          disabled={!offerId}
-                          className="min-w-0 text-left disabled:cursor-not-allowed disabled:opacity-60"
-                        >
-                          <div className="flex flex-wrap items-center gap-2">
-                            <span
-                              className={`truncate text-sm font-semibold ${
-                                isMissing
-                                  ? "text-orange-50"
-                                  : isOutOfStock
-                                    ? "text-rose-50"
-                                    : "text-white"
-                              }`}
-                            >
-                              {name}
-                            </span>
-                            <span className={`rounded-md border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] ${statusClass}`}>
-                              {statusLabel}
-                            </span>
-                          </div>
-                          <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                            <span>{categoryLabel}</span>
-                            {groupName && <span>{groupName}</span>}
-                            {isMissing && <span className="text-orange-200">Eksik</span>}
-                          </div>
-                          
-                        </button>
+                      <div
+                        className={`pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent ${highlightLineClass} to-transparent`}
+                      />
+                      <div className="pointer-events-none absolute -right-16 -top-16 h-32 w-32 rounded-full bg-accent-400/10 blur-3xl" />
 
-                        <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold">
-                          <span className="rounded-md border border-emerald-300/40 bg-emerald-500/10 px-2 py-1 text-emerald-50">
-                            Stokta {availableCount}
-                          </span>
-                          <span className="rounded-md border border-amber-300/50 bg-amber-500/10 px-2 py-1 text-amber-50">
-                            Kullanilan {usedCount}
-                          </span>
-                          <span className="rounded-md border border-sky-300/40 bg-sky-500/10 px-2 py-1 text-sky-50">
-                            Toplam {totalCapacity}
-                          </span>
+                      <div className="relative z-10 grid gap-4 lg:grid-cols-[minmax(0,1.5fr)_minmax(0,1fr)_auto] lg:items-center">
+                        <div className="space-y-3">
+                          <button
+                            type="button"
+                            onClick={() => toggleOfferOpen(offerId)}
+                            disabled={!offerId}
+                            className="group min-w-0 text-left disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span
+                                className={`truncate text-base font-semibold transition group-hover:text-accent-100 ${
+                                  isMissing
+                                    ? "text-orange-50"
+                                    : isOutOfStock
+                                      ? "text-rose-50"
+                                      : "text-white"
+                                }`}
+                              >
+                                {name}
+                              </span>
+                              <span
+                                className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] ${statusClass}`}
+                              >
+                                {statusLabel}
+                              </span>
+                            </div>
+                            <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                              <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
+                                {categoryLabel}
+                              </span>
+                              {groupName && (
+                                <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1">
+                                  {groupName}
+                                </span>
+                              )}
+                              {isMissing && (
+                                <span className="rounded-full border border-orange-300/50 bg-orange-500/15 px-2.5 py-1 text-orange-50">
+                                  Eksik
+                                </span>
+                              )}
+                              {hasNote && (
+                                <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-slate-200">
+                                  Not
+                                </span>
+                              )}
+                            </div>
+                            {hasNote && (
+                              <p className="mt-2 max-w-2xl text-xs text-slate-400">
+                                {notePreview}
+                              </p>
+                            )}
+                          </button>
+
+                          <div className="space-y-2">
+                            <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-500">
+                              <span>Stok durumu</span>
+                              <span>
+                                {availableCount} / {totalCapacity}
+                              </span>
+                            </div>
+                            <div className="h-2 w-full rounded-full bg-white/5">
+                              <div
+                                className={`h-full rounded-full ${
+                                  isOutOfStock
+                                    ? "bg-rose-400/80"
+                                    : "bg-gradient-to-r from-emerald-400 via-emerald-300 to-accent-400"
+                                }`}
+                                style={{ width: `${stockRatio}%` }}
+                              />
+                            </div>
+                          </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
+                        <div className="grid gap-2 sm:grid-cols-3">
+                          <div className="rounded-xl border border-white/10 bg-ink-950/70 px-3 py-2">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                              Stokta
+                            </p>
+                            <p className="mt-1 text-base font-semibold text-emerald-100">
+                              {availableCount}
+                            </p>
+                          </div>
+                          <div className="rounded-xl border border-white/10 bg-ink-950/70 px-3 py-2">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                              Kullanilan
+                            </p>
+                            <p className="mt-1 text-base font-semibold text-amber-100">
+                              {usedCount}
+                            </p>
+                          </div>
+                          <div className="rounded-xl border border-white/10 bg-ink-950/70 px-3 py-2">
+                            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                              Toplam
+                            </p>
+                            <p className="mt-1 text-base font-semibold text-sky-100">
+                              {totalCapacity}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-wrap items-center gap-2 lg:flex-col lg:items-end">
                           <button
                             type="button"
                             onClick={() => handleStockToggle(offerId)}
                             disabled={!canManageStock || !offerId}
-                            className={`inline-flex h-8 items-center gap-2 rounded-full border border-white/10 bg-ink-950/70 px-3 text-[10px] font-semibold uppercase tracking-[0.2em] transition ${
+                            className={`inline-flex h-9 items-center gap-2 rounded-full border border-white/10 bg-ink-950/70 px-4 text-[10px] font-semibold uppercase tracking-[0.2em] transition ${
                               isStockEnabled ? "text-emerald-100" : "text-rose-100"
-                            } ${!canManageStock || !offerId ? "cursor-not-allowed opacity-60" : "hover:border-white/30"}`}
+                            } ${
+                              !canManageStock || !offerId
+                                ? "cursor-not-allowed opacity-60"
+                                : "hover:border-white/30"
+                            }`}
                             aria-label="Stok ac/kapat"
                           >
                             <span
@@ -559,55 +633,72 @@ export default function ProductsTab({
                             />
                             <span>{isStockEnabled ? "ON" : "OFF"}</span>
                           </button>
-                          {href && (
-                            <a
-                              href={href}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
-                              aria-label="Urun linki"
+                          <div className="flex items-center gap-2">
+                            {href && (
+                              <a
+                                href={href}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-ink-950/60 text-slate-200 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+                                aria-label="Urun linki"
+                              >
+                                <svg
+                                  viewBox="0 0 24 24"
+                                  aria-hidden="true"
+                                  className="h-4 w-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L10.5 5.5" />
+                                  <path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07L13.5 18.5" />
+                                </svg>
+                              </a>
+                            )}
+                            {canAddKeys && (
+                              <button
+                                type="button"
+                                onClick={() => openStockModal(offerId, name)}
+                                disabled={!offerId || !isStockEnabled}
+                                className={`inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-ink-950/60 text-sm text-accent-100 transition ${
+                                  !offerId || !isStockEnabled
+                                    ? "cursor-not-allowed opacity-60"
+                                    : "hover:border-accent-300/60 hover:bg-white/10"
+                                }`}
+                                aria-label="Stok ekle"
+                              >
+                                +
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => toggleOfferOpen(offerId)}
+                              disabled={!offerId}
+                              className={`inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-ink-950/60 text-slate-200 transition ${
+                                isOpen ? "border-white/20 bg-white/10 text-white" : ""
+                              } ${
+                                !offerId
+                                  ? "cursor-not-allowed opacity-60"
+                                  : "hover:border-accent-300/60 hover:text-white"
+                              }`}
+                              aria-label="Urun detaylarini ac/kapat"
                             >
                               <svg
                                 viewBox="0 0 24 24"
                                 aria-hidden="true"
-                                className="h-4 w-4"
+                                className={`h-4 w-4 transition ${isOpen ? "rotate-180" : ""}`}
                                 fill="none"
                                 stroke="currentColor"
                                 strokeWidth="2"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                               >
-                                <path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L10.5 5.5" />
-                                <path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07L13.5 18.5" />
+                                <path d="m6 9 6 6 6-6" />
                               </svg>
-                            </a>
-                          )}
-                          {canAddKeys && (
-                            <button
-                              type="button"
-                              onClick={() => openStockModal(offerId, name)}
-                              disabled={!offerId || !isStockEnabled}
-                              className={`inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-sm text-accent-100 transition ${
-                                !offerId || !isStockEnabled
-                                  ? "cursor-not-allowed opacity-60"
-                                  : "hover:border-accent-300/60 hover:bg-white/10"
-                              }`}
-                              aria-label="Stok ekle"
-                            >
-                              +
                             </button>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => toggleOfferOpen(offerId)}
-                            disabled={!offerId}
-                            className={`inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-sm text-slate-200 transition ${
-                              isOpen ? "rotate-180 border-white/20 bg-white/10 text-white" : ""
-                            } ${!offerId ? "cursor-not-allowed opacity-60" : "hover:border-accent-300/60 hover:text-white"}`}
-                            aria-label="Urun detaylarini ac/kapat"
-                          >
-                            &gt;
-                          </button>
+                          </div>
                         </div>
                       </div>
                       
