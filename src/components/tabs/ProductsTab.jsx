@@ -481,7 +481,7 @@ export default function ProductsTab({
                     <div
                       key={key}
                       className={`rounded-2xl border p-4 shadow-inner transition hover:border-accent-400/60 hover:bg-ink-800/80 hover:shadow-card ${
-                        isMissing
+                        isMissing || (isStockEnabled && availableCount === 0)
                           ? "border-rose-300/30 bg-rose-500/5"
                           : "border-white/10 bg-ink-900/70"
                       }`}
@@ -529,7 +529,7 @@ export default function ProductsTab({
                                   Grup: {groupName}
                                 </span>
                               )}
-                              {isMissing && (
+                              {(isMissing || (isStockEnabled && availableCount === 0)) && (
                                 <span className="rounded-full border border-rose-300/60 bg-rose-500/20 px-2.5 py-1 text-[11px] font-semibold text-rose-50">
                                   Eksik urun
                                 </span>
