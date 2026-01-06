@@ -467,10 +467,10 @@ export default function ProductsTab({
                   return (
                     <div
                       key={key}
-                      className={`rounded-2xl border p-4 shadow-inner transition ${
+                      className={`rounded-2xl border p-4 shadow-inner transition hover:border-accent-400/60 hover:bg-ink-800/80 hover:shadow-card ${
                         isMissing
-                          ? "border-rose-300/30 bg-rose-500/5 hover:border-rose-300/50"
-                          : "border-white/10 bg-ink-900/70 hover:border-white/20 hover:bg-ink-900/80"
+                          ? "border-rose-300/30 bg-rose-500/5"
+                          : "border-white/10 bg-ink-900/70"
                       }`}
                     >
                       <div className="flex flex-wrap items-start justify-between gap-4">
