@@ -498,7 +498,7 @@ export default function ProductsTab({
                   return (
                     <div
                       key={key}
-                      className={`relative overflow-hidden rounded-2xl border p-5 shadow-inner transition hover:-translate-y-0.5 hover:border-accent-400/60 hover:bg-ink-800/80 hover:shadow-card ${
+                      className={`rounded-xl border p-4 shadow-inner transition hover:border-accent-400/60 hover:bg-ink-900/80 ${
                         isMissing
                           ? "border-orange-300/30 bg-orange-500/5"
                           : isOutOfStock
@@ -506,260 +506,164 @@ export default function ProductsTab({
                             : "border-white/10 bg-ink-900/70"
                       }`}
                     >
-                      <div className="pointer-events-none absolute inset-0 opacity-30">
-                        <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-accent-400 via-emerald-400 to-sky-400" />
-                        <div className="absolute -right-20 top-3 h-28 w-48 rounded-full bg-accent-500/10 blur-2xl" />
-                        <div className="absolute -bottom-20 left-12 h-32 w-56 rounded-full bg-sky-500/10 blur-3xl" />
-                      </div>
-                      <div className="relative space-y-4">
-                        <div className="grid gap-3 lg:grid-cols-[minmax(0,1.4fr)_minmax(0,0.9fr)]">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <button
+                          type="button"
+                          onClick={() => toggleOfferOpen(offerId)}
+                          disabled={!offerId}
+                          className="group flex min-w-0 flex-1 items-start gap-3 text-left disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-sm font-semibold text-accent-100 shadow-inner">
+                            {categoryInitial}
+                          </div>
+                          <div className="min-w-0 space-y-1">
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span
+                                className={`text-sm font-semibold leading-tight ${
+                                  isMissing
+                                    ? "text-orange-50"
+                                    : isOutOfStock
+                                      ? "text-rose-50"
+                                      : "text-white"
+                                }`}
+                              >
+                                {name}
+                              </span>
+                              <span className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] ${statusClass}`}>
+                                {statusLabel}
+                              </span>
+                              <span className="rounded-full border border-white/10 bg-ink-950/60 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-300">
+                                {categoryLabel}
+                              </span>
+                              {groupName && (
+                                <span className="rounded-full border border-sky-300/60 bg-sky-500/15 px-2 py-0.5 text-[10px] font-semibold text-sky-50">
+                                  Grup: {groupName}
+                                </span>
+                              )}
+                              {isMissing && (
+                                <span className="rounded-full border border-orange-300/60 bg-orange-500/20 px-2 py-0.5 text-[10px] font-semibold text-orange-50">
+                                  Eksik
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                              <span>Toplam {totalCount || "-"}</span>
+                              <span>Hazir {availableCount}</span>
+                              <span>Kullanilan {usedCount}</span>
+                              <span>ID: {offerId || "Yok"}</span>
+                              {hasNote && <span className="text-amber-200">Not</span>}
+                            </div>
+                            {hasNote && (
+                              <p className="line-clamp-1 text-xs text-slate-300/90">
+                                {notePreview}
+                              </p>
+                            )}
+                          </div>
+                        </button>
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleStockToggle(offerId)}
+                            disabled={!canManageStock || !offerId}
+                            className={`inline-flex h-8 items-center gap-2 rounded-full border border-white/10 bg-ink-950/60 px-3 text-[10px] font-semibold uppercase tracking-[0.2em] transition ${
+                              isStockEnabled ? "text-emerald-100" : "text-rose-100"
+                            } ${!canManageStock || !offerId ? "cursor-not-allowed opacity-60" : "hover:border-white/30"}`}
+                            aria-label="Stok ac/kapat"
+                          >
+                            <span
+                              className={`h-2 w-2 rounded-full ${
+                                isStockEnabled ? "bg-emerald-400" : "bg-rose-400"
+                              }`}
+                            />
+                            <span>{isStockEnabled ? "ON" : "OFF"}</span>
+                          </button>
+                          {href && (
+                            <a
+                              href={href}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+                              aria-label="Urun linki"
+                            >
+                              <svg
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                                className="h-4 w-4"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L10.5 5.5" />
+                                <path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07L13.5 18.5" />
+                              </svg>
+                            </a>
+                          )}
+                          {canAddKeys && (
+                            <button
+                              type="button"
+                              onClick={() => openStockModal(offerId, name)}
+                              disabled={!offerId || !isStockEnabled}
+                              className={`inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-accent-100 transition ${
+                                !offerId || !isStockEnabled
+                                  ? "cursor-not-allowed opacity-60"
+                                  : "hover:border-accent-300/60 hover:bg-white/10"
+                              }`}
+                              aria-label="Stok ekle"
+                            >
+                              +
+                            </button>
+                          )}
                           <button
                             type="button"
                             onClick={() => toggleOfferOpen(offerId)}
                             disabled={!offerId}
-                            className="group flex w-full min-w-0 items-start gap-3 rounded-2xl border border-white/5 bg-white/5 px-3 py-3 text-left transition hover:border-white/15 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+                            className={`inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-slate-200 transition ${
+                              isOpen ? "rotate-180 border-white/20 bg-white/10 text-white" : ""
+                            } ${!offerId ? "cursor-not-allowed opacity-60" : "hover:border-accent-300/60 hover:text-white"}`}
+                            aria-label="Urun detaylarini ac/kapat"
                           >
-                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-lg font-semibold text-accent-100 shadow-inner">
-                              {categoryInitial}
-                            </div>
-                            <div className="min-w-0 space-y-2">
-                              <div className="flex flex-wrap items-center gap-2">
-                                <span
-                                  className={`text-base font-semibold leading-tight ${
-                                    isMissing
-                                      ? "text-orange-50"
-                                      : isOutOfStock
-                                        ? "text-rose-50"
-                                        : "text-white"
-                                  }`}
-                                >
-                                  {name}
-                                </span>
-                                <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] ${statusClass}`}>
-                                  {statusLabel}
-                                </span>
-                                {isMissing && (
-                                  <span className="rounded-full border border-orange-300/60 bg-orange-500/20 px-2.5 py-1 text-[11px] font-semibold text-orange-50">
-                                    Eksik urun
-                                  </span>
-                                )}
-                              </div>
-                              <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-300">
-                                <span className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-ink-950/60 px-2.5 py-1">
-                                  <span className="h-2 w-2 rounded-full bg-accent-400" />
-                                  {categoryLabel}
-                                </span>
-                                {groupName && (
-                                  <span className="inline-flex items-center gap-1 rounded-md border border-sky-300/60 bg-sky-500/15 px-2.5 py-1 text-sky-50">
-                                    Grup: {groupName}
-                                  </span>
-                                )}
-                                <span className="inline-flex items-center gap-1 rounded-md border border-white/10 bg-ink-950/60 px-2.5 py-1 text-slate-300">
-                                  ID: {offerId || "Yok"}
-                                </span>
-                                {hasNote && (
-                                  <span className="inline-flex items-center gap-1 rounded-md border border-amber-300/60 bg-amber-500/10 px-2.5 py-1 text-amber-50">
-                                    Not var
-                                  </span>
-                                )}
-                              </div>
-                              {hasNote && (
-                                <p className="line-clamp-2 text-sm text-slate-300/90">
-                                  {notePreview}
-                                </p>
-                              )}
-                            </div>
+                            &gt;
                           </button>
-
-                          <div className="flex flex-col gap-2 rounded-2xl border border-white/10 bg-ink-950/40 p-3">
-                            <div className="flex items-center justify-between gap-2">
-                              <div className="space-y-0.5">
-                                <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-400">
-                                  Stok durumu
-                                </p>
-                                <p className="text-sm font-semibold text-white">{statusLabel}</p>
-                              </div>
-                              <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${statusClass}`}>
-                                {isStockEnabled ? (isOutOfStock ? "Tukendi" : "Aktif") : "Kapali"}
-                              </span>
-                            </div>
-                            <div className="flex flex-wrap items-center gap-2">
-                              <button
-                                type="button"
-                                onClick={() => handleStockToggle(offerId)}
-                                disabled={!canManageStock || !offerId}
-                                className={`inline-flex flex-1 items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-semibold uppercase tracking-[0.24em] transition ${
-                                  isStockEnabled ? "text-emerald-100" : "text-rose-100"
-                                } ${!canManageStock || !offerId ? "cursor-not-allowed opacity-60" : "hover:border-white/30 hover:-translate-y-0.5"}`}
-                                aria-label="Stok ac/kapat"
-                              >
-                                <span
-                                  className={`h-2.5 w-2.5 rounded-full ${
-                                    isStockEnabled ? "bg-emerald-400 shadow-glow" : "bg-rose-400"
-                                  }`}
-                                />
-                                <span>{isStockEnabled ? "Stok aktif" : "Stok kapali"}</span>
-                              </button>
-                              {href && (
-                                <a
-                                  href={href}
-                                  target="_blank"
-                                  rel="noreferrer"
-                                  className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-slate-200 transition hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/10 hover:text-white"
-                                  aria-label="Urun linki"
-                                >
-                                  <svg
-                                    viewBox="0 0 24 24"
-                                    aria-hidden="true"
-                                    className="h-4 w-4"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    strokeWidth="2"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                  >
-                                    <path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L10.5 5.5" />
-                                    <path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07L13.5 18.5" />
-                                  </svg>
-                                </a>
-                              )}
-                              {canAddKeys && (
-                                <button
-                                  type="button"
-                                  onClick={() => openStockModal(offerId, name)}
-                                  disabled={!offerId || !isStockEnabled}
-                                  className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-lg text-accent-100 transition ${
-                                    !offerId || !isStockEnabled
-                                      ? "cursor-not-allowed opacity-60"
-                                      : "hover:-translate-y-0.5 hover:border-accent-300/60 hover:bg-white/10"
-                                  }`}
-                                  aria-label="Stok ekle"
-                                >
-                                  +
-                                </button>
-                              )}
-                              <button
-                                type="button"
-                                onClick={() => toggleOfferOpen(offerId)}
-                                disabled={!offerId}
-                                className={`inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-sm text-slate-200 transition ${
-                                  isOpen ? "rotate-180 border-white/20 bg-white/10 text-white" : ""
-                                } ${!offerId ? "cursor-not-allowed opacity-60" : "hover:-translate-y-0.5 hover:border-accent-300/60 hover:text-white"}`}
-                                aria-label="Urun detaylarini ac/kapat"
-                              >
-                                &gt;
-                              </button>
-                            </div>
-                          </div>
                         </div>
+                      </div>
 
-                        <div className="grid gap-3 sm:grid-cols-3">
-                          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-ink-950/60 px-3 py-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-emerald-300/40 bg-emerald-500/10 text-emerald-100">
-                              <svg
-                                viewBox="0 0 24 24"
-                                aria-hidden="true"
-                                className="h-4 w-4"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <path d="M9 11 12 14 22 4" />
-                                <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11" />
-                              </svg>
-                            </div>
-                            <div>
-                              <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-400">
-                                Kullanilabilir
-                              </p>
-                              <p className="text-xl font-semibold text-emerald-50">{availableCount}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-ink-950/60 px-3 py-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-amber-300/40 bg-amber-500/10 text-amber-100">
-                              <svg
-                                viewBox="0 0 24 24"
-                                aria-hidden="true"
-                                className="h-4 w-4"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <path d="m9 18 6-6-6-6" />
-                              </svg>
-                            </div>
-                            <div>
-                              <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-400">
-                                Kullanilan
-                              </p>
-                              <p className="text-xl font-semibold text-amber-50">{usedCount}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-ink-950/60 px-3 py-3">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-accent-300/40 bg-accent-500/10 text-accent-100">
-                              <svg
-                                viewBox="0 0 24 24"
-                                aria-hidden="true"
-                                className="h-4 w-4"
-                                fill="none"
-                                stroke="currentColor"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              >
-                                <path d="M3 3h18v4H3z" />
-                                <path d="M3 11h18v10H3z" />
-                                <path d="M7 15h1" />
-                                <path d="M16 15h1" />
-                              </svg>
-                            </div>
-                            <div>
-                              <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-400">
-                                Toplam
-                              </p>
-                              <p className="text-xl font-semibold text-white">{totalCapacity}</p>
-                            </div>
-                          </div>
+                      <div className="mt-3 flex flex-wrap items-center gap-2 text-[11px] text-slate-300">
+                        <div className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-ink-950/60 px-3 py-1">
+                          <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                          <span className="font-semibold text-white">{availableCount}</span>
+                          <span className="text-slate-400">hazir</span>
                         </div>
+                        <div className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-ink-950/60 px-3 py-1">
+                          <span className="h-2 w-2 rounded-full bg-amber-400" />
+                          <span className="font-semibold text-white">{usedCount}</span>
+                          <span className="text-slate-400">kullanildi</span>
+                        </div>
+                        <div className="inline-flex items-center gap-2 rounded-lg border border-white/10 bg-ink-950/60 px-3 py-1">
+                          <span className="h-2 w-2 rounded-full bg-accent-400" />
+                          <span className="font-semibold text-white">{totalCapacity}</span>
+                          <span className="text-slate-400">toplam</span>
+                        </div>
+                      </div>
 
-                        <div className="space-y-3 rounded-2xl border border-white/10 bg-ink-950/40 p-4">
-                          <div className="flex flex-wrap items-center justify-between gap-2">
-                            <div>
-                              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">
-                                Stok doluluk
-                              </p>
-                              <p className="text-sm font-semibold text-white">
-                                {availabilityPercent}% dolu · {availableCount} hazir / {usedCount} cikti
-                              </p>
-                            </div>
-                            <span
-                              className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${
-                                isOutOfStock
-                                  ? "border-rose-300/60 bg-rose-500/20 text-rose-50"
-                                  : "border-emerald-300/60 bg-emerald-500/15 text-emerald-50"
-                              }`}
-                            >
-                              {isOutOfStock ? "Tukendi" : "Stokta"}
-                            </span>
-                          </div>
-                          <div className="relative h-3 overflow-hidden rounded-full bg-white/10">
-                            <div
-                              className="absolute left-0 top-0 h-full bg-amber-400/80"
-                              style={{ width: `${usedBarPercent}%` }}
-                            />
-                            <div
-                              className="absolute left-0 top-0 h-full bg-emerald-400"
-                              style={{
-                                left: `${usedBarPercent}%`,
-                                width: `${availableSegmentWidth}%`,
-                              }}
-                            />
-                          </div>
+                      <div className="mt-2 flex items-center gap-2 text-[11px] text-slate-400">
+                        <div className="relative h-2 w-full overflow-hidden rounded-full bg-white/10">
+                          <div
+                            className="absolute left-0 top-0 h-full bg-amber-400/80"
+                            style={{ width: `${usedBarPercent}%` }}
+                          />
+                          <div
+                            className="absolute top-0 h-full bg-emerald-400"
+                            style={{
+                              left: `${usedBarPercent}%`,
+                              width: `${availableSegmentWidth}%`,
+                            }}
+                          />
                         </div>
+                        <span className="whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-300">
+                          {availabilityPercent}% dolu
+                        </span>
                       </div>
 
                       {isOpen && (
