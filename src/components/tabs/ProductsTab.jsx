@@ -526,6 +526,22 @@ export default function ProductsTab({
                           </div>
                         </button>
                         <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleStockToggle(offerId)}
+                            disabled={!canManageStock || !offerId}
+                            className={`inline-flex h-8 items-center gap-2 rounded-full border border-white/10 bg-ink-950/60 px-3 text-[10px] font-semibold uppercase tracking-[0.25em] transition ${
+                              isStockEnabled ? "text-emerald-100" : "text-rose-100"
+                            } ${!canManageStock || !offerId ? "cursor-not-allowed opacity-60" : "hover:border-white/30"}`}
+                            aria-label="Stok ac/kapat"
+                          >
+                            <span
+                              className={`h-2 w-2 rounded-full ${
+                                isStockEnabled ? "bg-emerald-400" : "bg-rose-400"
+                              }`}
+                            />
+                            <span>{isStockEnabled ? "ON" : "OFF"}</span>
+                          </button>
                           {href && (
                             <a
                               href={href}
@@ -791,36 +807,12 @@ export default function ProductsTab({
                               </>
                             ) : (
                               <div className="rounded-2xl border border-white/10 bg-ink-900/40 px-4 py-3 text-xs text-slate-400 shadow-inner">
-                                Bu urunde stok kapali. Aktif etmek icin sagdan stok ayarini acin.
+                                Bu urunde stok kapali. Ustteki ON/OFF anahtarindan acin.
                               </div>
                             )}
                             </div>
 
                             <div className="space-y-3">
-                              <div className="rounded-2xl border border-white/10 bg-ink-900/40 p-4 shadow-card">
-                                <div className="flex items-start justify-between gap-3">
-                                  <div>
-                                    <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-500">
-                                      Stok ayari
-                                    </p>
-                                    <p className="text-xs text-slate-500">
-                                      Sadece secilen urunlerde stok yonet.
-                                    </p>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleStockToggle(offerId)}
-                                    disabled={!canManageStock || !offerId}
-                                    className={`rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.3em] transition ${
-                                      isStockEnabled
-                                        ? "border-emerald-300/50 bg-emerald-500/10 text-emerald-50"
-                                        : "border-white/10 bg-ink-950/60 text-slate-200"
-                                    } ${!canManageStock || !offerId ? "cursor-not-allowed opacity-60" : ""}`}
-                                  >
-                                    {isStockEnabled ? "Acik" : "Kapali"}
-                                  </button>
-                                </div>
-                              </div>
                               <div className="rounded-2xl border border-white/10 bg-ink-900/40 p-4 shadow-card">
                                 <div className="flex items-start justify-between gap-3">
                                   <div>
