@@ -478,10 +478,14 @@ export default function ProductsTab({
                       ? rawHref
                       : `https://www.eldorado.gg${rawHref.startsWith("/") ? "" : "/"}${rawHref}`
                     : ""
+                  const totalCapacity = Math.max(totalCount || 0, availableCount + usedCount)
+                  const availabilityPercent =
+                    totalCapacity > 0 ? Math.round((availableCount / totalCapacity) * 100) : 0
+                  const categoryInitial = categoryLabel.charAt(0).toUpperCase() || "U"
                   return (
                     <div
                       key={key}
-                      className={`rounded-2xl border p-4 shadow-inner transition hover:border-accent-400/60 hover:bg-ink-800/80 hover:shadow-card ${
+                      className={`relative overflow-hidden rounded-2xl border p-5 shadow-inner transition hover:-translate-y-0.5 hover:border-accent-400/60 hover:bg-ink-800/80 hover:shadow-card ${
                         isMissing
                           ? "border-orange-300/30 bg-orange-500/5"
                           : isOutOfStock
@@ -489,128 +493,210 @@ export default function ProductsTab({
                             : "border-white/10 bg-ink-900/70"
                       }`}
                     >
-                      <div className="flex flex-wrap items-start justify-between gap-4">
-                        <button
-                          type="button"
-                          onClick={() => toggleOfferOpen(offerId)}
-                          disabled={!offerId}
-                          className="group flex min-w-0 flex-1 items-start gap-3 text-left"
-                        >
-                          <div className="space-y-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span
-                                className={`text-sm font-semibold ${
-                                  isMissing
-                                    ? "text-orange-100"
-                                    : isOutOfStock
-                                      ? "text-rose-100"
-                                      : "text-white"
-                                }`}
-                              >
-                                {name}
-                              </span>
-                              {isStockEnabled ? (
-                                <>
-                                  <span
-                                    className={`rounded-full px-3 py-1 text-[11px] font-semibold ${
-                                      isOutOfStock
-                                        ? "border border-rose-300/60 bg-rose-500/15 text-rose-50"
-                                        : "border border-emerald-300/60 bg-emerald-500/15 text-emerald-50"
-                                    }`}
-                                  >
-                                    {availableCount} stok
-                                  </span>
-                                  {usedCount > 0 && (
-                                    <span className="rounded-full border border-amber-300/60 bg-amber-500/15 px-2.5 py-1 text-[11px] font-semibold text-amber-50">
-                                      Kullanildi: {usedCount}
-                                    </span>
-                                  )}
-                                </>
-                              ) : (
-                                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold text-slate-200">
-                                  Stok kapali
-                                </span>
-                              )}
-                              {groupName && (
-                                <span className="rounded-full border border-sky-300/60 bg-sky-500/15 px-2.5 py-1 text-[11px] font-semibold text-sky-50">
-                                  Grup: {groupName}
-                                </span>
-                              )}
-                              {isMissing && (
-                                <span className="rounded-full border border-orange-300/60 bg-orange-500/20 px-2.5 py-1 text-[11px] font-semibold text-orange-50">
-                                  Eksik urun
-                                </span>
-                              )}
-                            </div>
-                            <p className="text-xs text-slate-400">{categoryLabel}</p>
-                          </div>
-                        </button>
-                        <div className="flex items-center gap-1.5">
+                      <div className="pointer-events-none absolute inset-0 opacity-30">
+                        <div className="absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-accent-400 via-emerald-400 to-sky-400" />
+                        <div className="absolute -right-24 top-0 h-28 w-48 rounded-full bg-accent-500/10 blur-2xl" />
+                        <div className="absolute -bottom-20 left-10 h-32 w-56 rounded-full bg-sky-500/10 blur-3xl" />
+                      </div>
+                      <div className="relative space-y-4">
+                        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                           <button
                             type="button"
-                            onClick={() => handleStockToggle(offerId)}
-                            disabled={!canManageStock || !offerId}
-                            className={`inline-flex h-8 items-center gap-2 rounded-full border border-white/10 bg-ink-950/60 px-3 text-[10px] font-semibold uppercase tracking-[0.25em] transition ${
-                              isStockEnabled ? "text-emerald-100" : "text-rose-100"
-                            } ${!canManageStock || !offerId ? "cursor-not-allowed opacity-60" : "hover:border-white/30"}`}
-                            aria-label="Stok ac/kapat"
+                            onClick={() => toggleOfferOpen(offerId)}
+                            disabled={!offerId}
+                            className="group flex min-w-0 flex-1 items-start gap-3 text-left"
                           >
-                            <span
-                              className={`h-2 w-2 rounded-full ${
-                                isStockEnabled ? "bg-emerald-400" : "bg-rose-400"
-                              }`}
-                            />
-                            <span>{isStockEnabled ? "ON" : "OFF"}</span>
+                            <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-lg font-semibold text-accent-100 shadow-inner">
+                              {categoryInitial}
+                            </div>
+                            <div className="space-y-1">
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span
+                                  className={`text-base font-semibold leading-tight ${
+                                    isMissing
+                                      ? "text-orange-50"
+                                      : isOutOfStock
+                                        ? "text-rose-50"
+                                        : "text-white"
+                                  }`}
+                                >
+                                  {name}
+                                </span>
+                                <span className="rounded-full border border-white/10 bg-ink-950/60 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300">
+                                  {categoryLabel}
+                                </span>
+                                {groupName && (
+                                  <span className="rounded-full border border-sky-300/60 bg-sky-500/15 px-2.5 py-1 text-[11px] font-semibold text-sky-50">
+                                    Grup: {groupName}
+                                  </span>
+                                )}
+                                {isMissing && (
+                                  <span className="rounded-full border border-orange-300/60 bg-orange-500/20 px-2.5 py-1 text-[11px] font-semibold text-orange-50">
+                                    Eksik urun
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-slate-400">
+                                <span className="inline-flex items-center gap-1 rounded-md border border-white/5 bg-white/5 px-2 py-1">
+                                  <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                                  Toplam {totalCount || "-"}
+                                </span>
+                                <span className="inline-flex items-center gap-1 rounded-md border border-white/5 bg-white/5 px-2 py-1">
+                                  <span className="h-2 w-2 rounded-full bg-accent-400" />
+                                  ID: {offerId || "Yok"}
+                                </span>
+                                <span className="inline-flex items-center gap-1 rounded-md border border-white/5 bg-white/5 px-2 py-1">
+                                  <span className={`h-2 w-2 rounded-full ${isStockEnabled ? "bg-emerald-400" : "bg-rose-400"}`} />
+                                  {isStockEnabled ? "Stok acik" : "Stok kapali"}
+                                </span>
+                              </div>
+                            </div>
                           </button>
-                          {href && (
-                            <a
-                              href={href}
-                              target="_blank"
-                              rel="noreferrer"
-                              className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
-                              aria-label="Urun linki"
+                          <div className="flex flex-wrap items-center justify-end gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleStockToggle(offerId)}
+                              disabled={!canManageStock || !offerId}
+                              className={`inline-flex h-10 items-center gap-2 rounded-full border border-white/10 bg-ink-950/60 px-3 text-[11px] font-semibold uppercase tracking-[0.24em] transition ${
+                                isStockEnabled ? "text-emerald-100" : "text-rose-100"
+                              } ${!canManageStock || !offerId ? "cursor-not-allowed opacity-60" : "hover:border-white/30 hover:-translate-y-0.5"}`}
+                              aria-label="Stok ac/kapat"
                             >
+                              <span
+                                className={`h-2.5 w-2.5 rounded-full ${
+                                  isStockEnabled ? "bg-emerald-400 shadow-glow" : "bg-rose-400"
+                                }`}
+                              />
+                              <span>{isStockEnabled ? "Stok aktif" : "Stok kapali"}</span>
+                            </button>
+                            {href && (
+                              <a
+                                href={href}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-slate-200 transition hover:-translate-y-0.5 hover:border-white/20 hover:bg-white/10 hover:text-white"
+                                aria-label="Urun linki"
+                              >
+                                <svg
+                                  viewBox="0 0 24 24"
+                                  aria-hidden="true"
+                                  className="h-4 w-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L10.5 5.5" />
+                                  <path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07L13.5 18.5" />
+                                </svg>
+                              </a>
+                            )}
+                            {canAddKeys && (
+                              <button
+                                type="button"
+                                onClick={() => openStockModal(offerId, name)}
+                                disabled={!offerId || !isStockEnabled}
+                                className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-lg text-accent-100 transition ${
+                                  !offerId || !isStockEnabled
+                                    ? "cursor-not-allowed opacity-60"
+                                    : "hover:-translate-y-0.5 hover:border-accent-300/60 hover:bg-white/10"
+                                }`}
+                                aria-label="Stok ekle"
+                              >
+                                +
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() => toggleOfferOpen(offerId)}
+                              disabled={!offerId}
+                              className={`inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-sm text-slate-200 transition ${
+                                isOpen ? "rotate-180 border-white/20 bg-white/10 text-white" : ""
+                              } ${!offerId ? "cursor-not-allowed opacity-60" : "hover:-translate-y-0.5 hover:border-accent-300/60 hover:text-white"}`}
+                              aria-label="Urun detaylarini ac/kapat"
+                            >
+                              &gt;
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="grid gap-3 md:grid-cols-3">
+                          <div className="flex items-center justify-between rounded-xl border border-white/10 bg-ink-950/50 px-3 py-2">
+                            <div className="space-y-0.5">
+                              <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-400">
+                                Kullanilabilir
+                              </p>
+                              <p className="text-lg font-semibold text-emerald-100">{availableCount}</p>
+                            </div>
+                            <span className="rounded-full border border-emerald-300/50 bg-emerald-500/15 px-2.5 py-1 text-[11px] font-semibold text-emerald-50">
+                              Hazir
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between rounded-xl border border-white/10 bg-ink-950/50 px-3 py-2">
+                            <div className="space-y-0.5">
+                              <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-400">
+                                Kullanilan
+                              </p>
+                              <p className="text-lg font-semibold text-amber-100">{usedCount}</p>
+                            </div>
+                            <span className="rounded-full border border-amber-300/60 bg-amber-500/15 px-2.5 py-1 text-[11px] font-semibold text-amber-50">
+                              Cikti
+                            </span>
+                          </div>
+                          <div className="flex items-center justify-between rounded-xl border border-white/10 bg-ink-950/50 px-3 py-2">
+                            <div className="space-y-0.5">
+                              <p className="text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-400">
+                                Toplam
+                              </p>
+                              <p className="text-lg font-semibold text-slate-100">{totalCapacity}</p>
+                            </div>
+                            <span
+                              className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${
+                                isOutOfStock
+                                  ? "border-rose-300/60 bg-rose-500/20 text-rose-50"
+                                  : "border-accent-300/60 bg-accent-500/15 text-accent-50"
+                              }`}
+                            >
+                              {isOutOfStock ? "Tukendi" : "Aktif"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div className="flex flex-col gap-2 rounded-xl border border-white/10 bg-ink-950/40 p-3 sm:flex-row sm:items-center sm:justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-accent-100">
                               <svg
                                 viewBox="0 0 24 24"
                                 aria-hidden="true"
-                                className="h-4 w-4"
+                                className="h-5 w-5"
                                 fill="none"
                                 stroke="currentColor"
                                 strokeWidth="2"
                                 strokeLinecap="round"
                                 strokeLinejoin="round"
                               >
-                                <path d="M10 13a5 5 0 0 0 7.07 0l2.83-2.83a5 5 0 0 0-7.07-7.07L10.5 5.5" />
-                                <path d="M14 11a5 5 0 0 0-7.07 0L4.1 13.83a5 5 0 0 0 7.07 7.07L13.5 18.5" />
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3" />
+                                <path d="M22 4 12 14.01l-3-3" />
                               </svg>
-                            </a>
-                          )}
-                          {canAddKeys && (
-                            <button
-                              type="button"
-                              onClick={() => openStockModal(offerId, name)}
-                              disabled={!offerId || !isStockEnabled}
-                              className={`inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-slate-200 transition ${
-                                !offerId || !isStockEnabled
-                                  ? "cursor-not-allowed opacity-60"
-                                  : "hover:-translate-y-0.5 hover:border-accent-300/60 hover:bg-white/10 hover:text-accent-100"
-                              }`}
-                              aria-label="Stok ekle"
-                            >
-                              +
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => toggleOfferOpen(offerId)}
-                            disabled={!offerId}
-                            className={`inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/10 bg-white/5 text-xs text-slate-200 transition ${
-                              isOpen ? "rotate-180 border-white/20 bg-white/10 text-white" : ""
-                            } ${!offerId ? "cursor-not-allowed opacity-60" : ""}`}
-                            aria-label="Urun detaylarini ac/kapat"
-                          >
-                            &gt;
-                          </button>
+                            </div>
+                            <div>
+                              <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                                Stok doluluk
+                              </p>
+                              <p className="text-sm font-semibold text-white">
+                                {availabilityPercent}% dolu
+                              </p>
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <div className="relative h-2 overflow-hidden rounded-full bg-white/10">
+                              <div
+                                className={`absolute left-0 top-0 h-full ${isOutOfStock ? "bg-rose-400" : "bg-accent-400"}`}
+                                style={{ width: `${availabilityPercent}%` }}
+                              />
+                            </div>
+                          </div>
                         </div>
                       </div>
 
