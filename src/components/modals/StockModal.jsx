@@ -1,4 +1,6 @@
-﻿export default function StockModal({
+﻿import { createPortal } from "react-dom"
+
+export default function StockModal({
   isOpen,
   onClose,
   draft,
@@ -12,8 +14,8 @@
 }) {
   if (!isOpen) return null
 
-  return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 px-4" onClick={onClose}>
+  return createPortal(
+    <div className="fixed inset-0 z-[70] flex min-h-[100dvh] items-center justify-center bg-black/70 px-4 py-6 backdrop-blur-sm" onClick={onClose}>
       <div
         className="w-full max-w-3xl overflow-hidden rounded-2xl border border-white/10 bg-ink-900 shadow-card"
         onClick={(event) => event.stopPropagation()}
@@ -75,6 +77,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   )
 }
