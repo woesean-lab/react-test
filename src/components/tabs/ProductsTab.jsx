@@ -534,14 +534,14 @@ export default function ProductsTab({
                           )}
                         </button>
 
-                        <div className="flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
-                          <span className="rounded-md border border-white/10 bg-ink-950/70 px-2 py-1">
-                            Hazir {availableCount}
+                        <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold">
+                          <span className="rounded-md border border-emerald-300/40 bg-emerald-500/10 px-2 py-1 text-emerald-50">
+                            Stokta {availableCount}
                           </span>
-                          <span className="rounded-md border border-white/10 bg-ink-950/70 px-2 py-1">
+                          <span className="rounded-md border border-amber-300/50 bg-amber-500/10 px-2 py-1 text-amber-50">
                             Kullanilan {usedCount}
                           </span>
-                          <span className="rounded-md border border-white/10 bg-ink-950/70 px-2 py-1">
+                          <span className="rounded-md border border-sky-300/40 bg-sky-500/10 px-2 py-1 text-sky-50">
                             Toplam {totalCapacity}
                           </span>
                         </div>
