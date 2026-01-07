@@ -520,13 +520,18 @@ export default function ProductsTab({
                         </button>
 
                         {isStockEnabled && (
-                          <div className="flex flex-wrap items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.2em]">
-                            <div className="flex items-center gap-2">
-                              <span className="text-emerald-100">Stokta {availableCount}</span>
-                              <span className="text-slate-500">/</span>
-                              <span className="text-amber-100">Kullanildi {usedCount}</span>
+                          <div className="flex flex-col gap-1">
+                            <div className="flex flex-wrap items-center gap-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                              <span className="inline-flex items-center gap-1 text-emerald-100">
+                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+                                {availableCount} Stokta
+                              </span>
+                              <span className="inline-flex items-center gap-1 text-amber-100">
+                                <span className="h-1.5 w-1.5 rounded-full bg-amber-400" />
+                                {usedCount} Kullanildi
+                              </span>
                             </div>
-                            <div className="h-1.5 w-28 overflow-hidden rounded-full bg-white/10">
+                            <div className="h-1 w-28 overflow-hidden rounded-full bg-white/10">
                               <div
                                 className="h-full bg-emerald-400/70"
                                 style={{
