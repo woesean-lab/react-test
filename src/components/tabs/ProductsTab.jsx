@@ -520,7 +520,7 @@ export default function ProductsTab({
                         </button>
 
                         {isStockEnabled && (
-                          <div className="rounded-lg border border-white/10 bg-ink-950/50 px-2.5 py-1.5">
+                          <div className="inline-flex flex-col rounded-lg border border-white/10 bg-ink-950/40 px-2.5 py-1.5 backdrop-blur-sm">
                             <div className="flex flex-wrap items-center gap-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                               <span className="inline-flex items-center gap-1 text-emerald-100">
                                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
@@ -531,7 +531,7 @@ export default function ProductsTab({
                                 {usedCount} Kullanildi
                               </span>
                             </div>
-                            <div className="mt-1 h-1 w-28 overflow-hidden rounded-full bg-white/10">
+                            <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-white/10">
                               <div
                                 className="h-full bg-emerald-400/70"
                                 style={{
@@ -546,7 +546,7 @@ export default function ProductsTab({
                         )}
 
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <div className="flex items-center gap-1 rounded-full border border-white/10 bg-ink-950/60 p-1">
+                          <div className="flex items-center gap-1 rounded-full border border-white/10 bg-ink-950/40 p-1 backdrop-blur-sm">
                             <button
                               type="button"
                               onClick={() => handleStockToggle(offerId)}
