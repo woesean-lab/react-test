@@ -521,14 +521,44 @@ export default function ProductsTab({
 
                         {isStockEnabled && (
                           <div className="flex flex-wrap items-center gap-4">
+                            <div className="relative flex h-9 w-9 items-center justify-center">
+                              <svg viewBox="0 0 36 36" className="h-9 w-9">
+                                <circle
+                                  cx="18"
+                                  cy="18"
+                                  r="15"
+                                  fill="none"
+                                  stroke="rgba(255,255,255,0.12)"
+                                  strokeWidth="3"
+                                />
+                                <circle
+                                  cx="18"
+                                  cy="18"
+                                  r="15"
+                                  fill="none"
+                                  stroke="rgba(52,211,153,0.9)"
+                                  strokeWidth="3"
+                                  strokeLinecap="round"
+                                  strokeDasharray="94.2"
+                                  strokeDashoffset={
+                                    totalCapacity > 0
+                                      ? 94.2 - Math.min(94.2, (availableCount / totalCapacity) * 94.2)
+                                      : 94.2
+                                  }
+                                />
+                              </svg>
+                              <span className="absolute text-[9px] font-semibold text-emerald-100">
+                                {availableCount}
+                              </span>
+                            </div>
                             <div className="flex items-baseline gap-2 text-emerald-100">
-                              <span className="text-[16px] font-semibold leading-none">{availableCount}</span>
+                              <span className="text-[14px] font-semibold leading-none">{availableCount}</span>
                               <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
                                 Stokta
                               </span>
                             </div>
                             <div className="flex items-baseline gap-2 text-amber-100">
-                              <span className="text-[16px] font-semibold leading-none">{usedCount}</span>
+                              <span className="text-[14px] font-semibold leading-none">{usedCount}</span>
                               <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
                                 Kullanildi
                               </span>
