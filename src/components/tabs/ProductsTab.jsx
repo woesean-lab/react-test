@@ -479,6 +479,11 @@ export default function ProductsTab({
                       : `https://www.eldorado.gg${rawHref.startsWith("/") ? "" : "/"}${rawHref}`
                     : ""
                   const totalCapacity = Math.max(totalCount || 0, availableCount + usedCount)
+                  const gaugeTotal = 10
+                  const availableGaugeCount =
+                    totalCapacity > 0
+                      ? Math.min(gaugeTotal, Math.round((availableCount / totalCapacity) * gaugeTotal))
+                      : 0
                   return (
                     <div
                       key={key}
@@ -495,7 +500,7 @@ export default function ProductsTab({
                         >
                           <div className="flex flex-wrap items-baseline gap-2">
                             <span
-                              className={`break-words font-display text-sm font-semibold leading-snug text-white sm:text-base ${
+                              className={`break-words font-display text-[13px] font-semibold leading-snug text-white sm:text-sm ${
                                 isMissing
                                   ? "text-orange-50"
                                   : isOutOfStock
@@ -526,19 +531,15 @@ export default function ProductsTab({
                               <span className="text-slate-500">/</span>
                               <span className="text-amber-100">Kullanildi {usedCount}</span>
                             </div>
-                            <div
-                              className="h-1.5 w-28 overflow-hidden rounded-full bg-white/10"
-                              role="presentation"
-                            >
-                              <div
-                                className="h-full bg-emerald-400/70"
-                                style={{
-                                  width:
-                                    totalCapacity > 0
-                                      ? `${Math.min(100, Math.max(0, Math.round((availableCount / totalCapacity) * 100)))}%`
-                                      : "0%",
-                                }}
-                              />
+                            <div className="flex items-center gap-1" role="presentation">
+                              {Array.from({ length: gaugeTotal }).map((_, index) => (
+                                <span
+                                  key={`stock-gauge-${offerId}-${index}`}
+                                  className={`h-1.5 w-1.5 rounded-full ${
+                                    index < availableGaugeCount ? "bg-emerald-400" : "bg-amber-400/40"
+                                  }`}
+                                />
+                              ))}
                             </div>
                           </div>
                         )}
