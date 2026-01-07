@@ -488,44 +488,27 @@ export default function ProductsTab({
                       ? "border-rose-300/60 bg-rose-500/15 text-rose-50"
                       : "border-emerald-300/60 bg-emerald-500/15 text-emerald-50"
                     : "border-white/20 bg-white/5 text-slate-200"
-                  const stockPercent =
-                    totalCapacity > 0
-                      ? Math.min(100, Math.max(0, Math.round((availableCount / totalCapacity) * 100)))
-                      : 0
-                  const meterClass = isOutOfStock
-                    ? "from-rose-400 via-rose-300 to-amber-300"
-                    : isStockEnabled
-                      ? "from-emerald-400 via-teal-300 to-sky-300"
-                      : "from-slate-500 via-slate-400 to-slate-300"
-                  const accentBarClass = isMissing
-                    ? "from-orange-400 via-amber-300 to-orange-200"
-                    : isOutOfStock
-                      ? "from-rose-400 via-rose-300 to-rose-200"
-                      : isStockEnabled
-                        ? "from-accent-400 via-sky-400 to-emerald-300"
-                        : "from-slate-500 via-slate-400 to-slate-300"
                   return (
                     <div
                       key={key}
-                      className={`group relative overflow-hidden rounded-2xl border border-white/10 bg-ink-950/60 shadow-card transition hover:border-accent-400/60 hover:bg-ink-900/80 ${
+                      className={`rounded-2xl border border-white/10 bg-gradient-to-br from-ink-950/80 via-ink-900/70 to-ink-900/50 p-4 shadow-card transition hover:border-white/20 ${
                         isMissing
-                          ? "border-orange-300/30 bg-orange-500/5"
+                          ? "border-orange-300/30 from-orange-500/10 via-ink-900/60 to-ink-900/60"
                           : isOutOfStock
-                            ? "border-rose-300/30 bg-rose-500/5"
-                            : "border-white/10 bg-ink-900/70"
+                            ? "border-rose-300/30 from-rose-500/10 via-ink-900/60 to-ink-900/60"
+                            : "border-white/10"
                       }`}
                     >
-                      <div className={`absolute left-0 top-0 h-full w-1.5 bg-gradient-to-b ${accentBarClass}`} />
-                      <div className="relative grid gap-4 px-4 py-3 md:grid-cols-[minmax(0,1fr)_minmax(0,0.8fr)_auto] md:items-center">
+                      <div className="grid gap-3 md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_auto] md:items-center">
                         <button
                           type="button"
                           onClick={() => toggleOfferOpen(offerId)}
                           disabled={!offerId}
                           className="min-w-0 text-left disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                          <div className="flex flex-wrap items-center gap-3">
+                          <div className="flex flex-wrap items-center gap-2">
                             <span
-                              className={`truncate text-base font-semibold ${
+                              className={`truncate text-sm font-semibold ${
                                 isMissing
                                   ? "text-orange-50"
                                   : isOutOfStock
@@ -541,12 +524,12 @@ export default function ProductsTab({
                               {statusLabel}
                             </span>
                           </div>
-                          <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] font-semibold text-slate-300">
+                          <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
                             <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-slate-300">
                               {categoryLabel}
                             </span>
                             {groupName && (
-                              <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] text-slate-200">
+                              <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] text-slate-200">
                                 {groupName}
                               </span>
                             )}
@@ -563,21 +546,40 @@ export default function ProductsTab({
                           </div>
                         </button>
 
-                        <div className="min-w-[170px]">
-                          <div className="flex items-center justify-between text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-                            <span>Stok</span>
-                            <span>
-                              {availableCount}/{totalCapacity}
-                            </span>
-                          </div>
-                          <div className="mt-2 h-2 w-full rounded-full bg-white/10">
-                            <div
-                              className={`h-full rounded-full bg-gradient-to-r ${meterClass}`}
-                              style={{ width: `${stockPercent}%` }}
-                            />
-                          </div>
-                          <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                            <span>{isStockEnabled ? `${usedCount} kullanilan` : "Stok kapali"}</span>
+                        <div className="min-w-[200px]">
+                          <div
+                            className={`grid grid-cols-3 gap-2 rounded-2xl border border-white/10 bg-ink-950/60 px-3 py-2 text-center ${
+                              isStockEnabled ? "" : "opacity-60"
+                            }`}
+                          >
+                            <div>
+                              <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                                Stok
+                              </p>
+                              <p
+                                className={`mt-1 text-sm font-semibold ${
+                                  isOutOfStock ? "text-rose-100" : "text-emerald-100"
+                                }`}
+                              >
+                                {availableCount}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                                Kullanilan
+                              </p>
+                              <p className="mt-1 text-sm font-semibold text-amber-100">
+                                {usedCount}
+                              </p>
+                            </div>
+                            <div>
+                              <p className="text-[9px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                                Toplam
+                              </p>
+                              <p className="mt-1 text-sm font-semibold text-sky-100">
+                                {totalCapacity}
+                              </p>
+                            </div>
                           </div>
                         </div>
 
@@ -663,8 +665,7 @@ export default function ProductsTab({
                       
 
                       {isOpen && (
-                        <div className="border-t border-white/10 px-4 pb-4">
-                          <div className="mt-4 space-y-4">
+                        <div className="mt-4 space-y-4 border-t border-white/10 pt-4">
                           <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-white/10 bg-ink-900/50 px-4 py-2 text-[11px] text-slate-400 shadow-inner">
                             <div className="flex flex-wrap items-center gap-3">
                               <span>Kategori: {categoryLabel}</span>
@@ -967,8 +968,6 @@ export default function ProductsTab({
                             </div>
                           </div>
                         </div>
-                      </div>
-                      </div>
                       )}
                     </div>
                   )
