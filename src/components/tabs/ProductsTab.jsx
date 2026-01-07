@@ -546,7 +546,7 @@ export default function ProductsTab({
                         </button>
 
                         {isStockEnabled && (
-                          <div className="inline-flex flex-col rounded-lg border border-white/10 bg-ink-900/60 px-2.5 py-1.5 shadow-inner backdrop-blur-sm">
+                          <div className="inline-flex flex-col rounded-lg border border-white/15 bg-white/5 px-2.5 py-1.5 shadow-inner backdrop-blur-sm">
                             <div className="flex flex-wrap items-center gap-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                               <span className="inline-flex items-center gap-1 text-emerald-100">
                                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
@@ -557,7 +557,7 @@ export default function ProductsTab({
                                 {usedCount} Kullanildi
                               </span>
                             </div>
-                            <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-white/10">
+                            <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-white/15">
                               <div
                                 className="h-full bg-emerald-400/70"
                                 style={{
@@ -572,7 +572,7 @@ export default function ProductsTab({
                         )}
 
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-ink-900/60 p-1 shadow-inner backdrop-blur-sm">
+                          <div className="flex items-center gap-1 rounded-lg border border-white/15 bg-white/5 p-1 shadow-inner backdrop-blur-sm">
                             <button
                               type="button"
                               onClick={() => handleStockToggle(offerId)}
@@ -607,7 +607,7 @@ export default function ProductsTab({
                               disabled={!offerId}
                               className={`inline-flex h-7 w-7 items-center justify-center rounded-full transition ${
                                 !offerId ? "cursor-not-allowed opacity-60" : "hover:bg-white/10"
-                              } ${starredOffers[offerId] ? "text-amber-200" : "text-slate-300"}`}
+                              } ${starredOffers[offerId] ? "text-amber-200" : "text-amber-200/70"}`}
                               aria-label="Urunu yildizla"
                               title={starredOffers[offerId] ? "Yildizi kaldir" : "Yildizla"}
                             >
