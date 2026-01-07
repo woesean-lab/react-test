@@ -105,6 +105,7 @@ export default function ProductsTab({
 }) {
   const [query, setQuery] = useState("")
   const [openOffers, setOpenOffers] = useState({})
+  const [starredOffers, setStarredOffers] = useState({})
   const [confirmKeyTarget, setConfirmKeyTarget] = useState(null)
   const [groupDrafts, setGroupDrafts] = useState({})
   const [bulkCounts, setBulkCounts] = useState({})
@@ -155,12 +156,23 @@ export default function ProductsTab({
       return name.includes(normalizedQuery)
     })
   }, [list, normalizedQuery])
+  const sortedList = useMemo(() => {
+    if (!starredOffers || Object.keys(starredOffers).length === 0) return filteredList
+    return [...filteredList].sort((a, b) => {
+      const aId = String(a?.id ?? "").trim()
+      const bId = String(b?.id ?? "").trim()
+      const aStar = Boolean(starredOffers[aId])
+      const bStar = Boolean(starredOffers[bId])
+      if (aStar === bStar) return 0
+      return aStar ? -1 : 1
+    })
+  }, [filteredList, starredOffers])
   const totalPages = Math.max(1, Math.ceil(filteredList.length / pageSize))
   const totalItems = filteredList.length
   const paginatedList = useMemo(() => {
     const start = (page - 1) * pageSize
-    return filteredList.slice(start, start + pageSize)
-  }, [filteredList, page, pageSize])
+    return sortedList.slice(start, start + pageSize)
+  }, [sortedList, page, pageSize])
   const pageStart = totalItems === 0 ? 0 : (page - 1) * pageSize + 1
   const pageEnd = totalItems === 0 ? 0 : Math.min(totalItems, page * pageSize)
   const stockModalLineCount = useMemo(() => {
@@ -179,6 +191,20 @@ export default function ProductsTab({
         onLoadKeys(normalizedId)
       }
       return { ...prev, [normalizedId]: nextOpen }
+    })
+  }
+
+  const toggleStarred = (offerId) => {
+    const normalizedId = String(offerId ?? "").trim()
+    if (!normalizedId) return
+    setStarredOffers((prev) => {
+      const next = { ...prev }
+      if (next[normalizedId]) {
+        delete next[normalizedId]
+      } else {
+        next[normalizedId] = true
+      }
+      return next
     })
   }
 
@@ -520,7 +546,7 @@ export default function ProductsTab({
                         </button>
 
                         {isStockEnabled && (
-                          <div className="inline-flex flex-col rounded-lg border border-white/10 bg-ink-950/40 px-2.5 py-1.5 backdrop-blur-sm">
+                          <div className="inline-flex flex-col rounded-lg border border-white/10 bg-ink-900/60 px-2.5 py-1.5 shadow-inner backdrop-blur-sm">
                             <div className="flex flex-wrap items-center gap-3 text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">
                               <span className="inline-flex items-center gap-1 text-emerald-100">
                                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
@@ -546,7 +572,7 @@ export default function ProductsTab({
                         )}
 
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <div className="flex items-center gap-1 rounded-full border border-white/10 bg-ink-950/40 p-1 backdrop-blur-sm">
+                          <div className="flex items-center gap-1 rounded-lg border border-white/10 bg-ink-900/60 p-1 shadow-inner backdrop-blur-sm">
                             <button
                               type="button"
                               onClick={() => handleStockToggle(offerId)}
@@ -573,6 +599,29 @@ export default function ProductsTab({
                               >
                                 <path d="M12 2v6" />
                                 <path d="M6.4 6.4a8 8 0 1 0 11.2 0" />
+                              </svg>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => toggleStarred(offerId)}
+                              disabled={!offerId}
+                              className={`inline-flex h-7 w-7 items-center justify-center rounded-full transition ${
+                                !offerId ? "cursor-not-allowed opacity-60" : "hover:bg-white/10"
+                              } ${starredOffers[offerId] ? "text-amber-200" : "text-slate-300"}`}
+                              aria-label="Urunu yildizla"
+                              title={starredOffers[offerId] ? "Yildizi kaldir" : "Yildizla"}
+                            >
+                              <svg
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                                className="h-4 w-4"
+                                fill={starredOffers[offerId] ? "currentColor" : "none"}
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="m12 2 3.1 6.3 7 .9-5 4.9 1.2 7-6.3-3.3-6.3 3.3 1.2-7-5-4.9 7-.9z" />
                               </svg>
                             </button>
                             {href && (
