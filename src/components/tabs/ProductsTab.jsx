@@ -479,11 +479,6 @@ export default function ProductsTab({
                       : `https://www.eldorado.gg${rawHref.startsWith("/") ? "" : "/"}${rawHref}`
                     : ""
                   const totalCapacity = Math.max(totalCount || 0, availableCount + usedCount)
-                  const gaugeTotal = 10
-                  const availableGaugeCount =
-                    totalCapacity > 0
-                      ? Math.min(gaugeTotal, Math.round((availableCount / totalCapacity) * gaugeTotal))
-                      : 0
                   return (
                     <div
                       key={key}
@@ -525,21 +520,18 @@ export default function ProductsTab({
                         </button>
 
                         {isStockEnabled && (
-                          <div className="flex flex-wrap items-center gap-3 text-[10px] font-semibold uppercase tracking-[0.2em]">
-                            <div className="flex items-center gap-2">
-                              <span className="text-emerald-100">Stokta {availableCount}</span>
-                              <span className="text-slate-500">/</span>
-                              <span className="text-amber-100">Kullanildi {usedCount}</span>
+                          <div className="flex flex-wrap items-center gap-4">
+                            <div className="flex items-baseline gap-2 text-emerald-100">
+                              <span className="text-[16px] font-semibold leading-none">{availableCount}</span>
+                              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                                Stokta
+                              </span>
                             </div>
-                            <div className="flex items-center gap-1" role="presentation">
-                              {Array.from({ length: gaugeTotal }).map((_, index) => (
-                                <span
-                                  key={`stock-gauge-${offerId}-${index}`}
-                                  className={`h-1.5 w-1.5 rounded-full ${
-                                    index < availableGaugeCount ? "bg-emerald-400" : "bg-amber-400/40"
-                                  }`}
-                                />
-                              ))}
+                            <div className="flex items-baseline gap-2 text-amber-100">
+                              <span className="text-[16px] font-semibold leading-none">{usedCount}</span>
+                              <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
+                                Kullanildi
+                              </span>
                             </div>
                           </div>
                         )}
