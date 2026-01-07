@@ -473,8 +473,6 @@ export default function ProductsTab({
                   const noteHasChanges = String(noteInputValue ?? "").trim() !== storedNote
                   const canSaveNote = Boolean(offerId) && canManageNotes && noteHasChanges
                   const hasNote = Boolean(storedNote)
-                  const notePreview =
-                    hasNote && storedNote.length > 90 ? `${storedNote.slice(0, 90)}...` : storedNote
                   const rawHref = String(product?.href ?? "").trim()
                   const href = rawHref
                     ? rawHref.startsWith("http://") || rawHref.startsWith("https://")
@@ -491,125 +489,63 @@ export default function ProductsTab({
                   return (
                     <div
                       key={key}
-                      className={`rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-card transition hover:border-white/20 ${
-                        isMissing
-                          ? "border-orange-300/30 bg-orange-500/5"
-                          : isOutOfStock
-                            ? "border-rose-300/30 bg-rose-500/5"
-                            : "border-white/10"
+                      className={`rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner transition hover:border-accent-400/60 hover:bg-ink-800/80 hover:shadow-card ${
+                        isMissing ? "border-orange-300/30" : isOutOfStock ? "border-rose-300/30" : ""
                       }`}
                     >
-                      <div className="grid gap-4 md:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)_auto] md:items-center">
+                      <div className="flex flex-wrap items-center gap-3">
                         <button
                           type="button"
                           onClick={() => toggleOfferOpen(offerId)}
                           disabled={!offerId}
-                          className="min-w-0 text-left disabled:cursor-not-allowed disabled:opacity-60"
+                          className="min-w-0 flex-1 text-left disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                          <div className="space-y-2">
-                            <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.26em] text-slate-400">
-                              <span
-                                className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 ${statusClass}`}
-                              >
-                                <span
-                                  className={`h-2 w-2 rounded-full ${
-                                    isStockEnabled
-                                      ? isOutOfStock
-                                        ? "bg-rose-300"
-                                        : "bg-emerald-300"
-                                      : "bg-slate-400"
-                                  }`}
-                                />
-                                {statusLabel}
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span
+                              className={`truncate text-sm font-semibold ${
+                                isMissing
+                                  ? "text-orange-50"
+                                  : isOutOfStock
+                                    ? "text-rose-50"
+                                    : "text-white"
+                              }`}
+                            >
+                              {name}
+                            </span>
+                            <span
+                              className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] ${statusClass}`}
+                            >
+                              {statusLabel}
+                            </span>
+                            {isMissing && (
+                              <span className="rounded-full border border-orange-300/40 bg-orange-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-orange-100">
+                                Eksik
                               </span>
-                              <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] text-slate-300">
-                                {categoryLabel}
-                              </span>
-                              {groupName && (
-                                <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] text-slate-200">
-                                  {groupName}
-                                </span>
-                              )}
-                            </div>
-                            <div className="flex flex-wrap items-center gap-2">
-                              <h3
-                                className={`truncate text-base font-semibold ${
-                                  isMissing
-                                    ? "text-orange-50"
-                                    : isOutOfStock
-                                      ? "text-rose-50"
-                                      : "text-white"
-                                }`}
-                              >
-                                {name}
-                              </h3>
-                              {isMissing && (
-                                <span className="rounded-full border border-orange-300/40 bg-orange-500/10 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-orange-100">
-                                  Eksik
-                                </span>
-                              )}
-                              {hasNote && (
-                                <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] uppercase tracking-[0.2em] text-slate-300">
-                                  Not
-                                </span>
-                              )}
-                            </div>
-                            {hasNote && (
-                              <p className="text-xs text-slate-400">{notePreview}</p>
                             )}
+                          </div>
+                          <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                            <span>{categoryLabel}</span>
+                            {groupName && <span>{groupName}</span>}
+                            {hasNote && <span>Not</span>}
                           </div>
                         </button>
 
-                        <div className="min-w-[220px]">
-                          <div
-                            className={`grid grid-cols-3 gap-2 rounded-2xl border border-white/10 bg-ink-950/60 p-2 text-center ${
-                              isStockEnabled ? "" : "opacity-60"
-                            }`}
-                          >
-                            <div className="rounded-xl border border-white/5 bg-white/5 px-2 py-2">
-                              <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                                Stok
-                              </p>
-                              <p
-                                className={`mt-1 text-lg font-semibold ${
-                                  isOutOfStock ? "text-rose-100" : "text-emerald-100"
-                                }`}
-                              >
-                                {availableCount}
-                              </p>
-                              <div
-                                className={`mx-auto mt-1 h-1 w-8 rounded-full ${
-                                  isOutOfStock ? "bg-rose-400/60" : "bg-emerald-400/60"
-                                }`}
-                              />
-                            </div>
-                            <div className="rounded-xl border border-white/5 bg-white/5 px-2 py-2">
-                              <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                                Kullanilan
-                              </p>
-                              <p className="mt-1 text-lg font-semibold text-amber-100">
-                                {usedCount}
-                              </p>
-                              <div className="mx-auto mt-1 h-1 w-8 rounded-full bg-amber-400/60" />
-                            </div>
-                            <div className="rounded-xl border border-white/5 bg-white/5 px-2 py-2">
-                              <p className="text-[9px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                                Toplam
-                              </p>
-                              <p className="mt-1 text-lg font-semibold text-sky-100">
-                                {totalCapacity}
-                              </p>
-                              <div className="mx-auto mt-1 h-1 w-8 rounded-full bg-sky-400/60" />
-                            </div>
-                          </div>
+                        <div
+                          className={`flex flex-wrap items-center gap-2 rounded-xl border border-white/10 bg-ink-950/50 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 ${
+                            isStockEnabled ? "" : "opacity-60"
+                          }`}
+                        >
+                          <span className="text-emerald-100">Stok {availableCount}</span>
+                          <span className="text-amber-100">Kullanilan {usedCount}</span>
+                          <span className="text-sky-100">Toplam {totalCapacity}</span>
                         </div>
 
-                        <div className="flex flex-wrap items-center gap-2">
+                        <div className="flex flex-wrap items-center gap-1.5">
                           <button
                             type="button"
                             onClick={() => handleStockToggle(offerId)}
                             disabled={!canManageStock || !offerId}
-                            className={`inline-flex h-9 w-full items-center justify-center gap-2 rounded-xl border border-white/10 bg-ink-950/60 px-3 text-[10px] font-semibold uppercase tracking-[0.26em] transition sm:w-auto ${
+                            className={`inline-flex h-7 items-center justify-center gap-2 rounded-full border border-white/10 bg-ink-950/60 px-2.5 text-[10px] font-semibold uppercase tracking-[0.2em] transition ${
                               isStockEnabled ? "text-emerald-100" : "text-rose-100"
                             } ${
                               !canManageStock || !offerId
@@ -623,15 +559,15 @@ export default function ProductsTab({
                                 isStockEnabled ? "bg-emerald-400" : "bg-rose-400"
                               }`}
                             />
-                            <span>{isStockEnabled ? "Stok acik" : "Stok kapali"}</span>
+                            <span>{isStockEnabled ? "Acik" : "Kapali"}</span>
                           </button>
-                          <div className="flex w-full items-center justify-center gap-1 rounded-xl border border-white/10 bg-ink-950/60 p-1 sm:w-auto">
+                          <div className="flex items-center gap-1 rounded-full border border-white/10 bg-ink-950/60 p-1">
                             {href && (
                               <a
                                 href={href}
                                 target="_blank"
                                 rel="noreferrer"
-                                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-200 transition hover:bg-white/10 hover:text-white"
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-full text-slate-200 transition hover:bg-white/10 hover:text-white"
                                 aria-label="Urun linki"
                               >
                                 <svg
@@ -654,7 +590,7 @@ export default function ProductsTab({
                                 type="button"
                                 onClick={() => openStockModal(offerId, name)}
                                 disabled={!offerId || !isStockEnabled}
-                                className={`inline-flex h-8 w-8 items-center justify-center rounded-lg text-accent-100 transition ${
+                                className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-accent-100 transition ${
                                   !offerId || !isStockEnabled
                                     ? "cursor-not-allowed opacity-60"
                                     : "hover:bg-white/10"
@@ -680,7 +616,7 @@ export default function ProductsTab({
                               type="button"
                               onClick={() => toggleOfferOpen(offerId)}
                               disabled={!offerId}
-                              className={`inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-200 transition ${
+                              className={`inline-flex h-7 w-7 items-center justify-center rounded-full text-slate-200 transition ${
                                 isOpen ? "bg-white/10 text-white" : ""
                               } ${
                                 !offerId ? "cursor-not-allowed opacity-60" : "hover:bg-white/10 hover:text-white"
