@@ -191,8 +191,6 @@ export default function ProductsTab({
   const [messageGroupDrafts, setMessageGroupDrafts] = useState({})
   const stockModalLineRef = useRef(null)
   const stockModalTextareaRef = useRef(null)
-  const messageTemplateTypeaheadRef = useRef({})
-  const messageTemplateTypeaheadTimersRef = useRef({})
   const canManageGroups = canAddKeys
   const canManageNotes = canAddKeys && typeof onSaveNote === "function"
   const canManageStock = canAddKeys && typeof onToggleStock === "function"
@@ -536,35 +534,6 @@ export default function ProductsTab({
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
     setMessageTemplateDrafts((prev) => ({ ...prev, [normalizedId]: value }))
-  }
-
-  const handleMessageTemplateTypeahead = (offerId, event) => {
-    if (event.ctrlKey || event.metaKey || event.altKey) return
-    if (event.key.length !== 1 && event.key !== "Backspace") return
-    const normalizedId = String(offerId ?? "").trim()
-    if (!normalizedId) return
-    const current = messageTemplateTypeaheadRef.current[normalizedId] || ""
-    const next =
-      event.key === "Backspace" ? current.slice(0, -1) : `${current}${event.key}`
-    messageTemplateTypeaheadRef.current[normalizedId] = next
-
-    const timerId = messageTemplateTypeaheadTimersRef.current[normalizedId]
-    if (timerId) {
-      clearTimeout(timerId)
-    }
-    if (typeof window !== "undefined") {
-      messageTemplateTypeaheadTimersRef.current[normalizedId] = window.setTimeout(() => {
-        messageTemplateTypeaheadRef.current[normalizedId] = ""
-      }, 700)
-    }
-
-    const query = next.trim().toLowerCase()
-    if (!query) return
-    const match = templates.find((tpl) =>
-      String(tpl?.label ?? "").toLowerCase().includes(query),
-    )
-    if (!match) return
-    setMessageTemplateDrafts((prev) => ({ ...prev, [normalizedId]: match.label }))
   }
 
   const handleMessageGroupDraftChange = (offerId, value) => {
@@ -999,6 +968,10 @@ export default function ProductsTab({
                     Boolean(offerId) && canManageNotes && noteHasChanges && isNoteEditing
                   const messageTemplateDraftValue = messageTemplateDrafts[offerId] ?? ""
                   const messageGroupDraftValue = messageGroupDrafts[offerId] ?? ""
+                  const normalizedTemplateValue = String(messageTemplateDraftValue ?? "").trim()
+                  const isMessageTemplateValid = templates.some(
+                    (tpl) => tpl.label === normalizedTemplateValue,
+                  )
                   const messageGroupId = String(
                     messageGroupAssignments?.[offerId] ?? "",
                   ).trim()
@@ -1359,7 +1332,7 @@ export default function ProductsTab({
                                       disabled={!isNoteEditable || !noteGroupDraftValue.trim()}
                                       className="rounded-md border border-accent-400/70 bg-accent-500/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-accent-50 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                                     >
-                                      Oluştur
+                                          Oluştur
                                     </button>
                                   </div>
                                 </div>
@@ -1817,32 +1790,28 @@ export default function ProductsTab({
                                     </div>
                                   </div>
                                   <div className="flex flex-wrap items-center gap-2">
-                                    <select
+                                    <input
+                                      type="text"
+                                      list={`message-template-${offerId}`}
                                       value={messageTemplateDraftValue}
                                       onChange={(event) =>
                                         handleMessageTemplateDraftChange(offerId, event.target.value)
                                       }
-                                      onKeyDown={(event) =>
-                                        handleMessageTemplateTypeahead(offerId, event)
-                                      }
+                                      placeholder={templates.length === 0 ? "Şablon yok" : "Şablon seç"}
                                       disabled={!canManageMessages || templates.length === 0}
-                                      className="min-w-[200px] flex-1 appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
-                                    >
-                                      <option value="">
-                                        {templates.length === 0 ? "Şablon yok" : "Şablon seç"}
-                                      </option>
+                                      className="min-w-[200px] flex-1 rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                                    />
+                                    <datalist id={`message-template-${offerId}`}>
                                       {templates.map((tpl) => (
-                                        <option key={`${offerId}-msg-${tpl.label}`} value={tpl.label}>
-                                          {tpl.label}
-                                        </option>
+                                        <option key={`${offerId}-msg-${tpl.label}`} value={tpl.label} />
                                       ))}
-                                    </select>
+                                    </datalist>
                                     <button
                                       type="button"
                                       onClick={() => handleMessageTemplateAdd(offerId)}
                                       disabled={
                                         !canManageMessages ||
-                                        !messageTemplateDraftValue.trim() ||
+                                        !isMessageTemplateValid ||
                                         !messageGroupId
                                       }
                                       className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-slate-100 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50 disabled:cursor-not-allowed disabled:opacity-60"
@@ -2037,6 +2006,8 @@ export default function ProductsTab({
     </div>
   )
 }
+
+
 
 
 
