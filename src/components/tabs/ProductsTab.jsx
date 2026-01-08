@@ -1799,7 +1799,8 @@ export default function ProductsTab({
                                       }
                                       placeholder={templates.length === 0 ? "Şablon yok" : "Şablon seç"}
                                       disabled={!canManageMessages || templates.length === 0}
-                                      className="min-w-[200px] flex-1 rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                                      className="min-w-[200px] flex-1 appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                                      style={{ appearance: "none", WebkitAppearance: "none" }}
                                     />
                                     <datalist id={`message-template-${offerId}`}>
                                       {templates.map((tpl) => (
