@@ -737,20 +737,20 @@ export default function ProductsTab({
                         </button>
 
                         {isStockEnabled && (
-                          <div
-                            className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] ${
-                              isOutOfStock
-                                ? "border-rose-300/30 bg-rose-500/10 text-rose-100"
-                                : "border-emerald-300/30 bg-emerald-500/10 text-emerald-100"
-                            }`}
-                          >
+                          <div className="inline-flex items-center overflow-hidden rounded-full border border-white/10 bg-ink-950/40 text-[11px] font-semibold shadow-inner">
+                            <span className="flex items-center gap-2 px-3 py-1 text-slate-200">
+                              <span
+                                className={`h-1.5 w-1.5 rounded-full ${
+                                  isOutOfStock ? "bg-rose-300/80" : "bg-emerald-300/80"
+                                }`}
+                              />
+                              <span>{isOutOfStock ? "Stok yok" : "Stokta"}</span>
+                            </span>
                             <span
-                              className={`h-2 w-2 rounded-full ${
-                                isOutOfStock ? "bg-rose-300/80" : "bg-emerald-300/80"
+                              className={`border-l border-white/10 px-2.5 py-1 tabular-nums ${
+                                isOutOfStock ? "text-rose-100" : "text-emerald-100"
                               }`}
-                            />
-                            <span>{isOutOfStock ? "Stok yok" : "Stok"}</span>
-                            <span className="rounded-full border border-white/10 bg-white/10 px-2 py-0.5 text-[11px] tracking-normal text-slate-100">
+                            >
                               {availableCount}
                             </span>
                           </div>
