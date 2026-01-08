@@ -559,9 +559,9 @@ export default function ProductsTab({
                                     cy="18"
                                     r="15"
                                     fill="none"
-                                      stroke="rgba(255,255,255,0.15)"
-                                      strokeWidth="3"
-                                    />
+                                    stroke="rgba(248,113,113,0.6)"
+                                    strokeWidth="3"
+                                  />
                                     <circle
                                       cx="18"
                                       cy="18"
