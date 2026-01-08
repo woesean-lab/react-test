@@ -140,6 +140,9 @@ export default function ProductsTab({
   groups = [],
   groupAssignments = {},
   notesByOffer = {},
+  noteGroups = [],
+  noteGroupAssignments = {},
+  noteGroupNotes = {},
   stockEnabledByOffer = {},
   onLoadKeys,
   onAddKeys,
@@ -152,6 +155,8 @@ export default function ProductsTab({
   onCopyKey,
   onCreateGroup,
   onAssignGroup,
+  onCreateNoteGroup,
+  onAssignNoteGroup,
   onSaveNote,
   onToggleStock,
   canAddKeys = false,
@@ -170,6 +175,7 @@ export default function ProductsTab({
   const [editingKeys, setEditingKeys] = useState({})
   const [savingKeys, setSavingKeys] = useState({})
   const [confirmGroupDelete, setConfirmGroupDelete] = useState(null)
+  const [noteGroupDrafts, setNoteGroupDrafts] = useState({})
   const stockModalLineRef = useRef(null)
   const stockModalTextareaRef = useRef(null)
   const canManageGroups = canAddKeys
@@ -424,6 +430,12 @@ export default function ProductsTab({
     setNoteDrafts((prev) => ({ ...prev, [normalizedId]: value }))
   }
 
+  const handleNoteGroupDraftChange = (offerId, value) => {
+    const normalizedId = String(offerId ?? "").trim()
+    if (!normalizedId) return
+    setNoteGroupDrafts((prev) => ({ ...prev, [normalizedId]: value }))
+  }
+
   const handleNoteReset = (offerId) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
@@ -439,10 +451,36 @@ export default function ProductsTab({
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
     const draft = noteDrafts[normalizedId]
-    const stored = notesByOffer?.[normalizedId] ?? ""
+    const noteGroupId = String(noteGroupAssignments?.[normalizedId] ?? "").trim()
+    const stored = noteGroupId
+      ? noteGroupNotes?.[noteGroupId] ?? ""
+      : notesByOffer?.[normalizedId] ?? ""
     const value = draft !== undefined ? draft : stored
     onSaveNote(normalizedId, value)
     handleNoteReset(normalizedId)
+  }
+
+  const handleNoteGroupCreate = (offerId) => {
+    if (typeof onCreateNoteGroup !== "function" || typeof onAssignNoteGroup !== "function") return
+    const normalizedId = String(offerId ?? "").trim()
+    if (!normalizedId) return
+    const draft = noteGroupDrafts[normalizedId] ?? ""
+    const created = onCreateNoteGroup(draft)
+    if (!created) return
+    setNoteGroupDrafts((prev) => ({ ...prev, [normalizedId]: "" }))
+    onAssignNoteGroup(normalizedId, created.id)
+  }
+
+  const handleNoteGroupAssign = (offerId, groupId) => {
+    if (typeof onAssignNoteGroup !== "function") return
+    const normalizedId = String(offerId ?? "").trim()
+    if (!normalizedId) return
+    setNoteDrafts((prev) => {
+      const next = { ...prev }
+      delete next[normalizedId]
+      return next
+    })
+    onAssignNoteGroup(normalizedId, groupId)
   }
 
   const handleStockToggle = (offerId) => {
@@ -796,11 +834,20 @@ export default function ProductsTab({
                   const isOutOfStock = isStockEnabled && availableCount === 0
                   const isKeysLoading = Boolean(keysLoading?.[offerId])
                   const groupDraftValue = groupDrafts[offerId] ?? ""
-                  const storedNote = String(notesByOffer?.[offerId] ?? "").trim()
+                  const noteGroupId = String(noteGroupAssignments?.[offerId] ?? "").trim()
+                  const noteGroup = noteGroupId
+                    ? noteGroups.find((entry) => entry.id === noteGroupId)
+                    : null
+                  const noteGroupName = String(noteGroup?.name ?? "").trim()
+                  const noteGroupNote = String(noteGroupNotes?.[noteGroupId] ?? "").trim()
+                  const storedNote = noteGroupId
+                    ? noteGroupNote
+                    : String(notesByOffer?.[offerId] ?? "").trim()
                   const noteDraftValue = noteDrafts[offerId]
                   const noteInputValue = noteDraftValue !== undefined ? noteDraftValue : storedNote
                   const noteHasChanges = String(noteInputValue ?? "").trim() !== storedNote
                   const canSaveNote = Boolean(offerId) && canManageNotes && noteHasChanges
+                  const noteGroupDraftValue = noteGroupDrafts[offerId] ?? ""
                   const rawHref = String(product?.href ?? "").trim()
                   const href = rawHref
                     ? rawHref.startsWith("http://") || rawHref.startsWith("https://")
@@ -1052,6 +1099,11 @@ export default function ProductsTab({
                                   Kayitli
                                 </span>
                               )}
+                              {noteGroupId && (
+                                <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-semibold text-slate-200">
+                                  Grup: {noteGroupName || "Secili"}
+                                </span>
+                              )}
                               <button
                                 type="button"
                                 onClick={() => handleNoteSave(offerId)}
@@ -1068,6 +1120,47 @@ export default function ProductsTab({
                               >
                                 Sifirla
                               </button>
+                            </div>
+                          </div>
+                          <div className="mt-3 space-y-2">
+                            <label className="text-[11px] font-semibold text-slate-300">
+                              Not grubu
+                            </label>
+                            <div className="flex flex-wrap items-center gap-2">
+                              <select
+                                value={noteGroupId}
+                                onChange={(event) => handleNoteGroupAssign(offerId, event.target.value)}
+                                disabled={!canManageNotes}
+                                className="min-w-[180px] flex-1 appearance-none rounded-xl border border-white/10 bg-ink-900/60 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                              >
+                                <option value="">Bagimsiz not</option>
+                                {noteGroups.map((groupOption) => (
+                                  <option key={groupOption.id} value={groupOption.id}>
+                                    {groupOption.name}
+                                  </option>
+                                ))}
+                              </select>
+                              {canManageNotes && (
+                                <div className="flex min-w-[200px] flex-1 items-center gap-2">
+                                  <input
+                                    type="text"
+                                    value={noteGroupDraftValue}
+                                    onChange={(event) =>
+                                      handleNoteGroupDraftChange(offerId, event.target.value)
+                                    }
+                                    placeholder="Yeni not grubu"
+                                    className="w-full rounded-xl border border-white/10 bg-ink-900/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                                  />
+                                  <button
+                                    type="button"
+                                    onClick={() => handleNoteGroupCreate(offerId)}
+                                    disabled={!noteGroupDraftValue.trim()}
+                                    className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-slate-100 transition hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                  >
+                                    Olustur
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           </div>
                           <textarea

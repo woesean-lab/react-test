@@ -7,6 +7,7 @@ import {
   DEFAULT_LIST_ROWS,
   ELDORADO_KEYS_STORAGE_KEY,
   ELDORADO_GROUPS_STORAGE_KEY,
+  ELDORADO_NOTE_GROUPS_STORAGE_KEY,
   ELDORADO_NOTES_STORAGE_KEY,
   ELDORADO_STOCK_ENABLED_STORAGE_KEY,
   FORMULA_ERRORS,
@@ -187,6 +188,67 @@ export default function useAppData() {
       return {}
     }
   })
+  const [eldoradoNoteGroups, setEldoradoNoteGroups] = useState(() => {
+    if (typeof window === "undefined") return []
+    try {
+      const raw = localStorage.getItem(ELDORADO_NOTE_GROUPS_STORAGE_KEY)
+      if (!raw) return []
+      const parsed = JSON.parse(raw)
+      const groups = Array.isArray(parsed?.groups) ? parsed.groups : []
+      return groups
+        .map((group) => ({
+          id: String(group?.id ?? "").trim(),
+          name: String(group?.name ?? "").trim(),
+          createdAt: group?.createdAt ? String(group.createdAt) : new Date().toISOString(),
+        }))
+        .filter((group) => group.id && group.name)
+    } catch (error) {
+      console.warn("Could not read local Eldorado note groups", error)
+      return []
+    }
+  })
+  const [eldoradoNoteGroupAssignments, setEldoradoNoteGroupAssignments] = useState(() => {
+    if (typeof window === "undefined") return {}
+    try {
+      const raw = localStorage.getItem(ELDORADO_NOTE_GROUPS_STORAGE_KEY)
+      if (!raw) return {}
+      const parsed = JSON.parse(raw)
+      const assignments = parsed?.assignments
+      if (!assignments || typeof assignments !== "object") return {}
+      const normalized = {}
+      Object.entries(assignments).forEach(([offerId, groupId]) => {
+        const safeOfferId = String(offerId ?? "").trim()
+        const safeGroupId = String(groupId ?? "").trim()
+        if (!safeOfferId || !safeGroupId) return
+        normalized[safeOfferId] = safeGroupId
+      })
+      return normalized
+    } catch (error) {
+      console.warn("Could not read local Eldorado note group assignments", error)
+      return {}
+    }
+  })
+  const [eldoradoNoteGroupNotes, setEldoradoNoteGroupNotes] = useState(() => {
+    if (typeof window === "undefined") return {}
+    try {
+      const raw = localStorage.getItem(ELDORADO_NOTE_GROUPS_STORAGE_KEY)
+      if (!raw) return {}
+      const parsed = JSON.parse(raw)
+      const notes = parsed?.notes
+      if (!notes || typeof notes !== "object") return {}
+      const normalized = {}
+      Object.entries(notes).forEach(([groupId, note]) => {
+        const safeGroupId = String(groupId ?? "").trim()
+        const safeNote = String(note ?? "").trim()
+        if (!safeGroupId || !safeNote) return
+        normalized[safeGroupId] = safeNote
+      })
+      return normalized
+    } catch (error) {
+      console.warn("Could not read local Eldorado note group notes", error)
+      return {}
+    }
+  })
   const [eldoradoStockEnabledByOffer, setEldoradoStockEnabledByOffer] = useState(() => {
     if (typeof window === "undefined") return {}
     try {
@@ -216,6 +278,62 @@ export default function useAppData() {
       return {}
     }
   })
+  const readEldoradoNoteGroupStore = useCallback(() => {
+    if (typeof window === "undefined") return { groups: [], assignments: {}, notes: {} }
+    try {
+      const raw = localStorage.getItem(ELDORADO_NOTE_GROUPS_STORAGE_KEY)
+      if (!raw) return { groups: [], assignments: {}, notes: {} }
+      const parsed = JSON.parse(raw)
+      const groups = Array.isArray(parsed?.groups) ? parsed.groups : []
+      const assignments = parsed?.assignments && typeof parsed.assignments === "object"
+        ? parsed.assignments
+        : {}
+      const notes = parsed?.notes && typeof parsed.notes === "object" ? parsed.notes : {}
+
+      const normalizedGroups = groups
+        .map((group) => ({
+          id: String(group?.id ?? "").trim(),
+          name: String(group?.name ?? "").trim(),
+          createdAt: group?.createdAt ? String(group.createdAt) : new Date().toISOString(),
+        }))
+        .filter((group) => group.id && group.name)
+      const normalizedAssignments = {}
+      Object.entries(assignments).forEach(([offerId, groupId]) => {
+        const safeOfferId = String(offerId ?? "").trim()
+        const safeGroupId = String(groupId ?? "").trim()
+        if (!safeOfferId || !safeGroupId) return
+        normalizedAssignments[safeOfferId] = safeGroupId
+      })
+      const normalizedNotes = {}
+      Object.entries(notes).forEach(([groupId, note]) => {
+        const safeGroupId = String(groupId ?? "").trim()
+        const safeNote = String(note ?? "").trim()
+        if (!safeGroupId || !safeNote) return
+        normalizedNotes[safeGroupId] = safeNote
+      })
+
+      return {
+        groups: normalizedGroups,
+        assignments: normalizedAssignments,
+        notes: normalizedNotes,
+      }
+    } catch (error) {
+      console.warn("Could not read local Eldorado note group store", error)
+      return { groups: [], assignments: {}, notes: {} }
+    }
+  }, [])
+
+  const writeEldoradoNoteGroupStore = useCallback((store) => {
+    if (typeof window === "undefined") return false
+    try {
+      localStorage.setItem(ELDORADO_NOTE_GROUPS_STORAGE_KEY, JSON.stringify(store))
+      return true
+    } catch (error) {
+      console.warn("Could not save local Eldorado note groups", error)
+      toast.error("Not gruplari kaydedilemedi (local storage).")
+      return false
+    }
+  }, [])
   const stockModalTextareaRef = useRef(null)
   const stockModalLineRef = useRef(null)
   const isStockTextSelectingRef = useRef(false)
@@ -2187,6 +2305,13 @@ export default function useAppData() {
     return `local-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`
   }, [])
 
+  const createLocalEldoradoNoteGroupId = useCallback(() => {
+    if (typeof crypto !== "undefined" && crypto.randomUUID) {
+      return crypto.randomUUID()
+    }
+    return `note-group-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`
+  }, [])
+
   const normalizeEldoradoKeyList = useCallback(
     (offerId, list) => {
       if (!Array.isArray(list)) return []
@@ -2351,6 +2476,19 @@ export default function useAppData() {
   useEffect(() => {
     writeEldoradoNoteStore(eldoradoNotesByOffer)
   }, [eldoradoNotesByOffer, writeEldoradoNoteStore])
+
+  useEffect(() => {
+    writeEldoradoNoteGroupStore({
+      groups: eldoradoNoteGroups,
+      assignments: eldoradoNoteGroupAssignments,
+      notes: eldoradoNoteGroupNotes,
+    })
+  }, [
+    eldoradoNoteGroupAssignments,
+    eldoradoNoteGroupNotes,
+    eldoradoNoteGroups,
+    writeEldoradoNoteGroupStore,
+  ])
 
   useEffect(() => {
     writeEldoradoStockEnabledStore(eldoradoStockEnabledByOffer)
@@ -2683,21 +2821,39 @@ export default function useAppData() {
     ],
   )
 
-  const handleEldoradoNoteSave = useCallback((offerId, rawNote) => {
-    const normalizedOfferId = String(offerId ?? "").trim()
-    if (!normalizedOfferId) return false
-    const trimmedNote = String(rawNote ?? "").trim()
-    setEldoradoNotesByOffer((prev) => {
-      const next = { ...prev }
-      if (trimmedNote) {
-        next[normalizedOfferId] = trimmedNote
-      } else {
-        delete next[normalizedOfferId]
+  const handleEldoradoNoteSave = useCallback(
+    (offerId, rawNote) => {
+      const normalizedOfferId = String(offerId ?? "").trim()
+      if (!normalizedOfferId) return false
+      const trimmedNote = String(rawNote ?? "").trim()
+      const groupId = String(eldoradoNoteGroupAssignments?.[normalizedOfferId] ?? "").trim()
+
+      if (groupId) {
+        setEldoradoNoteGroupNotes((prev) => {
+          const next = { ...prev }
+          if (trimmedNote) {
+            next[groupId] = trimmedNote
+          } else {
+            delete next[groupId]
+          }
+          return next
+        })
+        return true
       }
-      return next
-    })
-    return true
-  }, [])
+
+      setEldoradoNotesByOffer((prev) => {
+        const next = { ...prev }
+        if (trimmedNote) {
+          next[normalizedOfferId] = trimmedNote
+        } else {
+          delete next[normalizedOfferId]
+        }
+        return next
+      })
+      return true
+    },
+    [eldoradoNoteGroupAssignments],
+  )
 
   const handleEldoradoStockToggle = useCallback((offerId, enabled) => {
     const normalizedOfferId = String(offerId ?? "").trim()
@@ -2709,6 +2865,75 @@ export default function useAppData() {
     }))
     return true
   }, [])
+
+  const handleEldoradoNoteGroupCreate = useCallback(
+    (name) => {
+      const trimmed = String(name ?? "").trim()
+      if (!trimmed) {
+        toast.error("Not grubu adi gerekli.")
+        return null
+      }
+      const store = readEldoradoNoteGroupStore()
+      const existing = store.groups.find(
+        (group) => group.name.toLowerCase() === trimmed.toLowerCase(),
+      )
+      if (existing) {
+        toast("Not grubu zaten var, secildi.", { position: "top-right" })
+        return existing
+      }
+      const createdAt = new Date().toISOString()
+      const nextGroup = {
+        id: createLocalEldoradoNoteGroupId(),
+        name: trimmed,
+        createdAt,
+      }
+      store.groups = [...store.groups, nextGroup]
+      const saved = writeEldoradoNoteGroupStore(store)
+      if (!saved) return null
+      setEldoradoNoteGroups(store.groups)
+      setEldoradoNoteGroupAssignments(store.assignments)
+      setEldoradoNoteGroupNotes(store.notes)
+      return nextGroup
+    },
+    [
+      createLocalEldoradoNoteGroupId,
+      readEldoradoNoteGroupStore,
+      writeEldoradoNoteGroupStore,
+    ],
+  )
+
+  const handleEldoradoNoteGroupAssign = useCallback(
+    (offerId, groupId) => {
+      const normalizedOfferId = String(offerId ?? "").trim()
+      if (!normalizedOfferId) return false
+      const nextGroupId = String(groupId ?? "").trim()
+      const store = readEldoradoNoteGroupStore()
+
+      if (nextGroupId && !store.groups.some((group) => group.id === nextGroupId)) {
+        toast.error("Not grubu bulunamadi.")
+        return false
+      }
+
+      if (nextGroupId) {
+        store.assignments[normalizedOfferId] = nextGroupId
+        const existingNote = String(eldoradoNotesByOffer?.[normalizedOfferId] ?? "").trim()
+        if (existingNote && !store.notes[nextGroupId]) {
+          store.notes[nextGroupId] = existingNote
+        }
+      } else {
+        delete store.assignments[normalizedOfferId]
+      }
+
+      const saved = writeEldoradoNoteGroupStore(store)
+      if (!saved) return false
+
+      setEldoradoNoteGroups(store.groups)
+      setEldoradoNoteGroupAssignments(store.assignments)
+      setEldoradoNoteGroupNotes(store.notes)
+      return true
+    },
+    [eldoradoNotesByOffer, readEldoradoNoteGroupStore, writeEldoradoNoteGroupStore],
+  )
 
   const loadEldoradoKeys = useCallback(
     async (offerId, options = {}) => {
@@ -4879,6 +5104,9 @@ export default function useAppData() {
     eldoradoGroups,
     eldoradoGroupAssignments,
     eldoradoNotesByOffer,
+    eldoradoNoteGroups,
+    eldoradoNoteGroupAssignments,
+    eldoradoNoteGroupNotes,
     eldoradoStockEnabledByOffer,
     isEldoradoLoading,
     isEldoradoRefreshing,
@@ -4894,6 +5122,8 @@ export default function useAppData() {
     handleEldoradoGroupCreate,
     handleEldoradoGroupDelete,
     handleEldoradoGroupAssign,
+    handleEldoradoNoteGroupCreate,
+    handleEldoradoNoteGroupAssign,
     handleEldoradoNoteSave,
     handleEldoradoStockToggle,
     products,
