@@ -546,7 +546,7 @@ export default function ProductsTab({
                         </button>
 
                         {isStockEnabled && (
-                          <div className="inline-flex min-w-[160px] flex-col rounded-lg border border-white/15 bg-white/6 px-3 py-2 shadow-inner backdrop-blur-sm">
+                          <div className="inline-flex min-h-[44px] min-w-[160px] flex-col justify-between rounded-lg border border-white/15 bg-white/6 px-3 py-2 shadow-inner backdrop-blur-sm">
                             <div className="flex items-end justify-between gap-4">
                               <div className="space-y-0.5">
                                 <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">
@@ -579,8 +579,8 @@ export default function ProductsTab({
                           </div>
                         )}
 
-                        <div className="flex flex-wrap items-center gap-1.5">
-                          <div className="flex items-center gap-1 rounded-lg border border-white/15 bg-white/6 p-1.5 shadow-inner backdrop-blur-sm">
+                        <div className="flex flex-wrap items-stretch gap-1.5">
+                          <div className="flex min-h-[44px] items-center gap-1 rounded-lg border border-white/15 bg-white/6 px-2.5 py-2 shadow-inner backdrop-blur-sm">
                             <button
                               type="button"
                               onClick={() => handleStockToggle(offerId)}
