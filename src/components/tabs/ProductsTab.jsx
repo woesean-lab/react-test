@@ -1095,7 +1095,7 @@ export default function ProductsTab({
                           </div>
                         </div>
 
-                          <div className="overflow-hidden rounded-2xl border border-white/10 bg-ink-900/30 shadow-card">
+                          <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-card">
                           <div
                             role="button"
                             tabIndex={0}
