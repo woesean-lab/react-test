@@ -212,14 +212,18 @@ export default function ProductsTab({
     const totals = {
       totalOffers: allProducts.length,
       stockEnabled: 0,
-      availableStock: 0,
-      usedStock: 0,
+      stockDisabled: 0,
+      outOfStock: 0,
     }
 
     allProducts.forEach((product) => {
       const offerId = String(product?.id ?? "").trim()
       const isStockEnabled = Boolean(stockEnabledByOffer?.[offerId])
-      if (isStockEnabled) totals.stockEnabled += 1
+      if (isStockEnabled) {
+        totals.stockEnabled += 1
+      } else {
+        totals.stockDisabled += 1
+      }
 
       const keyList = Array.isArray(keysByOffer?.[offerId]) ? keysByOffer[offerId] : []
       const usedCountFromKeys = keyList.reduce(
@@ -241,9 +245,9 @@ export default function ProductsTab({
       const hasLoadedKeys = Object.prototype.hasOwnProperty.call(keysByOffer, offerId)
       const usedCount = hasLoadedKeys ? usedCountFromKeys : rawUsedCount
       const availableCount = hasLoadedKeys ? availableCountFromKeys : rawAvailableCount
-
-      totals.availableStock += Math.max(0, availableCount)
-      totals.usedStock += Math.max(0, usedCount)
+      if (isStockEnabled && Math.max(0, availableCount) === 0) {
+        totals.outOfStock += 1
+      }
     })
 
     return totals
@@ -489,30 +493,30 @@ export default function ProductsTab({
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_120%_at_20%_0%,rgba(59,130,246,0.18),transparent)]" />
           <div className="relative">
             <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400">
-              Stok acik urun
+              Stok acik
             </p>
             <p className="mt-2 text-2xl font-semibold text-white">{productStats.stockEnabled}</p>
-            <p className="mt-1 text-xs text-slate-400">Stok takibi acik</p>
+            <p className="mt-1 text-xs text-slate-400">Stok takibi acik urun</p>
           </div>
         </div>
         <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60 p-4 shadow-card">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_120%_at_20%_0%,rgba(16,185,129,0.18),transparent)]" />
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_120%_at_20%_0%,rgba(248,113,113,0.18),transparent)]" />
           <div className="relative">
             <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400">
-              Kullanilabilir stok
+              Stok bitti
             </p>
-            <p className="mt-2 text-2xl font-semibold text-white">{productStats.availableStock}</p>
-            <p className="mt-1 text-xs text-slate-400">Hazir anahtar</p>
+            <p className="mt-2 text-2xl font-semibold text-white">{productStats.outOfStock}</p>
+            <p className="mt-1 text-xs text-slate-400">Stogu biten urun</p>
           </div>
         </div>
         <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60 p-4 shadow-card">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_120%_at_20%_0%,rgba(245,158,11,0.18),transparent)]" />
           <div className="relative">
             <p className="text-[10px] font-semibold uppercase tracking-[0.3em] text-slate-400">
-              Kullanilan stok
+              Stok kapali
             </p>
-            <p className="mt-2 text-2xl font-semibold text-white">{productStats.usedStock}</p>
-            <p className="mt-1 text-xs text-slate-400">Isaretlenen anahtar</p>
+            <p className="mt-2 text-2xl font-semibold text-white">{productStats.stockDisabled}</p>
+            <p className="mt-1 text-xs text-slate-400">Stok takibi kapali</p>
           </div>
         </div>
       </div>
