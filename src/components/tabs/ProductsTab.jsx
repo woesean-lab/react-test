@@ -770,7 +770,7 @@ export default function ProductsTab({
                                 </svg>
                               </div>
                               <div className="space-y-0.5">
-                                <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                                <p className="text-[13px] font-semibold leading-none text-emerald-100">
                                   Mevcut
                                 </p>
                                 <p className="text-[13px] font-semibold leading-none text-emerald-100">
