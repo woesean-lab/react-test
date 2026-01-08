@@ -191,6 +191,8 @@ export default function ProductsTab({
   const [messageGroupDrafts, setMessageGroupDrafts] = useState({})
   const stockModalLineRef = useRef(null)
   const stockModalTextareaRef = useRef(null)
+  const messageTemplateTypeaheadRef = useRef({})
+  const messageTemplateTypeaheadTimersRef = useRef({})
   const canManageGroups = canAddKeys
   const canManageNotes = canAddKeys && typeof onSaveNote === "function"
   const canManageStock = canAddKeys && typeof onToggleStock === "function"
@@ -534,6 +536,35 @@ export default function ProductsTab({
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
     setMessageTemplateDrafts((prev) => ({ ...prev, [normalizedId]: value }))
+  }
+
+  const handleMessageTemplateTypeahead = (offerId, event) => {
+    if (event.ctrlKey || event.metaKey || event.altKey) return
+    if (event.key.length !== 1 && event.key !== "Backspace") return
+    const normalizedId = String(offerId ?? "").trim()
+    if (!normalizedId) return
+    const current = messageTemplateTypeaheadRef.current[normalizedId] || ""
+    const next =
+      event.key === "Backspace" ? current.slice(0, -1) : `${current}${event.key}`
+    messageTemplateTypeaheadRef.current[normalizedId] = next
+
+    const timerId = messageTemplateTypeaheadTimersRef.current[normalizedId]
+    if (timerId) {
+      clearTimeout(timerId)
+    }
+    if (typeof window !== "undefined") {
+      messageTemplateTypeaheadTimersRef.current[normalizedId] = window.setTimeout(() => {
+        messageTemplateTypeaheadRef.current[normalizedId] = ""
+      }, 700)
+    }
+
+    const query = next.trim().toLowerCase()
+    if (!query) return
+    const match = templates.find((tpl) =>
+      String(tpl?.label ?? "").toLowerCase().includes(query),
+    )
+    if (!match) return
+    setMessageTemplateDrafts((prev) => ({ ...prev, [normalizedId]: match.label }))
   }
 
   const handleMessageGroupDraftChange = (offerId, value) => {
@@ -1790,6 +1821,9 @@ export default function ProductsTab({
                                       value={messageTemplateDraftValue}
                                       onChange={(event) =>
                                         handleMessageTemplateDraftChange(offerId, event.target.value)
+                                      }
+                                      onKeyDown={(event) =>
+                                        handleMessageTemplateTypeahead(offerId, event)
                                       }
                                       disabled={!canManageMessages || templates.length === 0}
                                       className="min-w-[200px] flex-1 appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
