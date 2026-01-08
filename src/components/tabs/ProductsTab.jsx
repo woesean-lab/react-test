@@ -734,18 +734,22 @@ export default function ProductsTab({
                               <span className="text-slate-400">{groupName}</span>
                             )}
                           </div>
-                          {isStockEnabled && (
-                            <p className="mt-2 text-[11px] text-slate-400">
-                              Stok:{" "}
-                              <span
-                                className={`font-semibold ${
-                                  isOutOfStock ? "text-rose-100" : "text-emerald-100"
-                                }`}
-                              >
-                                {availableCount}
-                              </span>
-                            </p>
-                          )}
+                          <p className="mt-2 text-[11px] text-slate-300">
+                            {isStockEnabled ? (
+                              <>
+                                Stok:{" "}
+                                <span
+                                  className={`font-semibold ${
+                                    isOutOfStock ? "text-rose-100" : "text-emerald-100"
+                                  }`}
+                                >
+                                  {availableCount}
+                                </span>
+                              </>
+                            ) : (
+                              <span className="text-slate-500">Stok kapali</span>
+                            )}
+                          </p>
                         </button>
 
                         <div className="flex flex-wrap items-stretch gap-1.5">
