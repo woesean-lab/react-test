@@ -550,12 +550,7 @@ export default function ProductsTab({
                         </button>
 
                         {isStockEnabled && (
-                          <div
-                            className="inline-flex h-[52px] min-w-[160px] flex-col justify-between rounded-lg border border-white/15 bg-white/6 px-3 py-2 shadow-inner backdrop-blur-sm"
-                            style={{
-                              background: `linear-gradient(90deg, rgba(167,243,208,0.22) ${stockFillPercent}%, rgba(255,255,255,0.04) ${stockFillPercent}%)`,
-                            }}
-                          >
+                          <div className="inline-flex h-[52px] w-[172px] flex-col justify-between rounded-lg border border-white/15 bg-white/6 px-3 py-2 shadow-inner backdrop-blur-sm">
                             <div className="flex items-end justify-between gap-4">
                               <div className="space-y-0.5">
                                 <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">
@@ -574,11 +569,19 @@ export default function ProductsTab({
                                 </p>
                               </div>
                             </div>
+                            <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-white/15">
+                              <div
+                                className="h-full bg-emerald-300/80"
+                                style={{
+                                  width: `${stockFillPercent}%`,
+                                }}
+                              />
+                            </div>
                           </div>
                         )}
 
                         <div className="flex flex-wrap items-stretch gap-1.5">
-                          <div className="flex h-[52px] min-w-[160px] items-center gap-1 rounded-lg border border-white/15 bg-white/6 px-2.5 py-2 shadow-inner backdrop-blur-sm">
+                          <div className="flex h-[52px] w-[172px] items-center gap-1 rounded-lg border border-white/15 bg-white/6 px-2.5 py-2 shadow-inner backdrop-blur-sm">
                             <button
                               type="button"
                               onClick={() => handleStockToggle(offerId)}
