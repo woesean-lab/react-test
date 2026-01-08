@@ -690,6 +690,11 @@ export default function ProductsTab({
                       ? rawHref
                       : `https://www.eldorado.gg${rawHref.startsWith("/") ? "" : "/"}${rawHref}`
                     : ""
+                  const totalCapacity = Math.max(totalCount || 0, availableCount + usedCount)
+                  const stockFillPercent =
+                    totalCapacity > 0
+                      ? Math.min(100, Math.max(0, Math.round((availableCount / totalCapacity) * 100)))
+                      : 0
                   return (
                     <div
                       key={key}
@@ -734,23 +739,47 @@ export default function ProductsTab({
                               <span className="text-slate-400">{groupName}</span>
                             )}
                           </div>
-                          <p className="mt-2 text-[11px] text-slate-300">
-                            {isStockEnabled ? (
-                              <>
-                                Stok:{" "}
-                                <span
-                                  className={`font-semibold ${
-                                    isOutOfStock ? "text-rose-100" : "text-emerald-100"
-                                  }`}
-                                >
-                                  {availableCount}
-                                </span>
-                              </>
-                            ) : (
-                              <span className="text-slate-500">Stok kapali</span>
-                            )}
-                          </p>
                         </button>
+
+                        {isStockEnabled && (
+                          <div className="inline-flex h-[48px] w-full max-w-[140px] flex-col justify-center rounded-lg border border-[#ffffff1a] bg-[#ffffff0d] px-2 py-2 shadow-inner sm:w-[104px]">
+                            <div className="flex items-center gap-2">
+                              <div className="relative flex h-5 w-5 items-center justify-center">
+                                <svg viewBox="0 0 36 36" className="h-5 w-5">
+                                  <circle
+                                    cx="18"
+                                    cy="18"
+                                    r="15"
+                                    fill="none"
+                                    stroke="rgba(248,113,113,0.6)"
+                                    strokeWidth="3"
+                                  />
+                                  <circle
+                                    cx="18"
+                                    cy="18"
+                                    r="15"
+                                    fill="none"
+                                    stroke="rgba(16,185,129,0.9)"
+                                    strokeWidth="3"
+                                    strokeLinecap="round"
+                                    strokeDasharray="94.2"
+                                    strokeDashoffset={
+                                      94.2 - Math.min(94.2, (stockFillPercent / 100) * 94.2)
+                                    }
+                                  />
+                                </svg>
+                              </div>
+                              <div className="space-y-0.5">
+                                <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                                  Stokta
+                                </p>
+                                <p className="text-[13px] font-semibold leading-none text-emerald-100">
+                                  {availableCount}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                         <div className="flex flex-wrap items-stretch gap-1.5">
                           <div className="flex h-[40px] w-full items-center gap-1 rounded-lg border border-[#ffffff1a] bg-[#ffffff0d] px-2.5 py-1.5 shadow-inner sm:w-[192px]">
