@@ -596,7 +596,7 @@ export default function ProductsTab({
                             >
                               <span
                                 className={`absolute right-1 top-1 h-1.5 w-1.5 rounded-full ${
-                                  isStockEnabled ? "bg-emerald-400" : "bg-slate-500"
+                                  isStockEnabled ? "bg-emerald-400" : "bg-rose-400"
                                 }`}
                               />
                               <svg
