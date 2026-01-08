@@ -196,6 +196,7 @@ function App() {
     handleEldoradoBulkCopy,
     handleEldoradoKeyCopy,
     handleEldoradoGroupCreate,
+    handleEldoradoGroupDelete,
     handleEldoradoGroupAssign,
     handleEldoradoNoteSave,
     handleEldoradoStockToggle,
@@ -983,6 +984,7 @@ function App() {
               onBulkCopy={handleEldoradoBulkCopy}
               onCopyKey={handleEldoradoKeyCopy}
               onCreateGroup={handleEldoradoGroupCreate}
+              onDeleteGroup={handleEldoradoGroupDelete}
               onAssignGroup={handleEldoradoGroupAssign}
               onSaveNote={handleEldoradoNoteSave}
               onToggleStock={handleEldoradoStockToggle}

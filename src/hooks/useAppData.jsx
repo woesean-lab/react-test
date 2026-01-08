@@ -2643,6 +2643,62 @@ export default function useAppData() {
     ],
   )
 
+  const handleEldoradoGroupDelete = useCallback(
+    (groupId) => {
+      const normalizedGroupId = String(groupId ?? "").trim()
+      if (!normalizedGroupId) return false
+
+      const store = readEldoradoGroupStore()
+      const exists = store.groups.some((group) => group.id === normalizedGroupId)
+      if (!exists) {
+        toast.error("Stok grubu bulunamadi.")
+        return false
+      }
+
+      const keyStore = readEldoradoKeyStore()
+      const groupList = Array.isArray(keyStore[normalizedGroupId]) ? keyStore[normalizedGroupId] : []
+      const nextAssignments = { ...store.assignments }
+      const affectedOffers = Object.entries(store.assignments)
+        .filter(([, assignedGroupId]) => assignedGroupId === normalizedGroupId)
+        .map(([offerId]) => offerId)
+
+      affectedOffers.forEach((offerId) => {
+        const offerList = Array.isArray(keyStore[offerId]) ? keyStore[offerId] : []
+        keyStore[offerId] = [...offerList, ...groupList]
+        delete nextAssignments[offerId]
+      })
+
+      delete keyStore[normalizedGroupId]
+      store.groups = store.groups.filter((group) => group.id !== normalizedGroupId)
+      store.assignments = nextAssignments
+
+      const groupSaved = writeEldoradoGroupStore(store)
+      if (!groupSaved) return false
+      writeEldoradoKeyStore(keyStore)
+
+      setEldoradoGroups(store.groups)
+      setEldoradoGroupAssignments(store.assignments)
+      setEldoradoKeysByOffer((prev) => {
+        const next = { ...prev }
+        affectedOffers.forEach((offerId) => {
+          next[offerId] = keyStore[offerId] || []
+        })
+        return next
+      })
+      setEldoradoCatalog((prev) => applyEldoradoKeyCounts(prev))
+
+      toast.success("Stok grubu silindi", { duration: 1500, position: "top-right" })
+      return true
+    },
+    [
+      applyEldoradoKeyCounts,
+      readEldoradoGroupStore,
+      readEldoradoKeyStore,
+      writeEldoradoGroupStore,
+      writeEldoradoKeyStore,
+    ],
+  )
+
   const handleEldoradoNoteSave = useCallback((offerId, rawNote) => {
     const normalizedOfferId = String(offerId ?? "").trim()
     if (!normalizedOfferId) return false
@@ -4852,6 +4908,7 @@ export default function useAppData() {
     handleEldoradoBulkCopy,
     handleEldoradoKeyCopy,
     handleEldoradoGroupCreate,
+    handleEldoradoGroupDelete,
     handleEldoradoGroupAssign,
     handleEldoradoNoteSave,
     handleEldoradoStockToggle,

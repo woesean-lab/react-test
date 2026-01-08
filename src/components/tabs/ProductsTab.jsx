@@ -148,6 +148,7 @@ export default function ProductsTab({
   onUpdateKeyCode,
   onBulkCopy,
   onBulkDelete,
+  onDeleteGroup,
   onCopyKey,
   onCreateGroup,
   onAssignGroup,
@@ -168,6 +169,7 @@ export default function ProductsTab({
   const [stockModalTarget, setStockModalTarget] = useState(null)
   const [editingKeys, setEditingKeys] = useState({})
   const [savingKeys, setSavingKeys] = useState({})
+  const [confirmGroupDelete, setConfirmGroupDelete] = useState(null)
   const stockModalLineRef = useRef(null)
   const stockModalTextareaRef = useRef(null)
   const canManageGroups = canAddKeys
@@ -390,6 +392,7 @@ export default function ProductsTab({
     const created = onCreateGroup(draft)
     if (!created) return
     setGroupDrafts((prev) => ({ ...prev, [normalizedId]: "" }))
+    setConfirmGroupDelete(null)
     onAssignGroup(normalizedId, created.id)
   }
 
@@ -397,7 +400,22 @@ export default function ProductsTab({
     if (typeof onAssignGroup !== "function") return
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
+    setConfirmGroupDelete(null)
     onAssignGroup(normalizedId, groupId)
+  }
+
+  const handleGroupDelete = (offerId, groupId) => {
+    if (typeof onDeleteGroup !== "function") return
+    const normalizedOfferId = String(offerId ?? "").trim()
+    const normalizedGroupId = String(groupId ?? "").trim()
+    if (!normalizedOfferId || !normalizedGroupId) return
+    if (confirmGroupDelete === normalizedGroupId) {
+      setConfirmGroupDelete(null)
+      onDeleteGroup(normalizedGroupId)
+      return
+    }
+    setConfirmGroupDelete(normalizedGroupId)
+    toast("Grubu silmek icin tekrar tikla", { position: "top-right" })
   }
 
   const handleNoteDraftChange = (offerId, value) => {
@@ -1373,6 +1391,19 @@ export default function ProductsTab({
                                         className="rounded-full border border-rose-300/50 bg-rose-500/10 px-3 py-1 text-[11px] font-semibold text-rose-50 transition hover:border-rose-300 hover:bg-rose-500/20"
                                       >
                                         Kaldir
+                                      </button>
+                                    )}
+                                    {groupId && canManageGroups && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleGroupDelete(offerId, groupId)}
+                                        className={`rounded-full border px-3 py-1 text-[11px] font-semibold transition ${
+                                          confirmGroupDelete === groupId
+                                            ? "border-rose-300 bg-rose-500/25 text-rose-50"
+                                            : "border-white/10 bg-white/5 text-slate-200 hover:border-rose-300/60 hover:bg-rose-500/10 hover:text-rose-50"
+                                        }`}
+                                      >
+                                        {confirmGroupDelete === groupId ? "Onayla" : "Sil"}
                                       </button>
                                     )}
                                   </div>
