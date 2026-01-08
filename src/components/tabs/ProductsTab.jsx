@@ -519,8 +519,14 @@ export default function ProductsTab({
                   return (
                     <div
                       key={key}
-                      className={`rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner transition hover:border-accent-400/60 hover:bg-ink-800/80 hover:shadow-card ${
-                        isMissing ? "border-orange-300/30" : isOutOfStock ? "border-rose-300/30" : ""
+                      className={`rounded-2xl border border-white/10 p-4 shadow-inner transition hover:border-accent-400/60 hover:shadow-card ${
+                        isMissing
+                          ? "border-rose-400/40 bg-rose-500/10"
+                          : starredOffers[offerId]
+                            ? "border-orange-300/40 bg-orange-500/10"
+                            : isOutOfStock
+                              ? "border-rose-300/30 bg-ink-900/70"
+                              : "bg-ink-900/70"
                       }`}
                     >
                       <div className="flex flex-wrap items-center gap-3 sm:flex-nowrap">
