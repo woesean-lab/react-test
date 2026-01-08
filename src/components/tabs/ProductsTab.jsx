@@ -701,14 +701,14 @@ export default function ProductsTab({
                             : "bg-ink-900/70"
                       }`}
                     >
-                      <div className="flex flex-wrap items-center gap-3 sm:flex-nowrap">
+                      <div className="flex flex-wrap items-start gap-3 sm:flex-nowrap">
                         <button
                           type="button"
                           onClick={() => toggleOfferOpen(offerId)}
                           disabled={!offerId}
                           className="min-w-0 flex-1 text-left disabled:cursor-not-allowed disabled:opacity-60"
                         >
-                          <div className="flex flex-wrap items-center gap-2">
+                          <div className="flex min-h-[40px] flex-wrap items-center gap-2">
                             <span
                               className={`min-w-0 flex-1 break-words font-display text-[13px] font-semibold leading-snug text-white sm:text-sm ${
                                 isMissing
