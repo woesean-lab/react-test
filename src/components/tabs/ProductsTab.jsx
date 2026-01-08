@@ -69,19 +69,20 @@ function ProductsSkeleton({ panelClass }) {
           </div>
           <div className="mt-4 space-y-2">
             {Array.from({ length: 6 }).map((_, index) => (
-              <SkeletonBlock key={`product-card-${index}`} className="h-14 w-full rounded-xl" />
+              <div key={`product-card-${index}`} className="space-y-3 rounded-2xl border border-white/10 bg-ink-900/60 p-4">
+                <SkeletonBlock className="h-4 w-2/3 rounded-full" />
+                <div className="flex flex-wrap items-center gap-3">
+                  <SkeletonBlock className="h-3 w-24 rounded-full" />
+                  <SkeletonBlock className="h-3 w-20 rounded-full" />
+                </div>
+                <div className="flex flex-wrap items-center gap-3">
+                  <SkeletonBlock className="h-11 w-24 rounded-lg" />
+                  <SkeletonBlock className="h-11 w-40 rounded-lg" />
+                </div>
+              </div>
             ))}
           </div>
         </div>
-        <aside className={`${panelClass} bg-ink-900/80`}>
-          <SkeletonBlock className="h-3 w-24 rounded-full" />
-          <SkeletonBlock className="mt-3 h-3 w-32 rounded-full" />
-          <div className="mt-4 space-y-2">
-            {Array.from({ length: 5 }).map((_, index) => (
-              <SkeletonBlock key={`product-category-${index}`} className="h-9 w-full rounded-xl" />
-            ))}
-          </div>
-        </aside>
       </div>
     </div>
   )
