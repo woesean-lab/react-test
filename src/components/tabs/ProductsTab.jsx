@@ -1095,7 +1095,7 @@ export default function ProductsTab({
                           </div>
                         </div>
 
-                        <div className="overflow-hidden rounded-2xl border border-white/10 bg-ink-900/50 shadow-card">
+                          <div className="overflow-hidden rounded-2xl border border-white/10 bg-ink-900/30 shadow-card">
                           <div
                             role="button"
                             tabIndex={0}
@@ -1106,7 +1106,7 @@ export default function ProductsTab({
                                 toggleNoteOpen(offerId)
                               }
                             }}
-                            className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3"
+                            className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3 transition hover:bg-white/5"
                             aria-expanded={isNoteOpen}
                           >
                             <div className="flex min-w-0 flex-1 items-center gap-2 text-left">
@@ -1146,17 +1146,6 @@ export default function ProductsTab({
                                 className="rounded-md border border-accent-400/70 bg-accent-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-accent-50 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                               >
                                 Kaydet
-                              </button>
-                              <button
-                                type="button"
-                                onClick={(event) => {
-                                  event.stopPropagation()
-                                  handleNoteReset(offerId)
-                                }}
-                                disabled={noteDraftValue === undefined}
-                                className="rounded-md border border-white/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-400 hover:text-accent-100 disabled:cursor-not-allowed disabled:opacity-60"
-                              >
-                                Sifirla
                               </button>
                             </div>
                           </div>
