@@ -1170,7 +1170,7 @@ export default function ProductsTab({
                                     handleNoteGroupAssign(offerId, event.target.value)
                                   }
                                   disabled={!canManageNotes}
-                                    className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900/60 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                                  className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                   <option value="">Bağımsız not</option>
                                   {noteGroups.map((groupOption) => (
@@ -1619,7 +1619,7 @@ export default function ProductsTab({
                                     value={groupId}
                                     onChange={(event) => handleGroupAssign(offerId, event.target.value)}
                                     disabled={!canManageGroups || !isStockEnabled}
-                                    className="w-full appearance-none rounded-xl border border-white/10 bg-ink-900/60 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                                    className="w-full appearance-none rounded-xl border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
                                   >
                                     <option value="">Grup sec</option>
                                     {groups.map((groupOption) => (
