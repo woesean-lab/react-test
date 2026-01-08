@@ -183,6 +183,7 @@ export default function ProductsTab({
   const [noteEditingByOffer, setNoteEditingByOffer] = useState({})
   const [messageTemplateDrafts, setMessageTemplateDrafts] = useState({})
   const [messageTemplatesByOffer, setMessageTemplatesByOffer] = useState({})
+  const [messageCategoryDrafts, setMessageCategoryDrafts] = useState({})
   const stockModalLineRef = useRef(null)
   const stockModalTextareaRef = useRef(null)
   const canManageGroups = canAddKeys
@@ -211,6 +212,22 @@ export default function ProductsTab({
     list.sort((a, b) => a.label.localeCompare(b.label, "tr"))
     return [{ key: "all", label: "Tumu", items: allProducts }, ...list]
   }, [allProducts, categoryMap])
+  const messageCategoryOptions = useMemo(() => {
+    const set = new Set()
+    templates.forEach((tpl) => {
+      const category = String(tpl?.category ?? "").trim() || "Genel"
+      set.add(category)
+    })
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "tr"))
+  }, [templates])
+  const templateMap = useMemo(() => {
+    const map = new Map()
+    templates.forEach((tpl) => {
+      const label = String(tpl?.label ?? "").trim()
+      if (label) map.set(label, tpl)
+    })
+    return map
+  }, [templates])
   const [activeCategoryKey, setActiveCategoryKey] = useState("all")
   const activeCategory = categories.find((category) => category.key === activeCategoryKey) ?? categories[0]
   const canRefresh = typeof onRefresh === "function"
@@ -527,6 +544,20 @@ export default function ProductsTab({
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
     setMessageTemplateDrafts((prev) => ({ ...prev, [normalizedId]: value }))
+  }
+
+  const handleMessageCategoryDraftChange = (offerId, value) => {
+    const normalizedId = String(offerId ?? "").trim()
+    if (!normalizedId) return
+    setMessageCategoryDrafts((prev) => ({ ...prev, [normalizedId]: value }))
+    const currentTemplate = String(messageTemplateDrafts[normalizedId] ?? "").trim()
+    if (!currentTemplate || value === "all") return
+    const templateCategory =
+      String(templates.find((tpl) => tpl.label === currentTemplate)?.category ?? "").trim() ||
+      "Genel"
+    if (templateCategory !== value) {
+      setMessageTemplateDrafts((prev) => ({ ...prev, [normalizedId]: "" }))
+    }
   }
 
   const handleMessageTemplateAdd = (offerId) => {
@@ -931,6 +962,24 @@ export default function ProductsTab({
                     Boolean(offerId) && canManageNotes && noteHasChanges && isNoteEditing
                   const messageTemplateDraftValue = messageTemplateDrafts[offerId] ?? ""
                   const selectedMessageTemplates = messageTemplatesByOffer[offerId] ?? []
+                  const messageCategoryValue = messageCategoryDrafts[offerId] ?? "all"
+                  const filteredMessageTemplates =
+                    messageCategoryValue === "all"
+                      ? templates
+                      : templates.filter((tpl) => {
+                          const category = String(tpl?.category ?? "").trim() || "Genel"
+                          return category === messageCategoryValue
+                        })
+                  const groupedMessages = selectedMessageTemplates.reduce((acc, label) => {
+                    const template = templateMap.get(label)
+                    const category = String(template?.category ?? "").trim() || "Genel"
+                    if (!acc[category]) acc[category] = []
+                    acc[category].push(label)
+                    return acc
+                  }, {})
+                  const groupedMessageEntries = Object.entries(groupedMessages).sort((a, b) =>
+                    a[0].localeCompare(b[0], "tr"),
+                  )
                   const rawHref = String(product?.href ?? "").trim()
                   const href = rawHref
                     ? rawHref.startsWith("http://") || rawHref.startsWith("https://")
@@ -1650,62 +1699,125 @@ export default function ProductsTab({
                             </div>
 
                             <div className="space-y-3">
-                              <div className="rounded-2xl border border-white/10 bg-ink-950/40 p-4 shadow-card">
-                                <div className="flex flex-wrap items-start justify-between gap-3">
-                                  <div>
-                                    <p className="text-sm font-semibold text-slate-100">Mesajlar</p>
-                                    <p className="mt-1 text-xs text-slate-400">
-                                      Mesaj şablonu seçip ekleyin, butonlardan kopyalayın.
-                                    </p>
-                                  </div>
-                                  {selectedMessageTemplates.length > 0 && (
-                                    <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-200">
-                                      {selectedMessageTemplates.length} mesaj
+                              <div className="rounded-2xl border border-white/10 bg-ink-950/50 p-4 shadow-card">
+                                <div className="flex flex-wrap items-center justify-between gap-3">
+                                  <div className="flex items-center gap-3">
+                                    <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200">
+                                      <svg
+                                        viewBox="0 0 24 24"
+                                        aria-hidden="true"
+                                        className="h-4 w-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        strokeWidth="1.6"
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                      >
+                                        <path d="M8 9h8M8 13h5" />
+                                        <path d="M6.5 17.5 4 20V5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H6.5z" />
+                                      </svg>
                                     </span>
-                                  )}
+                                    <div>
+                                      <p className="text-sm font-semibold text-slate-100">Mesajlar</p>
+                                      <p className="text-xs text-slate-400">
+                                        Mesaj şablonlarını gruplandırıp ürüne ekle.
+                                      </p>
+                                    </div>
+                                  </div>
+                                  <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-200">
+                                    {selectedMessageTemplates.length} mesaj
+                                  </span>
                                 </div>
-                                <div className="mt-4 space-y-3">
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <select
-                                      value={messageTemplateDraftValue}
-                                      onChange={(event) =>
-                                        handleMessageTemplateDraftChange(offerId, event.target.value)
-                                      }
-                                      disabled={templates.length === 0}
-                                      className="min-w-[200px] flex-1 appearance-none rounded-xl border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
-                                    >
-                                      <option value="">
-                                        {templates.length === 0 ? "Mesaj yok" : "Mesaj seç"}
-                                      </option>
-                                      {templates.map((tpl) => (
-                                        <option key={tpl.label} value={tpl.label}>
-                                          {tpl.label}
+                                <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,240px)_minmax(0,1fr)]">
+                                  <div className="space-y-3 rounded-xl border border-white/10 bg-ink-900/50 p-3">
+                                    <div className="space-y-2">
+                                      <label className="text-[11px] font-semibold text-slate-300">
+                                        Grup
+                                      </label>
+                                      <select
+                                        value={messageCategoryValue}
+                                        onChange={(event) =>
+                                          handleMessageCategoryDraftChange(
+                                            offerId,
+                                            event.target.value,
+                                          )
+                                        }
+                                        disabled={messageCategoryOptions.length === 0}
+                                        className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                                      >
+                                        <option value="all">Tümü</option>
+                                        {messageCategoryOptions.map((category) => (
+                                          <option key={`${offerId}-msg-cat-${category}`} value={category}>
+                                            {category}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
+                                    <div className="space-y-2">
+                                      <label className="text-[11px] font-semibold text-slate-300">
+                                        Şablon
+                                      </label>
+                                      <select
+                                        value={messageTemplateDraftValue}
+                                        onChange={(event) =>
+                                          handleMessageTemplateDraftChange(offerId, event.target.value)
+                                        }
+                                        disabled={filteredMessageTemplates.length === 0}
+                                        className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                                      >
+                                        <option value="">
+                                          {filteredMessageTemplates.length === 0
+                                            ? "Şablon yok"
+                                            : "Şablon seç"}
                                         </option>
-                                      ))}
-                                    </select>
+                                        {filteredMessageTemplates.map((tpl) => (
+                                          <option key={`${offerId}-msg-${tpl.label}`} value={tpl.label}>
+                                            {tpl.label}
+                                          </option>
+                                        ))}
+                                      </select>
+                                    </div>
                                     <button
                                       type="button"
                                       onClick={() => handleMessageTemplateAdd(offerId)}
                                       disabled={!messageTemplateDraftValue.trim()}
-                                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-slate-100 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                      className="w-full rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-slate-100 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50 disabled:cursor-not-allowed disabled:opacity-60"
                                     >
                                       Ekle
                                     </button>
                                   </div>
-                                  {selectedMessageTemplates.length > 0 && (
-                                    <div className="flex flex-wrap gap-2">
-                                      {selectedMessageTemplates.map((label) => (
-                                        <button
-                                          key={`${offerId}-message-${label}`}
-                                          type="button"
-                                          onClick={() => handleMessageTemplateCopy(label)}
-                                          className="rounded-md border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
-                                        >
-                                          {label}
-                                        </button>
-                                      ))}
-                                    </div>
-                                  )}
+                                  <div className="space-y-3 rounded-xl border border-white/10 bg-ink-900/30 p-3">
+                                    {groupedMessageEntries.length === 0 ? (
+                                      <div className="rounded-lg border border-dashed border-white/10 bg-white/5 px-3 py-3 text-xs text-slate-400">
+                                        Henüz mesaj eklenmedi.
+                                      </div>
+                                    ) : (
+                                      groupedMessageEntries.map(([category, labels]) => (
+                                        <div key={`${offerId}-msg-group-${category}`} className="space-y-2">
+                                          <div className="flex flex-wrap items-center justify-between gap-2">
+                                            <span className="text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                                              {category}
+                                            </span>
+                                            <span className="text-[10px] text-slate-500">
+                                              {labels.length} mesaj
+                                            </span>
+                                          </div>
+                                          <div className="flex flex-wrap gap-2">
+                                            {labels.map((label) => (
+                                              <button
+                                                key={`${offerId}-msg-${category}-${label}`}
+                                                type="button"
+                                                onClick={() => handleMessageTemplateCopy(label)}
+                                                className="rounded-md border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50"
+                                              >
+                                                {label}
+                                              </button>
+                                            ))}
+                                          </div>
+                                        </div>
+                                      ))
+                                    )}
+                                  </div>
                                 </div>
                               </div>
                               {isStockEnabled && (
