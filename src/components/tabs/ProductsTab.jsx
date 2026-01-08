@@ -552,13 +552,40 @@ export default function ProductsTab({
                         {isStockEnabled && (
                           <div className="inline-flex h-[52px] w-[172px] flex-col justify-between rounded-lg border border-[#ffffff1a] bg-[#ffffff0d] px-3 py-2 shadow-inner">
                             <div className="flex items-end justify-between gap-4">
-                              <div className="space-y-0.5">
-                                <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                                  Stokta
-                                </p>
-                                <p className="text-sm font-semibold text-emerald-100">
-                                  {availableCount}
-                                </p>
+                              <div className="flex items-center gap-2">
+                                <div className="relative flex h-6 w-6 items-center justify-center">
+                                  <svg viewBox="0 0 36 36" className="h-6 w-6">
+                                    <circle
+                                      cx="18"
+                                      cy="18"
+                                      r="15"
+                                      fill="none"
+                                      stroke="rgba(255,255,255,0.15)"
+                                      strokeWidth="3"
+                                    />
+                                    <circle
+                                      cx="18"
+                                      cy="18"
+                                      r="15"
+                                      fill="none"
+                                      stroke="rgba(16,185,129,0.9)"
+                                      strokeWidth="3"
+                                      strokeLinecap="round"
+                                      strokeDasharray="94.2"
+                                      strokeDashoffset={
+                                        94.2 - Math.min(94.2, (stockFillPercent / 100) * 94.2)
+                                      }
+                                    />
+                                  </svg>
+                                </div>
+                                <div className="space-y-0.5">
+                                  <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+                                    Stokta
+                                  </p>
+                                  <p className="text-sm font-semibold text-emerald-100">
+                                    {availableCount}
+                                  </p>
+                                </div>
                               </div>
                               <div className="space-y-0.5 text-right">
                                 <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">
@@ -568,10 +595,6 @@ export default function ProductsTab({
                                   {usedCount}
                                 </p>
                               </div>
-                            </div>
-                            <div className="mt-1 flex items-center justify-between text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                              <span>Doluluk</span>
-                              <span className="text-emerald-100">{stockFillPercent}%</span>
                             </div>
                           </div>
                         )}
