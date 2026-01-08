@@ -550,16 +550,15 @@ export default function ProductsTab({
                         </button>
 
                         {isStockEnabled && (
-                          <div className="inline-flex h-[52px] w-[172px] flex-col justify-between rounded-lg border border-[#ffffff1a] bg-[#ffffff0d] px-3 py-2 shadow-inner">
-                            <div className="flex items-center justify-between gap-4">
-                              <div className="flex items-center gap-2">
-                                <div className="relative flex h-6 w-6 items-center justify-center">
-                                  <svg viewBox="0 0 36 36" className="h-6 w-6">
-                                    <circle
-                                      cx="18"
-                                      cy="18"
-                                      r="15"
-                                      fill="none"
+                          <div className="inline-flex h-[48px] w-[120px] flex-col justify-center rounded-lg border border-[#ffffff1a] bg-[#ffffff0d] px-2 py-2 shadow-inner">
+                            <div className="flex items-center gap-2">
+                              <div className="relative flex h-5 w-5 items-center justify-center">
+                                <svg viewBox="0 0 36 36" className="h-5 w-5">
+                                  <circle
+                                    cx="18"
+                                    cy="18"
+                                    r="15"
+                                    fill="none"
                                       stroke="rgba(255,255,255,0.15)"
                                       strokeWidth="3"
                                     />
@@ -572,27 +571,26 @@ export default function ProductsTab({
                                       strokeWidth="3"
                                       strokeLinecap="round"
                                       strokeDasharray="94.2"
-                                      strokeDashoffset={
-                                        94.2 - Math.min(94.2, (stockFillPercent / 100) * 94.2)
-                                      }
-                                    />
-                                  </svg>
-                                </div>
-                                <div className="space-y-0.5">
-                                  <p className="text-[9px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-                                    Stokta
-                                  </p>
-                                  <p className="text-sm font-semibold leading-none text-emerald-100">
-                                    {availableCount}
-                                  </p>
-                                </div>
+                                    strokeDashoffset={
+                                      94.2 - Math.min(94.2, (stockFillPercent / 100) * 94.2)
+                                    }
+                                  />
+                                </svg>
+                              </div>
+                              <div className="space-y-0.5">
+                                <p className="text-[9px] font-semibold uppercase tracking-[0.16em] text-slate-500">
+                                  Stokta
+                                </p>
+                                <p className="text-[13px] font-semibold leading-none text-emerald-100">
+                                  {availableCount}
+                                </p>
                               </div>
                             </div>
                           </div>
                         )}
 
                         <div className="flex flex-wrap items-stretch gap-1.5">
-                          <div className="flex h-[52px] w-[172px] items-center gap-1 rounded-lg border border-[#ffffff1a] bg-[#ffffff0d] px-2.5 py-2 shadow-inner">
+                          <div className="flex h-[48px] w-[172px] items-center gap-1 rounded-lg border border-[#ffffff1a] bg-[#ffffff0d] px-2.5 py-2 shadow-inner">
                             <button
                               type="button"
                               onClick={() => handleStockToggle(offerId)}
