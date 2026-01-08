@@ -2580,13 +2580,7 @@ export default function useAppData() {
             : []
           if (implicitList.length > 0) {
             const groupList = Array.isArray(keyStore[nextGroupId]) ? keyStore[nextGroupId] : []
-            const seen = new Set(groupList.map((item) => item.code))
-            const merged = [...groupList]
-            implicitList.forEach((item) => {
-              if (seen.has(item.code)) return
-              merged.push(item)
-              seen.add(item.code)
-            })
+            const merged = [...groupList, ...implicitList]
             keyStore[nextGroupId] = merged
             delete keyStore[normalizedOfferId]
             nextList = merged
@@ -2599,20 +2593,10 @@ export default function useAppData() {
       } else if (currentGroupId) {
         const groupList = Array.isArray(keyStore[currentGroupId]) ? keyStore[currentGroupId] : []
         const implicitList = Array.isArray(keyStore[normalizedOfferId]) ? keyStore[normalizedOfferId] : []
-        if (groupList.length > 0) {
-          const seen = new Set(implicitList.map((item) => item.code))
-          const merged = [...implicitList]
-          groupList.forEach((item) => {
-            if (seen.has(item.code)) return
-            merged.push(item)
-            seen.add(item.code)
-          })
-          keyStore[normalizedOfferId] = merged
-          nextList = merged
-          shouldWriteKeys = true
-        } else {
-          nextList = implicitList
-        }
+        const merged = [...implicitList, ...groupList]
+        keyStore[normalizedOfferId] = merged
+        nextList = merged
+        shouldWriteKeys = true
       } else {
         nextList = Array.isArray(keyStore[normalizedOfferId]) ? keyStore[normalizedOfferId] : []
       }
