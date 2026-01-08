@@ -105,6 +105,29 @@ function ProductsSkeleton({ panelClass }) {
   )
 }
 
+function ProductsListSkeleton() {
+  return (
+    <div className="space-y-4">
+      {Array.from({ length: 6 }).map((_, index) => (
+        <div
+          key={`product-card-skeleton-${index}`}
+          className="rounded-2xl border border-white/10 bg-ink-900/60 p-4 shadow-inner"
+        >
+          <SkeletonBlock className="h-4 w-2/3 rounded-full" />
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            <SkeletonBlock className="h-4 w-20 rounded-full" />
+            <SkeletonBlock className="h-4 w-24 rounded-full" />
+          </div>
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <SkeletonBlock className="h-7 w-16 rounded-full" />
+            <SkeletonBlock className="h-7 w-20 rounded-full" />
+          </div>
+        </div>
+      ))}
+    </div>
+  )
+}
+
 export default function ProductsTab({
   panelClass = "",
   catalog,
@@ -648,7 +671,9 @@ export default function ProductsTab({
           </div>
 
           <div key={activeCategoryKey} className="mt-4 space-y-2">
-            {filteredList.length === 0 ? (
+            {isRefreshing ? (
+              <ProductsListSkeleton />
+            ) : filteredList.length === 0 ? (
               <div className="rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-slate-400">
                 Gosterilecek urun bulunamadi.
               </div>
