@@ -203,6 +203,7 @@ function App() {
     handleEldoradoGroupAssign,
     handleEldoradoNoteGroupCreate,
     handleEldoradoNoteGroupAssign,
+    handleEldoradoNoteGroupDelete,
     handleEldoradoNoteSave,
     handleEldoradoStockToggle,
     products,
@@ -996,6 +997,7 @@ function App() {
               onAssignGroup={handleEldoradoGroupAssign}
               onCreateNoteGroup={handleEldoradoNoteGroupCreate}
               onAssignNoteGroup={handleEldoradoNoteGroupAssign}
+              onDeleteNoteGroup={handleEldoradoNoteGroupDelete}
               onSaveNote={handleEldoradoNoteSave}
               onToggleStock={handleEldoradoStockToggle}
               canAddKeys={canAddStocks}

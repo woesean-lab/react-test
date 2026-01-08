@@ -155,6 +155,7 @@ export default function ProductsTab({
   onCopyKey,
   onCreateGroup,
   onAssignGroup,
+  onDeleteNoteGroup,
   onCreateNoteGroup,
   onAssignNoteGroup,
   onSaveNote,
@@ -177,6 +178,7 @@ export default function ProductsTab({
   const [confirmGroupDelete, setConfirmGroupDelete] = useState(null)
   const [noteGroupDrafts, setNoteGroupDrafts] = useState({})
   const [noteOpenByOffer, setNoteOpenByOffer] = useState({})
+  const [confirmNoteGroupDelete, setConfirmNoteGroupDelete] = useState(null)
   const stockModalLineRef = useRef(null)
   const stockModalTextareaRef = useRef(null)
   const canManageGroups = canAddKeys
@@ -487,7 +489,21 @@ export default function ProductsTab({
       delete next[normalizedId]
       return next
     })
+    setConfirmNoteGroupDelete(null)
     onAssignNoteGroup(normalizedId, groupId)
+  }
+
+  const handleNoteGroupDelete = (groupId) => {
+    if (typeof onDeleteNoteGroup !== "function") return
+    const normalizedGroupId = String(groupId ?? "").trim()
+    if (!normalizedGroupId) return
+    if (confirmNoteGroupDelete === normalizedGroupId) {
+      setConfirmNoteGroupDelete(null)
+      onDeleteNoteGroup(normalizedGroupId)
+      return
+    }
+    setConfirmNoteGroupDelete(normalizedGroupId)
+    toast("Not grubunu silmek icin tekrar tikla", { position: "top-right" })
   }
 
   const handleStockToggle = (offerId) => {
@@ -1145,21 +1161,36 @@ export default function ProductsTab({
                                 <label className="text-[11px] font-semibold text-slate-300">
                                   Not grubu
                                 </label>
-                                <select
-                                  value={noteGroupId}
-                                  onChange={(event) =>
-                                    handleNoteGroupAssign(offerId, event.target.value)
-                                  }
-                                  disabled={!canManageNotes}
-                                  className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900/60 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                  <option value="">Bagimsiz not</option>
-                                  {noteGroups.map((groupOption) => (
-                                    <option key={groupOption.id} value={groupOption.id}>
-                                      {groupOption.name}
-                                    </option>
-                                  ))}
-                                </select>
+                                <div className="flex items-center gap-2">
+                                  <select
+                                    value={noteGroupId}
+                                    onChange={(event) =>
+                                      handleNoteGroupAssign(offerId, event.target.value)
+                                    }
+                                    disabled={!canManageNotes}
+                                    className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900/60 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                                  >
+                                    <option value="">Bagimsiz not</option>
+                                    {noteGroups.map((groupOption) => (
+                                      <option key={groupOption.id} value={groupOption.id}>
+                                        {groupOption.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  {noteGroupId && canManageNotes && (
+                                    <button
+                                      type="button"
+                                      onClick={() => handleNoteGroupDelete(noteGroupId)}
+                                      className={`rounded-md border px-3 py-2 text-[11px] font-semibold uppercase tracking-wide transition ${
+                                        confirmNoteGroupDelete === noteGroupId
+                                          ? "border-rose-300 bg-rose-500/25 text-rose-50"
+                                          : "border-white/10 bg-white/5 text-slate-200 hover:border-rose-300/60 hover:bg-rose-500/10 hover:text-rose-50"
+                                      }`}
+                                    >
+                                      {confirmNoteGroupDelete === noteGroupId ? "Onayla" : "Sil"}
+                                    </button>
+                                  )}
+                                </div>
                               </div>
                               {canManageNotes && (
                                 <div className="space-y-2">

@@ -2935,6 +2935,50 @@ export default function useAppData() {
     [eldoradoNotesByOffer, readEldoradoNoteGroupStore, writeEldoradoNoteGroupStore],
   )
 
+  const handleEldoradoNoteGroupDelete = useCallback(
+    (groupId) => {
+      const normalizedGroupId = String(groupId ?? "").trim()
+      if (!normalizedGroupId) return false
+      const store = readEldoradoNoteGroupStore()
+      const exists = store.groups.some((group) => group.id === normalizedGroupId)
+      if (!exists) {
+        toast.error("Not grubu bulunamadi.")
+        return false
+      }
+
+      const groupNote = String(store.notes[normalizedGroupId] ?? "").trim()
+      const affectedOffers = Object.entries(store.assignments)
+        .filter(([, assignedGroupId]) => assignedGroupId === normalizedGroupId)
+        .map(([offerId]) => offerId)
+
+      affectedOffers.forEach((offerId) => {
+        delete store.assignments[offerId]
+      })
+
+      delete store.notes[normalizedGroupId]
+      store.groups = store.groups.filter((group) => group.id !== normalizedGroupId)
+      const saved = writeEldoradoNoteGroupStore(store)
+      if (!saved) return false
+
+      if (affectedOffers.length > 0 && groupNote) {
+        setEldoradoNotesByOffer((prev) => {
+          const next = { ...prev }
+          affectedOffers.forEach((offerId) => {
+            if (!next[offerId]) next[offerId] = groupNote
+          })
+          return next
+        })
+      }
+
+      setEldoradoNoteGroups(store.groups)
+      setEldoradoNoteGroupAssignments(store.assignments)
+      setEldoradoNoteGroupNotes(store.notes)
+      toast.success("Not grubu silindi", { duration: 1500, position: "top-right" })
+      return true
+    },
+    [readEldoradoNoteGroupStore, writeEldoradoNoteGroupStore],
+  )
+
   const loadEldoradoKeys = useCallback(
     async (offerId, options = {}) => {
       const normalizedId = String(offerId ?? "").trim()
@@ -5124,6 +5168,7 @@ export default function useAppData() {
     handleEldoradoGroupAssign,
     handleEldoradoNoteGroupCreate,
     handleEldoradoNoteGroupAssign,
+    handleEldoradoNoteGroupDelete,
     handleEldoradoNoteSave,
     handleEldoradoStockToggle,
     products,
