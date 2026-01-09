@@ -632,15 +632,15 @@ export default function ProductsTab({
     const message = templates.find((tpl) => tpl.label === normalizedLabel)?.value
     const trimmedMessage = String(message ?? "").trim()
     if (!trimmedMessage) {
-      toast.error("Mesaj þablonu bulunamadý.")
+      toast.error("Mesaj ÅŸablonu bulunamadÄ±.")
       return
     }
     try {
       await navigator.clipboard.writeText(trimmedMessage)
-      toast.success("Mesaj kopyalandý", { duration: 1500, position: "top-right" })
+      toast.success("Mesaj kopyalandÄ±", { duration: 1500, position: "top-right" })
     } catch (error) {
       console.error(error)
-      toast.error("Kopyalanamadý")
+      toast.error("KopyalanamadÄ±")
     }
   }
 
@@ -1037,7 +1037,7 @@ export default function ProductsTab({
                         : []
                       : independentMessages
                     const messageGroupLabel =
-                      messageGroupName || (messageGroupMessages.length > 0 ? "Baðýmsýz" : "Yok")
+                      messageGroupName || (messageGroupMessages.length > 0 ? "BaÄŸÄ±msÄ±z" : "Yok")
                     const canDeleteMessageItem = !messageGroupId && canRemoveMessageTemplate
                     const rawHref = String(product?.href ?? "").trim()
                   const href = rawHref
@@ -1304,7 +1304,7 @@ export default function ProductsTab({
                                 <div>
                                   <p className="text-sm font-semibold text-slate-100">Mesajlar</p>
                                   <p className="text-xs text-slate-400">
-                                    Mesaj grubu oluþturup þablonlarý buraya ekle.
+                                    Mesaj grubu oluÅŸturup ÅŸablonlarÄ± buraya ekle.
                                   </p>
                                 </div>
                                 <svg
@@ -1322,7 +1322,7 @@ export default function ProductsTab({
                               </div>
                               <div className="flex flex-wrap items-center gap-2">
                                 <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-200">
-                                  Seçili: {messageGroupLabel}
+                                  SeÃ§ili: {messageGroupLabel}
                                 </span>
                                 {messageGroupMessages.length > 0 && (
                                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-200">
@@ -1349,7 +1349,7 @@ export default function ProductsTab({
                                           className="min-w-[160px] flex-1 appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
                                         >
                                           <option value="">
-                                            {messageGroups.length === 0 ? "Baðýmsýz" : "Baðýmsýz"}
+                                            {messageGroups.length === 0 ? "BaÄŸÄ±msÄ±z" : "BaÄŸÄ±msÄ±z"}
                                           </option>
                                           {messageGroups.map((group) => (
                                             <option key={group.id} value={group.id}>
@@ -1383,7 +1383,7 @@ export default function ProductsTab({
                                           onChange={(event) =>
                                             handleMessageGroupDraftChange(offerId, event.target.value)
                                           }
-                                          placeholder="Yeni grup adý"
+                                          placeholder="Yeni grup adÄ±"
                                           disabled={!canManageMessages}
                                           className="min-w-[160px] flex-1 rounded-lg border border-white/10 bg-ink-900/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
                                         />
@@ -1393,7 +1393,7 @@ export default function ProductsTab({
                                           disabled={!canManageMessages || !messageGroupDraftValue.trim()}
                                           className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50 disabled:cursor-not-allowed disabled:opacity-60"
                                         >
-                                          Oluþtur
+                                          OluÅŸtur
                                         </button>
                                       </div>
                                     </div>
@@ -1406,7 +1406,7 @@ export default function ProductsTab({
                                       onChange={(event) =>
                                         handleMessageTemplateDraftChange(offerId, event.target.value)
                                       }
-                                      placeholder={templates.length === 0 ? "Þablon yok" : "Þablon seç"}
+                                      placeholder={templates.length === 0 ? "Åžablon yok" : "Åžablon seÃ§"}
                                       disabled={!canManageMessages || templates.length === 0}
                                       className="min-w-[220px] flex-1 appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
                                       style={{ appearance: "none", WebkitAppearance: "none" }}
@@ -1428,7 +1428,7 @@ export default function ProductsTab({
                                   <div className="rounded-xl border border-white/10 bg-ink-900/30 p-3">
                                     {messageGroupMessages.length === 0 ? (
                                       <div className="text-xs text-slate-400">
-                                        {messageGroupId ? "Bu grupta mesaj yok." : "Baðýmsýz mesaj yok."}
+                                        {messageGroupId ? "Bu grupta mesaj yok." : "BaÄŸÄ±msÄ±z mesaj yok."}
                                       </div>
                                     ) : (
                                       <div className="flex flex-wrap gap-2">
@@ -1481,7 +1481,7 @@ export default function ProductsTab({
                                   <div className="flex items-baseline gap-3">
                                     <span className="text-sm font-semibold text-slate-100">Stok grubu</span>
                                     <span className="text-[11px] text-slate-400">
-                                      Grup seçmezsen stoklar ürüne özeldir.
+                                      Grup seÃ§mezsen stoklar Ã¼rÃ¼ne Ã¶zeldir.
                                     </span>
                                   </div>
                                   <svg
@@ -1499,7 +1499,7 @@ export default function ProductsTab({
                                 </div>
                                 <div className="flex flex-wrap items-center gap-2">
                                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-200">
-                                    Seçili: {groupName || "Yok"}
+                                    SeÃ§ili: {groupName || "Yok"}
                                   </span>
                                   {groupId && canManageGroups && (
                                     <button
@@ -1510,7 +1510,7 @@ export default function ProductsTab({
                                       }}
                                       className="rounded-full border border-rose-300/50 bg-rose-500/10 px-3 py-1 text-[11px] font-semibold text-rose-50 transition hover:border-rose-300 hover:bg-rose-500/20"
                                     >
-                                      Kaldýr
+                                      KaldÄ±r
                                     </button>
                                   )}
                                   {groupId && canManageGroups && (
@@ -1542,7 +1542,7 @@ export default function ProductsTab({
                                       disabled={!canManageGroups}
                                       className="w-full appearance-none rounded-xl border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
                                     >
-                                      <option value="">Grup seç</option>
+                                      <option value="">Grup seÃ§</option>
                                       {groups.map((groupOption) => (
                                         <option key={groupOption.id} value={groupOption.id}>
                                           {groupOption.name}
@@ -1557,7 +1557,7 @@ export default function ProductsTab({
                                           onChange={(event) =>
                                             handleGroupDraftChange(offerId, event.target.value)
                                           }
-                                          placeholder="Yeni grup adý"
+                                          placeholder="Yeni grup adÄ±"
                                           className="min-w-[160px] flex-1 rounded-xl border border-white/10 bg-ink-900/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                                         />
                                         <button
@@ -1566,7 +1566,7 @@ export default function ProductsTab({
                                           disabled={!groupDraftValue.trim()}
                                           className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-slate-100 transition hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50 disabled:cursor-not-allowed disabled:opacity-60"
                                         >
-                                          Grup oluþtur
+                                          Grup oluÅŸtur
                                         </button>
                                       </div>
                                     )}
@@ -1592,8 +1592,8 @@ export default function ProductsTab({
                           >
                             <div className="flex min-w-0 flex-1 items-center gap-3 text-left">
                               <div className="flex items-baseline gap-3">
-                                <span className="text-sm font-semibold text-slate-100">Ürün notu</span>
-                                <span className="text-[11px] text-slate-400">Not ürün bazýnda saklanýr.</span>
+                                <span className="text-sm font-semibold text-slate-100">ÃœrÃ¼n notu</span>
+                                <span className="text-[11px] text-slate-400">Not Ã¼rÃ¼n bazÄ±nda saklanÄ±r.</span>
                               </div>
                               <svg
                                 viewBox="0 0 24 24"
@@ -1611,12 +1611,12 @@ export default function ProductsTab({
                             <div className="flex flex-wrap items-center gap-2">
                               {storedNote && !noteHasChanges && (
                                 <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-semibold text-slate-200">
-                                  Kayýtlý
+                                  KayÄ±tlÄ±
                                 </span>
                               )}
                               {noteGroupId && (
                                 <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-semibold text-slate-200">
-                                  Grup: {noteGroupName || "Seçili"}
+                                  Grup: {noteGroupName || "SeÃ§ili"}
                                 </span>
                               )}
                             </div>
@@ -1637,7 +1637,7 @@ export default function ProductsTab({
                                   disabled={!isNoteEditable}
                                   className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
                                 >
-                                  <option value="">Baðýmsýz not</option>
+                                  <option value="">BaÄŸÄ±msÄ±z not</option>
                                   {noteGroups.map((groupOption) => (
                                     <option key={groupOption.id} value={groupOption.id}>
                                       {groupOption.name}
@@ -1685,7 +1685,7 @@ export default function ProductsTab({
                                       disabled={!isNoteEditable || !noteGroupDraftValue.trim()}
                                       className="rounded-md border border-accent-400/70 bg-accent-500/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-accent-50 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                                     >
-                                          Oluþtur
+                                          OluÅŸtur
                                     </button>
                                   </div>
                                 </div>
@@ -1695,7 +1695,7 @@ export default function ProductsTab({
                               rows={9}
                               value={noteInputValue ?? ""}
                               onChange={(event) => handleNoteDraftChange(offerId, event.target.value)}
-                              placeholder="Ürün notu ekle"
+                              placeholder="ÃœrÃ¼n notu ekle"
                               readOnly={!isNoteEditable}
                               className="mt-4 min-h-[240px] w-full rounded-lg border border-white/10 bg-ink-900/60 px-3 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 read-only:bg-ink-900/40 read-only:text-slate-300"
                             />
@@ -1710,7 +1710,7 @@ export default function ProductsTab({
                                       : "border-white/10 bg-white/5 text-slate-200 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50"
                                   }`}
                                 >
-                                  {isNoteEditing ? "Vazgeç" : "Düzenle"}
+                                  {isNoteEditing ? "VazgeÃ§" : "DÃ¼zenle"}
                                 </button>
                               )}
                               <button
