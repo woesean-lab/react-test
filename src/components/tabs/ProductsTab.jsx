@@ -1241,7 +1241,7 @@ export default function ProductsTab({
                                   </svg>
                                 </div>
                                 <div className="flex flex-wrap items-center gap-2">
-                                  <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-200">
+                                  <span className="rounded-full border border-sky-300/60 bg-sky-500/15 px-2.5 py-1 text-[11px] font-semibold text-sky-50">
                                     Seçili: {groupName || "Yok"}
                                   </span>
                                 </div>
@@ -1360,7 +1360,7 @@ export default function ProductsTab({
                                 </svg>
                               </div>
                               <div className="flex flex-wrap items-center gap-2">
-                                <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-200">
+                                <span className="rounded-full border border-sky-300/60 bg-sky-500/15 px-2.5 py-1 text-[11px] font-semibold text-sky-50">
                                   Seçili: {messageGroupLabel}
                                 </span>
                                 {messageGroupMessages.length > 0 && (
@@ -1520,7 +1520,7 @@ export default function ProductsTab({
                                 </span>
                               )}
                               {noteGroupId && (
-                                <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-semibold text-slate-200">
+                                <span className="rounded-full border border-sky-300/60 bg-sky-500/15 px-2.5 py-1 text-[10px] font-semibold text-sky-50">
                                   Grup: {noteGroupName || "Seçili"}
                                 </span>
                               )}
