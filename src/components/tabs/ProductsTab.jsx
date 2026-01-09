@@ -1414,6 +1414,16 @@ export default function ProductsTab({
                                   <path d="m6 9 6 6 6-6" />
                                 </svg>
                               </div>
+                              <div className="flex flex-wrap items-center gap-2">
+                                <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-200">
+                                  Seçili: {messageGroupLabel}
+                                </span>
+                                {messageGroupMessages.length > 0 && (
+                                  <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-200">
+                                    {messageGroupMessages.length} mesaj
+                                  </span>
+                                )}
+                              </div>
                             </div>
                             {isMessageOpen && (
                               <div className="px-4 pb-4 pt-3">
@@ -1683,9 +1693,7 @@ export default function ProductsTab({
                                 <div className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-card">
                                   {canCopyKeys && (
                                     <div className="flex flex-wrap items-center justify-between gap-3">
-                                      <span className="text-xs font-semibold text-slate-300">
-                                        Toplu kopyala
-                                      </span>
+                                      <span className="text-sm font-semibold text-slate-100">Stoklar</span>
                                       <div className="flex flex-wrap items-center gap-2">
                                         <div className="flex items-center gap-2 rounded-full border border-white/10 bg-ink-950/60 px-2 py-1">
                                           <input
@@ -1845,9 +1853,7 @@ export default function ProductsTab({
                               {!isKeysLoading && usedKeys.length > 0 && (
                                 <div className="space-y-4 rounded-2xl border border-white/10 bg-white/5 p-4 shadow-card">
                                   <div className="flex flex-wrap items-center justify-between gap-3">
-                                    <span className="text-xs font-semibold text-slate-300">
-                                      Kullanilan stoklar
-                                    </span>
+                                    <span className="text-sm font-semibold text-slate-100">Kullanılan Stoklar</span>
                                     <div className="flex flex-wrap items-center gap-2">
                                       <span className="rounded-full border border-rose-300/60 bg-rose-500/15 px-2.5 py-1 text-[11px] font-semibold text-rose-50">
                                         {usedKeys.length} adet
@@ -1996,22 +2002,7 @@ export default function ProductsTab({
 
                             <div className="space-y-4">
                               <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-card">
-                                <div className="flex flex-wrap items-center justify-between gap-2">
-                                  <span className="text-xs font-semibold text-slate-300">
-                                    Mesaj kopyalama
-                                  </span>
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-200">
-                                      Seçili: {messageGroupLabel}
-                                    </span>
-                                    {messageGroupMessages.length > 0 && (
-                                      <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-200">
-                                        {messageGroupMessages.length} mesaj
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="mt-3 rounded-xl border border-white/10 bg-ink-900/30 p-3">
+                                <div className="rounded-xl border border-white/10 bg-ink-900/30 p-3">
                                   {messageGroupMessages.length === 0 ? (
                                     <div className="text-xs text-slate-400">
                                       {messageGroupId ? "Bu grupta mesaj yok." : "Bağımsız mesaj yok."}
@@ -2130,6 +2121,9 @@ export default function ProductsTab({
     </div>
   )
 }
+
+
+
 
 
 
