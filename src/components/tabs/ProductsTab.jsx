@@ -1,20 +1,16 @@
 ﻿import { useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "react-hot-toast"
 import StockModal from "../modals/StockModal"
-
 function SkeletonBlock({ className = "" }) {
   return <div className={`animate-pulse rounded-lg bg-white/10 ${className}`} />
 }
-
 const formatCategoryLabel = (value) =>
   value
     .split("-")
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ")
-
 const normalizeCategoryKey = (value) => String(value ?? "").trim().toLowerCase()
-
 const getCategoryKeyFromHref = (href) => {
   if (!href) return ""
   const raw = String(href).trim()
@@ -30,14 +26,12 @@ const getCategoryKeyFromHref = (href) => {
   const segment = path.split("?")[0].split("#")[0].split("/").filter(Boolean)[0]
   return normalizeCategoryKey(segment)
 }
-
 const getCategoryKey = (product) => {
   const direct = normalizeCategoryKey(product?.category)
   if (direct) return direct
   const derived = getCategoryKeyFromHref(product?.href)
   return derived || "diger"
 }
-
 function ProductsSkeleton({ panelClass }) {
   return (
     <div className="space-y-6">
@@ -68,7 +62,6 @@ function ProductsSkeleton({ panelClass }) {
             ))}
           </div>
         </aside>
-
         <div className={`${panelClass} bg-ink-800/60`}>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -104,7 +97,6 @@ function ProductsSkeleton({ panelClass }) {
     </div>
   )
 }
-
 function ProductsListSkeleton() {
   return (
     <div className="space-y-4">
@@ -127,7 +119,6 @@ function ProductsListSkeleton() {
     </div>
   )
 }
-
 export default function ProductsTab({
   panelClass = "",
   catalog,
@@ -278,7 +269,6 @@ export default function ProductsTab({
       totalStock: 0,
       usedStock: 0,
     }
-
     allProducts.forEach((product) => {
       const offerId = String(product?.id ?? "").trim()
       const isStockEnabled = Boolean(stockEnabledByOffer?.[offerId])
@@ -287,7 +277,6 @@ export default function ProductsTab({
       } else {
         totals.stockDisabled += 1
       }
-
       const keyList = Array.isArray(keysByOffer?.[offerId]) ? keysByOffer[offerId] : []
       const usedCountFromKeys = keyList.reduce(
         (acc, item) => acc + (item?.status === "used" ? 1 : 0),
@@ -309,18 +298,14 @@ export default function ProductsTab({
       const usedCount = hasLoadedKeys ? usedCountFromKeys : rawUsedCount
       const availableCount = hasLoadedKeys ? availableCountFromKeys : rawAvailableCount
       const totalCount = Math.max(0, availableCount + usedCount)
-
       totals.totalStock += totalCount
       totals.usedStock += Math.max(0, usedCount)
-
       if (isStockEnabled && Math.max(0, availableCount) === 0) {
         totals.outOfStock += 1
       }
     })
-
     return totals
   }, [allProducts, keysByOffer, stockEnabledByOffer])
-
   const toggleOfferOpen = (offerId) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
@@ -334,7 +319,6 @@ export default function ProductsTab({
       return { ...prev, [normalizedId]: nextOpen }
     })
   }
-
   const toggleStarred = (offerId) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
@@ -353,24 +337,20 @@ export default function ProductsTab({
       return next
     })
   }
-
   const handleStockModalScroll = (event) => {
     if (!stockModalLineRef.current) return
     stockModalLineRef.current.scrollTop = event.target.scrollTop
   }
-
   const openStockModal = (offerId, name) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
     setStockModalDraft("")
     setStockModalTarget({ id: normalizedId, name: String(name ?? "").trim() })
   }
-
   const handleStockModalClose = () => {
     setStockModalDraft("")
     setStockModalTarget(null)
   }
-
   const handleStockModalSave = async () => {
     if (!stockModalTarget || typeof onAddKeys !== "function") return
     const ok = await onAddKeys(stockModalTarget.id, stockModalDraft)
@@ -378,14 +358,12 @@ export default function ProductsTab({
       handleStockModalClose()
     }
   }
-
   const handleBulkCountChange = (offerId, value) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
     const cleaned = String(value ?? "").replace(/\D/g, "")
     setBulkCounts((prev) => ({ ...prev, [normalizedId]: cleaned }))
   }
-
   const handleBulkCopy = (offerId, markUsed) => {
     if (typeof onBulkCopy !== "function") return
     const normalizedId = String(offerId ?? "").trim()
@@ -393,7 +371,6 @@ export default function ProductsTab({
     const rawCount = bulkCounts[normalizedId]
     onBulkCopy(normalizedId, rawCount, { markUsed })
   }
-
   const handleBulkDelete = (offerId, list) => {
     if (typeof onBulkDelete !== "function") return
     const normalizedId = String(offerId ?? "").trim()
@@ -408,13 +385,11 @@ export default function ProductsTab({
     }
     onBulkDelete(normalizedId, selected.map((item) => item.id))
   }
-
   const handleGroupDraftChange = (offerId, value) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
     setGroupDrafts((prev) => ({ ...prev, [normalizedId]: value }))
   }
-
   const handleGroupCreate = (offerId) => {
     if (typeof onCreateGroup !== "function" || typeof onAssignGroup !== "function") return
     const normalizedId = String(offerId ?? "").trim()
@@ -426,7 +401,6 @@ export default function ProductsTab({
     setConfirmGroupDelete(null)
     onAssignGroup(normalizedId, created.id)
   }
-
   const handleGroupAssign = (offerId, groupId) => {
     if (typeof onAssignGroup !== "function") return
     const normalizedId = String(offerId ?? "").trim()
@@ -434,7 +408,6 @@ export default function ProductsTab({
     setConfirmGroupDelete(null)
     onAssignGroup(normalizedId, groupId)
   }
-
   const handleGroupDelete = (offerId, groupId) => {
     if (typeof onDeleteGroup !== "function") return
     const normalizedOfferId = String(offerId ?? "").trim()
@@ -448,19 +421,16 @@ export default function ProductsTab({
     setConfirmGroupDelete(normalizedGroupId)
     toast("Grubu silmek icin tekrar tikla", { position: "top-right" })
   }
-
   const handleNoteDraftChange = (offerId, value) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
     setNoteDrafts((prev) => ({ ...prev, [normalizedId]: value }))
   }
-
   const handleNoteGroupDraftChange = (offerId, value) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
     setNoteGroupDrafts((prev) => ({ ...prev, [normalizedId]: value }))
   }
-
   const handleNoteReset = (offerId) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
@@ -470,27 +440,23 @@ export default function ProductsTab({
       return next
     })
   }
-
   const toggleNoteOpen = (offerId) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
     setNoteOpenByOffer((prev) => ({ ...prev, [normalizedId]: !prev[normalizedId] }))
   }
-
   const toggleMessageOpen = (offerId) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
     setMessageOpenByOffer((prev) => ({ ...prev, [normalizedId]: !prev[normalizedId] }))
     setStockGroupOpenByOffer((prev) => ({ ...prev, [normalizedId]: false }))
   }
-
   const toggleStockGroupOpen = (offerId) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
     setStockGroupOpenByOffer((prev) => ({ ...prev, [normalizedId]: !prev[normalizedId] }))
     setMessageOpenByOffer((prev) => ({ ...prev, [normalizedId]: false }))
   }
-
   const toggleNoteEdit = (offerId) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
@@ -502,7 +468,6 @@ export default function ProductsTab({
       return { ...prev, [normalizedId]: next }
     })
   }
-
   const handleNoteSave = (offerId) => {
     if (!canManageNotes) return
     const normalizedId = String(offerId ?? "").trim()
@@ -517,7 +482,6 @@ export default function ProductsTab({
     handleNoteReset(normalizedId)
     setNoteEditingByOffer((prev) => ({ ...prev, [normalizedId]: false }))
   }
-
   const handleNoteGroupCreate = (offerId) => {
     if (typeof onCreateNoteGroup !== "function" || typeof onAssignNoteGroup !== "function") return
     const normalizedId = String(offerId ?? "").trim()
@@ -528,7 +492,6 @@ export default function ProductsTab({
     setNoteGroupDrafts((prev) => ({ ...prev, [normalizedId]: "" }))
     onAssignNoteGroup(normalizedId, created.id)
   }
-
   const handleNoteGroupAssign = (offerId, groupId) => {
     if (typeof onAssignNoteGroup !== "function") return
     const normalizedId = String(offerId ?? "").trim()
@@ -541,7 +504,6 @@ export default function ProductsTab({
     setConfirmNoteGroupDelete(null)
     onAssignNoteGroup(normalizedId, groupId)
   }
-
   const handleNoteGroupDelete = (groupId) => {
     if (typeof onDeleteNoteGroup !== "function") return
     const normalizedGroupId = String(groupId ?? "").trim()
@@ -554,19 +516,16 @@ export default function ProductsTab({
     setConfirmNoteGroupDelete(normalizedGroupId)
     toast("Not grubunu silmek icin tekrar tikla", { position: "top-right" })
   }
-
   const handleMessageTemplateDraftChange = (offerId, value) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
     setMessageTemplateDrafts((prev) => ({ ...prev, [normalizedId]: value }))
   }
-
   const handleMessageGroupDraftChange = (offerId, value) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
     setMessageGroupDrafts((prev) => ({ ...prev, [normalizedId]: value }))
   }
-
   const handleMessageGroupCreate = (offerId) => {
     if (typeof onCreateMessageGroup !== "function" || typeof onAssignMessageGroup !== "function") {
       return
@@ -580,7 +539,6 @@ export default function ProductsTab({
     setMessageGroupDrafts((prev) => ({ ...prev, [normalizedId]: "" }))
     onAssignMessageGroup(normalizedId, created.id)
   }
-
   const handleMessageGroupAssign = (offerId, value) => {
     if (typeof onAssignMessageGroup !== "function") return
     const normalizedId = String(offerId ?? "").trim()
@@ -588,7 +546,6 @@ export default function ProductsTab({
     setConfirmMessageGroupDelete(null)
     onAssignMessageGroup(normalizedId, value)
   }
-
   const handleMessageGroupDelete = (groupId) => {
     if (!canDeleteMessageGroup) return
     const normalizedGroupId = String(groupId ?? "").trim()
@@ -601,7 +558,6 @@ export default function ProductsTab({
     setConfirmMessageGroupDelete(normalizedGroupId)
     toast("Mesaj grubunu silmek icin tekrar tikla", { position: "top-right" })
   }
-
   const handleMessageTemplateAdd = (offerId) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
@@ -619,7 +575,6 @@ export default function ProductsTab({
     }
     setMessageTemplateDrafts((prev) => ({ ...prev, [normalizedId]: "" }))
   }
-
   const handleMessageTemplateRemove = (offerId, label) => {
     if (!canRemoveMessageTemplate) return
     const normalizedId = String(offerId ?? "").trim()
@@ -627,7 +582,6 @@ export default function ProductsTab({
     if (!normalizedId || !normalizedLabel) return
     onRemoveMessageTemplate(normalizedId, normalizedLabel)
   }
-
   const handleMessageTemplateCopy = async (label) => {
     const normalizedLabel = String(label ?? "").trim()
     if (!normalizedLabel) return
@@ -645,7 +599,6 @@ export default function ProductsTab({
       toast.error("Kopyalanamadı")
     }
   }
-
   const handleStockToggle = (offerId) => {
     if (!canManageStock) return
     const normalizedId = String(offerId ?? "").trim()
@@ -656,7 +609,6 @@ export default function ProductsTab({
       onLoadKeys(normalizedId)
     }
   }
-
   const handleKeyDelete = (offerId, keyId) => {
     if (typeof onDeleteKey !== "function") return
     const normalizedOfferId = String(offerId ?? "").trim()
@@ -670,7 +622,6 @@ export default function ProductsTab({
     }
     setConfirmKeyTarget(target)
   }
-
   const handleKeyStatusUpdate = (offerId, keyId, nextStatus) => {
     if (typeof onUpdateKeyStatus !== "function") return
     const normalizedOfferId = String(offerId ?? "").trim()
@@ -678,24 +629,20 @@ export default function ProductsTab({
     if (!normalizedOfferId || !normalizedKeyId) return
     onUpdateKeyStatus(normalizedOfferId, normalizedKeyId, nextStatus)
   }
-
   const handleKeyCopy = (code) => {
     if (typeof onCopyKey !== "function") return
     onCopyKey(code)
   }
-
   const handleKeyEditStart = (keyId, code) => {
     const normalizedKeyId = String(keyId ?? "").trim()
     if (!normalizedKeyId) return
     setEditingKeys((prev) => ({ ...prev, [normalizedKeyId]: String(code ?? "") }))
   }
-
   const handleKeyEditChange = (keyId, value) => {
     const normalizedKeyId = String(keyId ?? "").trim()
     if (!normalizedKeyId) return
     setEditingKeys((prev) => ({ ...prev, [normalizedKeyId]: value }))
   }
-
   const handleKeyEditCancel = (keyId) => {
     const normalizedKeyId = String(keyId ?? "").trim()
     if (!normalizedKeyId) return
@@ -705,7 +652,6 @@ export default function ProductsTab({
       return next
     })
   }
-
   const handleKeyEditSave = async (offerId, keyId) => {
     if (typeof onUpdateKeyCode !== "function") return
     const normalizedOfferId = String(offerId ?? "").trim()
@@ -726,7 +672,6 @@ export default function ProductsTab({
     })
     if (ok) handleKeyEditCancel(normalizedKeyId)
   }
-
   const handleKeysRefresh = (offerId) => {
     if (typeof onLoadKeys !== "function") return
     const normalizedId = String(offerId ?? "").trim()
@@ -734,27 +679,22 @@ export default function ProductsTab({
     onLoadKeys(normalizedId, { force: true })
     toast("Stoklar yenileniyor...", { duration: 1200, position: "top-right" })
   }
-
   useEffect(() => {
     if (!categories.some((category) => category.key === activeCategoryKey)) {
       setActiveCategoryKey(categories[0]?.key ?? "items")
     }
   }, [activeCategoryKey, categories])
-
   useEffect(() => {
     setPage(1)
   }, [activeCategoryKey, normalizedQuery])
-
   useEffect(() => {
     if (page > totalPages) {
       setPage(totalPages)
     }
   }, [page, totalPages])
-
   if (isLoading) {
     return <ProductsSkeleton panelClass={panelClass} />
   }
-
   return (
     <div className="space-y-6">
       <header className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-4 shadow-card sm:p-6">
@@ -789,7 +729,6 @@ export default function ProductsTab({
           </div>
         </div>
       </header>
-
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
         <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60 p-4 shadow-card">
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_120%_at_20%_0%,rgba(58,199,255,0.18),transparent)]" />
@@ -832,7 +771,6 @@ export default function ProductsTab({
           </div>
         </div>
       </div>
-
       <div className="grid gap-6 lg:grid-cols-[minmax(0,240px)_minmax(0,1fr)]">
         <aside className={`${panelClass} bg-ink-900/80`}>
           <div className="flex items-center justify-between gap-3">
@@ -901,7 +839,6 @@ export default function ProductsTab({
             })}
           </div>
         </aside>
-
         <div className={`${panelClass} bg-ink-800/60`}>
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
@@ -951,7 +888,6 @@ export default function ProductsTab({
               </div>
             </div>
           </div>
-
           <div key={activeCategoryKey} className="mt-4 space-y-2">
             {isRefreshing ? (
               <ProductsListSkeleton />
@@ -1110,7 +1046,6 @@ export default function ProductsTab({
                             )}
                           </div>
                         </button>
-
                         <div className="flex flex-wrap items-stretch gap-1.5">
                           <div className="flex h-[36px] w-full items-center gap-1 rounded-lg border border-[#ffffff1a] bg-[#ffffff0d] px-2.5 py-1 shadow-inner sm:w-[192px]">
                             <button
@@ -1269,7 +1204,6 @@ export default function ProductsTab({
                         </div>
                       </div>
                       
-
                       {isOpen && (
                         <div className="mt-4 space-y-4 border-t border-white/10 pt-4">
                         <div className={`grid gap-3 ${isStockEnabled ? "lg:grid-cols-2" : ""}`}>
@@ -1429,11 +1363,10 @@ export default function ProductsTab({
                                     {messageGroupMessages.length} mesaj
                                   </span>
                                 )}
-                              </div>
                             </div>
                             {isMessageOpen && (
                               <div className="px-4 pb-4 pt-3">
-                                <div className="space-y-4">
+                                <div className="">
                                   <div className="grid gap-3 md:grid-cols-2">
                                     <div className="space-y-2 min-w-0">
                                       <label className="text-[11px] font-semibold text-slate-300">
@@ -1541,7 +1474,6 @@ export default function ProductsTab({
                               </div>
                             )}
                           </div>
-
                         </div>
                           <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-card">
                           <div
@@ -1692,7 +1624,6 @@ export default function ProductsTab({
                           </div>
                           )}
                         </div>
-
                         <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.6fr)]">
                           <div className="space-y-4">
                             {isStockEnabled ? (
@@ -2017,10 +1948,8 @@ export default function ProductsTab({
                               </div>
                             )}
                             </div>
-
-                            <div className="space-y-4">
-                              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 shadow-card">
-                                <div className="rounded-xl border border-white/10 bg-ink-900/30 p-3">
+                            <div className="rounded-xl border border-white/10 bg-ink-900/30 p-3">
+                                
                                   {messageGroupMessages.length === 0 ? (
                                     <div className="text-xs text-slate-400">
                                       {messageGroupId ? "Bu grupta mesaj yok." : "Bağımsız mesaj yok."}
@@ -2055,7 +1984,6 @@ export default function ProductsTab({
                                 </div>
                               </div>
                             </div>
-
                         </div>
                       </div>
                       )}
@@ -2120,9 +2048,7 @@ export default function ProductsTab({
             </div>
           )}
         </div>
-
       </div>
-
       <StockModal
         isOpen={Boolean(stockModalTarget)}
         onClose={handleStockModalClose}
@@ -2135,20 +2061,6 @@ export default function ProductsTab({
         onScroll={handleStockModalScroll}
         onSave={handleStockModalSave}
       />
-
     </div>
   )
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
