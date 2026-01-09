@@ -1,4 +1,4 @@
-ï»¿import { useEffect, useMemo, useRef, useState } from "react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { toast } from "react-hot-toast"
 import StockModal from "../modals/StockModal"
 
@@ -189,6 +189,8 @@ export default function ProductsTab({
   const [confirmGroupDelete, setConfirmGroupDelete] = useState(null)
   const [noteGroupDrafts, setNoteGroupDrafts] = useState({})
   const [noteOpenByOffer, setNoteOpenByOffer] = useState({})
+  const [messageOpenByOffer, setMessageOpenByOffer] = useState({})
+  const [stockGroupOpenByOffer, setStockGroupOpenByOffer] = useState({})
   const [confirmNoteGroupDelete, setConfirmNoteGroupDelete] = useState(null)
   const [noteEditingByOffer, setNoteEditingByOffer] = useState({})
   const [messageTemplateDrafts, setMessageTemplateDrafts] = useState({})
@@ -475,6 +477,18 @@ export default function ProductsTab({
     setNoteOpenByOffer((prev) => ({ ...prev, [normalizedId]: !prev[normalizedId] }))
   }
 
+  const toggleMessageOpen = (offerId) => {
+    const normalizedId = String(offerId ?? "").trim()
+    if (!normalizedId) return
+    setMessageOpenByOffer((prev) => ({ ...prev, [normalizedId]: !prev[normalizedId] }))
+  }
+
+  const toggleStockGroupOpen = (offerId) => {
+    const normalizedId = String(offerId ?? "").trim()
+    if (!normalizedId) return
+    setStockGroupOpenByOffer((prev) => ({ ...prev, [normalizedId]: !prev[normalizedId] }))
+  }
+
   const toggleNoteEdit = (offerId) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
@@ -618,15 +632,15 @@ export default function ProductsTab({
     const message = templates.find((tpl) => tpl.label === normalizedLabel)?.value
     const trimmedMessage = String(message ?? "").trim()
     if (!trimmedMessage) {
-      toast.error("Mesaj ÅŸablonu bulunamadÄ±.")
+      toast.error("Mesaj þablonu bulunamadý.")
       return
     }
     try {
       await navigator.clipboard.writeText(trimmedMessage)
-      toast.success("Mesaj kopyalandÄ±", { duration: 1500, position: "top-right" })
+      toast.success("Mesaj kopyalandý", { duration: 1500, position: "top-right" })
     } catch (error) {
       console.error(error)
-      toast.error("KopyalanamadÄ±")
+      toast.error("Kopyalanamadý")
     }
   }
 
@@ -994,7 +1008,9 @@ export default function ProductsTab({
                   const noteInputValue = noteDraftValue !== undefined ? noteDraftValue : storedNote
                   const noteHasChanges = String(noteInputValue ?? "").trim() !== storedNote
                   const noteGroupDraftValue = noteGroupDrafts[offerId] ?? ""
-                  const isNoteOpen = Boolean(noteOpenByOffer[offerId])
+                    const isNoteOpen = Boolean(noteOpenByOffer[offerId])
+                    const isMessageOpen = Boolean(messageOpenByOffer[offerId])
+                    const isStockGroupOpen = Boolean(stockGroupOpenByOffer[offerId])
                   const isNoteEditing = Boolean(noteEditingByOffer[offerId])
                   const isNoteEditable = canManageNotes && isNoteEditing
                   const canSaveNote =
@@ -1021,7 +1037,7 @@ export default function ProductsTab({
                         : []
                       : independentMessages
                     const messageGroupLabel =
-                      messageGroupName || (messageGroupMessages.length > 0 ? "BaÄŸÄ±msÄ±z" : "Yok")
+                      messageGroupName || (messageGroupMessages.length > 0 ? "Baðýmsýz" : "Yok")
                     const canDeleteMessageItem = !messageGroupId && canRemoveMessageTemplate
                     const rawHref = String(product?.href ?? "").trim()
                   const href = rawHref
@@ -1255,9 +1271,21 @@ export default function ProductsTab({
                       {isOpen && (
                         <div className="mt-4 space-y-4 border-t border-white/10 pt-4">
                         <div className={`grid gap-3 ${isStockEnabled ? "lg:grid-cols-2" : ""}`}>
-                          <div className="flex h-full flex-col rounded-2xl border border-white/10 bg-ink-950/50 p-4 shadow-card">
-                            <div className="flex flex-wrap items-center justify-between gap-3">
-                              <div className="flex items-center gap-3">
+                          <div className="h-full overflow-hidden rounded-2xl border border-white/10 bg-ink-950/50 shadow-card">
+                            <div
+                              role="button"
+                              tabIndex={0}
+                              onClick={() => toggleMessageOpen(offerId)}
+                              onKeyDown={(event) => {
+                                if (event.key === "Enter" || event.key === " ") {
+                                  event.preventDefault()
+                                  toggleMessageOpen(offerId)
+                                }
+                              }}
+                              className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3 transition hover:bg-white/5"
+                              aria-expanded={isMessageOpen}
+                            >
+                              <div className="flex min-w-0 flex-1 items-center gap-3 text-left">
                                 <span className="flex h-9 w-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-200">
                                   <svg
                                     viewBox="0 0 24 24"
@@ -1276,13 +1304,25 @@ export default function ProductsTab({
                                 <div>
                                   <p className="text-sm font-semibold text-slate-100">Mesajlar</p>
                                   <p className="text-xs text-slate-400">
-                                    Mesaj grubu oluÅŸturup ÅŸablonlarÄ± buraya ekle.
+                                    Mesaj grubu oluþturup þablonlarý buraya ekle.
                                   </p>
                                 </div>
+                                <svg
+                                  viewBox="0 0 24 24"
+                                  aria-hidden="true"
+                                  className={`h-4 w-4 text-slate-400 transition ${isMessageOpen ? "rotate-180" : ""}`}
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <path d="m6 9 6 6 6-6" />
+                                </svg>
                               </div>
                               <div className="flex flex-wrap items-center gap-2">
                                 <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-200">
-                                  SeÃ§ili: {messageGroupLabel}
+                                  Seçili: {messageGroupLabel}
                                 </span>
                                 {messageGroupMessages.length > 0 && (
                                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-200">
@@ -1291,159 +1331,195 @@ export default function ProductsTab({
                                 )}
                               </div>
                             </div>
-                            <div className="mt-4 space-y-4">
-                              <div className="grid gap-3 md:grid-cols-2">
-                                <div className="space-y-2 min-w-0">
-                                  <label className="text-[11px] font-semibold text-slate-300">
-                                    Mesaj grubu
-                                  </label>
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <select
-                                      value={messageGroupId}
-                                      onChange={(event) =>
-                                        handleMessageGroupAssign(offerId, event.target.value)
-                                      }
-                                      disabled={!canManageMessages}
-                                      className="min-w-[160px] flex-1 appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
-                                    >
-                                      <option value="">
-                                        {messageGroups.length === 0 ? "BaÄŸÄ±msÄ±z" : "BaÄŸÄ±msÄ±z"}
-                                      </option>
-                                      {messageGroups.map((group) => (
-                                        <option key={group.id} value={group.id}>
-                                          {group.name}
-                                        </option>
-                                      ))}
-                                    </select>
-                                    {messageGroupId && canDeleteMessageGroup && (
-                                      <button
-                                        type="button"
-                                        onClick={() => handleMessageGroupDelete(messageGroupId)}
-                                        className={`rounded-lg border px-3 py-2 text-[11px] font-semibold transition ${
-                                          confirmMessageGroupDelete === messageGroupId
-                                            ? "border-rose-300 bg-rose-500/25 text-rose-50"
-                                            : "border-rose-300/40 bg-rose-500/10 text-rose-50/90 hover:border-rose-300 hover:bg-rose-500/20"
-                                        }`}
-                                      >
-                                        {confirmMessageGroupDelete === messageGroupId ? "Onayla" : "Sil"}
-                                      </button>
-                                    )}
-                                  </div>
-                                </div>
-                                <div className="space-y-2 min-w-0">
-                                  <label className="text-[11px] font-semibold text-slate-300">
-                                    Yeni grup
-                                  </label>
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <input
-                                      type="text"
-                                      value={messageGroupDraftValue}
-                                      onChange={(event) =>
-                                        handleMessageGroupDraftChange(offerId, event.target.value)
-                                      }
-                                      placeholder="Yeni grup adÄ±"
-                                      disabled={!canManageMessages}
-                                      className="min-w-[160px] flex-1 rounded-lg border border-white/10 bg-ink-900/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={() => handleMessageGroupCreate(offerId)}
-                                      disabled={!canManageMessages || !messageGroupDraftValue.trim()}
-                                      className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50 disabled:cursor-not-allowed disabled:opacity-60"
-                                    >
-                                      OluÅŸtur
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                              <div className="flex flex-wrap items-center gap-2">
-                                <input
-                                  type="text"
-                                  list={`message-template-${offerId}`}
-                                  value={messageTemplateDraftValue}
-                                  onChange={(event) =>
-                                    handleMessageTemplateDraftChange(offerId, event.target.value)
-                                  }
-                                  placeholder={templates.length === 0 ? "Åžablon yok" : "Åžablon seÃ§"}
-                                  disabled={!canManageMessages || templates.length === 0}
-                                  className="min-w-[220px] flex-1 appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
-                                  style={{ appearance: "none", WebkitAppearance: "none" }}
-                                />
-                                <datalist id={`message-template-${offerId}`}>
-                                  {templates.map((tpl) => (
-                                    <option key={`${offerId}-msg-${tpl.label}`} value={tpl.label} />
-                                  ))}
-                                </datalist>
-                                <button
-                                  type="button"
-                                  onClick={() => handleMessageTemplateAdd(offerId)}
-                                  disabled={!canManageMessages || !isMessageTemplateValid}
-                                  className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-slate-100 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50 disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                  Ekle
-                                </button>
-                              </div>
-                              <div className="rounded-xl border border-white/10 bg-ink-900/30 p-3">
-                                {messageGroupMessages.length === 0 ? (
-                                  <div className="text-xs text-slate-400">
-                                    {messageGroupId ? "Bu grupta mesaj yok." : "BaÄŸÄ±msÄ±z mesaj yok."}
-                                  </div>
-                                ) : (
-                                  <div className="flex flex-wrap gap-2">
-                                    {messageGroupMessages.map((label) => (
-                                      <div
-                                        key={`${offerId}-msg-${messageGroupId || "independent"}-${label}`}
-                                        className="flex max-w-full items-stretch gap-1"
-                                      >
-                                        <button
-                                          type="button"
-                                          onClick={() => handleMessageTemplateCopy(label)}
-                                          className="max-w-full rounded-md border border-white/15 bg-white/5 px-3 py-1 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50 whitespace-normal break-words"
+                            {isMessageOpen && (
+                              <div className="px-4 pb-4 pt-3">
+                                <div className="space-y-4">
+                                  <div className="grid gap-3 md:grid-cols-2">
+                                    <div className="space-y-2 min-w-0">
+                                      <label className="text-[11px] font-semibold text-slate-300">
+                                        Mesaj grubu
+                                      </label>
+                                      <div className="flex flex-wrap items-center gap-2">
+                                        <select
+                                          value={messageGroupId}
+                                          onChange={(event) =>
+                                            handleMessageGroupAssign(offerId, event.target.value)
+                                          }
+                                          disabled={!canManageMessages}
+                                          className="min-w-[160px] flex-1 appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
                                         >
-                                          {label}
-                                        </button>
-                                        {canDeleteMessageItem && (
+                                          <option value="">
+                                            {messageGroups.length === 0 ? "Baðýmsýz" : "Baðýmsýz"}
+                                          </option>
+                                          {messageGroups.map((group) => (
+                                            <option key={group.id} value={group.id}>
+                                              {group.name}
+                                            </option>
+                                          ))}
+                                        </select>
+                                        {messageGroupId && canDeleteMessageGroup && (
                                           <button
                                             type="button"
-                                            onClick={() => handleMessageTemplateRemove(offerId, label)}
-                                            className="rounded-md border border-rose-300/40 bg-rose-500/10 px-2.5 py-1 text-[10px] font-semibold text-rose-50 transition hover:border-rose-300 hover:bg-rose-500/20"
+                                            onClick={() => handleMessageGroupDelete(messageGroupId)}
+                                            className={`rounded-lg border px-3 py-2 text-[11px] font-semibold transition ${
+                                              confirmMessageGroupDelete === messageGroupId
+                                                ? "border-rose-300 bg-rose-500/25 text-rose-50"
+                                                : "border-rose-300/40 bg-rose-500/10 text-rose-50/90 hover:border-rose-300 hover:bg-rose-500/20"
+                                            }`}
                                           >
-                                            Sil
+                                            {confirmMessageGroupDelete === messageGroupId ? "Onayla" : "Sil"}
                                           </button>
                                         )}
                                       </div>
-                                    ))}
+                                    </div>
+                                    <div className="space-y-2 min-w-0">
+                                      <label className="text-[11px] font-semibold text-slate-300">
+                                        Yeni grup
+                                      </label>
+                                      <div className="flex flex-wrap items-center gap-2">
+                                        <input
+                                          type="text"
+                                          value={messageGroupDraftValue}
+                                          onChange={(event) =>
+                                            handleMessageGroupDraftChange(offerId, event.target.value)
+                                          }
+                                          placeholder="Yeni grup adý"
+                                          disabled={!canManageMessages}
+                                          className="min-w-[160px] flex-1 rounded-lg border border-white/10 bg-ink-900/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                                        />
+                                        <button
+                                          type="button"
+                                          onClick={() => handleMessageGroupCreate(offerId)}
+                                          disabled={!canManageMessages || !messageGroupDraftValue.trim()}
+                                          className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                        >
+                                          Oluþtur
+                                        </button>
+                                      </div>
+                                    </div>
                                   </div>
-                                )}
+                                  <div className="flex flex-wrap items-center gap-2">
+                                    <input
+                                      type="text"
+                                      list={`message-template-${offerId}`}
+                                      value={messageTemplateDraftValue}
+                                      onChange={(event) =>
+                                        handleMessageTemplateDraftChange(offerId, event.target.value)
+                                      }
+                                      placeholder={templates.length === 0 ? "Þablon yok" : "Þablon seç"}
+                                      disabled={!canManageMessages || templates.length === 0}
+                                      className="min-w-[220px] flex-1 appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                                      style={{ appearance: "none", WebkitAppearance: "none" }}
+                                    />
+                                    <datalist id={`message-template-${offerId}`}>
+                                      {templates.map((tpl) => (
+                                        <option key={`${offerId}-msg-${tpl.label}`} value={tpl.label} />
+                                      ))}
+                                    </datalist>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleMessageTemplateAdd(offerId)}
+                                      disabled={!canManageMessages || !isMessageTemplateValid}
+                                      className="rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-xs font-semibold text-slate-100 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                    >
+                                      Ekle
+                                    </button>
+                                  </div>
+                                  <div className="rounded-xl border border-white/10 bg-ink-900/30 p-3">
+                                    {messageGroupMessages.length === 0 ? (
+                                      <div className="text-xs text-slate-400">
+                                        {messageGroupId ? "Bu grupta mesaj yok." : "Baðýmsýz mesaj yok."}
+                                      </div>
+                                    ) : (
+                                      <div className="flex flex-wrap gap-2">
+                                        {messageGroupMessages.map((label) => (
+                                          <div
+                                            key={`${offerId}-msg-${messageGroupId || "independent"}-${label}`}
+                                            className="flex max-w-full items-stretch gap-1"
+                                          >
+                                            <button
+                                              type="button"
+                                              onClick={() => handleMessageTemplateCopy(label)}
+                                              className="max-w-full rounded-md border border-white/15 bg-white/5 px-3 py-1 text-left text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-indigo-300 hover:bg-indigo-500/15 hover:text-indigo-50 whitespace-normal break-words"
+                                            >
+                                              {label}
+                                            </button>
+                                            {canDeleteMessageItem && (
+                                              <button
+                                                type="button"
+                                                onClick={() => handleMessageTemplateRemove(offerId, label)}
+                                                className="rounded-md border border-rose-300/40 bg-rose-500/10 px-2.5 py-1 text-[10px] font-semibold text-rose-50 transition hover:border-rose-300 hover:bg-rose-500/20"
+                                              >
+                                                Sil
+                                              </button>
+                                            )}
+                                          </div>
+                                        ))}
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
-                            </div>
+                            )}
                           </div>
                           {isStockEnabled && (
-                            <div className="flex h-full flex-col rounded-2xl border border-white/10 bg-ink-950/40 p-4 shadow-card">
-                              <div className="flex flex-wrap items-start justify-between gap-3">
-                                <div>
-                                  <p className="text-sm font-semibold text-slate-100">Stok grubu</p>
-                                  <p className="mt-1 text-xs text-slate-400">
-                                    Grup seÃ§mezsen stoklar Ã¼rÃ¼ne Ã¶zeldir.
-                                  </p>
+                            <div className="h-full overflow-hidden rounded-2xl border border-white/10 bg-ink-950/40 shadow-card">
+                              <div
+                                role="button"
+                                tabIndex={0}
+                                onClick={() => toggleStockGroupOpen(offerId)}
+                                onKeyDown={(event) => {
+                                  if (event.key === "Enter" || event.key === " ") {
+                                    event.preventDefault()
+                                    toggleStockGroupOpen(offerId)
+                                  }
+                                }}
+                                className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3 transition hover:bg-white/5"
+                                aria-expanded={isStockGroupOpen}
+                              >
+                                <div className="flex min-w-0 flex-1 items-center gap-3 text-left">
+                                  <div className="flex items-baseline gap-3">
+                                    <span className="text-sm font-semibold text-slate-100">Stok grubu</span>
+                                    <span className="text-[11px] text-slate-400">
+                                      Grup seçmezsen stoklar ürüne özeldir.
+                                    </span>
+                                  </div>
+                                  <svg
+                                    viewBox="0 0 24 24"
+                                    aria-hidden="true"
+                                    className={`h-4 w-4 text-slate-400 transition ${isStockGroupOpen ? "rotate-180" : ""}`}
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                  >
+                                    <path d="m6 9 6 6 6-6" />
+                                  </svg>
                                 </div>
                                 <div className="flex flex-wrap items-center gap-2">
                                   <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-slate-200">
-                                    SeÃ§ili: {groupName || "Yok"}
+                                    Seçili: {groupName || "Yok"}
                                   </span>
                                   {groupId && canManageGroups && (
                                     <button
                                       type="button"
-                                      onClick={() => handleGroupAssign(offerId, "")}
+                                      onClick={(event) => {
+                                        event.stopPropagation()
+                                        handleGroupAssign(offerId, "")
+                                      }}
                                       className="rounded-full border border-rose-300/50 bg-rose-500/10 px-3 py-1 text-[11px] font-semibold text-rose-50 transition hover:border-rose-300 hover:bg-rose-500/20"
                                     >
-                                      KaldÄ±r
+                                      Kaldýr
                                     </button>
                                   )}
                                   {groupId && canManageGroups && (
                                     <button
                                       type="button"
-                                      onClick={() => handleGroupDelete(offerId, groupId)}
+                                      onClick={(event) => {
+                                        event.stopPropagation()
+                                        handleGroupDelete(offerId, groupId)
+                                      }}
                                       className={`rounded-full border px-3 py-1 text-[11px] font-semibold transition ${
                                         confirmGroupDelete === groupId
                                           ? "border-rose-300 bg-rose-500/25 text-rose-50"
@@ -1455,48 +1531,51 @@ export default function ProductsTab({
                                   )}
                                 </div>
                               </div>
-                              <div className="mt-4 space-y-3">
-                                <select
-                                  value={groupId}
-                                  onChange={(event) =>
-                                    handleGroupAssign(offerId, event.target.value)
-                                  }
-                                  disabled={!canManageGroups}
-                                  className="w-full appearance-none rounded-xl border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
-                                >
-                                  <option value="">Grup seÃ§</option>
-                                  {groups.map((groupOption) => (
-                                    <option key={groupOption.id} value={groupOption.id}>
-                                      {groupOption.name}
-                                    </option>
-                                  ))}
-                                </select>
-                                {canManageGroups && (
-                                  <div className="flex flex-wrap items-center gap-2">
-                                    <input
-                                      type="text"
-                                      value={groupDraftValue}
+                              {isStockGroupOpen && (
+                                <div className="px-4 pb-4 pt-3">
+                                  <div className="space-y-3">
+                                    <select
+                                      value={groupId}
                                       onChange={(event) =>
-                                        handleGroupDraftChange(offerId, event.target.value)
+                                        handleGroupAssign(offerId, event.target.value)
                                       }
-                                      placeholder="Yeni grup adÄ±"
-                                      className="min-w-[160px] flex-1 rounded-xl border border-white/10 bg-ink-900/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                                    />
-                                    <button
-                                      type="button"
-                                      onClick={() => handleGroupCreate(offerId)}
-                                      disabled={!groupDraftValue.trim()}
-                                      className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-slate-100 transition hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                      disabled={!canManageGroups}
+                                      className="w-full appearance-none rounded-xl border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
                                     >
-                                      Grup oluÅŸtur
-                                    </button>
+                                      <option value="">Grup seç</option>
+                                      {groups.map((groupOption) => (
+                                        <option key={groupOption.id} value={groupOption.id}>
+                                          {groupOption.name}
+                                        </option>
+                                      ))}
+                                    </select>
+                                    {canManageGroups && (
+                                      <div className="flex flex-wrap items-center gap-2">
+                                        <input
+                                          type="text"
+                                          value={groupDraftValue}
+                                          onChange={(event) =>
+                                            handleGroupDraftChange(offerId, event.target.value)
+                                          }
+                                          placeholder="Yeni grup adý"
+                                          className="min-w-[160px] flex-1 rounded-xl border border-white/10 bg-ink-900/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                                        />
+                                        <button
+                                          type="button"
+                                          onClick={() => handleGroupCreate(offerId)}
+                                          disabled={!groupDraftValue.trim()}
+                                          className="rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-xs font-semibold text-slate-100 transition hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50 disabled:cursor-not-allowed disabled:opacity-60"
+                                        >
+                                          Grup oluþtur
+                                        </button>
+                                      </div>
+                                    )}
                                   </div>
-                                )}
-                              </div>
+                                </div>
+                              )}
                             </div>
                           )}
                         </div>
-
                           <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-card">
                           <div
                             role="button"
@@ -1513,8 +1592,8 @@ export default function ProductsTab({
                           >
                             <div className="flex min-w-0 flex-1 items-center gap-3 text-left">
                               <div className="flex items-baseline gap-3">
-                                <span className="text-sm font-semibold text-slate-100">ÃœrÃ¼n notu</span>
-                                <span className="text-[11px] text-slate-400">Not Ã¼rÃ¼n bazÄ±nda saklanÄ±r.</span>
+                                <span className="text-sm font-semibold text-slate-100">Ürün notu</span>
+                                <span className="text-[11px] text-slate-400">Not ürün bazýnda saklanýr.</span>
                               </div>
                               <svg
                                 viewBox="0 0 24 24"
@@ -1532,12 +1611,12 @@ export default function ProductsTab({
                             <div className="flex flex-wrap items-center gap-2">
                               {storedNote && !noteHasChanges && (
                                 <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-semibold text-slate-200">
-                                  KayÄ±tlÄ±
+                                  Kayýtlý
                                 </span>
                               )}
                               {noteGroupId && (
                                 <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] font-semibold text-slate-200">
-                                  Grup: {noteGroupName || "SeÃ§ili"}
+                                  Grup: {noteGroupName || "Seçili"}
                                 </span>
                               )}
                             </div>
@@ -1558,7 +1637,7 @@ export default function ProductsTab({
                                   disabled={!isNoteEditable}
                                   className="w-full appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
                                 >
-                                  <option value="">BaÄŸÄ±msÄ±z not</option>
+                                  <option value="">Baðýmsýz not</option>
                                   {noteGroups.map((groupOption) => (
                                     <option key={groupOption.id} value={groupOption.id}>
                                       {groupOption.name}
@@ -1606,7 +1685,7 @@ export default function ProductsTab({
                                       disabled={!isNoteEditable || !noteGroupDraftValue.trim()}
                                       className="rounded-md border border-accent-400/70 bg-accent-500/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-accent-50 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                                     >
-                                          OluÅŸtur
+                                          Oluþtur
                                     </button>
                                   </div>
                                 </div>
@@ -1616,7 +1695,7 @@ export default function ProductsTab({
                               rows={9}
                               value={noteInputValue ?? ""}
                               onChange={(event) => handleNoteDraftChange(offerId, event.target.value)}
-                              placeholder="ÃœrÃ¼n notu ekle"
+                              placeholder="Ürün notu ekle"
                               readOnly={!isNoteEditable}
                               className="mt-4 min-h-[240px] w-full rounded-lg border border-white/10 bg-ink-900/60 px-3 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 read-only:bg-ink-900/40 read-only:text-slate-300"
                             />
@@ -1631,7 +1710,7 @@ export default function ProductsTab({
                                       : "border-white/10 bg-white/5 text-slate-200 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50"
                                   }`}
                                 >
-                                  {isNoteEditing ? "VazgeÃ§" : "DÃ¼zenle"}
+                                  {isNoteEditing ? "Vazgeç" : "Düzenle"}
                                 </button>
                               )}
                               <button
@@ -2059,8 +2138,6 @@ export default function ProductsTab({
     </div>
   )
 }
-
-
 
 
 
