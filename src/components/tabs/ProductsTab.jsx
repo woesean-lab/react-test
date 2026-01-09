@@ -481,12 +481,14 @@ export default function ProductsTab({
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
     setMessageOpenByOffer((prev) => ({ ...prev, [normalizedId]: !prev[normalizedId] }))
+    setStockGroupOpenByOffer((prev) => ({ ...prev, [normalizedId]: false }))
   }
 
   const toggleStockGroupOpen = (offerId) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
     setStockGroupOpenByOffer((prev) => ({ ...prev, [normalizedId]: !prev[normalizedId] }))
+    setMessageOpenByOffer((prev) => ({ ...prev, [normalizedId]: false }))
   }
 
   const toggleNoteEdit = (offerId) => {
