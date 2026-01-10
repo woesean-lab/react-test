@@ -1222,7 +1222,7 @@ export default function ProductsTab({
                                 aria-pressed={activePanel === "note"}
                               >
                                 <span>Ürün notu</span>
-                                <span className="rounded-full border border-sky-300/60 bg-sky-500/15 px-2 py-0.5 text-[10px] font-semibold text-sky-50">
+                                <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-slate-200">
                                   {noteGroupName || "Bağımsız"}
                                 </span>
                               </button>
@@ -1237,7 +1237,7 @@ export default function ProductsTab({
                                 aria-pressed={activePanel === "messages"}
                               >
                                 <span>Mesajlar</span>
-                                <span className="rounded-full border border-sky-300/60 bg-sky-500/15 px-2 py-0.5 text-[10px] font-semibold text-sky-50">
+                                <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-slate-200">
                                   {messageGroupLabel}
                                 </span>
                               </button>
@@ -1253,7 +1253,7 @@ export default function ProductsTab({
                                   aria-pressed={activePanel === "stock"}
                                 >
                                   <span>Stok grubu</span>
-                                  <span className="rounded-full border border-sky-300/60 bg-sky-500/15 px-2 py-0.5 text-[10px] font-semibold text-sky-50">
+                                  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-slate-200">
                                     {groupName || "Bağımsız"}
                                   </span>
                                 </button>
