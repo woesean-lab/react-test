@@ -1278,7 +1278,6 @@ export default function ProductsTab({
                                 <div className="flex flex-wrap items-start justify-between gap-3">
                                   <div>
                                     <p className="text-[13px] font-semibold text-slate-100">Stok grubu</p>
-                                    <p className="text-[11px] text-slate-400">Stoklarýn baðlý olduðu grubu belirle.</p>
                                   </div>
                                 </div>
                                 <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)]">
@@ -1376,7 +1375,6 @@ export default function ProductsTab({
                                 <div className="flex flex-wrap items-start justify-between gap-3">
                                   <div>
                                     <p className="text-[13px] font-semibold text-slate-100">Mesaj grubu</p>
-                                    <p className="text-[11px] text-slate-400">Mesajlarýn hangi grup üzerinden atanacaðýný seç.</p>
                                   </div>
                                 </div>
                                 <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
@@ -1498,7 +1496,6 @@ export default function ProductsTab({
                                 <div className="flex flex-wrap items-start justify-between gap-3">
                                   <div>
                                     <p className="text-[13px] font-semibold text-slate-100">Ürün notu</p>
-                                    <p className="text-[11px] text-slate-400">Not ürün bazýnda saklanýr.</p>
                                   </div>
                                 </div>
                               <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
