@@ -1312,7 +1312,7 @@ export default function ProductsTab({
                                               [offerId]: "",
                                             }))
                                           }
-                                          className="rounded-lg border border-rose-300/50 bg-rose-500/10 px-3 py-2 text-[11px] font-semibold text-rose-50 transition hover:border-rose-300 hover:bg-rose-500/20"
+                                          className="rounded-lg border border-amber-300/60 bg-amber-500/15 px-3 py-2 text-[11px] font-semibold text-amber-50 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
                                         >
                                           KALDIR
                                         </button>
@@ -1329,7 +1329,7 @@ export default function ProductsTab({
                                             })
                                           }}
                                           disabled={!isGroupSelectionDirty}
-                                          className="rounded-lg border border-accent-400/70 bg-accent-500/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-accent-50 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                                          className="rounded-lg border border-emerald-300/60 bg-emerald-500/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                                         >
                                           KAYDET
                                         </button>
@@ -1338,7 +1338,7 @@ export default function ProductsTab({
                                         <button
                                           type="button"
                                           onClick={() => handleGroupDelete(offerId, groupId)}
-                                          className="rounded-lg border border-accent-400/70 bg-accent-500/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-accent-50 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
+                                        className="rounded-lg border border-amber-300/60 bg-amber-500/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-amber-50 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
                                         >
                                           {confirmGroupDelete === groupId ? "ONAYLA" : "SİL"}
                                         </button>
@@ -1361,7 +1361,7 @@ export default function ProductsTab({
                                           type="button"
                                           onClick={() => handleGroupCreate(offerId)}
                                           disabled={!canManageGroups || !groupDraftValue.trim()}
-                                          className="rounded-md border border-accent-400/70 bg-accent-500/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-accent-50 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                                          className="rounded-md border border-sky-300/60 bg-sky-500/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-sky-50 transition hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                                         >
                                           OLUŞTUR
                                         </button>
@@ -1410,7 +1410,7 @@ export default function ProductsTab({
                                               [offerId]: "",
                                             }))
                                           }
-                                          className="rounded-lg border border-rose-300/50 bg-rose-500/10 px-3 py-2 text-[11px] font-semibold text-rose-50 transition hover:border-rose-300 hover:bg-rose-500/20"
+                                          className="rounded-lg border border-amber-300/60 bg-amber-500/15 px-3 py-2 text-[11px] font-semibold text-amber-50 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
                                         >
                                           KALDIR
                                         </button>
@@ -1427,7 +1427,7 @@ export default function ProductsTab({
                                             })
                                           }}
                                           disabled={!isMessageGroupSelectionDirty}
-                                          className="rounded-lg border border-accent-400/70 bg-accent-500/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-accent-50 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                                          className="rounded-lg border border-emerald-300/60 bg-emerald-500/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                                         >
                                           KAYDET
                                         </button>
@@ -1436,7 +1436,7 @@ export default function ProductsTab({
                                         <button
                                           type="button"
                                           onClick={() => handleMessageGroupDelete(messageGroupId)}
-                                          className="rounded-lg border border-accent-400/70 bg-accent-500/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-accent-50 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
+                                        className="rounded-lg border border-amber-300/60 bg-amber-500/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-amber-50 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
                                         >
                                           {confirmMessageGroupDelete === messageGroupId ? "ONAYLA" : "SİL"}
                                         </button>
@@ -1455,7 +1455,7 @@ export default function ProductsTab({
                                         type="button"
                                         onClick={() => handleMessageGroupCreate(offerId)}
                                         disabled={!canManageMessages || !messageGroupDraftValue.trim()}
-                                        className="rounded-md border border-accent-400/70 bg-accent-500/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-accent-50 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                                        className="rounded-md border border-amber-300/60 bg-amber-500/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-amber-50 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                                       >
                                         OLUŞTUR
                                       </button>
@@ -1483,7 +1483,7 @@ export default function ProductsTab({
                                         type="button"
                                         onClick={() => handleMessageTemplateAdd(offerId)}
                                         disabled={!canManageMessages || !isMessageTemplateValid}
-                                        className="rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-accent-50 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                                        className="rounded-lg border border-sky-300/60 bg-sky-500/15 px-4 py-2 text-[11px] font-semibold uppercase tracking-wide text-sky-50 transition hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                                       >
                                         EKLE
                                       </button>
@@ -1528,7 +1528,7 @@ export default function ProductsTab({
                                         type="button"
                                         onClick={() => handleNoteGroupDelete(noteGroupId)}
                                         disabled={!canManageNotes}
-                                        className="rounded-md border border-accent-400/70 bg-accent-500/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-accent-50 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                                        className="rounded-md border border-emerald-300/60 bg-emerald-500/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                                       >
                                         {confirmNoteGroupDelete === noteGroupId ? "ONAYLA" : "SİL"}
                                       </button>
@@ -1545,7 +1545,7 @@ export default function ProductsTab({
                                           })
                                         }}
                                         disabled={!isNoteGroupSelectionDirty}
-                                        className="rounded-md border border-accent-400/70 bg-accent-500/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-accent-50 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                                        className="rounded-md border border-sky-300/60 bg-sky-500/15 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-sky-50 transition hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                                       >
                                         KAYDET
                                       </button>
@@ -1591,7 +1591,7 @@ export default function ProductsTab({
                                   <button
                                     type="button"
                                     onClick={() => toggleNoteEdit(offerId)}
-                                    className="flex h-8 items-center justify-center rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 text-[11px] font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
+                                    className="flex h-8 items-center justify-center rounded-lg border border-sky-300/60 bg-sky-500/15 px-4 text-[11px] font-semibold uppercase tracking-wide text-sky-50 shadow-glow transition hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-500/25"
                                   >
                                     {isNoteEditing ? "VAZGEÇ" : "DÜZENLE"}
                                   </button>
@@ -1600,7 +1600,7 @@ export default function ProductsTab({
                                   type="button"
                                   onClick={() => handleNoteSave(offerId)}
                                   disabled={!canSaveNote}
-                                  className="flex h-8 items-center justify-center rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 text-[11px] font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                                  className="flex h-8 items-center justify-center rounded-lg border border-emerald-300/60 bg-emerald-500/15 px-4 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 shadow-glow transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                                 >
                                   KAYDET
                                 </button>
@@ -1742,10 +1742,9 @@ export default function ProductsTab({
                                                   <button
                                                     type="button"
                                                     onClick={() => handleKeyEditStart(item.id, item.code)}
-                                                    className="flex h-7 w-full items-center justify-center rounded-md border border-white/10 bg-white/5 px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50 sm:w-auto"
+                                                    className="flex h-7 w-full items-center justify-center rounded-md border border-sky-300/60 bg-sky-500/15 px-2 text-[11px] font-semibold uppercase tracking-wide text-sky-50 transition hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-500/25 sm:w-auto"
                                                   >
-                                                    DÜZENLE
-                                                  </button>
+                                                    DÜZENLE</button>
                                                 )}
                                                 {canUpdateKeys && (
                                                   <button
@@ -1765,8 +1764,8 @@ export default function ProductsTab({
                                                     disabled={isDeleting}
                                                     className={`flex h-7 w-full items-center justify-center rounded-md border px-2 text-[11px] font-semibold uppercase tracking-wide transition hover:-translate-y-0.5 sm:w-auto ${
                                                       confirmKeyTarget === `${offerId}-${item.id}`
-                                                        ? "border-rose-300 bg-rose-500/25 text-rose-50"
-                                                        : "border-rose-400/60 bg-rose-500/10 text-rose-50 hover:border-rose-300 hover:bg-rose-500/20"
+                                                        ? "border-amber-300 bg-amber-500/25 text-amber-50"
+                                                        : "border-amber-300/60 bg-amber-500/10 text-amber-50 hover:border-amber-300 hover:bg-amber-500/20"
                                                     }`}
                                                   >
                                                     {confirmKeyTarget === `${offerId}-${item.id}`
@@ -1884,10 +1883,9 @@ export default function ProductsTab({
                                                   <button
                                                     type="button"
                                                     onClick={() => handleKeyEditStart(item.id, item.code)}
-                                                    className="flex h-7 w-full items-center justify-center rounded-md border border-white/10 bg-white/5 px-2 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50 sm:w-auto"
+                                                    className="flex h-7 w-full items-center justify-center rounded-md border border-sky-300/60 bg-sky-500/15 px-2 text-[11px] font-semibold uppercase tracking-wide text-sky-50 transition hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-500/25 sm:w-auto"
                                                   >
-                                                    DÜZENLE
-                                                  </button>
+                                                    DÜZENLE</button>
                                                 )}
                                                 {canUpdateKeys && (
                                                   <button
@@ -1907,8 +1905,8 @@ export default function ProductsTab({
                                                     disabled={isDeleting}
                                                     className={`flex h-7 w-full items-center justify-center rounded-md border px-2 text-[11px] font-semibold uppercase tracking-wide transition hover:-translate-y-0.5 sm:w-auto ${
                                                       confirmKeyTarget === `${offerId}-${item.id}`
-                                                        ? "border-rose-300 bg-rose-500/25 text-rose-50"
-                                                        : "border-rose-400/60 bg-rose-500/10 text-rose-50 hover:border-rose-300 hover:bg-rose-500/20"
+                                                        ? "border-amber-300 bg-amber-500/25 text-amber-50"
+                                                        : "border-amber-300/60 bg-amber-500/10 text-amber-50 hover:border-amber-300 hover:bg-amber-500/20"
                                                     }`}
                                                   >
                                                     {confirmKeyTarget === `${offerId}-${item.id}`
@@ -1958,7 +1956,7 @@ export default function ProductsTab({
                                           <button
                                             type="button"
                                             onClick={() => handleMessageTemplateRemove(offerId, label)}
-                                            className="rounded-md border border-accent-400/70 bg-accent-500/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-accent-50 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
+                                            className="rounded-md border border-amber-300/60 bg-amber-500/15 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-amber-50 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
                                           >
                                             SİL
                                           </button>
@@ -2049,6 +2047,13 @@ export default function ProductsTab({
     </div>
   )
 }
+
+
+
+
+
+
+
 
 
 
