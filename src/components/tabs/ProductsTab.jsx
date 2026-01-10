@@ -179,9 +179,7 @@ export default function ProductsTab({
   const [savingKeys, setSavingKeys] = useState({})
   const [confirmGroupDelete, setConfirmGroupDelete] = useState(null)
   const [noteGroupDrafts, setNoteGroupDrafts] = useState({})
-  const [noteOpenByOffer, setNoteOpenByOffer] = useState({})
-  const [messageOpenByOffer, setMessageOpenByOffer] = useState({})
-  const [stockGroupOpenByOffer, setStockGroupOpenByOffer] = useState({})
+  const [activePanelByOffer, setActivePanelByOffer] = useState({})
   const [confirmNoteGroupDelete, setConfirmNoteGroupDelete] = useState(null)
   const [noteEditingByOffer, setNoteEditingByOffer] = useState({})
   const [messageTemplateDrafts, setMessageTemplateDrafts] = useState({})
@@ -440,20 +438,10 @@ export default function ProductsTab({
       return next
     })
   }
-  const toggleNoteOpen = (offerId) => {
+  const setActivePanel = (offerId, panel) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
-    setNoteOpenByOffer((prev) => ({ ...prev, [normalizedId]: !prev[normalizedId] }))
-  }
-  const toggleMessageOpen = (offerId) => {
-    const normalizedId = String(offerId ?? "").trim()
-    if (!normalizedId) return
-    setMessageOpenByOffer((prev) => ({ ...prev, [normalizedId]: !prev[normalizedId] }))
-  }
-  const toggleStockGroupOpen = (offerId) => {
-    const normalizedId = String(offerId ?? "").trim()
-    if (!normalizedId) return
-    setStockGroupOpenByOffer((prev) => ({ ...prev, [normalizedId]: !prev[normalizedId] }))
+    setActivePanelByOffer((prev) => ({ ...prev, [normalizedId]: panel }))
   }
   const toggleNoteEdit = (offerId) => {
     const normalizedId = String(offerId ?? "").trim()
@@ -944,9 +932,13 @@ export default function ProductsTab({
                   const noteInputValue = noteDraftValue !== undefined ? noteDraftValue : storedNote
                   const noteHasChanges = String(noteInputValue ?? "").trim() !== storedNote
                   const noteGroupDraftValue = noteGroupDrafts[offerId] ?? ""
-                    const isNoteOpen = Boolean(noteOpenByOffer[offerId])
-                    const isMessageOpen = Boolean(messageOpenByOffer[offerId])
-                    const isStockGroupOpen = Boolean(stockGroupOpenByOffer[offerId])
+                  const availablePanels = isStockEnabled
+                    ? ["note", "messages", "stock"]
+                    : ["note", "messages"]
+                  const storedPanel = activePanelByOffer[offerId]
+                  const activePanel = availablePanels.includes(storedPanel)
+                    ? storedPanel
+                    : availablePanels[0]
                   const isNoteEditing = Boolean(noteEditingByOffer[offerId])
                   const isNoteEditable = canManageNotes && isNoteEditing
                   const canSaveNote =
@@ -1204,24 +1196,78 @@ export default function ProductsTab({
                       
                       {isOpen && (
                         <div className="mt-4 space-y-4 border-t border-white/10 pt-4">
+                          <div className="rounded-2xl border border-white/10 bg-white/5 p-3 shadow-card">
+                            <div
+                              className={`grid gap-2 ${isStockEnabled ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
+                              role="tablist"
+                            >
+                              <button
+                                type="button"
+                                onClick={() => setActivePanel(offerId, "note")}
+                                className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left text-[12px] font-semibold transition ${
+                                  activePanel === "note"
+                                    ? "border-accent-400/70 bg-ink-900/70 text-slate-100 shadow-card"
+                                    : "border-white/10 bg-ink-900/40 text-slate-300 hover:border-white/20 hover:bg-ink-900/60"
+                                }`}
+                                aria-pressed={activePanel === "note"}
+                              >
+                                <span>Urun notu</span>
+                                <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-slate-200">
+                                  {storedNote ? "Kayitli" : "Bos"}
+                                </span>
+                              </button>
+                              <button
+                                type="button"
+                                onClick={() => setActivePanel(offerId, "messages")}
+                                className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left text-[12px] font-semibold transition ${
+                                  activePanel === "messages"
+                                    ? "border-accent-400/70 bg-ink-900/70 text-slate-100 shadow-card"
+                                    : "border-white/10 bg-ink-900/40 text-slate-300 hover:border-white/20 hover:bg-ink-900/60"
+                                }`}
+                                aria-pressed={activePanel === "messages"}
+                              >
+                                <span>Mesajlar</span>
+                                <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-slate-200">
+                                  {messageGroupMessages.length}
+                                </span>
+                              </button>
+                              {isStockEnabled && (
+                                <button
+                                  type="button"
+                                  onClick={() => setActivePanel(offerId, "stock")}
+                                  className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left text-[12px] font-semibold transition ${
+                                    activePanel === "stock"
+                                      ? "border-accent-400/70 bg-ink-900/70 text-slate-100 shadow-card"
+                                      : "border-white/10 bg-ink-900/40 text-slate-300 hover:border-white/20 hover:bg-ink-900/60"
+                                  }`}
+                                  aria-pressed={activePanel === "stock"}
+                                >
+                                  <span>Stok grubu</span>
+                                  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-slate-200">
+                                    {groupName ? "Grup" : "Bagimsiz"}
+                                  </span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
                           <div className={`grid items-start gap-3 ${isStockEnabled ? "lg:grid-cols-2" : ""}`}>
-                            {isStockEnabled && (
+                            {isStockEnabled && activePanel === "stock" && (
                             <div className="relative z-10 overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-card">
                               <div
                                 role="button"
                                 tabIndex={0}
                                 onClick={(event) => {
                                   event.stopPropagation()
-                                  toggleStockGroupOpen(offerId)
+                                  setActivePanel(offerId, "stock")
                                 }}
                                 onKeyDown={(event) => {
                                   if (event.key === "Enter" || event.key === " ") {
                                     event.preventDefault()
-                                    toggleStockGroupOpen(offerId)
+                                    setActivePanel(offerId, "stock")
                                   }
                                 }}
                                 className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3 transition hover:bg-white/5"
-                                aria-expanded={isStockGroupOpen}
+                                aria-expanded={activePanel === "stock"}
                               >
                                 <div className="flex min-w-0 flex-1 items-center gap-3 text-left">
                                   <div>
@@ -1230,7 +1276,7 @@ export default function ProductsTab({
                                   <svg
                                     viewBox="0 0 24 24"
                                     aria-hidden="true"
-                                    className={`h-4 w-4 text-slate-400 transition ${isStockGroupOpen ? "rotate-180" : ""}`}
+                                    className={`h-4 w-4 text-slate-400 transition ${activePanel === "stock" ? "rotate-180" : ""}`}
                                     fill="none"
                                     stroke="currentColor"
                                     strokeWidth="2"
@@ -1246,7 +1292,7 @@ export default function ProductsTab({
                                   </span>
                                 </div>
                               </div>
-                              {isStockGroupOpen && (
+                              {activePanel === "stock" && (
                                 <div className="px-4 pb-4 pt-3">
                                   <div className="space-y-3">
                                     <div className="space-y-2">
@@ -1325,22 +1371,23 @@ export default function ProductsTab({
                               )}
                             </div>
                             )}
+                            {activePanel === "messages" && (
                             <div className="relative z-0 overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-card">
                             <div
                               role="button"
                               tabIndex={0}
                               onClick={(event) => {
                                 event.stopPropagation()
-                                toggleMessageOpen(offerId)
+                                setActivePanel(offerId, "messages")
                               }}
                               onKeyDown={(event) => {
                                 if (event.key === "Enter" || event.key === " ") {
                                   event.preventDefault()
-                                  toggleMessageOpen(offerId)
+                                  setActivePanel(offerId, "messages")
                                 }
                               }}
                               className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3 transition hover:bg-white/5"
-                              aria-expanded={isMessageOpen}
+                              aria-expanded={activePanel === "messages"}
                             >
                               <div className="flex min-w-0 flex-1 items-center gap-3 text-left">
                                 <div>
@@ -1349,7 +1396,7 @@ export default function ProductsTab({
                                 <svg
                                   viewBox="0 0 24 24"
                                   aria-hidden="true"
-                                  className={`h-4 w-4 text-slate-400 transition ${isMessageOpen ? "rotate-180" : ""}`}
+                                  className={`h-4 w-4 text-slate-400 transition ${activePanel === "messages" ? "rotate-180" : ""}`}
                                   fill="none"
                                   stroke="currentColor"
                                   strokeWidth="2"
@@ -1370,7 +1417,8 @@ export default function ProductsTab({
                                 )}
                               </div>
                             </div>
-                            {isMessageOpen && (
+                            )}
+                            {activePanel === "messages" && (
                               <div className="px-4 pb-4 pt-3">
                                 <div className="space-y-4">
                                   <div className="grid gap-3 md:grid-cols-2">
@@ -1481,19 +1529,20 @@ export default function ProductsTab({
                             )}
                             </div>
                           </div>
+                          {activePanel === "note" && (
                           <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-card">
                           <div
                             role="button"
                             tabIndex={0}
-                            onClick={() => toggleNoteOpen(offerId)}
+                            onClick={() => setActivePanel(offerId, "note")}
                             onKeyDown={(event) => {
                               if (event.key === "Enter" || event.key === " ") {
                                 event.preventDefault()
-                                toggleNoteOpen(offerId)
+                                setActivePanel(offerId, "note")
                               }
                             }}
                             className="flex flex-wrap items-center justify-between gap-3 border-b border-white/10 px-4 py-3 transition hover:bg-white/5"
-                            aria-expanded={isNoteOpen}
+                            aria-expanded={activePanel === "note"}
                           >
                             <div className="flex min-w-0 flex-1 items-center gap-3 text-left">
                               <div className="flex items-baseline gap-3">
@@ -1503,7 +1552,7 @@ export default function ProductsTab({
                               <svg
                                 viewBox="0 0 24 24"
                                 aria-hidden="true"
-                                className={`h-4 w-4 text-slate-400 transition ${isNoteOpen ? "rotate-180" : ""}`}
+                                className={`h-4 w-4 text-slate-400 transition ${activePanel === "note" ? "rotate-180" : ""}`}
                                 fill="none"
                                 stroke="currentColor"
                                 strokeWidth="2"
@@ -1526,7 +1575,7 @@ export default function ProductsTab({
                               )}
                             </div>
                           </div>
-                          {isNoteOpen && (
+                          {activePanel === "note" && (
                           <div className="px-4 pb-4 pt-3">
                             <div className="grid gap-3 sm:grid-cols-2">
                               <div className="space-y-2">
@@ -1630,7 +1679,8 @@ export default function ProductsTab({
                           </div>
                           )}
                         </div>
-                        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.6fr)]">
+                        )}
+                        <div className="space-y-4">
                           <div className="space-y-4">
                             {isStockEnabled ? (
                                 <>
@@ -1954,6 +2004,7 @@ export default function ProductsTab({
                               </div>
                             )}
                             </div>
+                            {activePanel === "messages" && (
                             <div className="self-start rounded-2xl border border-white/10 bg-white/5 p-4 shadow-card">
                                 
                                   {messageGroupMessages.length === 0 ? (
@@ -1988,6 +2039,7 @@ export default function ProductsTab({
                                     </div>
                                   )}
                             </div>
+                            )}
                         </div>
                       </div>
                       )}
