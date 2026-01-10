@@ -1493,11 +1493,21 @@ export default function ProductsTab({
                             )}
                             {activePanel === "note" && (
                               <div className="rounded-2xl rounded-t-none border border-white/10 bg-[#161a25] p-4 pt-5 shadow-card -mt-2 lg:col-span-2 animate-panelFade">
-                                <div className="flex flex-wrap items-start justify-between gap-3">
+                              <div className="flex flex-wrap items-start justify-between gap-3">
                                   <div>
                                     <p className="text-[13px] font-semibold text-slate-100">Ürün notu</p>
                                   </div>
                                 </div>
+                              <div className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-ink-900/60 p-0">
+                                <textarea
+                                  rows={9}
+                                  value={noteInputValue ?? ""}
+                                  onChange={(event) => handleNoteDraftChange(offerId, event.target.value)}
+                                  placeholder="Ürün notu ekle"
+                                  readOnly={!canEditNoteText}
+                                  className="block min-h-[240px] w-full rounded-xl bg-ink-900/40 px-3 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-accent-500/30 read-only:bg-ink-900/30 read-only:text-slate-300"
+                                />
+                              </div>
                               <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
                                 <div className="rounded-xl border border-white/10 bg-white/5 p-3">
                                   <label className="text-[11px] font-semibold text-slate-300">Not grubu</label>
@@ -1572,16 +1582,6 @@ export default function ProductsTab({
                                     </div>
                                   </div>
                                 )}
-                              </div>
-                              <div className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-ink-900/60 p-0">
-                                <textarea
-                                  rows={9}
-                                  value={noteInputValue ?? ""}
-                                  onChange={(event) => handleNoteDraftChange(offerId, event.target.value)}
-                                  placeholder="Ürün notu ekle"
-                                  readOnly={!canEditNoteText}
-                                  className="block min-h-[240px] w-full rounded-xl bg-ink-900/40 px-3 py-3 text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-accent-500/30 read-only:bg-ink-900/30 read-only:text-slate-300"
-                                />
                               </div>
                               <div className="mt-3 flex flex-wrap justify-end gap-2">
                                 {canManageNotes && (
