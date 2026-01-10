@@ -1936,8 +1936,7 @@ export default function ProductsTab({
                               </div>
                             )}
                             </div>
-                          {activePanel === "messages" && (
-                            <div className="self-start rounded-2xl border border-white/10 bg-white/5 p-4 shadow-card">
+                          <div className="self-start rounded-2xl border border-white/10 bg-white/5 p-4 shadow-card">
                               <div className="flex items-center justify-between gap-2">
                                 <span className="text-[11px] font-semibold text-slate-300">
                                   Mesaj listesi
@@ -1981,8 +1980,7 @@ export default function ProductsTab({
                                   </div>
                                 )}
                               </div>
-                            </div>
-                          )}
+                          </div>
                         </div>
                       </div>
                       )}
