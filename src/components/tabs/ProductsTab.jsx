@@ -696,6 +696,7 @@ export default function ProductsTab({
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
     setRefreshingOffers((prev) => ({ ...prev, [normalizedId]: true }))
+    const startedAt = Date.now()
     try {
       if (typeof onRefreshOffer === "function") {
         await onRefreshOffer(normalizedId)
@@ -703,6 +704,10 @@ export default function ProductsTab({
         handleKeysRefresh(normalizedId)
       }
     } finally {
+      const elapsed = Date.now() - startedAt
+      if (elapsed < 450) {
+        await new Promise((resolve) => setTimeout(resolve, 450 - elapsed))
+      }
       setRefreshingOffers((prev) => ({ ...prev, [normalizedId]: false }))
     }
   }
@@ -1745,7 +1750,7 @@ export default function ProductsTab({
                                         <button
                                           type="button"
                                           onClick={() => handleBulkCopy(offerId, false)}
-                                          className="rounded-md border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-100 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/15 hover:text-accent-50"
+                                          className="rounded-md border border-sky-300/60 bg-sky-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-sky-50 h-8 transition hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-500/25"
                                         >
                                           Kopyala
                                         </button>
