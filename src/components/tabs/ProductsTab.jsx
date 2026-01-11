@@ -1641,6 +1641,20 @@ export default function ProductsTab({
                                             {noteGroupSelectionValue && canManageNotes && (
                                               <button
                                                 type="button"
+                                                onClick={() =>
+                                                  setNoteGroupSelectionDrafts((prev) => ({
+                                                    ...prev,
+                                                    [offerId]: "",
+                                                  }))
+                                                }
+                                                className="rounded-md border border-amber-300/60 bg-amber-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-amber-50 h-8 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
+                                              >
+                                                KALDIR
+                                              </button>
+                                            )}
+                                            {noteGroupSelectionValue && canManageNotes && (
+                                              <button
+                                                type="button"
                                                 onClick={() => handleNoteGroupDelete(noteGroupId)}
                                                 disabled={!canManageNotes}
                                                 className="rounded-md border border-rose-300/60 bg-rose-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-rose-50 h-8 transition hover:-translate-y-0.5 hover:border-rose-200 hover:bg-rose-500/25 disabled:cursor-not-allowed disabled:opacity-60"

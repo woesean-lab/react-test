@@ -2949,40 +2949,13 @@ export default function useAppData() {
       if (!saved) return false
 
       const keyStore = readEldoradoKeyStore()
-      let nextList = []
-      let shouldWriteKeys = false
-
-      if (nextGroupId) {
-        if (!currentGroupId) {
-          const implicitList = Array.isArray(keyStore[normalizedOfferId])
-            ? keyStore[normalizedOfferId]
-            : []
-          if (implicitList.length > 0) {
-            const groupList = Array.isArray(keyStore[nextGroupId]) ? keyStore[nextGroupId] : []
-            const merged = [...groupList, ...implicitList]
-            keyStore[nextGroupId] = merged
-            delete keyStore[normalizedOfferId]
-            nextList = merged
-            shouldWriteKeys = true
-          }
-        }
-        if (nextList.length === 0) {
-          nextList = Array.isArray(keyStore[nextGroupId]) ? keyStore[nextGroupId] : []
-        }
-      } else if (currentGroupId) {
-        const groupList = Array.isArray(keyStore[currentGroupId]) ? keyStore[currentGroupId] : []
-        const implicitList = Array.isArray(keyStore[normalizedOfferId]) ? keyStore[normalizedOfferId] : []
-        const merged = [...implicitList, ...groupList]
-        keyStore[normalizedOfferId] = merged
-        nextList = merged
-        shouldWriteKeys = true
-      } else {
-        nextList = Array.isArray(keyStore[normalizedOfferId]) ? keyStore[normalizedOfferId] : []
-      }
-
-      if (shouldWriteKeys) {
-        writeEldoradoKeyStore(keyStore)
-      }
+      const nextList = nextGroupId
+        ? Array.isArray(keyStore[nextGroupId])
+          ? keyStore[nextGroupId]
+          : []
+        : Array.isArray(keyStore[normalizedOfferId])
+          ? keyStore[normalizedOfferId]
+          : []
 
       setEldoradoGroupAssignments(store.assignments)
       setEldoradoGroups(store.groups)
@@ -3523,9 +3496,9 @@ export default function useAppData() {
       try {
         const groupStore = readEldoradoGroupStore()
         const assignedGroupId = groupStore.assignments[normalizedId] ?? ""
-        const groupId = assignedGroupId || normalizedId
+        const targetKey = normalizedId
         const store = readEldoradoKeyStore()
-        const currentList = Array.isArray(store[groupId]) ? store[groupId] : []
+        const currentList = Array.isArray(store[targetKey]) ? store[targetKey] : []
         const createdAt = new Date().toISOString()
         const added = []
 
@@ -3534,13 +3507,11 @@ export default function useAppData() {
         })
 
         const nextList = [...currentList, ...added]
-        store[groupId] = nextList
+        store[targetKey] = nextList
         const saved = writeEldoradoKeyStore(store)
         if (!saved) return false
 
-        if (assignedGroupId) {
-          syncEldoradoKeysForGroup(groupId, nextList, groupStore.assignments)
-        } else {
+        if (!assignedGroupId) {
           setEldoradoKeysByOffer((prev) => ({ ...prev, [normalizedId]: nextList }))
         }
         setEldoradoCatalog((prev) => applyEldoradoKeyCounts(prev))
