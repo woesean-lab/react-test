@@ -3426,6 +3426,45 @@ export default function useAppData() {
     [readEldoradoMessageGroupStore, writeEldoradoMessageGroupStore],
   )
 
+  const loadEldoradoKeys = useCallback(
+    async (offerId, options = {}) => {
+      const normalizedId = String(offerId ?? "").trim()
+      if (!normalizedId) return
+      if (!options?.force && Array.isArray(eldoradoKeysByOffer[normalizedId])) return
+
+      setEldoradoKeysLoading((prev) => ({ ...prev, [normalizedId]: true }))
+      try {
+        const groupStore = readEldoradoGroupStore()
+        const assignedGroupId = groupStore.assignments[normalizedId] ?? ""
+        const groupId = assignedGroupId || normalizedId
+        const keyStore = readEldoradoKeyStore()
+        const list = Array.isArray(keyStore[groupId]) ? keyStore[groupId] : []
+        if (assignedGroupId) {
+          syncEldoradoKeysForGroup(groupId, list, groupStore.assignments)
+        } else {
+          setEldoradoKeysByOffer((prev) => ({ ...prev, [normalizedId]: list }))
+        }
+        setEldoradoCatalog((prev) => applyEldoradoKeyCounts(prev))
+      } catch (error) {
+        console.error(error)
+        toast.error("Urun stoklari alinamadi (local storage).")
+      } finally {
+        setEldoradoKeysLoading((prev) => {
+          const next = { ...prev }
+          delete next[normalizedId]
+          return next
+        })
+      }
+    },
+    [
+      applyEldoradoKeyCounts,
+      eldoradoKeysByOffer,
+      readEldoradoGroupStore,
+      readEldoradoKeyStore,
+      syncEldoradoKeysForGroup,
+    ],
+  )
+
   const refreshEldoradoOffer = useCallback(
     async (offerId) => {
       const normalizedId = String(offerId ?? "").trim()
@@ -3464,45 +3503,6 @@ export default function useAppData() {
       setEldoradoNoteGroupNotes,
       setEldoradoNoteGroups,
       setEldoradoStockEnabledByOffer,
-    ],
-  )
-
-  const loadEldoradoKeys = useCallback(
-    async (offerId, options = {}) => {
-      const normalizedId = String(offerId ?? "").trim()
-      if (!normalizedId) return
-      if (!options?.force && Array.isArray(eldoradoKeysByOffer[normalizedId])) return
-
-      setEldoradoKeysLoading((prev) => ({ ...prev, [normalizedId]: true }))
-      try {
-        const groupStore = readEldoradoGroupStore()
-        const assignedGroupId = groupStore.assignments[normalizedId] ?? ""
-        const groupId = assignedGroupId || normalizedId
-        const keyStore = readEldoradoKeyStore()
-        const list = Array.isArray(keyStore[groupId]) ? keyStore[groupId] : []
-        if (assignedGroupId) {
-          syncEldoradoKeysForGroup(groupId, list, groupStore.assignments)
-        } else {
-          setEldoradoKeysByOffer((prev) => ({ ...prev, [normalizedId]: list }))
-        }
-        setEldoradoCatalog((prev) => applyEldoradoKeyCounts(prev))
-      } catch (error) {
-        console.error(error)
-        toast.error("Urun stoklari alinamadi (local storage).")
-      } finally {
-        setEldoradoKeysLoading((prev) => {
-          const next = { ...prev }
-          delete next[normalizedId]
-          return next
-        })
-      }
-    },
-    [
-      applyEldoradoKeyCounts,
-      eldoradoKeysByOffer,
-      readEldoradoGroupStore,
-      readEldoradoKeyStore,
-      syncEldoradoKeysForGroup,
     ],
   )
 
