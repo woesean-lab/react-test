@@ -73,6 +73,94 @@ model EldoradoSync {
   updatedAt  DateTime @updatedAt
 }
 
+model EldoradoStockGroup {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  assignments EldoradoStockGroupAssignment[]
+  keys      EldoradoKey[]
+}
+
+model EldoradoStockGroupAssignment {
+  offerId String @id
+  groupId String
+  group   EldoradoStockGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+}
+
+model EldoradoKey {
+  id        String   @id @default(cuid())
+  code      String
+  status    String   @default("available")
+  offerId   String?
+  groupId   String?
+  group     EldoradoStockGroup? @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EldoradoOfferNote {
+  offerId   String   @id
+  note      String?
+  updatedAt DateTime @updatedAt
+}
+
+model EldoradoNoteGroup {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  assignments EldoradoNoteGroupAssignment[]
+  note      EldoradoNoteGroupNote?
+}
+
+model EldoradoNoteGroupAssignment {
+  offerId String @id
+  groupId String
+  group   EldoradoNoteGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+}
+
+model EldoradoNoteGroupNote {
+  groupId String @id
+  note    String?
+  group   EldoradoNoteGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+}
+
+model EldoradoMessageGroup {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  assignments EldoradoMessageGroupAssignment[]
+  templates EldoradoMessageGroupTemplate[]
+}
+
+model EldoradoMessageGroupAssignment {
+  offerId String @id
+  groupId String
+  group   EldoradoMessageGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+}
+
+model EldoradoMessageGroupTemplate {
+  groupId String
+  label   String
+  group   EldoradoMessageGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+
+  @@id([groupId, label])
+}
+
+model EldoradoMessageTemplate {
+  offerId String
+  label   String
+
+  @@id([offerId, label])
+}
+
+model EldoradoStockEnabled {
+  offerId String  @id
+  enabled Boolean @default(true)
+}
+
 model List {
   id        String   @id @default(cuid())
   name      String

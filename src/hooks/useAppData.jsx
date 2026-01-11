@@ -5,12 +5,6 @@ import {
   AUTH_TOKEN_STORAGE_KEY,
   DEFAULT_LIST_COLS,
   DEFAULT_LIST_ROWS,
-  ELDORADO_KEYS_STORAGE_KEY,
-  ELDORADO_GROUPS_STORAGE_KEY,
-  ELDORADO_MESSAGE_GROUPS_STORAGE_KEY,
-  ELDORADO_NOTE_GROUPS_STORAGE_KEY,
-  ELDORADO_NOTES_STORAGE_KEY,
-  ELDORADO_STOCK_ENABLED_STORAGE_KEY,
   FORMULA_ERRORS,
   LIST_AUTO_SAVE_DELAY_MS,
   LIST_CELL_TONE_CLASSES,
@@ -169,390 +163,15 @@ export default function useAppData() {
   const [eldoradoKeysDeleting, setEldoradoKeysDeleting] = useState({})
   const [eldoradoGroups, setEldoradoGroups] = useState([])
   const [eldoradoGroupAssignments, setEldoradoGroupAssignments] = useState({})
-  const [eldoradoNotesByOffer, setEldoradoNotesByOffer] = useState(() => {
-    if (typeof window === "undefined") return {}
-    try {
-      const raw = localStorage.getItem(ELDORADO_NOTES_STORAGE_KEY)
-      if (!raw) return {}
-      const parsed = JSON.parse(raw)
-      if (!parsed || typeof parsed !== "object") return {}
-      const normalized = {}
-      Object.entries(parsed).forEach(([offerId, note]) => {
-        const safeOfferId = String(offerId ?? "").trim()
-        const safeNote = String(note ?? "").trim()
-        if (!safeOfferId || !safeNote) return
-        normalized[safeOfferId] = safeNote
-      })
-      return normalized
-    } catch (error) {
-      console.warn("Could not read local Eldorado notes", error)
-      return {}
-    }
-  })
-  const [eldoradoNoteGroups, setEldoradoNoteGroups] = useState(() => {
-    if (typeof window === "undefined") return []
-    try {
-      const raw = localStorage.getItem(ELDORADO_NOTE_GROUPS_STORAGE_KEY)
-      if (!raw) return []
-      const parsed = JSON.parse(raw)
-      const groups = Array.isArray(parsed?.groups) ? parsed.groups : []
-      return groups
-        .map((group) => ({
-          id: String(group?.id ?? "").trim(),
-          name: String(group?.name ?? "").trim(),
-          createdAt: group?.createdAt ? String(group.createdAt) : new Date().toISOString(),
-        }))
-        .filter((group) => group.id && group.name)
-    } catch (error) {
-      console.warn("Could not read local Eldorado note groups", error)
-      return []
-    }
-  })
-  const [eldoradoNoteGroupAssignments, setEldoradoNoteGroupAssignments] = useState(() => {
-    if (typeof window === "undefined") return {}
-    try {
-      const raw = localStorage.getItem(ELDORADO_NOTE_GROUPS_STORAGE_KEY)
-      if (!raw) return {}
-      const parsed = JSON.parse(raw)
-      const assignments = parsed?.assignments
-      if (!assignments || typeof assignments !== "object") return {}
-      const normalized = {}
-      Object.entries(assignments).forEach(([offerId, groupId]) => {
-        const safeOfferId = String(offerId ?? "").trim()
-        const safeGroupId = String(groupId ?? "").trim()
-        if (!safeOfferId || !safeGroupId) return
-        normalized[safeOfferId] = safeGroupId
-      })
-      return normalized
-    } catch (error) {
-      console.warn("Could not read local Eldorado note group assignments", error)
-      return {}
-    }
-  })
-  const [eldoradoNoteGroupNotes, setEldoradoNoteGroupNotes] = useState(() => {
-    if (typeof window === "undefined") return {}
-    try {
-      const raw = localStorage.getItem(ELDORADO_NOTE_GROUPS_STORAGE_KEY)
-      if (!raw) return {}
-      const parsed = JSON.parse(raw)
-      const notes = parsed?.notes
-      if (!notes || typeof notes !== "object") return {}
-      const normalized = {}
-      Object.entries(notes).forEach(([groupId, note]) => {
-        const safeGroupId = String(groupId ?? "").trim()
-        const safeNote = String(note ?? "").trim()
-        if (!safeGroupId || !safeNote) return
-        normalized[safeGroupId] = safeNote
-      })
-      return normalized
-    } catch (error) {
-      console.warn("Could not read local Eldorado note group notes", error)
-      return {}
-    }
-  })
-  const [eldoradoMessageGroups, setEldoradoMessageGroups] = useState(() => {
-    if (typeof window === "undefined") return []
-    try {
-      const raw = localStorage.getItem(ELDORADO_MESSAGE_GROUPS_STORAGE_KEY)
-      if (!raw) return []
-      const parsed = JSON.parse(raw)
-      const groups = Array.isArray(parsed?.groups) ? parsed.groups : []
-      return groups
-        .map((group) => ({
-          id: String(group?.id ?? "").trim(),
-          name: String(group?.name ?? "").trim(),
-          createdAt: group?.createdAt ? String(group.createdAt) : new Date().toISOString(),
-        }))
-        .filter((group) => group.id && group.name)
-    } catch (error) {
-      console.warn("Could not read local Eldorado message groups", error)
-      return []
-    }
-  })
-  const [eldoradoMessageGroupAssignments, setEldoradoMessageGroupAssignments] = useState(() => {
-    if (typeof window === "undefined") return {}
-    try {
-      const raw = localStorage.getItem(ELDORADO_MESSAGE_GROUPS_STORAGE_KEY)
-      if (!raw) return {}
-      const parsed = JSON.parse(raw)
-      const assignments = parsed?.assignments
-      if (!assignments || typeof assignments !== "object") return {}
-      const normalized = {}
-      Object.entries(assignments).forEach(([offerId, groupId]) => {
-        const safeOfferId = String(offerId ?? "").trim()
-        const safeGroupId = String(groupId ?? "").trim()
-        if (!safeOfferId || !safeGroupId) return
-        normalized[safeOfferId] = safeGroupId
-      })
-      return normalized
-    } catch (error) {
-      console.warn("Could not read local Eldorado message group assignments", error)
-      return {}
-    }
-  })
-  const [eldoradoMessageGroupTemplates, setEldoradoMessageGroupTemplates] = useState(() => {
-    if (typeof window === "undefined") return {}
-    try {
-      const raw = localStorage.getItem(ELDORADO_MESSAGE_GROUPS_STORAGE_KEY)
-      if (!raw) return {}
-      const parsed = JSON.parse(raw)
-      const templates = parsed?.templates
-      if (!templates || typeof templates !== "object") return {}
-      const normalized = {}
-      Object.entries(templates).forEach(([groupId, list]) => {
-        const safeGroupId = String(groupId ?? "").trim()
-        if (!safeGroupId) return
-        const safeList = Array.isArray(list) ? list : []
-        const unique = []
-        const seen = new Set()
-        safeList.forEach((label) => {
-          const value = String(label ?? "").trim()
-          if (!value || seen.has(value)) return
-          seen.add(value)
-          unique.push(value)
-        })
-        if (unique.length > 0) normalized[safeGroupId] = unique
-      })
-      return normalized
-    } catch (error) {
-      console.warn("Could not read local Eldorado message group templates", error)
-      return {}
-    }
-  })
-  const [eldoradoMessageTemplatesByOffer, setEldoradoMessageTemplatesByOffer] = useState(() => {
-    if (typeof window === "undefined") return {}
-    try {
-      const raw = localStorage.getItem(ELDORADO_MESSAGE_GROUPS_STORAGE_KEY)
-      if (!raw) return {}
-      const parsed = JSON.parse(raw)
-      const independent = parsed?.independent
-      if (!independent || typeof independent !== "object") return {}
-      const normalized = {}
-      Object.entries(independent).forEach(([offerId, list]) => {
-        const safeOfferId = String(offerId ?? "").trim()
-        if (!safeOfferId) return
-        const safeList = Array.isArray(list) ? list : []
-        const unique = []
-        const seen = new Set()
-        safeList.forEach((label) => {
-          const value = String(label ?? "").trim()
-          if (!value || seen.has(value)) return
-          seen.add(value)
-          unique.push(value)
-        })
-        if (unique.length > 0) normalized[safeOfferId] = unique
-      })
-      return normalized
-    } catch (error) {
-      console.warn("Could not read local Eldorado message templates", error)
-      return {}
-    }
-  })
-  const [eldoradoStockEnabledByOffer, setEldoradoStockEnabledByOffer] = useState(() => {
-    if (typeof window === "undefined") return {}
-    try {
-      const raw = localStorage.getItem(ELDORADO_STOCK_ENABLED_STORAGE_KEY)
-      if (!raw) return {}
-      const parsed = JSON.parse(raw)
-      if (!parsed || typeof parsed !== "object") return {}
-      const normalized = {}
-      Object.entries(parsed).forEach(([offerId, enabled]) => {
-        const safeOfferId = String(offerId ?? "").trim()
-        if (!safeOfferId) return
-        let nextEnabled = false
-        if (enabled === true || enabled === false) {
-          nextEnabled = enabled
-        } else if (enabled === "true") {
-          nextEnabled = true
-        } else if (enabled === "false") {
-          nextEnabled = false
-        } else {
-          nextEnabled = Boolean(enabled)
-        }
-        normalized[safeOfferId] = nextEnabled
-      })
-      return normalized
-    } catch (error) {
-      console.warn("Could not read local Eldorado stock selection", error)
-      return {}
-    }
-  })
-  const readEldoradoStockEnabledStore = useCallback(() => {
-    if (typeof window === "undefined") return {}
-    try {
-      const raw = localStorage.getItem(ELDORADO_STOCK_ENABLED_STORAGE_KEY)
-      if (!raw) return {}
-      const parsed = JSON.parse(raw)
-      if (!parsed || typeof parsed !== "object") return {}
-      const normalized = {}
-      Object.entries(parsed).forEach(([offerId, enabled]) => {
-        const safeOfferId = String(offerId ?? "").trim()
-        if (!safeOfferId) return
-        let nextEnabled = false
-        if (enabled === true || enabled === false) {
-          nextEnabled = enabled
-        } else if (enabled === "true") {
-          nextEnabled = true
-        } else if (enabled === "false") {
-          nextEnabled = false
-        } else {
-          nextEnabled = Boolean(enabled)
-        }
-        normalized[safeOfferId] = nextEnabled
-      })
-      return normalized
-    } catch (error) {
-      console.warn("Could not read local Eldorado stock selection", error)
-      return {}
-    }
-  }, [])
-
-  const readEldoradoNoteGroupStore = useCallback(() => {
-    if (typeof window === "undefined") return { groups: [], assignments: {}, notes: {} }
-    try {
-      const raw = localStorage.getItem(ELDORADO_NOTE_GROUPS_STORAGE_KEY)
-      if (!raw) return { groups: [], assignments: {}, notes: {} }
-      const parsed = JSON.parse(raw)
-      const groups = Array.isArray(parsed?.groups) ? parsed.groups : []
-      const assignments = parsed?.assignments && typeof parsed.assignments === "object"
-        ? parsed.assignments
-        : {}
-      const notes = parsed?.notes && typeof parsed.notes === "object" ? parsed.notes : {}
-
-      const normalizedGroups = groups
-        .map((group) => ({
-          id: String(group?.id ?? "").trim(),
-          name: String(group?.name ?? "").trim(),
-          createdAt: group?.createdAt ? String(group.createdAt) : new Date().toISOString(),
-        }))
-        .filter((group) => group.id && group.name)
-      const normalizedAssignments = {}
-      Object.entries(assignments).forEach(([offerId, groupId]) => {
-        const safeOfferId = String(offerId ?? "").trim()
-        const safeGroupId = String(groupId ?? "").trim()
-        if (!safeOfferId || !safeGroupId) return
-        normalizedAssignments[safeOfferId] = safeGroupId
-      })
-      const normalizedNotes = {}
-      Object.entries(notes).forEach(([groupId, note]) => {
-        const safeGroupId = String(groupId ?? "").trim()
-        const safeNote = String(note ?? "").trim()
-        if (!safeGroupId || !safeNote) return
-        normalizedNotes[safeGroupId] = safeNote
-      })
-
-      return {
-        groups: normalizedGroups,
-        assignments: normalizedAssignments,
-        notes: normalizedNotes,
-      }
-    } catch (error) {
-      console.warn("Could not read local Eldorado note group store", error)
-      return { groups: [], assignments: {}, notes: {} }
-    }
-  }, [])
-
-  const writeEldoradoNoteGroupStore = useCallback((store) => {
-    if (typeof window === "undefined") return false
-    try {
-      localStorage.setItem(ELDORADO_NOTE_GROUPS_STORAGE_KEY, JSON.stringify(store))
-      return true
-    } catch (error) {
-      console.warn("Could not save local Eldorado note groups", error)
-      toast.error("Not gruplari kaydedilemedi (local storage).")
-      return false
-    }
-  }, [])
-
-  const readEldoradoMessageGroupStore = useCallback(() => {
-    if (typeof window === "undefined") {
-      return { groups: [], assignments: {}, templates: {}, independent: {} }
-    }
-    try {
-      const raw = localStorage.getItem(ELDORADO_MESSAGE_GROUPS_STORAGE_KEY)
-      if (!raw) return { groups: [], assignments: {}, templates: {}, independent: {} }
-      const parsed = JSON.parse(raw)
-      const groups = Array.isArray(parsed?.groups) ? parsed.groups : []
-      const assignments = parsed?.assignments && typeof parsed.assignments === "object"
-        ? parsed.assignments
-        : {}
-      const templates = parsed?.templates && typeof parsed.templates === "object"
-        ? parsed.templates
-        : {}
-      const independent = parsed?.independent && typeof parsed.independent === "object"
-        ? parsed.independent
-        : {}
-
-      const normalizedGroups = groups
-        .map((group) => ({
-          id: String(group?.id ?? "").trim(),
-          name: String(group?.name ?? "").trim(),
-          createdAt: group?.createdAt ? String(group.createdAt) : new Date().toISOString(),
-        }))
-        .filter((group) => group.id && group.name)
-      const groupIds = new Set(normalizedGroups.map((group) => group.id))
-      const normalizedAssignments = {}
-      Object.entries(assignments).forEach(([offerId, groupId]) => {
-        const safeOfferId = String(offerId ?? "").trim()
-        const safeGroupId = String(groupId ?? "").trim()
-        if (!safeOfferId || !safeGroupId) return
-        if (!groupIds.has(safeGroupId)) return
-        normalizedAssignments[safeOfferId] = safeGroupId
-      })
-      const normalizedTemplates = {}
-      Object.entries(templates).forEach(([groupId, list]) => {
-        const safeGroupId = String(groupId ?? "").trim()
-        if (!safeGroupId || !groupIds.has(safeGroupId)) return
-        const safeList = Array.isArray(list) ? list : []
-        const unique = []
-        const seen = new Set()
-        safeList.forEach((label) => {
-          const value = String(label ?? "").trim()
-          if (!value || seen.has(value)) return
-          seen.add(value)
-          unique.push(value)
-        })
-        if (unique.length > 0) normalizedTemplates[safeGroupId] = unique
-      })
-      const normalizedIndependent = {}
-      Object.entries(independent).forEach(([offerId, list]) => {
-        const safeOfferId = String(offerId ?? "").trim()
-        if (!safeOfferId) return
-        const safeList = Array.isArray(list) ? list : []
-        const unique = []
-        const seen = new Set()
-        safeList.forEach((label) => {
-          const value = String(label ?? "").trim()
-          if (!value || seen.has(value)) return
-          seen.add(value)
-          unique.push(value)
-        })
-        if (unique.length > 0) normalizedIndependent[safeOfferId] = unique
-      })
-
-      return {
-        groups: normalizedGroups,
-        assignments: normalizedAssignments,
-        templates: normalizedTemplates,
-        independent: normalizedIndependent,
-      }
-    } catch (error) {
-      console.warn("Could not read local Eldorado message group store", error)
-      return { groups: [], assignments: {}, templates: {}, independent: {} }
-    }
-  }, [])
-
-  const writeEldoradoMessageGroupStore = useCallback((store) => {
-    if (typeof window === "undefined") return false
-    try {
-      localStorage.setItem(ELDORADO_MESSAGE_GROUPS_STORAGE_KEY, JSON.stringify(store))
-      return true
-    } catch (error) {
-      console.warn("Could not save local Eldorado message groups", error)
-      toast.error("Mesaj grupları kaydedilemedi (local storage).")
-      return false
-    }
-  }, [])
+  const [eldoradoNotesByOffer, setEldoradoNotesByOffer] = useState({})
+  const [eldoradoNoteGroups, setEldoradoNoteGroups] = useState([])
+  const [eldoradoNoteGroupAssignments, setEldoradoNoteGroupAssignments] = useState({})
+  const [eldoradoNoteGroupNotes, setEldoradoNoteGroupNotes] = useState({})
+  const [eldoradoMessageGroups, setEldoradoMessageGroups] = useState([])
+  const [eldoradoMessageGroupAssignments, setEldoradoMessageGroupAssignments] = useState({})
+  const [eldoradoMessageGroupTemplates, setEldoradoMessageGroupTemplates] = useState({})
+  const [eldoradoMessageTemplatesByOffer, setEldoradoMessageTemplatesByOffer] = useState({})
+  const [eldoradoStockEnabledByOffer, setEldoradoStockEnabledByOffer] = useState({})
   const stockModalTextareaRef = useRef(null)
   const stockModalLineRef = useRef(null)
   const isStockTextSelectingRef = useRef(false)
@@ -751,6 +370,61 @@ export default function useAppData() {
       return res
     },
     [authToken],
+  )
+
+  const loadEldoradoStore = useCallback(
+    async (signal) => {
+      try {
+        const res = await apiFetch("/api/eldorado/store", { signal })
+        if (!res.ok) throw new Error("api_error")
+        const data = await res.json()
+        setEldoradoGroups(Array.isArray(data?.stockGroups) ? data.stockGroups : [])
+        setEldoradoGroupAssignments(
+          data?.stockGroupAssignments && typeof data.stockGroupAssignments === "object"
+            ? data.stockGroupAssignments
+            : {},
+        )
+        setEldoradoNotesByOffer(
+          data?.notesByOffer && typeof data.notesByOffer === "object" ? data.notesByOffer : {},
+        )
+        setEldoradoNoteGroups(Array.isArray(data?.noteGroups) ? data.noteGroups : [])
+        setEldoradoNoteGroupAssignments(
+          data?.noteGroupAssignments && typeof data.noteGroupAssignments === "object"
+            ? data.noteGroupAssignments
+            : {},
+        )
+        setEldoradoNoteGroupNotes(
+          data?.noteGroupNotes && typeof data.noteGroupNotes === "object"
+            ? data.noteGroupNotes
+            : {},
+        )
+        setEldoradoMessageGroups(Array.isArray(data?.messageGroups) ? data.messageGroups : [])
+        setEldoradoMessageGroupAssignments(
+          data?.messageGroupAssignments && typeof data.messageGroupAssignments === "object"
+            ? data.messageGroupAssignments
+            : {},
+        )
+        setEldoradoMessageGroupTemplates(
+          data?.messageGroupTemplates && typeof data.messageGroupTemplates === "object"
+            ? data.messageGroupTemplates
+            : {},
+        )
+        setEldoradoMessageTemplatesByOffer(
+          data?.messageTemplatesByOffer && typeof data.messageTemplatesByOffer === "object"
+            ? data.messageTemplatesByOffer
+            : {},
+        )
+        setEldoradoStockEnabledByOffer(
+          data?.stockEnabledByOffer && typeof data.stockEnabledByOffer === "object"
+            ? data.stockEnabledByOffer
+            : {},
+        )
+      } catch (error) {
+        if (error?.name === "AbortError") return
+        toast.error("Eldorado ayarlari alinamadi (API/Server kontrol edin).")
+      }
+    },
+    [apiFetch],
   )
 
   const loadLists = useCallback(
@@ -1359,7 +1033,7 @@ export default function useAppData() {
       } catch (error) {
         if (error?.name === "AbortError") return
         console.warn("Could not load sales data", error)
-        toast.error("Satışlar alınamadı (API/DB kontrol edin).")
+        toast.error("Sat��lar al�namad� (API/DB kontrol edin).")
         setSales([])
       } finally {
         setIsSalesLoading(false)
@@ -1600,7 +1274,7 @@ export default function useAppData() {
 
   const getTaskDueLabel = (task) => {
     if (task.dueType === "today") return "Bug\u00fcn"
-    if (task.dueType === "none") return "Süresiz"
+    if (task.dueType === "none") return "S�resiz"
     if (task.dueType === "repeat") {
       const labels = getRepeatDayLabels(task.repeatDays)
       const todayTag = isTaskDueToday(task) ? " (Bug\u00fcn)" : ""
@@ -1633,7 +1307,7 @@ export default function useAppData() {
       return
     }
     if (!Number.isFinite(amount) || !Number.isInteger(amount) || amount <= 0) {
-      toast.error("Satış adedi girin.")
+      toast.error("Sat�� adedi girin.")
       return
     }
     try {
@@ -1651,10 +1325,10 @@ export default function useAppData() {
         return [...next, saved]
       })
       setSalesForm((prev) => ({ ...prev, amount: "" }))
-      toast.success("Satış kaydedildi")
+      toast.success("Sat�� kaydedildi")
     } catch (error) {
       console.error(error)
-      toast.error("Satış kaydedilemedi (API/DB kontrol edin).")
+      toast.error("Sat�� kaydedilemedi (API/DB kontrol edin).")
     }
   }
 
@@ -1671,20 +1345,20 @@ export default function useAppData() {
       return false
     }
     if (!Number.isFinite(amount) || !Number.isInteger(amount) || amount <= 0) {
-      toast.error("Satış adedi girin.")
+      toast.error("Sat�� adedi girin.")
       return false
     }
     if (sales.some((sale) => sale.id !== saleId && String(sale?.date ?? "").trim() === date)) {
-      toast.error("Aynı tarih zaten var.")
+      toast.error("Ayn� tarih zaten var.")
       return false
     }
     const exists = sales.some((sale) => sale.id === saleId)
     if (!exists) {
-      toast.error("Kayıt bulunamadı.")
+      toast.error("Kay�t bulunamad�.")
       return false
     }
     setSales((prev) => prev.map((sale) => (sale.id === saleId ? { ...sale, date, amount } : sale)))
-    toast.success("Satış güncellendi")
+    toast.success("Sat�� g�ncellendi")
     return true
   }
 
@@ -1762,7 +1436,7 @@ export default function useAppData() {
         }))
       } catch (error) {
         console.warn("Task comments fetch failed", error)
-        toast.error("Yorumlar alınamadı (API/DB kontrol edin).")
+        toast.error("Yorumlar al�namad� (API/DB kontrol edin).")
       }
     },
     [apiFetch],
@@ -1782,7 +1456,7 @@ export default function useAppData() {
     const trimmed = (text ?? "").trim()
     const cleanImages = Array.isArray(images) ? images.filter(Boolean) : []
     if (!trimmed && cleanImages.length === 0) {
-      toast.error("Yorum veya görsel ekleyin.")
+      toast.error("Yorum veya g�rsel ekleyin.")
       return null
     }
     try {
@@ -2517,296 +2191,15 @@ export default function useAppData() {
     return normalized
   }
 
-  const createLocalEldoradoKeyId = useCallback(() => {
-    if (typeof crypto !== "undefined" && crypto.randomUUID) {
-      return crypto.randomUUID()
-    }
-    return `local-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`
-  }, [])
+  
 
-  const createLocalEldoradoNoteGroupId = useCallback(() => {
-    if (typeof crypto !== "undefined" && crypto.randomUUID) {
-      return crypto.randomUUID()
-    }
-    return `note-group-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`
-  }, [])
+  
 
-  const createLocalEldoradoMessageGroupId = useCallback(() => {
-    if (typeof crypto !== "undefined" && crypto.randomUUID) {
-      return crypto.randomUUID()
-    }
-    return `message-group-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`
-  }, [])
-
-  const normalizeEldoradoKeyList = useCallback(
-    (offerId, list) => {
-      if (!Array.isArray(list)) return []
-      const normalizedOfferId = String(offerId ?? "").trim()
-      const normalized = []
-      list.forEach((entry, index) => {
-        const code = String(entry?.code ?? entry ?? "").trim()
-        if (!code) return
-        const statusRaw = String(entry?.status ?? "").trim().toLowerCase()
-        const status = statusRaw === "used" ? "used" : "available"
-        let id = String(entry?.id ?? "").trim()
-        if (!id) {
-          id = normalizedOfferId ? `${normalizedOfferId}-${index}` : createLocalEldoradoKeyId()
-        }
-        const createdAt = entry?.createdAt ? String(entry.createdAt) : new Date().toISOString()
-        normalized.push({ id, code, status, createdAt })
-      })
-      return normalized
-    },
-    [createLocalEldoradoKeyId],
-  )
-
-  const readEldoradoKeyStore = useCallback(() => {
-    if (typeof window === "undefined") return {}
-    try {
-      const raw = localStorage.getItem(ELDORADO_KEYS_STORAGE_KEY)
-      if (!raw) return {}
-      const parsed = JSON.parse(raw)
-      if (!parsed || typeof parsed !== "object") return {}
-      const normalized = {}
-      Object.entries(parsed).forEach(([offerId, list]) => {
-        const safeList = normalizeEldoradoKeyList(offerId, list)
-        if (safeList.length > 0) normalized[offerId] = safeList
-      })
-      return normalized
-    } catch (error) {
-      console.warn("Could not read local Eldorado keys", error)
-      return {}
-    }
-  }, [normalizeEldoradoKeyList])
-
-  const writeEldoradoKeyStore = useCallback((store) => {
-    if (typeof window === "undefined") return false
-    try {
-      localStorage.setItem(ELDORADO_KEYS_STORAGE_KEY, JSON.stringify(store))
-      return true
-    } catch (error) {
-      console.warn("Could not save local Eldorado keys", error)
-      toast.error("Stoklar kaydedilemedi (local storage).")
-      return false
-    }
-  }, [])
-
-  const createLocalEldoradoGroupId = useCallback(() => {
-    if (typeof crypto !== "undefined" && crypto.randomUUID) {
-      return crypto.randomUUID()
-    }
-    return `group-${Date.now()}-${Math.random().toString(16).slice(2, 8)}`
-  }, [])
-
-  const normalizeEldoradoGroupList = useCallback(
-    (list) => {
-      if (!Array.isArray(list)) return []
-      const seen = new Set()
-      return list
-        .map((entry) => {
-          const name = String(entry?.name ?? "").trim()
-          if (!name) return null
-          let id = String(entry?.id ?? "").trim()
-          if (!id) id = createLocalEldoradoGroupId()
-          if (seen.has(id)) return null
-          seen.add(id)
-          const createdAt = entry?.createdAt ? String(entry.createdAt) : new Date().toISOString()
-          return { id, name, createdAt }
-        })
-        .filter(Boolean)
-    },
-    [createLocalEldoradoGroupId],
-  )
-
-  const writeEldoradoGroupStore = useCallback((store) => {
-    if (typeof window === "undefined") return false
-    try {
-      localStorage.setItem(ELDORADO_GROUPS_STORAGE_KEY, JSON.stringify(store))
-      return true
-    } catch (error) {
-      console.warn("Could not save local Eldorado groups", error)
-      toast.error("Stok gruplari kaydedilemedi (local storage).")
-      return false
-    }
-  }, [])
-
-  const writeEldoradoNoteStore = useCallback((store) => {
-    if (typeof window === "undefined") return false
-    try {
-      localStorage.setItem(ELDORADO_NOTES_STORAGE_KEY, JSON.stringify(store))
-      return true
-    } catch (error) {
-      console.warn("Could not save local Eldorado notes", error)
-      toast.error("Urun notlari kaydedilemedi (local storage).")
-      return false
-    }
-  }, [])
-
-  const writeEldoradoStockEnabledStore = useCallback((store) => {
-    if (typeof window === "undefined") return false
-    try {
-      localStorage.setItem(ELDORADO_STOCK_ENABLED_STORAGE_KEY, JSON.stringify(store))
-      return true
-    } catch (error) {
-      console.warn("Could not save local Eldorado stock selection", error)
-      toast.error("Stok secimleri kaydedilemedi (local storage).")
-      return false
-    }
-  }, [])
-
-  const readEldoradoGroupStore = useCallback(() => {
-    if (typeof window === "undefined") return { groups: [], assignments: {} }
-    try {
-      const raw = localStorage.getItem(ELDORADO_GROUPS_STORAGE_KEY)
-      const parsed = raw ? JSON.parse(raw) : null
-      const groups = normalizeEldoradoGroupList(parsed?.groups)
-      const assignmentsRaw = parsed?.assignments ?? {}
-      const groupIds = new Set(groups.map((group) => group.id))
-      const assignments = {}
-
-      Object.entries(assignmentsRaw).forEach(([offerId, groupId]) => {
-        const safeOfferId = String(offerId ?? "").trim()
-        const safeGroupId = String(groupId ?? "").trim()
-        if (!safeOfferId || !safeGroupId) return
-        if (!groupIds.has(safeGroupId)) return
-        assignments[safeOfferId] = safeGroupId
-      })
-
-      if (groups.length === 0) {
-        const keyStore = readEldoradoKeyStore()
-        const legacyOfferIds = Object.keys(keyStore)
-        if (legacyOfferIds.length > 0) {
-          const createdAt = new Date().toISOString()
-          const legacyGroups = legacyOfferIds.map((offerId, index) => ({
-            id: offerId,
-            name: `Stok Grubu ${index + 1}`,
-            createdAt,
-          }))
-          const legacyAssignments = {}
-          legacyGroups.forEach((group) => {
-            legacyAssignments[group.id] = group.id
-          })
-          const nextStore = { groups: legacyGroups, assignments: legacyAssignments }
-          writeEldoradoGroupStore(nextStore)
-          return nextStore
-        }
-      }
-
-      return { groups, assignments }
-    } catch (error) {
-      console.warn("Could not read local Eldorado groups", error)
-      return { groups: [], assignments: {} }
-    }
-  }, [normalizeEldoradoGroupList, readEldoradoKeyStore, writeEldoradoGroupStore])
-
-  useEffect(() => {
-    writeEldoradoNoteStore(eldoradoNotesByOffer)
-  }, [eldoradoNotesByOffer, writeEldoradoNoteStore])
-
-  useEffect(() => {
-    writeEldoradoNoteGroupStore({
-      groups: eldoradoNoteGroups,
-      assignments: eldoradoNoteGroupAssignments,
-      notes: eldoradoNoteGroupNotes,
-    })
-  }, [
-    eldoradoNoteGroupAssignments,
-    eldoradoNoteGroupNotes,
-    eldoradoNoteGroups,
-    writeEldoradoNoteGroupStore,
-  ])
-
-  useEffect(() => {
-    writeEldoradoMessageGroupStore({
-      groups: eldoradoMessageGroups,
-      assignments: eldoradoMessageGroupAssignments,
-      templates: eldoradoMessageGroupTemplates,
-      independent: eldoradoMessageTemplatesByOffer,
-    })
-  }, [
-    eldoradoMessageGroupAssignments,
-    eldoradoMessageGroupTemplates,
-    eldoradoMessageGroups,
-    eldoradoMessageTemplatesByOffer,
-    writeEldoradoMessageGroupStore,
-  ])
-
-  useEffect(() => {
-    writeEldoradoStockEnabledStore(eldoradoStockEnabledByOffer)
-  }, [eldoradoStockEnabledByOffer, writeEldoradoStockEnabledStore])
-
-  useEffect(() => {
-    const catalogItems = [
-      ...(Array.isArray(eldoradoCatalog?.items) ? eldoradoCatalog.items : []),
-      ...(Array.isArray(eldoradoCatalog?.topups) ? eldoradoCatalog.topups : []),
-    ]
-    if (catalogItems.length === 0) return
-    setEldoradoStockEnabledByOffer((prev) => {
-      const keyStore = readEldoradoKeyStore()
-      const groupStore = readEldoradoGroupStore()
-      const assignments = groupStore.assignments ?? {}
-      let didChange = false
-      const next = { ...prev }
-
-      catalogItems.forEach((offer) => {
-        const offerId = String(offer?.id ?? "").trim()
-        if (!offerId) return
-        if (Object.prototype.hasOwnProperty.call(next, offerId)) return
-        const assignedGroupId = String(assignments[offerId] ?? "").trim()
-        const groupId = assignedGroupId || offerId
-        const list = Array.isArray(keyStore[groupId]) ? keyStore[groupId] : []
-        if (list.length > 0 || assignedGroupId) {
-          next[offerId] = true
-          didChange = true
-        }
-      })
-
-      return didChange ? next : prev
-    })
-  }, [eldoradoCatalog, readEldoradoGroupStore, readEldoradoKeyStore])
-
-  const getEldoradoKeyCounts = useCallback((list) => {
-    const safeList = Array.isArray(list) ? list : []
-    const used = safeList.reduce(
-      (acc, item) => acc + (item?.status === "used" ? 1 : 0),
-      0,
-    )
-    const total = safeList.length
-    const available = Math.max(0, total - used)
-    return { available, used, total }
-  }, [])
+  
 
   const applyEldoradoKeyCounts = useCallback(
-    (catalog) => {
-      const safeCatalog = normalizeEldoradoCatalog(catalog)
-      const keyStore = readEldoradoKeyStore()
-      const groupStore = readEldoradoGroupStore()
-      const groupMap = new Map(groupStore.groups.map((group) => [group.id, group]))
-      const assignments = groupStore.assignments
-      const withCounts = (list) =>
-        Array.isArray(list)
-          ? list.map((offer) => {
-            const assignedGroupId = assignments[offer.id] ?? ""
-            const effectiveGroupId = assignedGroupId || offer.id
-            const counts = getEldoradoKeyCounts(keyStore[effectiveGroupId])
-            const groupName = assignedGroupId ? groupMap.get(assignedGroupId)?.name ?? "" : ""
-            return {
-              ...offer,
-              stockGroupId: assignedGroupId || null,
-              stockGroupName: groupName,
-              stockCount: counts.available,
-              stockUsedCount: counts.used,
-              stockTotalCount: counts.total,
-            }
-          })
-          : []
-      return {
-        ...safeCatalog,
-        items: withCounts(safeCatalog.items),
-        topups: withCounts(safeCatalog.topups),
-      }
-    },
-    [getEldoradoKeyCounts, readEldoradoGroupStore, readEldoradoKeyStore],
+    (catalog) => normalizeEldoradoCatalog(catalog),
+    [],
   )
 
   const loadEldoradoCatalog = useCallback(
@@ -2869,18 +2262,16 @@ export default function useAppData() {
     }
   }, [apiFetch, applyEldoradoKeyCounts, isEldoradoRefreshing])
 
-  const loadEldoradoGroups = useCallback(() => {
-    const store = readEldoradoGroupStore()
-    setEldoradoGroups(store.groups)
-    setEldoradoGroupAssignments(store.assignments)
-    return store
-  }, [readEldoradoGroupStore])
+  const loadEldoradoGroups = useCallback(
+    (signal) => loadEldoradoStore(signal),
+    [loadEldoradoStore],
+  )
 
   const syncEldoradoKeysForGroup = useCallback(
     (groupId, list, assignmentsOverride) => {
       const normalizedGroupId = String(groupId ?? "").trim()
       if (!normalizedGroupId) return
-      const assignments = assignmentsOverride ?? readEldoradoGroupStore().assignments
+      const assignments = assignmentsOverride ?? eldoradoGroupAssignments
       const offerIds = Object.entries(assignments)
         .filter(([, assignedGroupId]) => assignedGroupId === normalizedGroupId)
         .map(([offerId]) => offerId)
@@ -2893,510 +2284,490 @@ export default function useAppData() {
         return next
       })
     },
-    [readEldoradoGroupStore],
+    [eldoradoGroupAssignments],
   )
 
   const handleEldoradoGroupCreate = useCallback(
-    (name) => {
+    async (name) => {
       const trimmed = String(name ?? "").trim()
       if (!trimmed) {
         toast.error("Grup adi gerekli.")
         return null
       }
-      const store = readEldoradoGroupStore()
-      const existing = store.groups.find(
-        (group) => group.name.toLowerCase() === trimmed.toLowerCase(),
-      )
-      if (existing) {
-        toast("Grup zaten var, secildi.", { position: "top-right" })
-        return existing
+      try {
+        const res = await apiFetch("/api/eldorado/stock-groups", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: trimmed }),
+        })
+        if (!res.ok) throw new Error("api_error")
+        const created = await res.json()
+        setEldoradoGroups((prev) => {
+          if (prev.some((group) => group.id === created.id)) return prev
+          return [...prev, created]
+        })
+        return created
+      } catch (error) {
+        toast.error("Grup olusturulamadi (API/Server kontrol edin).")
+        return null
       }
-      const createdAt = new Date().toISOString()
-      const nextGroup = {
-        id: createLocalEldoradoGroupId(),
-        name: trimmed,
-        createdAt,
-      }
-      store.groups = [...store.groups, nextGroup]
-      const saved = writeEldoradoGroupStore(store)
-      if (!saved) return null
-      setEldoradoGroups(store.groups)
-      return nextGroup
     },
-    [createLocalEldoradoGroupId, readEldoradoGroupStore, writeEldoradoGroupStore],
+    [apiFetch],
   )
 
   const handleEldoradoGroupAssign = useCallback(
-    (offerId, groupId) => {
+    async (offerId, groupId) => {
       const normalizedOfferId = String(offerId ?? "").trim()
       if (!normalizedOfferId) return false
       const nextGroupId = String(groupId ?? "").trim()
 
-      const store = readEldoradoGroupStore()
-      const currentGroupId = String(store.assignments[normalizedOfferId] ?? "").trim()
-      if (nextGroupId && !store.groups.some((group) => group.id === nextGroupId)) {
+      if (nextGroupId && !eldoradoGroups.some((group) => group.id === nextGroupId)) {
         toast.error("Stok grubu bulunamadi.")
         return false
       }
 
-      if (nextGroupId) {
-        store.assignments[normalizedOfferId] = nextGroupId
-      } else {
-        delete store.assignments[normalizedOfferId]
+      try {
+        const res = await apiFetch("/api/eldorado/stock-groups/assign", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ offerId: normalizedOfferId, groupId: nextGroupId || "" }),
+        })
+        if (!res.ok) throw new Error("api_error")
+
+        setEldoradoGroupAssignments((prev) => {
+          const next = { ...prev }
+          if (nextGroupId) {
+            next[normalizedOfferId] = nextGroupId
+          } else {
+            delete next[normalizedOfferId]
+          }
+          return next
+        })
+        await loadEldoradoKeys(normalizedOfferId, { force: true })
+        loadEldoradoCatalog()
+        return true
+      } catch (error) {
+        toast.error("Stok grubu atanamadi (API/Server kontrol edin).")
+        return false
       }
-
-      const saved = writeEldoradoGroupStore(store)
-      if (!saved) return false
-
-      const keyStore = readEldoradoKeyStore()
-      const nextList = nextGroupId
-        ? Array.isArray(keyStore[nextGroupId])
-          ? keyStore[nextGroupId]
-          : []
-        : Array.isArray(keyStore[normalizedOfferId])
-          ? keyStore[normalizedOfferId]
-          : []
-
-      setEldoradoGroupAssignments(store.assignments)
-      setEldoradoGroups(store.groups)
-
-      if (nextGroupId) {
-        syncEldoradoKeysForGroup(nextGroupId, nextList, store.assignments)
-      } else {
-        setEldoradoKeysByOffer((prev) => ({ ...prev, [normalizedOfferId]: nextList }))
-      }
-      setEldoradoCatalog((prev) => applyEldoradoKeyCounts(prev))
-
-      return true
     },
-    [
-      applyEldoradoKeyCounts,
-      readEldoradoGroupStore,
-      readEldoradoKeyStore,
-      syncEldoradoKeysForGroup,
-      writeEldoradoGroupStore,
-      writeEldoradoKeyStore,
-    ],
+    [apiFetch, eldoradoGroups, loadEldoradoCatalog, loadEldoradoKeys],
   )
 
   const handleEldoradoGroupDelete = useCallback(
-    (groupId) => {
+    async (groupId) => {
       const normalizedGroupId = String(groupId ?? "").trim()
       if (!normalizedGroupId) return false
 
-      const store = readEldoradoGroupStore()
-      const exists = store.groups.some((group) => group.id === normalizedGroupId)
-      if (!exists) {
+      if (!eldoradoGroups.some((group) => group.id === normalizedGroupId)) {
         toast.error("Stok grubu bulunamadi.")
         return false
       }
 
-      const keyStore = readEldoradoKeyStore()
-      const groupList = Array.isArray(keyStore[normalizedGroupId]) ? keyStore[normalizedGroupId] : []
-      const nextAssignments = { ...store.assignments }
-      const affectedOffers = Object.entries(store.assignments)
-        .filter(([, assignedGroupId]) => assignedGroupId === normalizedGroupId)
-        .map(([offerId]) => offerId)
-
-      affectedOffers.forEach((offerId) => {
-        const offerList = Array.isArray(keyStore[offerId]) ? keyStore[offerId] : []
-        keyStore[offerId] = [...offerList, ...groupList]
-        delete nextAssignments[offerId]
-      })
-
-      delete keyStore[normalizedGroupId]
-      store.groups = store.groups.filter((group) => group.id !== normalizedGroupId)
-      store.assignments = nextAssignments
-
-      const groupSaved = writeEldoradoGroupStore(store)
-      if (!groupSaved) return false
-      writeEldoradoKeyStore(keyStore)
-
-      setEldoradoGroups(store.groups)
-      setEldoradoGroupAssignments(store.assignments)
-      setEldoradoKeysByOffer((prev) => {
-        const next = { ...prev }
-        affectedOffers.forEach((offerId) => {
-          next[offerId] = keyStore[offerId] || []
+      try {
+        const res = await apiFetch(`/api/eldorado/stock-groups/${normalizedGroupId}`, {
+          method: "DELETE",
         })
-        return next
-      })
-      setEldoradoCatalog((prev) => applyEldoradoKeyCounts(prev))
+        if (!res.ok) throw new Error("api_error")
+        const payload = await res.json()
+        const affectedOffers = Array.isArray(payload?.affectedOffers) ? payload.affectedOffers : []
 
-      toast.success("Stok grubu silindi", { duration: 1500, position: "top-right" })
-      return true
+        setEldoradoGroups((prev) => prev.filter((group) => group.id !== normalizedGroupId))
+        setEldoradoGroupAssignments((prev) => {
+          const next = { ...prev }
+          affectedOffers.forEach((offerId) => {
+            delete next[offerId]
+          })
+          return next
+        })
+        await Promise.all(affectedOffers.map((offerId) => loadEldoradoKeys(offerId, { force: true })))
+        loadEldoradoCatalog()
+        toast.success("Stok grubu silindi", { duration: 1500, position: "top-right" })
+        return true
+      } catch (error) {
+        toast.error("Stok grubu silinemedi (API/Server kontrol edin).")
+        return false
+      }
     },
-    [
-      applyEldoradoKeyCounts,
-      readEldoradoGroupStore,
-      readEldoradoKeyStore,
-      writeEldoradoGroupStore,
-      writeEldoradoKeyStore,
-    ],
+    [apiFetch, eldoradoGroups, loadEldoradoCatalog, loadEldoradoKeys],
   )
 
   const handleEldoradoNoteSave = useCallback(
-    (offerId, rawNote) => {
+    async (offerId, rawNote) => {
       const normalizedOfferId = String(offerId ?? "").trim()
       if (!normalizedOfferId) return false
       const trimmedNote = String(rawNote ?? "").trim()
       const groupId = String(eldoradoNoteGroupAssignments?.[normalizedOfferId] ?? "").trim()
 
-      if (groupId) {
-        setEldoradoNoteGroupNotes((prev) => {
-          const next = { ...prev }
-          if (trimmedNote) {
-            next[groupId] = trimmedNote
-          } else {
-            delete next[groupId]
-          }
-          return next
+      try {
+        const res = await apiFetch("/api/eldorado/notes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ offerId: normalizedOfferId, note: trimmedNote }),
         })
-        return true
-      }
+        if (!res.ok) throw new Error("api_error")
 
-      setEldoradoNotesByOffer((prev) => {
-        const next = { ...prev }
-        if (trimmedNote) {
-          next[normalizedOfferId] = trimmedNote
+        if (groupId) {
+          setEldoradoNoteGroupNotes((prev) => {
+            const next = { ...prev }
+            if (trimmedNote) {
+              next[groupId] = trimmedNote
+            } else {
+              delete next[groupId]
+            }
+            return next
+          })
         } else {
-          delete next[normalizedOfferId]
+          setEldoradoNotesByOffer((prev) => {
+            const next = { ...prev }
+            if (trimmedNote) {
+              next[normalizedOfferId] = trimmedNote
+            } else {
+              delete next[normalizedOfferId]
+            }
+            return next
+          })
         }
-        return next
-      })
-      return true
+        return true
+      } catch (error) {
+        toast.error("Not kaydedilemedi (API/Server kontrol edin).")
+        return false
+      }
     },
-    [eldoradoNoteGroupAssignments],
+    [apiFetch, eldoradoNoteGroupAssignments],
   )
 
-  const handleEldoradoStockToggle = useCallback((offerId, enabled) => {
-    const normalizedOfferId = String(offerId ?? "").trim()
-    if (!normalizedOfferId) return false
-    const nextEnabled = Boolean(enabled)
-    setEldoradoStockEnabledByOffer((prev) => ({
-      ...prev,
-      [normalizedOfferId]: nextEnabled,
-    }))
-    return true
-  }, [])
+  const handleEldoradoStockToggle = useCallback(
+    async (offerId, enabled) => {
+      const normalizedOfferId = String(offerId ?? "").trim()
+      if (!normalizedOfferId) return false
+      const nextEnabled = Boolean(enabled)
+      try {
+        const res = await apiFetch("/api/eldorado/stock-enabled", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ offerId: normalizedOfferId, enabled: nextEnabled }),
+        })
+        if (!res.ok) throw new Error("api_error")
+        setEldoradoStockEnabledByOffer((prev) => ({
+          ...prev,
+          [normalizedOfferId]: nextEnabled,
+        }))
+        return true
+      } catch (error) {
+        toast.error("Stok durumu kaydedilemedi (API/Server kontrol edin).")
+        return false
+      }
+    },
+    [apiFetch],
+  )
 
   const handleEldoradoNoteGroupCreate = useCallback(
-    (name) => {
+    async (name) => {
       const trimmed = String(name ?? "").trim()
       if (!trimmed) {
         toast.error("Not grubu adi gerekli.")
         return null
       }
-      const store = readEldoradoNoteGroupStore()
-      const existing = store.groups.find(
-        (group) => group.name.toLowerCase() === trimmed.toLowerCase(),
-      )
-      if (existing) {
-        toast("Not grubu zaten var, secildi.", { position: "top-right" })
-        return existing
+      try {
+        const res = await apiFetch("/api/eldorado/note-groups", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: trimmed }),
+        })
+        if (!res.ok) throw new Error("api_error")
+        const created = await res.json()
+        setEldoradoNoteGroups((prev) => {
+          if (prev.some((group) => group.id === created.id)) return prev
+          return [...prev, created]
+        })
+        return created
+      } catch (error) {
+        toast.error("Not grubu olusturulamadi (API/Server kontrol edin).")
+        return null
       }
-      const createdAt = new Date().toISOString()
-      const nextGroup = {
-        id: createLocalEldoradoNoteGroupId(),
-        name: trimmed,
-        createdAt,
-      }
-      store.groups = [...store.groups, nextGroup]
-      const saved = writeEldoradoNoteGroupStore(store)
-      if (!saved) return null
-      setEldoradoNoteGroups(store.groups)
-      setEldoradoNoteGroupAssignments(store.assignments)
-      setEldoradoNoteGroupNotes(store.notes)
-      return nextGroup
     },
-    [
-      createLocalEldoradoNoteGroupId,
-      readEldoradoNoteGroupStore,
-      writeEldoradoNoteGroupStore,
-    ],
+    [apiFetch],
   )
 
   const handleEldoradoNoteGroupAssign = useCallback(
-    (offerId, groupId) => {
+    async (offerId, groupId) => {
       const normalizedOfferId = String(offerId ?? "").trim()
       if (!normalizedOfferId) return false
       const nextGroupId = String(groupId ?? "").trim()
-      const store = readEldoradoNoteGroupStore()
 
-      if (nextGroupId && !store.groups.some((group) => group.id === nextGroupId)) {
+      if (nextGroupId && !eldoradoNoteGroups.some((group) => group.id === nextGroupId)) {
         toast.error("Not grubu bulunamadi.")
         return false
       }
 
-      if (nextGroupId) {
-        store.assignments[normalizedOfferId] = nextGroupId
-        const existingNote = String(eldoradoNotesByOffer?.[normalizedOfferId] ?? "").trim()
-        if (existingNote && !store.notes[nextGroupId]) {
-          store.notes[nextGroupId] = existingNote
+      try {
+        const res = await apiFetch("/api/eldorado/note-groups/assign", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ offerId: normalizedOfferId, groupId: nextGroupId || "" }),
+        })
+        if (!res.ok) throw new Error("api_error")
+
+        setEldoradoNoteGroupAssignments((prev) => {
+          const next = { ...prev }
+          if (nextGroupId) {
+            next[normalizedOfferId] = nextGroupId
+          } else {
+            delete next[normalizedOfferId]
+          }
+          return next
+        })
+        if (nextGroupId) {
+          const existingNote = String(eldoradoNotesByOffer?.[normalizedOfferId] ?? "").trim()
+          if (existingNote && !eldoradoNoteGroupNotes?.[nextGroupId]) {
+            setEldoradoNoteGroupNotes((prev) => ({ ...prev, [nextGroupId]: existingNote }))
+          }
         }
-      } else {
-        delete store.assignments[normalizedOfferId]
+        return true
+      } catch (error) {
+        toast.error("Not grubu atanamadi (API/Server kontrol edin).")
+        return false
       }
-
-      const saved = writeEldoradoNoteGroupStore(store)
-      if (!saved) return false
-
-      setEldoradoNoteGroups(store.groups)
-      setEldoradoNoteGroupAssignments(store.assignments)
-      setEldoradoNoteGroupNotes(store.notes)
-      return true
     },
-    [eldoradoNotesByOffer, readEldoradoNoteGroupStore, writeEldoradoNoteGroupStore],
+    [apiFetch, eldoradoNoteGroups, eldoradoNoteGroupNotes, eldoradoNotesByOffer],
   )
 
   const handleEldoradoNoteGroupDelete = useCallback(
-    (groupId) => {
+    async (groupId) => {
       const normalizedGroupId = String(groupId ?? "").trim()
       if (!normalizedGroupId) return false
-      const store = readEldoradoNoteGroupStore()
-      const exists = store.groups.some((group) => group.id === normalizedGroupId)
-      if (!exists) {
+      if (!eldoradoNoteGroups.some((group) => group.id === normalizedGroupId)) {
         toast.error("Not grubu bulunamadi.")
         return false
       }
 
-      const groupNote = String(store.notes[normalizedGroupId] ?? "").trim()
-      const affectedOffers = Object.entries(store.assignments)
-        .filter(([, assignedGroupId]) => assignedGroupId === normalizedGroupId)
-        .map(([offerId]) => offerId)
-
-      affectedOffers.forEach((offerId) => {
-        delete store.assignments[offerId]
-      })
-
-      delete store.notes[normalizedGroupId]
-      store.groups = store.groups.filter((group) => group.id !== normalizedGroupId)
-      const saved = writeEldoradoNoteGroupStore(store)
-      if (!saved) return false
-
-      if (affectedOffers.length > 0 && groupNote) {
-        setEldoradoNotesByOffer((prev) => {
-          const next = { ...prev }
-          affectedOffers.forEach((offerId) => {
-            if (!next[offerId]) next[offerId] = groupNote
-          })
-          return next
+      try {
+        const res = await apiFetch(`/api/eldorado/note-groups/${normalizedGroupId}`, {
+          method: "DELETE",
         })
+        if (!res.ok) throw new Error("api_error")
+        await loadEldoradoStore()
+        toast.success("Not grubu silindi", { duration: 1500, position: "top-right" })
+        return true
+      } catch (error) {
+        toast.error("Not grubu silinemedi (API/Server kontrol edin).")
+        return false
       }
-
-      setEldoradoNoteGroups(store.groups)
-      setEldoradoNoteGroupAssignments(store.assignments)
-      setEldoradoNoteGroupNotes(store.notes)
-      toast.success("Not grubu silindi", { duration: 1500, position: "top-right" })
-      return true
     },
-    [readEldoradoNoteGroupStore, writeEldoradoNoteGroupStore],
+    [apiFetch, eldoradoNoteGroups, loadEldoradoStore],
   )
 
-  const handleEldoradoMessageGroupCreate = useCallback(
-    (name) => {
+    const handleEldoradoMessageGroupCreate = useCallback(
+    async (name) => {
       const trimmed = String(name ?? "").trim()
       if (!trimmed) {
-        toast.error("Mesaj grubu adı gerekli.")
+        toast.error("Mesaj grubu adi gerekli.")
         return null
       }
-      const store = readEldoradoMessageGroupStore()
-      const existing = store.groups.find(
-        (group) => group.name.toLowerCase() === trimmed.toLowerCase(),
-      )
-      if (existing) {
-        toast("Mesaj grubu zaten var, seçildi.", { position: "top-right" })
-        return existing
+      try {
+        const res = await apiFetch("/api/eldorado/message-groups", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ name: trimmed }),
+        })
+        if (!res.ok) throw new Error("api_error")
+        const created = await res.json()
+        setEldoradoMessageGroups((prev) => {
+          if (prev.some((group) => group.id === created.id)) return prev
+          return [...prev, created]
+        })
+        return created
+      } catch (error) {
+        toast.error("Mesaj grubu olusturulamadi (API/Server kontrol edin).")
+        return null
       }
-      const createdAt = new Date().toISOString()
-      const nextGroup = {
-        id: createLocalEldoradoMessageGroupId(),
-        name: trimmed,
-        createdAt,
-      }
-      store.groups = [...store.groups, nextGroup]
-      const saved = writeEldoradoMessageGroupStore(store)
-      if (!saved) return null
-      setEldoradoMessageGroups(store.groups)
-      setEldoradoMessageGroupAssignments(store.assignments)
-      setEldoradoMessageGroupTemplates(store.templates)
-      setEldoradoMessageTemplatesByOffer(store.independent ?? {})
-      return nextGroup
     },
-    [
-      createLocalEldoradoMessageGroupId,
-      readEldoradoMessageGroupStore,
-      writeEldoradoMessageGroupStore,
-    ],
+    [apiFetch],
   )
 
   const handleEldoradoMessageGroupAssign = useCallback(
-    (offerId, groupId) => {
+    async (offerId, groupId) => {
       const normalizedOfferId = String(offerId ?? "").trim()
       if (!normalizedOfferId) return false
       const nextGroupId = String(groupId ?? "").trim()
-      const store = readEldoradoMessageGroupStore()
 
-      if (nextGroupId && !store.groups.some((group) => group.id === nextGroupId)) {
-        toast.error("Mesaj grubu bulunamadı.")
-        return false
-      }
-
-      if (nextGroupId) {
-        store.assignments[normalizedOfferId] = nextGroupId
-      } else {
-        delete store.assignments[normalizedOfferId]
-      }
-
-      const saved = writeEldoradoMessageGroupStore(store)
-      if (!saved) return false
-
-      setEldoradoMessageGroups(store.groups)
-      setEldoradoMessageGroupAssignments(store.assignments)
-      setEldoradoMessageGroupTemplates(store.templates)
-      setEldoradoMessageTemplatesByOffer(store.independent ?? {})
-      return true
-    },
-    [readEldoradoMessageGroupStore, writeEldoradoMessageGroupStore],
-  )
-
-  const handleEldoradoMessageGroupDelete = useCallback(
-    (groupId) => {
-      const normalizedGroupId = String(groupId ?? "").trim()
-      if (!normalizedGroupId) return false
-      const store = readEldoradoMessageGroupStore()
-      const exists = store.groups.some((group) => group.id === normalizedGroupId)
-      if (!exists) {
+      if (nextGroupId && !eldoradoMessageGroups.some((group) => group.id === nextGroupId)) {
         toast.error("Mesaj grubu bulunamadi.")
         return false
       }
 
-      Object.entries(store.assignments).forEach(([offerId, assignedGroupId]) => {
-        if (assignedGroupId === normalizedGroupId) {
-          delete store.assignments[offerId]
-        }
-      })
+      try {
+        const res = await apiFetch("/api/eldorado/message-groups/assign", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ offerId: normalizedOfferId, groupId: nextGroupId || "" }),
+        })
+        if (!res.ok) throw new Error("api_error")
 
-      delete store.templates[normalizedGroupId]
-      store.groups = store.groups.filter((group) => group.id !== normalizedGroupId)
-      const saved = writeEldoradoMessageGroupStore(store)
-      if (!saved) return false
-
-      setEldoradoMessageGroups(store.groups)
-      setEldoradoMessageGroupAssignments(store.assignments)
-      setEldoradoMessageGroupTemplates(store.templates)
-      setEldoradoMessageTemplatesByOffer(store.independent ?? {})
-      toast.success("Mesaj grubu silindi", { duration: 1500, position: "top-right" })
-      return true
+        setEldoradoMessageGroupAssignments((prev) => {
+          const next = { ...prev }
+          if (nextGroupId) {
+            next[normalizedOfferId] = nextGroupId
+          } else {
+            delete next[normalizedOfferId]
+          }
+          return next
+        })
+        return true
+      } catch (error) {
+        toast.error("Mesaj grubu atanamadi (API/Server kontrol edin).")
+        return false
+      }
     },
-    [readEldoradoMessageGroupStore, writeEldoradoMessageGroupStore],
+    [apiFetch, eldoradoMessageGroups],
+  )
+
+  const handleEldoradoMessageGroupDelete = useCallback(
+    async (groupId) => {
+      const normalizedGroupId = String(groupId ?? "").trim()
+      if (!normalizedGroupId) return false
+      if (!eldoradoMessageGroups.some((group) => group.id === normalizedGroupId)) {
+        toast.error("Mesaj grubu bulunamadi.")
+        return false
+      }
+
+      try {
+        const res = await apiFetch(`/api/eldorado/message-groups/${normalizedGroupId}`, {
+          method: "DELETE",
+        })
+        if (!res.ok) throw new Error("api_error")
+        await loadEldoradoStore()
+        toast.success("Mesaj grubu silindi", { duration: 1500, position: "top-right" })
+        return true
+      } catch (error) {
+        toast.error("Mesaj grubu silinemedi (API/Server kontrol edin).")
+        return false
+      }
+    },
+    [apiFetch, eldoradoMessageGroups, loadEldoradoStore],
   )
 
   const handleEldoradoMessageGroupTemplateAdd = useCallback(
-    (groupId, label) => {
+    async (groupId, label) => {
       const normalizedGroupId = String(groupId ?? "").trim()
       const normalizedLabel = String(label ?? "").trim()
       if (!normalizedGroupId || !normalizedLabel) return false
-      const store = readEldoradoMessageGroupStore()
-      if (!store.groups.some((group) => group.id === normalizedGroupId)) {
-        toast.error("Mesaj grubu bulunamadı.")
+      if (!eldoradoMessageGroups.some((group) => group.id === normalizedGroupId)) {
+        toast.error("Mesaj grubu bulunamadi.")
         return false
       }
-      const list = Array.isArray(store.templates[normalizedGroupId])
-        ? store.templates[normalizedGroupId]
-        : []
-      if (list.includes(normalizedLabel)) return true
-      store.templates[normalizedGroupId] = [...list, normalizedLabel]
-      const saved = writeEldoradoMessageGroupStore(store)
-      if (!saved) return false
-      setEldoradoMessageGroups(store.groups)
-      setEldoradoMessageGroupAssignments(store.assignments)
-      setEldoradoMessageGroupTemplates(store.templates)
-      setEldoradoMessageTemplatesByOffer(store.independent ?? {})
-      return true
+      try {
+        const res = await apiFetch(`/api/eldorado/message-groups/${normalizedGroupId}/templates`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ label: normalizedLabel }),
+        })
+        if (!res.ok) throw new Error("api_error")
+        setEldoradoMessageGroupTemplates((prev) => {
+          const next = { ...prev }
+          const list = Array.isArray(next[normalizedGroupId]) ? next[normalizedGroupId] : []
+          if (!list.includes(normalizedLabel)) {
+            next[normalizedGroupId] = [...list, normalizedLabel]
+          }
+          return next
+        })
+        return true
+      } catch (error) {
+        toast.error("Mesaj sablonu eklenemedi (API/Server kontrol edin).")
+        return false
+      }
     },
-    [readEldoradoMessageGroupStore, writeEldoradoMessageGroupStore],
+    [apiFetch, eldoradoMessageGroups],
   )
 
   const handleEldoradoMessageTemplateAdd = useCallback(
-    (offerId, label) => {
+    async (offerId, label) => {
       const normalizedOfferId = String(offerId ?? "").trim()
       const normalizedLabel = String(label ?? "").trim()
       if (!normalizedOfferId || !normalizedLabel) return false
-      const store = readEldoradoMessageGroupStore()
-      store.independent = store.independent && typeof store.independent === "object"
-        ? store.independent
-        : {}
-      const list = Array.isArray(store.independent[normalizedOfferId])
-        ? store.independent[normalizedOfferId]
-        : []
-      if (list.includes(normalizedLabel)) return true
-      store.independent[normalizedOfferId] = [...list, normalizedLabel]
-      const saved = writeEldoradoMessageGroupStore(store)
-      if (!saved) return false
-      setEldoradoMessageGroups(store.groups)
-      setEldoradoMessageGroupAssignments(store.assignments)
-      setEldoradoMessageGroupTemplates(store.templates)
-      setEldoradoMessageTemplatesByOffer(store.independent ?? {})
-      return true
+      try {
+        const res = await apiFetch("/api/eldorado/message-templates", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ offerId: normalizedOfferId, label: normalizedLabel }),
+        })
+        if (!res.ok) throw new Error("api_error")
+        setEldoradoMessageTemplatesByOffer((prev) => {
+          const next = { ...prev }
+          const list = Array.isArray(next[normalizedOfferId]) ? next[normalizedOfferId] : []
+          if (!list.includes(normalizedLabel)) {
+            next[normalizedOfferId] = [...list, normalizedLabel]
+          }
+          return next
+        })
+        return true
+      } catch (error) {
+        toast.error("Mesaj sablonu eklenemedi (API/Server kontrol edin).")
+        return false
+      }
     },
-    [readEldoradoMessageGroupStore, writeEldoradoMessageGroupStore],
+    [apiFetch],
   )
 
   const handleEldoradoMessageGroupTemplateRemove = useCallback(
-    (groupId, label) => {
+    async (groupId, label) => {
       const normalizedGroupId = String(groupId ?? "").trim()
       const normalizedLabel = String(label ?? "").trim()
       if (!normalizedGroupId || !normalizedLabel) return false
-      const store = readEldoradoMessageGroupStore()
-      const list = Array.isArray(store.templates?.[normalizedGroupId])
-        ? store.templates[normalizedGroupId]
-        : []
-      if (list.length === 0) return false
-      const nextList = list.filter((item) => item !== normalizedLabel)
-      if (nextList.length === 0) {
-        delete store.templates[normalizedGroupId]
-      } else {
-        store.templates[normalizedGroupId] = nextList
+      try {
+        const query = new URLSearchParams({ label: normalizedLabel })
+        const res = await apiFetch(`/api/eldorado/message-groups/${normalizedGroupId}/templates?${query}`, {
+          method: "DELETE",
+        })
+        if (!res.ok) throw new Error("api_error")
+        setEldoradoMessageGroupTemplates((prev) => {
+          const next = { ...prev }
+          const list = Array.isArray(next[normalizedGroupId]) ? next[normalizedGroupId] : []
+          const nextList = list.filter((item) => item !== normalizedLabel)
+          if (nextList.length === 0) {
+            delete next[normalizedGroupId]
+          } else {
+            next[normalizedGroupId] = nextList
+          }
+          return next
+        })
+        return true
+      } catch (error) {
+        toast.error("Mesaj sablonu kaldirilamadi (API/Server kontrol edin).")
+        return false
       }
-      const saved = writeEldoradoMessageGroupStore(store)
-      if (!saved) return false
-      setEldoradoMessageGroups(store.groups)
-      setEldoradoMessageGroupAssignments(store.assignments)
-      setEldoradoMessageGroupTemplates(store.templates)
-      setEldoradoMessageTemplatesByOffer(store.independent ?? {})
-      return true
     },
-    [readEldoradoMessageGroupStore, writeEldoradoMessageGroupStore],
+    [apiFetch],
   )
 
   const handleEldoradoMessageTemplateRemove = useCallback(
-    (offerId, label) => {
+    async (offerId, label) => {
       const normalizedOfferId = String(offerId ?? "").trim()
       const normalizedLabel = String(label ?? "").trim()
       if (!normalizedOfferId || !normalizedLabel) return false
-      const store = readEldoradoMessageGroupStore()
-      store.independent =
-        store.independent && typeof store.independent === "object" ? store.independent : {}
-      const list = Array.isArray(store.independent[normalizedOfferId])
-        ? store.independent[normalizedOfferId]
-        : []
-      if (list.length === 0) return false
-      const nextList = list.filter((item) => item !== normalizedLabel)
-      if (nextList.length === 0) {
-        delete store.independent[normalizedOfferId]
-      } else {
-        store.independent[normalizedOfferId] = nextList
+      try {
+        const query = new URLSearchParams({ offerId: normalizedOfferId, label: normalizedLabel })
+        const res = await apiFetch(`/api/eldorado/message-templates?${query}`, { method: "DELETE" })
+        if (!res.ok) throw new Error("api_error")
+        setEldoradoMessageTemplatesByOffer((prev) => {
+          const next = { ...prev }
+          const list = Array.isArray(next[normalizedOfferId]) ? next[normalizedOfferId] : []
+          const nextList = list.filter((item) => item !== normalizedLabel)
+          if (nextList.length === 0) {
+            delete next[normalizedOfferId]
+          } else {
+            next[normalizedOfferId] = nextList
+          }
+          return next
+        })
+        return true
+      } catch (error) {
+        toast.error("Mesaj sablonu kaldirilamadi (API/Server kontrol edin).")
+        return false
       }
-      const saved = writeEldoradoMessageGroupStore(store)
-      if (!saved) return false
-      setEldoradoMessageGroups(store.groups)
-      setEldoradoMessageGroupAssignments(store.assignments)
-      setEldoradoMessageGroupTemplates(store.templates)
-      setEldoradoMessageTemplatesByOffer(store.independent ?? {})
-      return true
     },
-    [readEldoradoMessageGroupStore, writeEldoradoMessageGroupStore],
+    [apiFetch],
   )
 
   const loadEldoradoKeys = useCallback(
@@ -3407,20 +2778,18 @@ export default function useAppData() {
 
       setEldoradoKeysLoading((prev) => ({ ...prev, [normalizedId]: true }))
       try {
-        const groupStore = readEldoradoGroupStore()
-        const assignedGroupId = groupStore.assignments[normalizedId] ?? ""
-        const groupId = assignedGroupId || normalizedId
-        const keyStore = readEldoradoKeyStore()
-        const list = Array.isArray(keyStore[groupId]) ? keyStore[groupId] : []
+        const res = await apiFetch(`/api/eldorado/keys/${normalizedId}`)
+        if (!res.ok) throw new Error("api_error")
+        const list = await res.json()
+        const assignedGroupId = String(eldoradoGroupAssignments?.[normalizedId] ?? "").trim()
         if (assignedGroupId) {
-          syncEldoradoKeysForGroup(groupId, list, groupStore.assignments)
+          syncEldoradoKeysForGroup(assignedGroupId, list)
         } else {
           setEldoradoKeysByOffer((prev) => ({ ...prev, [normalizedId]: list }))
         }
-        setEldoradoCatalog((prev) => applyEldoradoKeyCounts(prev))
       } catch (error) {
         console.error(error)
-        toast.error("Urun stoklari alinamadi (local storage).")
+        toast.error("Urun stoklari alinamadi (API/Server kontrol edin).")
       } finally {
         setEldoradoKeysLoading((prev) => {
           const next = { ...prev }
@@ -3429,54 +2798,17 @@ export default function useAppData() {
         })
       }
     },
-    [
-      applyEldoradoKeyCounts,
-      eldoradoKeysByOffer,
-      readEldoradoGroupStore,
-      readEldoradoKeyStore,
-      syncEldoradoKeysForGroup,
-    ],
+    [apiFetch, eldoradoGroupAssignments, eldoradoKeysByOffer, syncEldoradoKeysForGroup],
   )
 
   const refreshEldoradoOffer = useCallback(
     async (offerId) => {
       const normalizedId = String(offerId ?? "").trim()
       if (!normalizedId) return
-      const groupStore = readEldoradoGroupStore()
-      setEldoradoGroups(groupStore.groups)
-      setEldoradoGroupAssignments(groupStore.assignments)
-
-      const noteStore = readEldoradoNoteGroupStore()
-      setEldoradoNoteGroups(noteStore.groups)
-      setEldoradoNoteGroupAssignments(noteStore.assignments)
-      setEldoradoNoteGroupNotes(noteStore.notes)
-
-      const messageStore = readEldoradoMessageGroupStore()
-      setEldoradoMessageGroups(messageStore.groups)
-      setEldoradoMessageGroupAssignments(messageStore.assignments)
-      setEldoradoMessageGroupTemplates(messageStore.templates)
-      setEldoradoMessageTemplatesByOffer(messageStore.independent ?? {})
-
-      setEldoradoStockEnabledByOffer(readEldoradoStockEnabledStore())
+      await loadEldoradoStore()
       await loadEldoradoKeys(normalizedId, { force: true })
     },
-    [
-      loadEldoradoKeys,
-      readEldoradoGroupStore,
-      readEldoradoMessageGroupStore,
-      readEldoradoNoteGroupStore,
-      readEldoradoStockEnabledStore,
-      setEldoradoGroups,
-      setEldoradoGroupAssignments,
-      setEldoradoMessageGroupAssignments,
-      setEldoradoMessageGroupTemplates,
-      setEldoradoMessageGroups,
-      setEldoradoMessageTemplatesByOffer,
-      setEldoradoNoteGroupAssignments,
-      setEldoradoNoteGroupNotes,
-      setEldoradoNoteGroups,
-      setEldoradoStockEnabledByOffer,
-    ],
+    [loadEldoradoKeys, loadEldoradoStore],
   )
 
   const handleEldoradoKeysAdd = useCallback(
@@ -3494,40 +2826,32 @@ export default function useAppData() {
 
       setEldoradoKeysSaving((prev) => ({ ...prev, [normalizedId]: true }))
       try {
-        const groupStore = readEldoradoGroupStore()
-        const assignedGroupId = groupStore.assignments[normalizedId] ?? ""
-        const targetKey = assignedGroupId || normalizedId
-        const store = readEldoradoKeyStore()
-        const currentList = Array.isArray(store[targetKey]) ? store[targetKey] : []
-        const createdAt = new Date().toISOString()
-        const added = []
-
-        codes.forEach((code) => {
-          added.push({ id: createLocalEldoradoKeyId(), code, status: "available", createdAt })
+        const res = await apiFetch(`/api/eldorado/keys/${normalizedId}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ codes }),
         })
-
-        const nextList = [...currentList, ...added]
-        store[targetKey] = nextList
-        const saved = writeEldoradoKeyStore(store)
-        if (!saved) return false
-
+        if (!res.ok) throw new Error("api_error")
+        const list = await res.json()
+        const assignedGroupId = String(eldoradoGroupAssignments?.[normalizedId] ?? "").trim()
         if (assignedGroupId) {
-          syncEldoradoKeysForGroup(targetKey, nextList, groupStore.assignments)
+          syncEldoradoKeysForGroup(assignedGroupId, list)
         } else {
-          setEldoradoKeysByOffer((prev) => ({ ...prev, [normalizedId]: nextList }))
+          setEldoradoKeysByOffer((prev) => ({ ...prev, [normalizedId]: list }))
         }
-        setEldoradoCatalog((prev) => applyEldoradoKeyCounts(prev))
+        setEldoradoStockEnabledByOffer((prev) => ({ ...prev, [normalizedId]: true }))
+        loadEldoradoCatalog()
 
-        const addedCount = added.length
+        const addedCount = codes.length
         if (addedCount > 0) {
           toast.success(`${addedCount} stok eklendi`, { duration: 1600, position: "top-right" })
-        } else {
-          toast.error("Yeni stok eklenmedi.")
+          return true
         }
-        return addedCount > 0
+        toast.error("Yeni stok eklenmedi.")
+        return false
       } catch (error) {
         console.error(error)
-        toast.error("Stok eklenemedi (local storage).")
+        toast.error("Stok eklenemedi (API/Server kontrol edin).")
         return false
       } finally {
         setEldoradoKeysSaving((prev) => {
@@ -3537,14 +2861,7 @@ export default function useAppData() {
         })
       }
     },
-    [
-      applyEldoradoKeyCounts,
-      createLocalEldoradoKeyId,
-      readEldoradoGroupStore,
-      readEldoradoKeyStore,
-      syncEldoradoKeysForGroup,
-      writeEldoradoKeyStore,
-    ],
+    [apiFetch, eldoradoGroupAssignments, loadEldoradoCatalog, syncEldoradoKeysForGroup],
   )
 
   const handleEldoradoKeyDelete = useCallback(
@@ -3555,27 +2872,18 @@ export default function useAppData() {
 
       setEldoradoKeysDeleting((prev) => ({ ...prev, [normalizedKeyId]: true }))
       try {
-        const groupStore = readEldoradoGroupStore()
-        const assignedGroupId = groupStore.assignments[normalizedOfferId] ?? ""
-        const groupId = assignedGroupId || normalizedOfferId
-        const store = readEldoradoKeyStore()
-        const list = Array.isArray(store[groupId]) ? store[groupId] : []
-        const nextList = list.filter((item) => item.id !== normalizedKeyId)
-        store[groupId] = nextList
-
-        const saved = writeEldoradoKeyStore(store)
-        if (!saved) return
-
-        if (assignedGroupId) {
-          syncEldoradoKeysForGroup(groupId, nextList, groupStore.assignments)
-        } else {
-          setEldoradoKeysByOffer((prev) => ({ ...prev, [normalizedOfferId]: nextList }))
-        }
-        setEldoradoCatalog((prev) => applyEldoradoKeyCounts(prev))
+        const res = await apiFetch("/api/eldorado/keys/bulk-delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids: [normalizedKeyId] }),
+        })
+        if (!res.ok) throw new Error("api_error")
+        await loadEldoradoKeys(normalizedOfferId, { force: true })
+        loadEldoradoCatalog()
         toast.success("Stok silindi")
       } catch (error) {
         console.error(error)
-        toast.error("Stok silinemedi (local storage).")
+        toast.error("Stok silinemedi (API/Server kontrol edin).")
       } finally {
         setEldoradoKeysDeleting((prev) => {
           const next = { ...prev }
@@ -3584,13 +2892,7 @@ export default function useAppData() {
         })
       }
     },
-    [
-      applyEldoradoKeyCounts,
-      readEldoradoGroupStore,
-      readEldoradoKeyStore,
-      syncEldoradoKeysForGroup,
-      writeEldoradoKeyStore,
-    ],
+    [apiFetch, loadEldoradoCatalog, loadEldoradoKeys],
   )
 
   const handleEldoradoBulkDelete = useCallback(
@@ -3602,96 +2904,50 @@ export default function useAppData() {
       if (!normalizedOfferId || idList.length === 0) return false
 
       try {
-        const groupStore = readEldoradoGroupStore()
-        const assignedGroupId = groupStore.assignments[normalizedOfferId] ?? ""
-        const groupId = assignedGroupId || normalizedOfferId
-        const store = readEldoradoKeyStore()
-        const list = Array.isArray(store[groupId]) ? store[groupId] : []
-        const removeSet = new Set(idList)
-        const nextList = list.filter((item) => !removeSet.has(String(item.id ?? "")))
-        if (nextList.length === list.length) {
-          toast.error("Silinecek stok bulunamadi.")
-          return false
-        }
-        store[groupId] = nextList
-
-        const saved = writeEldoradoKeyStore(store)
-        if (!saved) return false
-
-        if (assignedGroupId) {
-          syncEldoradoKeysForGroup(groupId, nextList, groupStore.assignments)
-        } else {
-          setEldoradoKeysByOffer((prev) => ({ ...prev, [normalizedOfferId]: nextList }))
-        }
-        setEldoradoCatalog((prev) => applyEldoradoKeyCounts(prev))
-        toast.success(`${list.length - nextList.length} stok silindi`, {
-          duration: 1500,
-          position: "top-right",
+        const res = await apiFetch("/api/eldorado/keys/bulk-delete", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids: idList }),
         })
+        if (!res.ok) throw new Error("api_error")
+        await loadEldoradoKeys(normalizedOfferId, { force: true })
+        loadEldoradoCatalog()
+        toast.success("Stoklar silindi", { duration: 1500, position: "top-right" })
         return true
       } catch (error) {
         console.error(error)
-        toast.error("Stok silinemedi (local storage).")
+        toast.error("Stoklar silinemedi (API/Server kontrol edin).")
         return false
       }
     },
-    [
-      applyEldoradoKeyCounts,
-      readEldoradoGroupStore,
-      readEldoradoKeyStore,
-      syncEldoradoKeysForGroup,
-      writeEldoradoKeyStore,
-    ],
+    [apiFetch, loadEldoradoCatalog, loadEldoradoKeys],
   )
 
   const handleEldoradoKeyStatusUpdate = useCallback(
-    (offerId, keyId, nextStatus) => {
+    async (offerId, keyId, status) => {
       const normalizedOfferId = String(offerId ?? "").trim()
       const normalizedKeyId = String(keyId ?? "").trim()
-      if (!normalizedOfferId || !normalizedKeyId) return
+      const normalizedStatus = String(status ?? "").trim()
+      if (!normalizedOfferId || !normalizedKeyId || !normalizedStatus) return false
 
-      const status = nextStatus === "used" ? "used" : "available"
       try {
-        const groupStore = readEldoradoGroupStore()
-        const assignedGroupId = groupStore.assignments[normalizedOfferId] ?? ""
-        const groupId = assignedGroupId || normalizedOfferId
-        const store = readEldoradoKeyStore()
-        const list = Array.isArray(store[groupId]) ? store[groupId] : []
-        let didUpdate = false
-
-        const nextList = list.map((item) => {
-          if (item.id !== normalizedKeyId) return item
-          const currentStatus = item?.status === "used" ? "used" : "available"
-          if (currentStatus === status) return item
-          didUpdate = true
-          return { ...item, status }
+        const res = await apiFetch("/api/eldorado/keys/bulk-status", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ ids: [normalizedKeyId], status: normalizedStatus }),
         })
-
-        if (!didUpdate) return
-
-        store[groupId] = nextList
-        const saved = writeEldoradoKeyStore(store)
-        if (!saved) return
-
-        if (assignedGroupId) {
-          syncEldoradoKeysForGroup(groupId, nextList, groupStore.assignments)
-        } else {
-          setEldoradoKeysByOffer((prev) => ({ ...prev, [normalizedOfferId]: nextList }))
-        }
-        setEldoradoCatalog((prev) => applyEldoradoKeyCounts(prev))
-        toast.success(status === "used" ? "Stok kullanildi" : "Stok geri alindi")
+        if (!res.ok) throw new Error("api_error")
+        await loadEldoradoKeys(normalizedOfferId, { force: true })
+        loadEldoradoCatalog()
+        toast.success(normalizedStatus === "used" ? "Stok kullanildi" : "Stok geri alindi")
+        return true
       } catch (error) {
         console.error(error)
-        toast.error("Stok durumu guncellenemedi (local storage).")
+        toast.error("Stok durumu guncellenemedi (API/Server kontrol edin).")
+        return false
       }
     },
-    [
-      applyEldoradoKeyCounts,
-      readEldoradoGroupStore,
-      readEldoradoKeyStore,
-      syncEldoradoKeysForGroup,
-      writeEldoradoKeyStore,
-    ],
+    [apiFetch, loadEldoradoCatalog, loadEldoradoKeys],
   )
 
   const handleEldoradoKeyUpdate = useCallback(
@@ -3702,46 +2958,23 @@ export default function useAppData() {
       if (!normalizedOfferId || !normalizedKeyId || !trimmedCode) return false
 
       try {
-        const groupStore = readEldoradoGroupStore()
-        const assignedGroupId = groupStore.assignments[normalizedOfferId] ?? ""
-        const groupId = assignedGroupId || normalizedOfferId
-        const store = readEldoradoKeyStore()
-        const list = Array.isArray(store[groupId]) ? store[groupId] : []
-        let didUpdate = false
-        const nextList = list.map((item) => {
-          if (String(item.id ?? "").trim() !== normalizedKeyId) return item
-          didUpdate = true
-          return { ...item, code: trimmedCode }
+        const res = await apiFetch(`/api/eldorado/keys/${normalizedKeyId}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ code: trimmedCode }),
         })
-        if (!didUpdate) {
-          toast.error("Stok bulunamadi.")
-          return false
-        }
-        store[groupId] = nextList
-        const saved = writeEldoradoKeyStore(store)
-        if (!saved) return false
-
-        if (assignedGroupId) {
-          syncEldoradoKeysForGroup(groupId, nextList, groupStore.assignments)
-        } else {
-          setEldoradoKeysByOffer((prev) => ({ ...prev, [normalizedOfferId]: nextList }))
-        }
-        setEldoradoCatalog((prev) => applyEldoradoKeyCounts(prev))
+        if (!res.ok) throw new Error("api_error")
+        await loadEldoradoKeys(normalizedOfferId, { force: true })
+        loadEldoradoCatalog()
         toast.success("Stok guncellendi", { duration: 1500, position: "top-right" })
         return true
       } catch (error) {
         console.error(error)
-        toast.error("Stok guncellenemedi (local storage).")
+        toast.error("Stok guncellenemedi (API/Server kontrol edin).")
         return false
       }
     },
-    [
-      applyEldoradoKeyCounts,
-      readEldoradoGroupStore,
-      readEldoradoKeyStore,
-      syncEldoradoKeysForGroup,
-      writeEldoradoKeyStore,
-    ],
+    [apiFetch, loadEldoradoCatalog, loadEldoradoKeys],
   )
 
   const handleEldoradoBulkCopy = useCallback(
@@ -3749,12 +2982,26 @@ export default function useAppData() {
       const normalizedOfferId = String(offerId ?? "").trim()
       if (!normalizedOfferId) return false
 
-      const groupStore = readEldoradoGroupStore()
-      const assignedGroupId = groupStore.assignments[normalizedOfferId] ?? ""
-      const groupId = assignedGroupId || normalizedOfferId
+      let list = Array.isArray(eldoradoKeysByOffer[normalizedOfferId])
+        ? eldoradoKeysByOffer[normalizedOfferId]
+        : null
+      if (!list) {
+        try {
+          const res = await apiFetch(`/api/eldorado/keys/${normalizedOfferId}`)
+          if (!res.ok) throw new Error("api_error")
+          list = await res.json()
+          const assignedGroupId = String(eldoradoGroupAssignments?.[normalizedOfferId] ?? "").trim()
+          if (assignedGroupId) {
+            syncEldoradoKeysForGroup(assignedGroupId, list)
+          } else {
+            setEldoradoKeysByOffer((prev) => ({ ...prev, [normalizedOfferId]: list }))
+          }
+        } catch (error) {
+          toast.error("Kopyalama icin stok bulunamadi.")
+          return false
+        }
+      }
 
-      const store = readEldoradoKeyStore()
-      const list = Array.isArray(store[groupId]) ? store[groupId] : []
       const available = list.filter((item) => item?.status !== "used")
       const parsedCount = Number(rawCount)
       const count = Number.isFinite(parsedCount) && parsedCount > 0 ? Math.floor(parsedCount) : available.length
@@ -3775,20 +3022,19 @@ export default function useAppData() {
       }
 
       if (options.markUsed) {
-        const selectedIds = new Set(selected.map((item) => item.id))
-        const nextList = list.map((item) =>
-          selectedIds.has(item.id) ? { ...item, status: "used" } : item,
-        )
-        store[groupId] = nextList
-        const saved = writeEldoradoKeyStore(store)
-        if (!saved) return false
-
-        if (assignedGroupId) {
-          syncEldoradoKeysForGroup(groupId, nextList, groupStore.assignments)
-        } else {
-          setEldoradoKeysByOffer((prev) => ({ ...prev, [normalizedOfferId]: nextList }))
+        try {
+          const res = await apiFetch("/api/eldorado/keys/bulk-status", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ ids: selected.map((item) => item.id), status: "used" }),
+          })
+          if (!res.ok) throw new Error("api_error")
+          await loadEldoradoKeys(normalizedOfferId, { force: true })
+          loadEldoradoCatalog()
+        } catch (error) {
+          toast.error("Stoklar isaretlenemedi (API/Server kontrol edin).")
+          return false
         }
-        setEldoradoCatalog((prev) => applyEldoradoKeyCounts(prev))
         toast.success(`${selected.length} stok kopyalandi ve kullanildi`, {
           duration: 1700,
           position: "top-right",
@@ -3803,11 +3049,12 @@ export default function useAppData() {
       return true
     },
     [
-      applyEldoradoKeyCounts,
-      readEldoradoGroupStore,
-      readEldoradoKeyStore,
+      apiFetch,
+      eldoradoGroupAssignments,
+      eldoradoKeysByOffer,
+      loadEldoradoCatalog,
+      loadEldoradoKeys,
       syncEldoradoKeysForGroup,
-      writeEldoradoKeyStore,
     ],
   )
 
@@ -3830,6 +3077,15 @@ export default function useAppData() {
     if (!isAuthed || !permissions.includes(PERMISSIONS.stockView)) {
       setEldoradoGroups([])
       setEldoradoGroupAssignments({})
+      setEldoradoNotesByOffer({})
+      setEldoradoNoteGroups([])
+      setEldoradoNoteGroupAssignments({})
+      setEldoradoNoteGroupNotes({})
+      setEldoradoMessageGroups([])
+      setEldoradoMessageGroupAssignments({})
+      setEldoradoMessageGroupTemplates({})
+      setEldoradoMessageTemplatesByOffer({})
+      setEldoradoStockEnabledByOffer({})
       return
     }
     loadEldoradoGroups()
@@ -4688,11 +3944,11 @@ export default function useAppData() {
   const toastIconTheme = isLight
     ? { primary: "#2563eb", secondary: "#ffffff" }
     : { primary: "#3ac7ff", secondary: "#0f1625" }
-  const templateCountText = showLoading ? <LoadingIndicator label="YÃ¼kleniyor" /> : templates.length
-  const categoryCountText = showLoading ? <LoadingIndicator label="YÃ¼kleniyor" /> : categories.length
-  const selectedCategoryText = showLoading ? <LoadingIndicator label="YÃ¼kleniyor" /> : selectedCategory.trim() || "Genel"
-  const listCountText = isListsTabLoading ? <LoadingIndicator label="YÃ¼kleniyor" /> : lists.length
-  const taskCountText = isTasksTabLoading ? <LoadingIndicator label="YÃ¼kleniyor" /> : taskStats.total
+  const templateCountText = showLoading ? <LoadingIndicator label="Yükleniyor" /> : templates.length
+  const categoryCountText = showLoading ? <LoadingIndicator label="Yükleniyor" /> : categories.length
+  const selectedCategoryText = showLoading ? <LoadingIndicator label="Yükleniyor" /> : selectedCategory.trim() || "Genel"
+  const listCountText = isListsTabLoading ? <LoadingIndicator label="Yükleniyor" /> : lists.length
+  const taskCountText = isTasksTabLoading ? <LoadingIndicator label="Yükleniyor" /> : taskStats.total
 
   const isAuthBusy = isAuthChecking || isAuthLoading
 

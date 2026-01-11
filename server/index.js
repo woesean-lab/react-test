@@ -171,6 +171,54 @@ const mapEldoradoOffersToCatalog = (offers, syncByKind) => {
   })
 }
 
+const loadEldoradoStockGroupMeta = async () => {
+  const [groups, assignments] = await Promise.all([
+    prisma.eldoradoStockGroup.findMany({ orderBy: { createdAt: "asc" } }),
+    prisma.eldoradoStockGroupAssignment.findMany(),
+  ])
+  const assignmentMap = {}
+  assignments.forEach((entry) => {
+    if (!entry?.offerId || !entry?.groupId) return
+    assignmentMap[entry.offerId] = entry.groupId
+  })
+  return { groups, assignments: assignmentMap }
+}
+
+const addEldoradoKeyCount = (map, id, status, count) => {
+  if (!id) return
+  const existing = map.get(id) ?? { total: 0, used: 0 }
+  existing.total += count
+  if (status === "used") {
+    existing.used += count
+  }
+  map.set(id, existing)
+}
+
+const buildEldoradoKeyCounts = async (offerIds, groupIds) => {
+  const counts = new Map()
+  if (groupIds.length > 0) {
+    const rows = await prisma.eldoradoKey.groupBy({
+      by: ["groupId", "status"],
+      _count: { _all: true },
+      where: { groupId: { in: groupIds } },
+    })
+    rows.forEach((row) => {
+      addEldoradoKeyCount(counts, row.groupId, row.status, row._count._all)
+    })
+  }
+  if (offerIds.length > 0) {
+    const rows = await prisma.eldoradoKey.groupBy({
+      by: ["offerId", "status"],
+      _count: { _all: true },
+      where: { offerId: { in: offerIds } },
+    })
+    rows.forEach((row) => {
+      addEldoradoKeyCount(counts, row.offerId, row.status, row._count._all)
+    })
+  }
+  return counts
+}
+
 const loadEldoradoCatalog = async () => {
   try {
     const [offers, syncs] = await Promise.all([
@@ -178,6 +226,11 @@ const loadEldoradoCatalog = async () => {
       prisma.eldoradoSync.findMany(),
     ])
     if (offers.length > 0) {
+      const { groups, assignments } = await loadEldoradoStockGroupMeta()
+      const groupNameById = new Map(groups.map((group) => [group.id, group.name]))
+      const groupIds = Array.from(new Set(Object.values(assignments)))
+      const offerIds = offers.map((offer) => offer.id)
+      const keyCounts = await buildEldoradoKeyCounts(offerIds, groupIds)
       const syncByKind = new Map()
       syncs.forEach((entry) => {
         if (entry?.kind && entry?.lastSyncAt instanceof Date) {
@@ -185,7 +238,28 @@ const loadEldoradoCatalog = async () => {
         }
       })
       const catalog = mapEldoradoOffersToCatalog(offers, syncByKind)
-      return catalog
+      const withCounts = (list) =>
+        Array.isArray(list)
+          ? list.map((offer) => {
+            const assignedGroupId = assignments[offer.id] ?? ""
+            const effectiveId = assignedGroupId || offer.id
+            const counts = keyCounts.get(effectiveId) ?? { total: 0, used: 0 }
+            const available = Math.max(0, counts.total - counts.used)
+            return {
+              ...offer,
+              stockGroupId: assignedGroupId || null,
+              stockGroupName: assignedGroupId ? groupNameById.get(assignedGroupId) ?? "" : "",
+              stockCount: available,
+              stockUsedCount: counts.used,
+              stockTotalCount: counts.total,
+            }
+          })
+          : []
+      return {
+        ...catalog,
+        items: withCounts(catalog.items),
+        topups: withCounts(catalog.topups),
+      }
     }
   } catch (error) {
     console.warn("Failed to load Eldorado offers from database, falling back to JSON.", error)
@@ -204,6 +278,117 @@ const loadEldoradoCatalog = async () => {
     giftCards: [],
   })
   return catalog
+}
+
+const loadEldoradoStore = async () => {
+  const [
+    stockGroups,
+    stockAssignments,
+    stockEnabled,
+    offerNotes,
+    noteGroups,
+    noteAssignments,
+    noteGroupNotes: noteGroupNoteRows,
+    messageGroups,
+    messageAssignments,
+    messageGroupTemplates: messageGroupTemplateRows,
+    messageTemplates: messageTemplateRows,
+  ] = await Promise.all([
+    prisma.eldoradoStockGroup.findMany({ orderBy: { createdAt: "asc" } }),
+    prisma.eldoradoStockGroupAssignment.findMany(),
+    prisma.eldoradoStockEnabled.findMany(),
+    prisma.eldoradoOfferNote.findMany(),
+    prisma.eldoradoNoteGroup.findMany({ orderBy: { createdAt: "asc" } }),
+    prisma.eldoradoNoteGroupAssignment.findMany(),
+    prisma.eldoradoNoteGroupNote.findMany(),
+    prisma.eldoradoMessageGroup.findMany({ orderBy: { createdAt: "asc" } }),
+    prisma.eldoradoMessageGroupAssignment.findMany(),
+    prisma.eldoradoMessageGroupTemplate.findMany(),
+    prisma.eldoradoMessageTemplate.findMany(),
+  ])
+
+  const stockGroupAssignments = {}
+  stockAssignments.forEach((entry) => {
+    if (entry?.offerId && entry?.groupId) {
+      stockGroupAssignments[entry.offerId] = entry.groupId
+    }
+  })
+
+  const stockEnabledByOffer = {}
+  stockEnabled.forEach((entry) => {
+    if (!entry?.offerId) return
+    stockEnabledByOffer[entry.offerId] = Boolean(entry.enabled)
+  })
+
+  const notesByOffer = {}
+  offerNotes.forEach((entry) => {
+    if (!entry?.offerId) return
+    const note = String(entry.note ?? "").trim()
+    if (!note) return
+    notesByOffer[entry.offerId] = note
+  })
+
+  const noteGroupAssignments = {}
+  noteAssignments.forEach((entry) => {
+    if (entry?.offerId && entry?.groupId) {
+      noteGroupAssignments[entry.offerId] = entry.groupId
+    }
+  })
+
+  const noteGroupNotes = {}
+  noteGroupNoteRows.forEach((entry) => {
+    if (!entry?.groupId) return
+    const note = String(entry.note ?? "").trim()
+    if (!note) return
+    noteGroupNotes[entry.groupId] = note
+  })
+
+  const messageGroupAssignments = {}
+  messageAssignments.forEach((entry) => {
+    if (entry?.offerId && entry?.groupId) {
+      messageGroupAssignments[entry.offerId] = entry.groupId
+    }
+  })
+
+  const messageGroupTemplates = {}
+  messageGroupTemplateRows.forEach((entry) => {
+    if (!entry?.groupId || !entry?.label) return
+    if (!messageGroupTemplates[entry.groupId]) messageGroupTemplates[entry.groupId] = []
+    messageGroupTemplates[entry.groupId].push(entry.label)
+  })
+
+  const messageTemplatesByOffer = {}
+  messageTemplateRows.forEach((entry) => {
+    if (!entry?.offerId || !entry?.label) return
+    if (!messageTemplatesByOffer[entry.offerId]) messageTemplatesByOffer[entry.offerId] = []
+    messageTemplatesByOffer[entry.offerId].push(entry.label)
+  })
+
+  return {
+    stockGroups: stockGroups.map((group) => ({
+      id: group.id,
+      name: group.name,
+      createdAt: group.createdAt.toISOString(),
+    })),
+    stockGroupAssignments,
+    stockEnabledByOffer,
+    notesByOffer,
+    noteGroups: noteGroups.map((group) => ({
+      id: group.id,
+      name: group.name,
+      createdAt: group.createdAt.toISOString(),
+    })),
+    noteGroupAssignments,
+    noteGroupNotes,
+    messageGroups: messageGroups.map((group) => ({
+      id: group.id,
+      name: group.name,
+      createdAt: group.createdAt.toISOString(),
+    })),
+    messageGroupAssignments,
+    messageGroupTemplates,
+    messageTemplatesByOffer,
+  }
 }
 
 const syncEldoradoOffers = async (kind, offers, seenAtOverride) => {
@@ -1739,6 +1924,526 @@ app.post("/api/eldorado/refresh", async (_req, res, next) => {
   } finally {
     eldoradoRefreshInFlight = false
   }
+})
+
+app.get("/api/eldorado/store", async (_req, res, next) => {
+  try {
+    const store = await loadEldoradoStore()
+    res.json(store)
+  } catch (error) {
+    next(error)
+  }
+})
+
+app.post("/api/eldorado/stock-groups", async (req, res) => {
+  const name = String(req.body?.name ?? "").trim()
+  if (!name) {
+    res.status(400).json({ error: "name is required" })
+    return
+  }
+
+  const existing = await prisma.eldoradoStockGroup.findFirst({
+    where: { name: { equals: name, mode: "insensitive" } },
+  })
+  if (existing) {
+    res.json({
+      id: existing.id,
+      name: existing.name,
+      createdAt: existing.createdAt.toISOString(),
+    })
+    return
+  }
+
+  const created = await prisma.eldoradoStockGroup.create({ data: { name } })
+  res.status(201).json({
+    id: created.id,
+    name: created.name,
+    createdAt: created.createdAt.toISOString(),
+  })
+})
+
+app.put("/api/eldorado/stock-groups/assign", async (req, res) => {
+  const offerId = String(req.body?.offerId ?? "").trim()
+  const groupId = String(req.body?.groupId ?? "").trim()
+  if (!offerId) {
+    res.status(400).json({ error: "offerId is required" })
+    return
+  }
+
+  if (groupId) {
+    const group = await prisma.eldoradoStockGroup.findUnique({ where: { id: groupId } })
+    if (!group) {
+      res.status(404).json({ error: "group not found" })
+      return
+    }
+    await prisma.eldoradoStockGroupAssignment.upsert({
+      where: { offerId },
+      update: { groupId },
+      create: { offerId, groupId },
+    })
+  } else {
+    await prisma.eldoradoStockGroupAssignment.deleteMany({ where: { offerId } })
+  }
+
+  res.json({ ok: true })
+})
+
+app.delete("/api/eldorado/stock-groups/:id", async (req, res) => {
+  const groupId = String(req.params.id ?? "").trim()
+  if (!groupId) {
+    res.status(400).json({ error: "invalid id" })
+    return
+  }
+
+  const group = await prisma.eldoradoStockGroup.findUnique({ where: { id: groupId } })
+  if (!group) {
+    res.status(404).json({ error: "group not found" })
+    return
+  }
+
+  const assignments = await prisma.eldoradoStockGroupAssignment.findMany({
+    where: { groupId },
+  })
+  const offerIds = assignments.map((entry) => entry.offerId)
+  const groupKeys = await prisma.eldoradoKey.findMany({ where: { groupId } })
+
+  const operations = []
+  if (groupKeys.length > 0) {
+    offerIds.forEach((offerId) => {
+      const data = groupKeys.map((key) => ({
+        code: key.code,
+        status: key.status,
+        offerId,
+      }))
+      operations.push(prisma.eldoradoKey.createMany({ data }))
+    })
+  }
+  operations.push(prisma.eldoradoKey.deleteMany({ where: { groupId } }))
+  operations.push(prisma.eldoradoStockGroupAssignment.deleteMany({ where: { groupId } }))
+  operations.push(prisma.eldoradoStockGroup.delete({ where: { id: groupId } }))
+
+  await prisma.$transaction(operations)
+  res.json({ ok: true, affectedOffers: offerIds })
+})
+
+app.get("/api/eldorado/keys/:offerId", async (req, res) => {
+  const offerId = String(req.params.offerId ?? "").trim()
+  if (!offerId) {
+    res.status(400).json({ error: "invalid offerId" })
+    return
+  }
+  const assignment = await prisma.eldoradoStockGroupAssignment.findUnique({ where: { offerId } })
+  const groupId = assignment?.groupId || null
+  const keys = await prisma.eldoradoKey.findMany({
+    where: groupId ? { groupId } : { offerId },
+    orderBy: { createdAt: "asc" },
+  })
+  res.json(
+    keys.map((item) => ({
+      id: item.id,
+      code: item.code,
+      status: item.status,
+      createdAt: item.createdAt.toISOString(),
+    })),
+  )
+})
+
+app.post("/api/eldorado/keys/:offerId", async (req, res) => {
+  const offerId = String(req.params.offerId ?? "").trim()
+  if (!offerId) {
+    res.status(400).json({ error: "invalid offerId" })
+    return
+  }
+  const codesRaw = req.body?.codes
+  const codes = Array.isArray(codesRaw)
+    ? codesRaw.map((code) => String(code ?? "").trim()).filter(Boolean)
+    : []
+  if (codes.length === 0) {
+    res.status(400).json({ error: "codes are required" })
+    return
+  }
+
+  const assignment = await prisma.eldoradoStockGroupAssignment.findUnique({ where: { offerId } })
+  const groupId = assignment?.groupId || null
+  await prisma.eldoradoKey.createMany({
+    data: codes.map((code) => ({
+      code,
+      status: "available",
+      offerId: groupId ? null : offerId,
+      groupId: groupId || null,
+    })),
+  })
+
+  await prisma.eldoradoStockEnabled.upsert({
+    where: { offerId },
+    update: { enabled: true },
+    create: { offerId, enabled: true },
+  })
+
+  const keys = await prisma.eldoradoKey.findMany({
+    where: groupId ? { groupId } : { offerId },
+    orderBy: { createdAt: "asc" },
+  })
+  res.status(201).json(
+    keys.map((item) => ({
+      id: item.id,
+      code: item.code,
+      status: item.status,
+      createdAt: item.createdAt.toISOString(),
+    })),
+  )
+})
+
+app.put("/api/eldorado/keys/:id", async (req, res) => {
+  const id = String(req.params.id ?? "").trim()
+  if (!id) {
+    res.status(400).json({ error: "invalid id" })
+    return
+  }
+
+  const statusRaw = req.body?.status
+  const codeRaw = req.body?.code
+  if (statusRaw === undefined && codeRaw === undefined) {
+    res.status(400).json({ error: "status or code is required" })
+    return
+  }
+
+  const data = {}
+  if (statusRaw !== undefined) {
+    const status = String(statusRaw).trim()
+    if (!allowedStockStatus.has(status)) {
+      res.status(400).json({ error: "invalid status" })
+      return
+    }
+    data.status = status
+  }
+  if (codeRaw !== undefined) {
+    const code = String(codeRaw).trim()
+    if (!code) {
+      res.status(400).json({ error: "invalid code" })
+      return
+    }
+    data.code = code
+  }
+
+  try {
+    const updated = await prisma.eldoradoKey.update({ where: { id }, data })
+    res.json({
+      id: updated.id,
+      code: updated.code,
+      status: updated.status,
+      createdAt: updated.createdAt.toISOString(),
+    })
+  } catch (error) {
+    if (error?.code === "P2025") {
+      res.status(404).json({ error: "key not found" })
+      return
+    }
+    throw error
+  }
+})
+
+app.post("/api/eldorado/keys/bulk-status", async (req, res) => {
+  const idsRaw = req.body?.ids
+  const ids = Array.isArray(idsRaw)
+    ? idsRaw.map((item) => String(item ?? "").trim()).filter(Boolean)
+    : []
+  const status = String(req.body?.status ?? "").trim()
+  if (ids.length === 0 || !status) {
+    res.status(400).json({ error: "ids and status are required" })
+    return
+  }
+  if (!allowedStockStatus.has(status)) {
+    res.status(400).json({ error: "invalid status" })
+    return
+  }
+
+  const result = await prisma.eldoradoKey.updateMany({
+    where: { id: { in: ids } },
+    data: { status },
+  })
+  res.json({ updated: result.count })
+})
+
+app.post("/api/eldorado/keys/bulk-delete", async (req, res) => {
+  const idsRaw = req.body?.ids
+  const ids = Array.isArray(idsRaw)
+    ? idsRaw.map((item) => String(item ?? "").trim()).filter(Boolean)
+    : []
+  if (ids.length === 0) {
+    res.status(400).json({ error: "ids are required" })
+    return
+  }
+  const result = await prisma.eldoradoKey.deleteMany({ where: { id: { in: ids } } })
+  res.json({ deleted: result.count })
+})
+
+app.post("/api/eldorado/notes", async (req, res) => {
+  const offerId = String(req.body?.offerId ?? "").trim()
+  if (!offerId) {
+    res.status(400).json({ error: "offerId is required" })
+    return
+  }
+  const note = String(req.body?.note ?? "").trim()
+  const assignment = await prisma.eldoradoNoteGroupAssignment.findUnique({ where: { offerId } })
+  if (assignment?.groupId) {
+    if (note) {
+      await prisma.eldoradoNoteGroupNote.upsert({
+        where: { groupId: assignment.groupId },
+        update: { note },
+        create: { groupId: assignment.groupId, note },
+      })
+    } else {
+      await prisma.eldoradoNoteGroupNote.deleteMany({ where: { groupId: assignment.groupId } })
+    }
+  } else if (note) {
+    await prisma.eldoradoOfferNote.upsert({
+      where: { offerId },
+      update: { note },
+      create: { offerId, note },
+    })
+  } else {
+    await prisma.eldoradoOfferNote.deleteMany({ where: { offerId } })
+  }
+  res.json({ ok: true })
+})
+
+app.post("/api/eldorado/note-groups", async (req, res) => {
+  const name = String(req.body?.name ?? "").trim()
+  if (!name) {
+    res.status(400).json({ error: "name is required" })
+    return
+  }
+  const existing = await prisma.eldoradoNoteGroup.findFirst({
+    where: { name: { equals: name, mode: "insensitive" } },
+  })
+  if (existing) {
+    res.json({
+      id: existing.id,
+      name: existing.name,
+      createdAt: existing.createdAt.toISOString(),
+    })
+    return
+  }
+  const created = await prisma.eldoradoNoteGroup.create({ data: { name } })
+  res.status(201).json({
+    id: created.id,
+    name: created.name,
+    createdAt: created.createdAt.toISOString(),
+  })
+})
+
+app.put("/api/eldorado/note-groups/assign", async (req, res) => {
+  const offerId = String(req.body?.offerId ?? "").trim()
+  const groupId = String(req.body?.groupId ?? "").trim()
+  if (!offerId) {
+    res.status(400).json({ error: "offerId is required" })
+    return
+  }
+  if (groupId) {
+    const group = await prisma.eldoradoNoteGroup.findUnique({ where: { id: groupId } })
+    if (!group) {
+      res.status(404).json({ error: "group not found" })
+      return
+    }
+    await prisma.eldoradoNoteGroupAssignment.upsert({
+      where: { offerId },
+      update: { groupId },
+      create: { offerId, groupId },
+    })
+    const offerNote = await prisma.eldoradoOfferNote.findUnique({ where: { offerId } })
+    if (offerNote?.note) {
+      const existingGroupNote = await prisma.eldoradoNoteGroupNote.findUnique({
+        where: { groupId },
+      })
+      if (!existingGroupNote?.note) {
+        await prisma.eldoradoNoteGroupNote.upsert({
+          where: { groupId },
+          update: { note: offerNote.note },
+          create: { groupId, note: offerNote.note },
+        })
+      }
+    }
+  } else {
+    await prisma.eldoradoNoteGroupAssignment.deleteMany({ where: { offerId } })
+  }
+  res.json({ ok: true })
+})
+
+app.delete("/api/eldorado/note-groups/:id", async (req, res) => {
+  const groupId = String(req.params.id ?? "").trim()
+  if (!groupId) {
+    res.status(400).json({ error: "invalid id" })
+    return
+  }
+  const group = await prisma.eldoradoNoteGroup.findUnique({ where: { id: groupId } })
+  if (!group) {
+    res.status(404).json({ error: "group not found" })
+    return
+  }
+
+  const assignments = await prisma.eldoradoNoteGroupAssignment.findMany({ where: { groupId } })
+  const offerIds = assignments.map((entry) => entry.offerId)
+  const groupNote = await prisma.eldoradoNoteGroupNote.findUnique({ where: { groupId } })
+
+  const operations = []
+  if (groupNote?.note) {
+    offerIds.forEach((offerId) => {
+      operations.push(
+        prisma.eldoradoOfferNote.upsert({
+          where: { offerId },
+          update: {},
+          create: { offerId, note: groupNote.note },
+        }),
+      )
+    })
+  }
+  operations.push(prisma.eldoradoNoteGroupAssignment.deleteMany({ where: { groupId } }))
+  operations.push(prisma.eldoradoNoteGroupNote.deleteMany({ where: { groupId } }))
+  operations.push(prisma.eldoradoNoteGroup.delete({ where: { id: groupId } }))
+
+  await prisma.$transaction(operations)
+  res.json({ ok: true, affectedOffers: offerIds })
+})
+
+app.post("/api/eldorado/message-groups", async (req, res) => {
+  const name = String(req.body?.name ?? "").trim()
+  if (!name) {
+    res.status(400).json({ error: "name is required" })
+    return
+  }
+  const existing = await prisma.eldoradoMessageGroup.findFirst({
+    where: { name: { equals: name, mode: "insensitive" } },
+  })
+  if (existing) {
+    res.json({
+      id: existing.id,
+      name: existing.name,
+      createdAt: existing.createdAt.toISOString(),
+    })
+    return
+  }
+  const created = await prisma.eldoradoMessageGroup.create({ data: { name } })
+  res.status(201).json({
+    id: created.id,
+    name: created.name,
+    createdAt: created.createdAt.toISOString(),
+  })
+})
+
+app.put("/api/eldorado/message-groups/assign", async (req, res) => {
+  const offerId = String(req.body?.offerId ?? "").trim()
+  const groupId = String(req.body?.groupId ?? "").trim()
+  if (!offerId) {
+    res.status(400).json({ error: "offerId is required" })
+    return
+  }
+  if (groupId) {
+    const group = await prisma.eldoradoMessageGroup.findUnique({ where: { id: groupId } })
+    if (!group) {
+      res.status(404).json({ error: "group not found" })
+      return
+    }
+    await prisma.eldoradoMessageGroupAssignment.upsert({
+      where: { offerId },
+      update: { groupId },
+      create: { offerId, groupId },
+    })
+  } else {
+    await prisma.eldoradoMessageGroupAssignment.deleteMany({ where: { offerId } })
+  }
+  res.json({ ok: true })
+})
+
+app.delete("/api/eldorado/message-groups/:id", async (req, res) => {
+  const groupId = String(req.params.id ?? "").trim()
+  if (!groupId) {
+    res.status(400).json({ error: "invalid id" })
+    return
+  }
+  const group = await prisma.eldoradoMessageGroup.findUnique({ where: { id: groupId } })
+  if (!group) {
+    res.status(404).json({ error: "group not found" })
+    return
+  }
+  await prisma.eldoradoMessageGroupAssignment.deleteMany({ where: { groupId } })
+  await prisma.eldoradoMessageGroupTemplate.deleteMany({ where: { groupId } })
+  await prisma.eldoradoMessageGroup.delete({ where: { id: groupId } })
+  res.json({ ok: true })
+})
+
+app.post("/api/eldorado/message-groups/:id/templates", async (req, res) => {
+  const groupId = String(req.params.id ?? "").trim()
+  const label = String(req.body?.label ?? "").trim()
+  if (!groupId || !label) {
+    res.status(400).json({ error: "groupId and label are required" })
+    return
+  }
+  const group = await prisma.eldoradoMessageGroup.findUnique({ where: { id: groupId } })
+  if (!group) {
+    res.status(404).json({ error: "group not found" })
+    return
+  }
+  await prisma.eldoradoMessageGroupTemplate.upsert({
+    where: { groupId_label: { groupId, label } },
+    update: {},
+    create: { groupId, label },
+  })
+  res.json({ ok: true })
+})
+
+app.delete("/api/eldorado/message-groups/:id/templates", async (req, res) => {
+  const groupId = String(req.params.id ?? "").trim()
+  const label = String(req.query?.label ?? "").trim()
+  if (!groupId || !label) {
+    res.status(400).json({ error: "groupId and label are required" })
+    return
+  }
+  await prisma.eldoradoMessageGroupTemplate.deleteMany({ where: { groupId, label } })
+  res.json({ ok: true })
+})
+
+app.post("/api/eldorado/message-templates", async (req, res) => {
+  const offerId = String(req.body?.offerId ?? "").trim()
+  const label = String(req.body?.label ?? "").trim()
+  if (!offerId || !label) {
+    res.status(400).json({ error: "offerId and label are required" })
+    return
+  }
+  await prisma.eldoradoMessageTemplate.upsert({
+    where: { offerId_label: { offerId, label } },
+    update: {},
+    create: { offerId, label },
+  })
+  res.json({ ok: true })
+})
+
+app.delete("/api/eldorado/message-templates", async (req, res) => {
+  const offerId = String(req.query?.offerId ?? "").trim()
+  const label = String(req.query?.label ?? "").trim()
+  if (!offerId || !label) {
+    res.status(400).json({ error: "offerId and label are required" })
+    return
+  }
+  await prisma.eldoradoMessageTemplate.deleteMany({ where: { offerId, label } })
+  res.json({ ok: true })
+})
+
+app.put("/api/eldorado/stock-enabled", async (req, res) => {
+  const offerId = String(req.body?.offerId ?? "").trim()
+  if (!offerId) {
+    res.status(400).json({ error: "offerId is required" })
+    return
+  }
+  const enabledRaw = req.body?.enabled
+  const enabled =
+    typeof enabledRaw === "boolean" ? enabledRaw : String(enabledRaw).toLowerCase() === "true"
+  await prisma.eldoradoStockEnabled.upsert({
+    where: { offerId },
+    update: { enabled },
+    create: { offerId, enabled },
+  })
+  res.json({ ok: true, offerId, enabled })
 })
 
 const normalizeListCellFormat = (format) => {
