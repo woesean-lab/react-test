@@ -4,10 +4,29 @@ import path from "node:path"
 import { createRequire } from "node:module"
 import { chromium } from "playwright"
 
+const DEFAULT_URLS = [
+  "https://www.eldorado.gg/users/PulcipStore?tab=Offers&category=Account&pageIndex=1",
+  "https://www.eldorado.gg/users/PulcipStore?tab=Offers&category=CustomItem&pageIndex=1",
+  "https://www.eldorado.gg/users/PulcipStore?tab=Offers&category=TopUp&pageIndex=1",
+  "https://www.eldorado.gg/users/PulcipStore?tab=Offers&category=GiftCard&pageIndex=1",
+  "https://www.eldorado.gg/users/PulcipStore?tab=Offers&category=Currency&pageIndex=1",
+]
+const START_URLS = (process.env.ELDORADO_URLS ?? "")
+  .split(",")
+  .map((item) => item.trim())
+  .filter(Boolean)
 const START_URL =
   process.env.ELDORADO_URL ??
   "https://www.eldorado.gg/users/PulcipStore?tab=Offers&category=CustomItem&pageIndex=1"
-const TOTAL_PAGES = Number(process.env.ELDORADO_PAGES ?? 15)
+const SCRAPE_URLS =
+  START_URLS.length > 0
+    ? START_URLS
+    : process.env.ELDORADO_URL
+      ? [START_URL]
+      : DEFAULT_URLS
+const TOTAL_PAGES = Number(process.env.ELDORADO_PAGES ?? 0)
+const MAX_PAGES = Number(process.env.ELDORADO_MAX_PAGES ?? 50)
+const USE_TOTAL_PAGES = Number.isFinite(TOTAL_PAGES) && TOTAL_PAGES > 0
 const OUTPUT_PATH = process.env.ELDORADO_OUTPUT ?? "src/data/eldorado-products.json"
 const TITLE_SELECTOR = process.env.ELDORADO_TITLE_SELECTOR ?? ".offer-title"
 const DEFAULT_BROWSERS_PATH = process.env.PLAYWRIGHT_BROWSERS_PATH ?? path.resolve(process.cwd(), ".cache", "ms-playwright")
@@ -47,6 +66,15 @@ const extractCategoryFromHref = (href) => {
   const path = normalizeHref(href)
   const parts = path.split("/").filter(Boolean)
   return parts.length > 0 ? parts[0] : ""
+}
+
+const extractCategoryFromUrl = (url) => {
+  if (!url) return ""
+  try {
+    return new URL(url).searchParams.get("category") ?? ""
+  } catch (error) {
+    return ""
+  }
 }
 
 const slugifyName = (value) => {
@@ -180,17 +208,31 @@ const waitForStableSelectorCount = async (page, selector, options = {}) => {
   }
 }
 
-const scrapeAllPages = async () => {
+const scrapeCategory = async (startUrl) => {
   const browser = await chromium.launch({ headless: true })
   const page = await browser.newPage()
   const scraped = []
+  const categoryHint = extractCategoryFromUrl(startUrl)
 
-  for (let pageIndex = 1; pageIndex <= TOTAL_PAGES; pageIndex += 1) {
-    const pageUrl = buildPageUrl(START_URL, pageIndex)
-    console.log(`[eldorado] page ${pageIndex}/${TOTAL_PAGES}: ${pageUrl}`)
+  let pageIndex = 1
+  let emptyPages = 0
+  const maxPages = USE_TOTAL_PAGES ? TOTAL_PAGES : Math.max(1, Math.floor(MAX_PAGES))
+
+  while (pageIndex <= maxPages) {
+    const pageUrl = buildPageUrl(startUrl, pageIndex)
+    console.log(`[eldorado] page ${pageIndex}${USE_TOTAL_PAGES ? `/${TOTAL_PAGES}` : ""}: ${pageUrl}`)
     await page.goto(pageUrl, { waitUntil: "domcontentloaded" })
     await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {})
-    await page.waitForSelector(TITLE_SELECTOR, { timeout: 30000 })
+    const found = await page
+      .waitForSelector(TITLE_SELECTOR, { timeout: 12000 })
+      .then(() => true)
+      .catch(() => false)
+    if (!found) {
+      emptyPages += 1
+      if (!USE_TOTAL_PAGES && emptyPages >= 2) break
+      pageIndex += 1
+      continue
+    }
     await waitForStableSelectorCount(page, TITLE_SELECTOR)
 
     const pageItems = await page.$$eval(TITLE_SELECTOR, (nodes) => {
@@ -219,11 +261,27 @@ const scrapeAllPages = async () => {
         .filter((item) => item.name)
     })
     console.log(`[eldorado] found ${pageItems.length} items`)
-    scraped.push(...pageItems)
+    if (pageItems.length === 0) {
+      emptyPages += 1
+      if (!USE_TOTAL_PAGES && emptyPages >= 2) break
+    } else {
+      emptyPages = 0
+    }
+    scraped.push(...pageItems.map((item) => ({ ...item, category: categoryHint })))
+    pageIndex += 1
   }
 
   await browser.close()
   return scraped
+}
+
+const scrapeAllPages = async () => {
+  const all = []
+  for (const url of SCRAPE_URLS) {
+    const items = await scrapeCategory(url)
+    all.push(...items)
+  }
+  return all
 }
 
 const normalizeMinRatio = (value) => {
@@ -234,8 +292,8 @@ const normalizeMinRatio = (value) => {
 }
 
 const run = async () => {
-  if (!Number.isFinite(TOTAL_PAGES) || TOTAL_PAGES <= 0) {
-    throw new Error("ELDORADO_PAGES must be a positive number")
+  if (!USE_TOTAL_PAGES && (!Number.isFinite(MAX_PAGES) || MAX_PAGES <= 0)) {
+    throw new Error("ELDORADO_MAX_PAGES must be a positive number")
   }
 
   await ensurePlaywrightChromium()
@@ -294,7 +352,7 @@ const run = async () => {
     const derivedId = buildDerivedId(name, href)
     if (!derivedId) return
     if (seenIds.has(derivedId)) return
-    const category = extractCategoryFromHref(href)
+    const category = item.category || extractCategoryFromHref(href)
     let existingItem = existingById.get(derivedId)
     if (!existingItem && name) {
       existingItem = legacyByName.get(name.toLowerCase())
