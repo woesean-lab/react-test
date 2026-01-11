@@ -3496,7 +3496,7 @@ export default function useAppData() {
       try {
         const groupStore = readEldoradoGroupStore()
         const assignedGroupId = groupStore.assignments[normalizedId] ?? ""
-        const targetKey = normalizedId
+        const targetKey = assignedGroupId || normalizedId
         const store = readEldoradoKeyStore()
         const currentList = Array.isArray(store[targetKey]) ? store[targetKey] : []
         const createdAt = new Date().toISOString()
@@ -3511,7 +3511,9 @@ export default function useAppData() {
         const saved = writeEldoradoKeyStore(store)
         if (!saved) return false
 
-        if (!assignedGroupId) {
+        if (assignedGroupId) {
+          syncEldoradoKeysForGroup(targetKey, nextList, groupStore.assignments)
+        } else {
           setEldoradoKeysByOffer((prev) => ({ ...prev, [normalizedId]: nextList }))
         }
         setEldoradoCatalog((prev) => applyEldoradoKeyCounts(prev))
