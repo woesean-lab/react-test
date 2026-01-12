@@ -203,6 +203,7 @@ export default function ProductsTab({
   const [confirmMessageTemplateDelete, setConfirmMessageTemplateDelete] = useState(null)
   const [keyFadeById, setKeyFadeById] = useState({})
   const [noteGroupFlashByOffer, setNoteGroupFlashByOffer] = useState({})
+  const [selectFlashByKey, setSelectFlashByKey] = useState({})
   const stockModalLineRef = useRef(null)
   const stockModalTextareaRef = useRef(null)
   const prevNoteGroupAssignments = useRef(noteGroupAssignments)
@@ -246,6 +247,20 @@ export default function ProductsTab({
         return next
       })
     }, 240)
+  }
+  const triggerSelectFlash = (offerId, section) => {
+    const normalizedId = String(offerId ?? "").trim()
+    const normalizedSection = String(section ?? "").trim()
+    if (!normalizedId || !normalizedSection) return
+    const key = `${normalizedId}:${normalizedSection}`
+    setSelectFlashByKey((prev) => ({ ...prev, [key]: true }))
+    setTimeout(() => {
+      setSelectFlashByKey((prev) => {
+        const next = { ...prev }
+        delete next[key]
+        return next
+      })
+    }, 260)
   }
   const items = Array.isArray(catalog?.items) ? catalog.items : []
   const topups = Array.isArray(catalog?.topups) ? catalog.topups : []
@@ -1404,7 +1419,11 @@ export default function ProductsTab({
                                 <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)]">
                                   <div className="rounded-xl border border-white/10 bg-white/5 p-3">
                                     <label className="text-[11px] font-semibold text-slate-300">Stok grubu</label>
-                                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                                    <div
+                                      className={`mt-2 flex flex-wrap items-center gap-2 ${
+                                        selectFlashByKey[`${offerId}:stock-group`] ? "animate-noteSwap" : ""
+                                      }`}
+                                    >
                                       <select
                                         value={groupSelectionValue}
                                         onChange={(event) =>
@@ -1427,10 +1446,13 @@ export default function ProductsTab({
                                         <button
                                           type="button"
                                           onClick={() =>
-                                            setGroupSelectionDrafts((prev) => ({
-                                              ...prev,
-                                              [offerId]: "",
-                                            }))
+                                            {
+                                              setGroupSelectionDrafts((prev) => ({
+                                                ...prev,
+                                                [offerId]: "",
+                                              }))
+                                              triggerSelectFlash(offerId, "stock-group")
+                                            }
                                           }
                                           className="rounded-lg border border-amber-300/60 bg-amber-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-amber-50 h-8 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
                                         >
@@ -1447,6 +1469,7 @@ export default function ProductsTab({
                                               delete next[offerId]
                                               return next
                                             })
+                                            triggerSelectFlash(offerId, "stock-group")
                                           }}
                                           disabled={!isGroupSelectionDirty}
                                           className="rounded-lg border border-emerald-300/60 bg-emerald-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 h-8 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-60"
@@ -1511,7 +1534,11 @@ export default function ProductsTab({
                                 <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
                                   <div className="rounded-xl border border-white/10 bg-white/5 p-3">
                                     <label className="text-[11px] font-semibold text-slate-300">Mesaj grubu</label>
-                                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                                    <div
+                                      className={`mt-2 flex flex-wrap items-center gap-2 ${
+                                        selectFlashByKey[`${offerId}:message-group`] ? "animate-noteSwap" : ""
+                                      }`}
+                                    >
                                       <select
                                         value={messageGroupSelectionValue}
                                         onChange={(event) =>
@@ -1534,10 +1561,13 @@ export default function ProductsTab({
                                         <button
                                           type="button"
                                           onClick={() =>
-                                            setMessageGroupSelectionDrafts((prev) => ({
-                                              ...prev,
-                                              [offerId]: "",
-                                            }))
+                                            {
+                                              setMessageGroupSelectionDrafts((prev) => ({
+                                                ...prev,
+                                                [offerId]: "",
+                                              }))
+                                              triggerSelectFlash(offerId, "message-group")
+                                            }
                                           }
                                           className="rounded-lg border border-amber-300/60 bg-amber-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-amber-50 h-8 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
                                         >
@@ -1554,6 +1584,7 @@ export default function ProductsTab({
                                               delete next[offerId]
                                               return next
                                             })
+                                            triggerSelectFlash(offerId, "message-group")
                                           }}
                                           disabled={!isMessageGroupSelectionDirty}
                                           className="rounded-lg border border-emerald-300/60 bg-emerald-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 h-8 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-60"
@@ -1685,7 +1716,11 @@ export default function ProductsTab({
                                       <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
                                         <div className="rounded-xl border border-white/10 bg-white/5 p-3">
                                           <label className="text-[11px] font-semibold text-slate-300">Not grubu</label>
-                                          <div className="mt-2 flex items-center gap-2">
+                                          <div
+                                            className={`mt-2 flex items-center gap-2 ${
+                                              selectFlashByKey[`${offerId}:note-group`] ? "animate-noteSwap" : ""
+                                            }`}
+                                          >
                                             <select
                                               value={noteGroupSelectionValue}
                                               onChange={(event) =>
@@ -1708,10 +1743,13 @@ export default function ProductsTab({
                                               <button
                                                 type="button"
                                                 onClick={() =>
-                                                  setNoteGroupSelectionDrafts((prev) => ({
-                                                    ...prev,
-                                                    [offerId]: "",
-                                                  }))
+                                                  {
+                                                    setNoteGroupSelectionDrafts((prev) => ({
+                                                      ...prev,
+                                                      [offerId]: "",
+                                                    }))
+                                                    triggerSelectFlash(offerId, "note-group")
+                                                  }
                                                 }
                                                 className="rounded-md border border-amber-300/60 bg-amber-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-amber-50 h-8 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
                                               >
@@ -1738,6 +1776,7 @@ export default function ProductsTab({
                                                     delete next[offerId]
                                                     return next
                                                   })
+                                                  triggerSelectFlash(offerId, "note-group")
                                                 }}
                                                 disabled={!isNoteGroupSelectionDirty}
                                                 className="rounded-md border border-emerald-300/60 bg-emerald-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 h-8 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-60"
