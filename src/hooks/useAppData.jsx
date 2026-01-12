@@ -2287,6 +2287,47 @@ export default function useAppData() {
     [eldoradoGroupAssignments],
   )
 
+  const loadEldoradoKeys = useCallback(
+    async (offerId, options = {}) => {
+      const normalizedId = String(offerId ?? "").trim()
+      if (!normalizedId) return
+      if (!options?.force && Array.isArray(eldoradoKeysByOffer[normalizedId])) return
+
+      setEldoradoKeysLoading((prev) => ({ ...prev, [normalizedId]: true }))
+      try {
+        const res = await apiFetch(`/api/eldorado/keys/${normalizedId}`)
+        if (!res.ok) throw new Error("api_error")
+        const list = await res.json()
+        const assignedGroupId = String(eldoradoGroupAssignments?.[normalizedId] ?? "").trim()
+        if (assignedGroupId) {
+          syncEldoradoKeysForGroup(assignedGroupId, list)
+        } else {
+          setEldoradoKeysByOffer((prev) => ({ ...prev, [normalizedId]: list }))
+        }
+      } catch (error) {
+        console.error(error)
+        toast.error("Urun stoklari alinamadi (API/Server kontrol edin).")
+      } finally {
+        setEldoradoKeysLoading((prev) => {
+          const next = { ...prev }
+          delete next[normalizedId]
+          return next
+        })
+      }
+    },
+    [apiFetch, eldoradoGroupAssignments, eldoradoKeysByOffer, syncEldoradoKeysForGroup],
+  )
+
+  const refreshEldoradoOffer = useCallback(
+    async (offerId) => {
+      const normalizedId = String(offerId ?? "").trim()
+      if (!normalizedId) return
+      await loadEldoradoStore()
+      await loadEldoradoKeys(normalizedId, { force: true })
+    },
+    [loadEldoradoKeys, loadEldoradoStore],
+  )
+
   const handleEldoradoGroupCreate = useCallback(
     async (name) => {
       const trimmed = String(name ?? "").trim()
@@ -2768,47 +2809,6 @@ export default function useAppData() {
       }
     },
     [apiFetch],
-  )
-
-  const loadEldoradoKeys = useCallback(
-    async (offerId, options = {}) => {
-      const normalizedId = String(offerId ?? "").trim()
-      if (!normalizedId) return
-      if (!options?.force && Array.isArray(eldoradoKeysByOffer[normalizedId])) return
-
-      setEldoradoKeysLoading((prev) => ({ ...prev, [normalizedId]: true }))
-      try {
-        const res = await apiFetch(`/api/eldorado/keys/${normalizedId}`)
-        if (!res.ok) throw new Error("api_error")
-        const list = await res.json()
-        const assignedGroupId = String(eldoradoGroupAssignments?.[normalizedId] ?? "").trim()
-        if (assignedGroupId) {
-          syncEldoradoKeysForGroup(assignedGroupId, list)
-        } else {
-          setEldoradoKeysByOffer((prev) => ({ ...prev, [normalizedId]: list }))
-        }
-      } catch (error) {
-        console.error(error)
-        toast.error("Urun stoklari alinamadi (API/Server kontrol edin).")
-      } finally {
-        setEldoradoKeysLoading((prev) => {
-          const next = { ...prev }
-          delete next[normalizedId]
-          return next
-        })
-      }
-    },
-    [apiFetch, eldoradoGroupAssignments, eldoradoKeysByOffer, syncEldoradoKeysForGroup],
-  )
-
-  const refreshEldoradoOffer = useCallback(
-    async (offerId) => {
-      const normalizedId = String(offerId ?? "").trim()
-      if (!normalizedId) return
-      await loadEldoradoStore()
-      await loadEldoradoKeys(normalizedId, { force: true })
-    },
-    [loadEldoradoKeys, loadEldoradoStore],
   )
 
   const handleEldoradoKeysAdd = useCallback(
