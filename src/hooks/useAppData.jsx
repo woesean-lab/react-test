@@ -2983,8 +2983,16 @@ const handleEldoradoNoteSave = useCallback(
           const detail = await readApiError(res)
           throw new Error(detail || "api_error")
         }
-        await loadEldoradoKeys(normalizedOfferId, { force: true })
-        loadEldoradoCatalog(undefined, { silent: true })
+        const assignedGroupId = String(eldoradoGroupAssignments?.[normalizedOfferId] ?? "").trim()
+        const list = Array.isArray(eldoradoKeysByOffer?.[normalizedOfferId])
+          ? eldoradoKeysByOffer[normalizedOfferId]
+          : []
+        const nextList = list.filter((item) => item.id !== normalizedKeyId)
+        if (assignedGroupId) {
+          syncEldoradoKeysForGroup(assignedGroupId, nextList)
+        } else {
+          setEldoradoKeysByOffer((prev) => ({ ...prev, [normalizedOfferId]: nextList }))
+        }
         toast.success("Stok silindi")
       } catch (error) {
         console.error(error)
@@ -3000,7 +3008,13 @@ const handleEldoradoNoteSave = useCallback(
         })
       }
     },
-    [apiFetch, loadEldoradoCatalog, loadEldoradoKeys, readApiError],
+    [
+      apiFetch,
+      eldoradoGroupAssignments,
+      eldoradoKeysByOffer,
+      readApiError,
+      syncEldoradoKeysForGroup,
+    ],
   )
 
   const handleEldoradoBulkDelete = useCallback(
@@ -3090,8 +3104,25 @@ const handleEldoradoNoteSave = useCallback(
             throw new Error(detail || "api_error")
           }
         }
-        await loadEldoradoKeys(normalizedOfferId, { force: true })
-        loadEldoradoCatalog(undefined, { silent: true })
+        const assignedGroupId = String(eldoradoGroupAssignments?.[normalizedOfferId] ?? "").trim()
+        const list = Array.isArray(eldoradoKeysByOffer?.[normalizedOfferId])
+          ? eldoradoKeysByOffer[normalizedOfferId]
+          : []
+        let didUpdate = false
+        const nextList = list.map((item) => {
+          if (item.id !== normalizedKeyId) return item
+          const currentStatus = item?.status === "used" ? "used" : "available"
+          if (currentStatus === normalizedStatus) return item
+          didUpdate = true
+          return { ...item, status: normalizedStatus }
+        })
+        if (didUpdate) {
+          if (assignedGroupId) {
+            syncEldoradoKeysForGroup(assignedGroupId, nextList)
+          } else {
+            setEldoradoKeysByOffer((prev) => ({ ...prev, [normalizedOfferId]: nextList }))
+          }
+        }
         toast.success(normalizedStatus === "used" ? "Stok kullanildi" : "Stok geri alindi")
         return true
       } catch (error) {
@@ -3100,7 +3131,7 @@ const handleEldoradoNoteSave = useCallback(
         return false
       }
     },
-    [apiFetch, loadEldoradoCatalog, loadEldoradoKeys],
+    [apiFetch, eldoradoGroupAssignments, eldoradoKeysByOffer, syncEldoradoKeysForGroup],
   )
 
   const handleEldoradoKeyUpdate = useCallback(
