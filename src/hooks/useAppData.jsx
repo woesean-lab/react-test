@@ -2311,14 +2311,16 @@ export default function useAppData() {
       if (!normalizedId) return
       if (!options?.force && Array.isArray(eldoradoKeysByOffer[normalizedId])) return
 
+      const assignmentsOverride = options?.assignmentsOverride
       setEldoradoKeysLoading((prev) => ({ ...prev, [normalizedId]: true }))
       try {
         const res = await apiFetch(`/api/eldorado/keys/${normalizedId}`)
         if (!res.ok) throw new Error("api_error")
         const list = await res.json()
-        const assignedGroupId = String(eldoradoGroupAssignments?.[normalizedId] ?? "").trim()
+        const assignments = assignmentsOverride ?? eldoradoGroupAssignments
+        const assignedGroupId = String(assignments?.[normalizedId] ?? "").trim()
         if (assignedGroupId) {
-          syncEldoradoKeysForGroup(assignedGroupId, list)
+          syncEldoradoKeysForGroup(assignedGroupId, list, assignments)
         } else {
           setEldoradoKeysByOffer((prev) => ({ ...prev, [normalizedId]: list }))
         }
@@ -2391,16 +2393,17 @@ export default function useAppData() {
       })
       if (!res.ok) throw new Error("api_error")
 
-      setEldoradoGroupAssignments((prev) => {
-        const next = { ...prev }
-        if (nextGroupId) {
-          next[normalizedOfferId] = nextGroupId
-        } else {
-          delete next[normalizedOfferId]
-        }
-        return next
+      const nextAssignments = { ...eldoradoGroupAssignments }
+      if (nextGroupId) {
+        nextAssignments[normalizedOfferId] = nextGroupId
+      } else {
+        delete nextAssignments[normalizedOfferId]
+      }
+      setEldoradoGroupAssignments(nextAssignments)
+      await loadEldoradoKeys(normalizedOfferId, {
+        force: true,
+        assignmentsOverride: nextAssignments,
       })
-      await loadEldoradoKeys(normalizedOfferId, { force: true })
       loadEldoradoCatalog(undefined, { silent: true })
       toast.success(
         nextGroupId ? "Stok grubu atandi" : "Stok grubu kaldirildi",
@@ -2430,14 +2433,19 @@ export default function useAppData() {
       const affectedOffers = Array.isArray(payload?.affectedOffers) ? payload.affectedOffers : []
 
       setEldoradoGroups((prev) => prev.filter((group) => group.id !== normalizedGroupId))
-      setEldoradoGroupAssignments((prev) => {
-        const next = { ...prev }
-        affectedOffers.forEach((offerId) => {
-          delete next[offerId]
-        })
-        return next
+      const nextAssignments = { ...eldoradoGroupAssignments }
+      affectedOffers.forEach((offerId) => {
+        delete nextAssignments[offerId]
       })
-      await Promise.all(affectedOffers.map((offerId) => loadEldoradoKeys(offerId, { force: true })))
+      setEldoradoGroupAssignments(nextAssignments)
+      await Promise.all(
+        affectedOffers.map((offerId) =>
+          loadEldoradoKeys(offerId, {
+            force: true,
+            assignmentsOverride: nextAssignments,
+          }),
+        ),
+      )
       loadEldoradoCatalog(undefined, { silent: true })
       toast.success("Stok grubu silindi", { duration: 1500, position: "top-right" })
       return true
