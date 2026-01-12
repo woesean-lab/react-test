@@ -2203,8 +2203,10 @@ export default function useAppData() {
   )
 
   const loadEldoradoCatalog = useCallback(
-    async (signal) => {
-      setIsEldoradoLoading(true)
+    async (signal, options = {}) => {
+      if (!options.silent) {
+        setIsEldoradoLoading(true)
+      }
       try {
         const res = await apiFetch("/api/eldorado/products", { signal })
         if (!res.ok) throw new Error("api_error")
@@ -2216,7 +2218,9 @@ export default function useAppData() {
         setEldoradoCatalog(applyEldoradoKeyCounts(null))
         toast.error("Eldorado urunleri alinamadi (API/Server kontrol edin).")
       } finally {
-        setIsEldoradoLoading(false)
+        if (!options.silent) {
+          setIsEldoradoLoading(false)
+        }
       }
     },
     [apiFetch, applyEldoradoKeyCounts],
@@ -2381,7 +2385,7 @@ export default function useAppData() {
         return next
       })
       await loadEldoradoKeys(normalizedOfferId, { force: true })
-      loadEldoradoCatalog()
+      loadEldoradoCatalog(undefined, { silent: true })
       return true
     } catch (error) {
       toast.error("Stok grubu atanamadi (API/Server kontrol edin).")
@@ -2414,7 +2418,7 @@ export default function useAppData() {
         return next
       })
       await Promise.all(affectedOffers.map((offerId) => loadEldoradoKeys(offerId, { force: true })))
-      loadEldoradoCatalog()
+      loadEldoradoCatalog(undefined, { silent: true })
       toast.success("Stok grubu silindi", { duration: 1500, position: "top-right" })
       return true
     } catch (error) {
@@ -2526,11 +2530,6 @@ const handleEldoradoNoteSave = useCallback(
       if (!normalizedOfferId) return false
       const nextGroupId = String(groupId ?? "").trim()
 
-      if (nextGroupId && !eldoradoNoteGroups.some((group) => group.id === nextGroupId)) {
-        toast.error("Not grubu bulunamadi.")
-        return false
-      }
-
       try {
         const res = await apiFetch("/api/eldorado/note-groups/assign", {
           method: "PUT",
@@ -2621,11 +2620,6 @@ const handleEldoradoNoteSave = useCallback(
       const normalizedOfferId = String(offerId ?? "").trim()
       if (!normalizedOfferId) return false
       const nextGroupId = String(groupId ?? "").trim()
-
-      if (nextGroupId && !eldoradoMessageGroups.some((group) => group.id === nextGroupId)) {
-        toast.error("Mesaj grubu bulunamadi.")
-        return false
-      }
 
       try {
         const res = await apiFetch("/api/eldorado/message-groups/assign", {
@@ -2829,7 +2823,7 @@ const handleEldoradoNoteSave = useCallback(
           setEldoradoKeysByOffer((prev) => ({ ...prev, [normalizedId]: list }))
         }
         setEldoradoStockEnabledByOffer((prev) => ({ ...prev, [normalizedId]: true }))
-        loadEldoradoCatalog()
+        loadEldoradoCatalog(undefined, { silent: true })
 
         const addedCount = codes.length
         if (addedCount > 0) {
@@ -2868,7 +2862,7 @@ const handleEldoradoNoteSave = useCallback(
         })
         if (!res.ok) throw new Error("api_error")
         await loadEldoradoKeys(normalizedOfferId, { force: true })
-        loadEldoradoCatalog()
+        loadEldoradoCatalog(undefined, { silent: true })
         toast.success("Stok silindi")
       } catch (error) {
         console.error(error)
@@ -2900,7 +2894,7 @@ const handleEldoradoNoteSave = useCallback(
         })
         if (!res.ok) throw new Error("api_error")
         await loadEldoradoKeys(normalizedOfferId, { force: true })
-        loadEldoradoCatalog()
+        loadEldoradoCatalog(undefined, { silent: true })
         toast.success("Stoklar silindi", { duration: 1500, position: "top-right" })
         return true
       } catch (error) {
@@ -2918,6 +2912,10 @@ const handleEldoradoNoteSave = useCallback(
       const normalizedKeyId = String(keyId ?? "").trim()
       const normalizedStatus = String(status ?? "").trim()
       if (!normalizedOfferId || !normalizedKeyId || !normalizedStatus) return false
+      if (!["available", "used"].includes(normalizedStatus)) {
+        toast.error("Stok durumu gecersiz.")
+        return false
+      }
 
       try {
         const res = await apiFetch("/api/eldorado/keys/bulk-status", {
@@ -2927,7 +2925,7 @@ const handleEldoradoNoteSave = useCallback(
         })
         if (!res.ok) throw new Error("api_error")
         await loadEldoradoKeys(normalizedOfferId, { force: true })
-        loadEldoradoCatalog()
+        loadEldoradoCatalog(undefined, { silent: true })
         toast.success(normalizedStatus === "used" ? "Stok kullanildi" : "Stok geri alindi")
         return true
       } catch (error) {
@@ -2954,7 +2952,7 @@ const handleEldoradoNoteSave = useCallback(
         })
         if (!res.ok) throw new Error("api_error")
         await loadEldoradoKeys(normalizedOfferId, { force: true })
-        loadEldoradoCatalog()
+        loadEldoradoCatalog(undefined, { silent: true })
         toast.success("Stok guncellendi", { duration: 1500, position: "top-right" })
         return true
       } catch (error) {
@@ -3011,15 +3009,20 @@ const handleEldoradoNoteSave = useCallback(
       }
 
       if (options.markUsed) {
+        const ids = selected.map((item) => String(item?.id ?? "").trim()).filter(Boolean)
+        if (ids.length === 0) {
+          toast.error("Stoklar isaretlenemedi.")
+          return false
+        }
         try {
           const res = await apiFetch("/api/eldorado/keys/bulk-status", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ ids: selected.map((item) => item.id), status: "used" }),
+            body: JSON.stringify({ ids, status: "used" }),
           })
           if (!res.ok) throw new Error("api_error")
           await loadEldoradoKeys(normalizedOfferId, { force: true })
-          loadEldoradoCatalog()
+          loadEldoradoCatalog(undefined, { silent: true })
         } catch (error) {
           toast.error("Stoklar isaretlenemedi (API/Server kontrol edin).")
           return false
