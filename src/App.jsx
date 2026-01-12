@@ -412,6 +412,7 @@ function App() {
     PERMISSIONS.listsEdit,
   ])
   const canViewStock = hasPermission(PERMISSIONS.stockView)
+  const canViewProducts = hasAnyPermission([PERMISSIONS.productsView, PERMISSIONS.stockView])
   const canCreateProducts = hasAnyPermission([PERMISSIONS.stockProductCreate, PERMISSIONS.stockManage])
   const canEditProducts = hasAnyPermission([PERMISSIONS.stockProductEdit, PERMISSIONS.stockManage])
   const canDeleteProducts = hasAnyPermission([PERMISSIONS.stockProductDelete, PERMISSIONS.stockManage])
@@ -428,6 +429,67 @@ function App() {
   ])
   const canCopyStocks = hasAnyPermission([PERMISSIONS.stockStockCopy, PERMISSIONS.stockManage])
   const canBulkStocks = hasAnyPermission([PERMISSIONS.stockStockBulk, PERMISSIONS.stockManage])
+  const canAddProductStocks = hasAnyPermission([
+    PERMISSIONS.productsStockAdd,
+    PERMISSIONS.productsManage,
+    PERMISSIONS.stockStockAdd,
+    PERMISSIONS.stockManage,
+  ])
+  const canEditProductStocks = hasAnyPermission([
+    PERMISSIONS.productsStockEdit,
+    PERMISSIONS.productsManage,
+    PERMISSIONS.stockStockEdit,
+    PERMISSIONS.stockManage,
+  ])
+  const canDeleteProductStocks = hasAnyPermission([
+    PERMISSIONS.productsStockDelete,
+    PERMISSIONS.productsManage,
+    PERMISSIONS.stockStockDelete,
+    PERMISSIONS.stockManage,
+  ])
+  const canChangeProductStockStatus = hasAnyPermission([
+    PERMISSIONS.productsStockStatus,
+    PERMISSIONS.productsManage,
+    PERMISSIONS.stockStockStatus,
+    PERMISSIONS.stockManage,
+  ])
+  const canCopyProductStocks = hasAnyPermission([
+    PERMISSIONS.productsStockCopy,
+    PERMISSIONS.productsManage,
+    PERMISSIONS.stockStockCopy,
+    PERMISSIONS.stockManage,
+  ])
+  const canBulkProductStocks = hasAnyPermission([
+    PERMISSIONS.productsStockBulk,
+    PERMISSIONS.productsManage,
+    PERMISSIONS.stockStockBulk,
+    PERMISSIONS.stockManage,
+  ])
+  const canManageProductGroups = hasAnyPermission([
+    PERMISSIONS.productsGroupManage,
+    PERMISSIONS.productsManage,
+    PERMISSIONS.stockManage,
+  ])
+  const canManageProductNotes = hasAnyPermission([
+    PERMISSIONS.productsNoteManage,
+    PERMISSIONS.productsManage,
+    PERMISSIONS.stockManage,
+  ])
+  const canManageProductMessages = hasAnyPermission([
+    PERMISSIONS.productsMessageManage,
+    PERMISSIONS.productsManage,
+    PERMISSIONS.stockManage,
+  ])
+  const canToggleProductStock = hasAnyPermission([
+    PERMISSIONS.productsStockToggle,
+    PERMISSIONS.productsManage,
+    PERMISSIONS.stockManage,
+  ])
+  const canStarProducts = hasAnyPermission([
+    PERMISSIONS.productsStar,
+    PERMISSIONS.productsManage,
+    PERMISSIONS.stockManage,
+  ])
   const canManageRoles = hasAnyPermission([PERMISSIONS.adminRolesManage, PERMISSIONS.adminManage])
   const canManageUsers = hasAnyPermission([PERMISSIONS.adminUsersManage, PERMISSIONS.adminManage])
   const canViewAdmin = canManageRoles || canManageUsers
@@ -438,7 +500,7 @@ function App() {
       { key: "sales", label: "Satış", canView: canViewSales },
       { key: "problems", label: "Problem", canView: canViewProblems },
       { key: "lists", label: "Liste", canView: canViewLists },
-      { key: "products", label: "Ürünler", canView: canViewStock },
+      { key: "products", label: "Ürünler", canView: canViewProducts },
       { key: "stock", label: "Stok", canView: canViewStock },
       { key: "admin", label: "Admin", canView: canViewAdmin },
     ],
@@ -450,6 +512,7 @@ function App() {
       canViewProblems,
       canViewSales,
       canViewStock,
+      canViewProducts,
       canViewTasks,
     ],
   )
@@ -979,7 +1042,7 @@ function App() {
           </div>
         )}
 
-        {activeTab === "products" && canViewStock && (
+        {activeTab === "products" && canViewProducts && (
           <div className={getTabSlideClass("products")}>
             <ProductsTab
               panelClass={panelClass}
@@ -1029,9 +1092,16 @@ function App() {
               onToggleStock={handleEldoradoStockToggle}
               onToggleOfferStar={handleEldoradoOfferStarToggle}
               onRefreshOffer={refreshEldoradoOffer}
-              canAddKeys={canAddStocks}
-              canDeleteKeys={canDeleteStocks}
-              canCopyKeys={canCopyStocks}
+              canAddKeys={canAddProductStocks}
+              canDeleteKeys={canDeleteProductStocks || canBulkProductStocks}
+              canCopyKeys={canCopyProductStocks}
+              canEditKeys={canEditProductStocks}
+              canChangeKeyStatus={canChangeProductStockStatus}
+              canManageGroups={canManageProductGroups}
+              canManageNotes={canManageProductNotes}
+              canManageMessages={canManageProductMessages}
+              canToggleStock={canToggleProductStock}
+              canStarOffers={canStarProducts}
             />
           </div>
         )}

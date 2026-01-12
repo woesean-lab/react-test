@@ -169,6 +169,13 @@ export default function ProductsTab({
   canAddKeys = false,
   canDeleteKeys = false,
   canCopyKeys = false,
+  canEditKeys: canEditKeysProp = false,
+  canChangeKeyStatus: canChangeKeyStatusProp = false,
+  canManageGroups: canManageGroupsProp,
+  canManageNotes: canManageNotesProp,
+  canManageMessages: canManageMessagesProp,
+  canToggleStock: canToggleStockProp,
+  canStarOffers: canStarOffersProp,
 }) {
   const [query, setQuery] = useState("")
   const [openOffers, setOpenOffers] = useState({})
@@ -198,19 +205,34 @@ export default function ProductsTab({
   const stockModalLineRef = useRef(null)
   const stockModalTextareaRef = useRef(null)
   const prevNoteGroupAssignments = useRef(noteGroupAssignments)
-  const canManageGroups = canAddKeys
-  const canManageNotes = canAddKeys && typeof onSaveNote === "function"
-  const canManageStock = canAddKeys && typeof onToggleStock === "function"
+  const canManageGroups = typeof canManageGroupsProp === "boolean" ? canManageGroupsProp : canAddKeys
+  const canManageNotes =
+    typeof canManageNotesProp === "boolean"
+      ? canManageNotesProp
+      : canAddKeys && typeof onSaveNote === "function"
+  const canManageStock =
+    typeof canToggleStockProp === "boolean"
+      ? canToggleStockProp
+      : canAddKeys && typeof onToggleStock === "function"
   const canManageMessages =
-    canAddKeys &&
-    (typeof onAddMessageGroupTemplate === "function" || typeof onAddMessageTemplate === "function")
-  const canDeleteMessageGroup = canAddKeys && typeof onDeleteMessageGroup === "function"
+    typeof canManageMessagesProp === "boolean"
+      ? canManageMessagesProp
+      : canAddKeys &&
+        (typeof onAddMessageGroupTemplate === "function" || typeof onAddMessageTemplate === "function")
+  const canDeleteMessageGroup =
+    canManageMessages && typeof onDeleteMessageGroup === "function"
   const canRemoveMessageTemplate =
-    canAddKeys &&
+    canManageMessages &&
     (typeof onRemoveMessageTemplate === "function" ||
       typeof onRemoveMessageGroupTemplate === "function")
-  const canUpdateKeys = typeof onUpdateKeyStatus === "function" && canCopyKeys
-  const canEditKeys = canAddKeys && typeof onUpdateKeyCode === "function"
+  const canUpdateKeys =
+    typeof onUpdateKeyStatus === "function" &&
+    (typeof canChangeKeyStatusProp === "boolean" ? canChangeKeyStatusProp : canCopyKeys)
+  const canEditKeys =
+    typeof onUpdateKeyCode === "function" &&
+    (typeof canEditKeysProp === "boolean" ? canEditKeysProp : canAddKeys)
+  const canStarOffers =
+    typeof canStarOffersProp === "boolean" ? canStarOffersProp : canAddKeys
   const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
   const triggerKeyFade = (keyId) => {
     const normalizedId = String(keyId ?? "").trim()
@@ -1091,7 +1113,7 @@ export default function ProductsTab({
                         <button
                           type="button"
                           onClick={() => toggleOfferOpen(offerId)}
-                          disabled={!offerId}
+                          disabled={!offerId || !canStarOffers}
                           className="min-w-0 flex-1 text-left disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           <div className="flex min-h-[36px] flex-wrap items-center gap-2">
@@ -1175,9 +1197,9 @@ export default function ProductsTab({
                             <button
                               type="button"
                               onClick={() => toggleStarred(offerId)}
-                              disabled={!offerId}
+                              disabled={!offerId || !canStarOffers}
                               className={`inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-200/80 transition hover:bg-white/10 hover:text-white ${
-                                !offerId ? "cursor-not-allowed opacity-60" : ""
+                                !offerId || !canStarOffers ? "cursor-not-allowed opacity-60" : ""
                               } ${starredOffers[offerId] ? "text-yellow-300" : ""}`}
                               aria-label="Ürünü yıldızla"
                               title={starredOffers[offerId] ? "Yıldızı kaldır" : "Yıldızla"}
@@ -1282,10 +1304,10 @@ export default function ProductsTab({
                             <button
                               type="button"
                               onClick={() => toggleOfferOpen(offerId)}
-                              disabled={!offerId}
+                              disabled={!offerId || !canStarOffers}
                               className={`inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-200/80 transition hover:bg-white/10 hover:text-white ${
                                 isOpen ? "bg-white/10 text-white" : ""
-                              } ${!offerId ? "cursor-not-allowed opacity-60" : ""}`}
+                              } ${!offerId || !canStarOffers ? "cursor-not-allowed opacity-60" : ""}`}
                               aria-label="Ürün detaylarını aç/kapat"
                             >
                               <svg
@@ -2208,6 +2230,7 @@ export default function ProductsTab({
     </div>
   )
 }
+
 
 
 

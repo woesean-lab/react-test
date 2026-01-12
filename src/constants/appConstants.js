@@ -83,6 +83,19 @@ export const STOCK_STATUS = {
 }
 
 export const PERMISSIONS = {
+  productsView: "products.view",
+  productsStockAdd: "products.stock.add",
+  productsStockEdit: "products.stock.edit",
+  productsStockDelete: "products.stock.delete",
+  productsStockStatus: "products.stock.status",
+  productsStockCopy: "products.stock.copy",
+  productsStockBulk: "products.stock.bulk",
+  productsGroupManage: "products.group.manage",
+  productsNoteManage: "products.note.manage",
+  productsMessageManage: "products.message.manage",
+  productsStockToggle: "products.stock.toggle",
+  productsStar: "products.star",
+  productsManage: "products.manage",
   messagesView: "messages.view",
   messagesCreate: "messages.create",
   messagesTemplateEdit: "messages.template.edit",
@@ -127,6 +140,24 @@ export const PERMISSIONS = {
 }
 
 export const PERMISSION_GROUPS = [
+  {
+    title: "Urunler",
+    items: [
+      { id: PERMISSIONS.productsView, label: "Goruntule" },
+      { id: PERMISSIONS.productsStockAdd, label: "Stok ekle" },
+      { id: PERMISSIONS.productsStockEdit, label: "Stok duzenle" },
+      { id: PERMISSIONS.productsStockDelete, label: "Stok sil" },
+      { id: PERMISSIONS.productsStockStatus, label: "Stok durum degistir" },
+      { id: PERMISSIONS.productsStockCopy, label: "Stok kopyala" },
+      { id: PERMISSIONS.productsStockBulk, label: "Toplu islemler" },
+      { id: PERMISSIONS.productsGroupManage, label: "Stok grubu yonet" },
+      { id: PERMISSIONS.productsNoteManage, label: "Not grubu yonet" },
+      { id: PERMISSIONS.productsMessageManage, label: "Mesaj grubu yonet" },
+      { id: PERMISSIONS.productsStockToggle, label: "Stok ac/kapat" },
+      { id: PERMISSIONS.productsStar, label: "Yildizla" },
+      { id: PERMISSIONS.productsManage, label: "Tum yetki (eski)" },
+    ],
+  },
   {
     title: "Mesajlar",
     items: [

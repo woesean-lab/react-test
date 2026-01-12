@@ -237,6 +237,7 @@ export default function useAppData() {
     PERMISSIONS.salesCreate,
     PERMISSIONS.adminManage,
   ])
+  const canViewProductsTab = hasAnyPermission([PERMISSIONS.productsView, PERMISSIONS.stockView])
   const availableTabs = useMemo(() => {
     const tabs = []
     if (isAuthed) tabs.push("dashboard")
@@ -245,11 +246,11 @@ export default function useAppData() {
     if (canViewSales) tabs.push("sales")
     if (permissions.includes(PERMISSIONS.problemsView)) tabs.push("problems")
     if (permissions.includes(PERMISSIONS.listsView)) tabs.push("lists")
-    if (permissions.includes(PERMISSIONS.stockView)) tabs.push("products")
+    if (canViewProductsTab) tabs.push("products")
     if (permissions.includes(PERMISSIONS.stockView)) tabs.push("stock")
     if (canManageAdmin) tabs.push("admin")
     return tabs
-  }, [permissions, canManageAdmin, canViewSales, isAuthed])
+  }, [permissions, canManageAdmin, canViewSales, canViewProductsTab, isAuthed])
 
   useEffect(() => {
     const root = document.documentElement
@@ -3291,7 +3292,7 @@ const handleEldoradoNoteSave = useCallback(
   }
 
   useEffect(() => {
-    if (!isAuthed || !permissions.includes(PERMISSIONS.stockView)) {
+    if (!isAuthed || !canViewProductsTab) {
       setEldoradoGroups([])
       setEldoradoGroupAssignments({})
       setEldoradoNotesByOffer({})
@@ -3306,10 +3307,10 @@ const handleEldoradoNoteSave = useCallback(
       return
     }
     loadEldoradoGroups()
-  }, [isAuthed, loadEldoradoGroups, permissions])
+  }, [canViewProductsTab, isAuthed, loadEldoradoGroups])
 
   useEffect(() => {
-    if (!isAuthed || !permissions.includes(PERMISSIONS.stockView)) {
+    if (!isAuthed || !canViewProductsTab) {
       setEldoradoCatalog(normalizeEldoradoCatalog(null))
       setIsEldoradoLoading(false)
       return
@@ -3317,14 +3318,14 @@ const handleEldoradoNoteSave = useCallback(
     const controller = new AbortController()
     loadEldoradoCatalog(controller.signal)
     return () => controller.abort()
-  }, [isAuthed, loadEldoradoCatalog, permissions])
+  }, [canViewProductsTab, isAuthed, loadEldoradoCatalog])
 
   useEffect(() => {
-    if (!isAuthed || activeTab !== "products" || !permissions.includes(PERMISSIONS.stockView)) return
+    if (!isAuthed || activeTab !== "products" || !canViewProductsTab) return
     const controller = new AbortController()
     loadEldoradoCatalog(controller.signal)
     return () => controller.abort()
-  }, [activeTab, isAuthed, loadEldoradoCatalog, permissions])
+  }, [activeTab, canViewProductsTab, isAuthed, loadEldoradoCatalog])
 
   useEffect(() => {
     const timer = window.setTimeout(() => setDelayDone(true), 1200)
