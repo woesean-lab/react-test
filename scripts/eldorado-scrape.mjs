@@ -71,7 +71,8 @@ const extractCategoryFromHref = (href) => {
 const extractCategoryFromUrl = (url) => {
   if (!url) return ""
   try {
-    return new URL(url).searchParams.get("category") ?? ""
+    const value = new URL(url).searchParams.get("category") ?? ""
+    return String(value || "").trim()
   } catch (error) {
     return ""
   }
@@ -352,7 +353,7 @@ const run = async () => {
     const derivedId = buildDerivedId(name, href)
     if (!derivedId) return
     if (seenIds.has(derivedId)) return
-    const category = item.category || extractCategoryFromHref(href)
+    const category = extractCategoryFromHref(href) || item.category || extractCategoryFromUrl(href)
     let existingItem = existingById.get(derivedId)
     if (!existingItem && name) {
       existingItem = legacyByName.get(name.toLowerCase())
