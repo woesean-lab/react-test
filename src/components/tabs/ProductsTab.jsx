@@ -193,8 +193,11 @@ export default function ProductsTab({
   const [refreshingOffers, setRefreshingOffers] = useState({})
   const [confirmMessageGroupDelete, setConfirmMessageGroupDelete] = useState(null)
   const [confirmMessageTemplateDelete, setConfirmMessageTemplateDelete] = useState(null)
+  const [keyFadeById, setKeyFadeById] = useState({})
+  const [noteGroupFlashByOffer, setNoteGroupFlashByOffer] = useState({})
   const stockModalLineRef = useRef(null)
   const stockModalTextareaRef = useRef(null)
+  const prevNoteGroupAssignments = useRef(noteGroupAssignments)
   const canManageGroups = canAddKeys
   const canManageNotes = canAddKeys && typeof onSaveNote === "function"
   const canManageStock = canAddKeys && typeof onToggleStock === "function"
@@ -208,6 +211,19 @@ export default function ProductsTab({
       typeof onRemoveMessageGroupTemplate === "function")
   const canUpdateKeys = typeof onUpdateKeyStatus === "function" && canCopyKeys
   const canEditKeys = canAddKeys && typeof onUpdateKeyCode === "function"
+  const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
+  const triggerKeyFade = (keyId) => {
+    const normalizedId = String(keyId ?? "").trim()
+    if (!normalizedId) return
+    setKeyFadeById((prev) => ({ ...prev, [normalizedId]: true }))
+    setTimeout(() => {
+      setKeyFadeById((prev) => {
+        const next = { ...prev }
+        delete next[normalizedId]
+        return next
+      })
+    }, 240)
+  }
   const items = Array.isArray(catalog?.items) ? catalog.items : []
   const topups = Array.isArray(catalog?.topups) ? catalog.topups : []
   const allProducts = useMemo(() => [...items, ...topups], [items, topups])
@@ -380,7 +396,8 @@ export default function ProductsTab({
       toast.error("Silinecek stok yok.")
       return
     }
-    onBulkDelete(normalizedId, selected.map((item) => item.id))
+    selected.forEach((item) => triggerKeyFade(item?.id))
+    wait(180).then(() => onBulkDelete(normalizedId, selected.map((item) => item.id)))
   }
   const handleGroupDraftChange = (offerId, value) => {
     const normalizedId = String(offerId ?? "").trim()
@@ -619,16 +636,19 @@ export default function ProductsTab({
     const target = `${normalizedOfferId}-${normalizedKeyId}`
     if (confirmKeyTarget === target) {
       setConfirmKeyTarget(null)
-      onDeleteKey(normalizedOfferId, normalizedKeyId)
+      triggerKeyFade(normalizedKeyId)
+      wait(180).then(() => onDeleteKey(normalizedOfferId, normalizedKeyId))
       return
     }
     setConfirmKeyTarget(target)
   }
-  const handleKeyStatusUpdate = (offerId, keyId, nextStatus) => {
+  const handleKeyStatusUpdate = async (offerId, keyId, nextStatus) => {
     if (typeof onUpdateKeyStatus !== "function") return
     const normalizedOfferId = String(offerId ?? "").trim()
     const normalizedKeyId = String(keyId ?? "").trim()
     if (!normalizedOfferId || !normalizedKeyId) return
+    triggerKeyFade(normalizedKeyId)
+    await wait(180)
     onUpdateKeyStatus(normalizedOfferId, normalizedKeyId, nextStatus)
   }
   const handleKeyCopy = (code) => {
@@ -711,6 +731,36 @@ export default function ProductsTab({
   useEffect(() => {
     setOpenOffers({})
   }, [allProducts.length])
+  useEffect(() => {
+    const prev = prevNoteGroupAssignments.current || {}
+    const next = noteGroupAssignments || {}
+    const changed = new Set()
+    Object.keys(next).forEach((offerId) => {
+      if (next[offerId] !== prev[offerId]) changed.add(offerId)
+    })
+    Object.keys(prev).forEach((offerId) => {
+      if (!(offerId in next)) changed.add(offerId)
+    })
+    if (changed.size > 0) {
+      setNoteGroupFlashByOffer((current) => {
+        const updated = { ...current }
+        changed.forEach((offerId) => {
+          updated[offerId] = true
+        })
+        return updated
+      })
+      setTimeout(() => {
+        setNoteGroupFlashByOffer((current) => {
+          const updated = { ...current }
+          changed.forEach((offerId) => {
+            delete updated[offerId]
+          })
+          return updated
+        })
+      }, 320)
+    }
+    prevNoteGroupAssignments.current = next
+  }, [noteGroupAssignments])
   useEffect(() => {
     if (page > totalPages) {
       setPage(totalPages)
@@ -1573,7 +1623,11 @@ export default function ProductsTab({
                                         <p className="text-[13px] font-semibold text-slate-100">Ürün notu</p>
                                       </div>
                                     </div>
-                                    <div className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-ink-900/60 p-0">
+                                    <div
+                                      className={`mt-4 overflow-hidden rounded-xl border border-white/10 bg-ink-900/60 p-0 ${
+                                        noteGroupFlashByOffer?.[offerId] ? "animate-noteSwap" : ""
+                                      }`}
+                                    >
                                       <textarea
                                         rows={9}
                                         value={noteInputValue ?? ""}
@@ -1763,6 +1817,7 @@ export default function ProductsTab({
                                   <div className="space-y-2">
                                     {availableKeys.map((item, index) => {
                                       const isDeleting = Boolean(keysDeleting?.[item.id])
+                                      const isFading = Boolean(keyFadeById?.[item.id])
                                       const isEditing = Object.prototype.hasOwnProperty.call(
                                         editingKeys,
                                         item.id,
@@ -1772,9 +1827,9 @@ export default function ProductsTab({
                                       return (
                                         <div
                                           key={item.id}
-                                          className={`group flex flex-col items-start gap-3 rounded-xl border border-emerald-300/30 bg-emerald-500/5 px-3 py-2 transition-all duration-300 hover:border-emerald-200/60 hover:bg-emerald-500/10 sm:flex-row sm:items-center ${
+                                          className={`group flex flex-col items-start gap-3 rounded-xl border border-emerald-300/30 bg-emerald-500/5 px-3 py-2 transition-all duration-300 hover:border-emerald-200/60 hover:bg-emerald-500/10 sm:flex-row sm:items-center animate-panelFade ${
                                             isDeleting ? "opacity-60" : ""
-                                          }`}
+                                          } ${isFading ? "animate-keyFadeOut" : ""}`}
                                         >
                                           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-ink-950/60 text-[11px] font-semibold text-slate-300 transition group-hover:border-accent-300 group-hover:text-accent-100">
                                             #{index + 1}
@@ -1904,6 +1959,7 @@ export default function ProductsTab({
                                   <div className="space-y-2">
                                     {usedKeys.map((item, index) => {
                                       const isDeleting = Boolean(keysDeleting?.[item.id])
+                                      const isFading = Boolean(keyFadeById?.[item.id])
                                       const isEditing = Object.prototype.hasOwnProperty.call(
                                         editingKeys,
                                         item.id,
@@ -1913,9 +1969,9 @@ export default function ProductsTab({
                                       return (
                                         <div
                                           key={item.id}
-                                          className={`group flex flex-col items-start gap-3 rounded-xl border border-rose-300/30 bg-rose-500/5 px-3 py-2 transition-all duration-300 hover:border-rose-200/60 hover:bg-rose-500/10 sm:flex-row sm:items-center ${
+                                          className={`group flex flex-col items-start gap-3 rounded-xl border border-rose-300/30 bg-rose-500/5 px-3 py-2 transition-all duration-300 hover:border-rose-200/60 hover:bg-rose-500/10 sm:flex-row sm:items-center animate-panelFade ${
                                             isDeleting ? "opacity-60" : ""
-                                          }`}
+                                          } ${isFading ? "animate-keyFadeOut" : ""}`}
                                         >
                                           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-white/10 bg-ink-950/60 text-[11px] font-semibold text-slate-300 transition group-hover:border-amber-300 group-hover:text-amber-100">
                                             #{index + 1}
@@ -2047,7 +2103,7 @@ export default function ProductsTab({
                                       return (
                                         <div
                                           key={`${offerId}-msg-${messageGroupId || "independent"}-${label}`}
-                                          className="flex max-w-full items-stretch gap-1"
+                                          className="flex max-w-full items-stretch gap-1 animate-panelFade"
                                         >
                                           <button
                                             type="button"

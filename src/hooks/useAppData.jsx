@@ -2366,6 +2366,7 @@ export default function useAppData() {
         if (prev.some((group) => group.id === created.id)) return prev
         return [...prev, created]
       })
+      toast.success("Stok grubu olusturuldu", { duration: 1400, position: "top-right" })
       return created
     } catch (error) {
       const detail = String(error?.message || "").trim()
@@ -2400,6 +2401,10 @@ export default function useAppData() {
       })
       await loadEldoradoKeys(normalizedOfferId, { force: true })
       loadEldoradoCatalog(undefined, { silent: true })
+      toast.success(
+        nextGroupId ? "Stok grubu atandi" : "Stok grubu kaldirildi",
+        { duration: 1400, position: "top-right" },
+      )
       return true
     } catch (error) {
       toast.error("Stok grubu atanamadi (API/Server kontrol edin).")
@@ -2476,6 +2481,10 @@ const handleEldoradoNoteSave = useCallback(
             return next
           })
         }
+        toast.success(trimmedNote ? "Not kaydedildi" : "Not temizlendi", {
+          duration: 1400,
+          position: "top-right",
+        })
         return true
       } catch (error) {
         toast.error("Not kaydedilemedi (API/Server kontrol edin).")
@@ -2501,6 +2510,10 @@ const handleEldoradoNoteSave = useCallback(
           ...prev,
           [normalizedOfferId]: nextEnabled,
         }))
+        toast.success(nextEnabled ? "Stok acildi" : "Stok kapatildi", {
+          duration: 1400,
+          position: "top-right",
+        })
         return true
       } catch (error) {
         toast.error("Stok durumu kaydedilemedi (API/Server kontrol edin).")
@@ -2596,6 +2609,7 @@ const handleEldoradoNoteSave = useCallback(
           if (prev.some((group) => group.id === created.id)) return prev
           return [...prev, created]
         })
+        toast.success("Not grubu olusturuldu", { duration: 1400, position: "top-right" })
         return created
       } catch (error) {
         const detail = String(error?.message || "").trim()
@@ -2639,6 +2653,10 @@ const handleEldoradoNoteSave = useCallback(
             setEldoradoNoteGroupNotes((prev) => ({ ...prev, [nextGroupId]: existingNote }))
           }
         }
+        toast.success(
+          nextGroupId ? "Not grubu atandi" : "Not grubu kaldirildi",
+          { duration: 1400, position: "top-right" },
+        )
         return true
       } catch (error) {
         toast.error("Not grubu atanamadi (API/Server kontrol edin).")
@@ -2695,6 +2713,7 @@ const handleEldoradoNoteSave = useCallback(
           if (prev.some((group) => group.id === created.id)) return prev
           return [...prev, created]
         })
+        toast.success("Mesaj grubu olusturuldu", { duration: 1400, position: "top-right" })
         return created
       } catch (error) {
         const detail = String(error?.message || "").trim()
@@ -2732,6 +2751,10 @@ const handleEldoradoNoteSave = useCallback(
           }
           return next
         })
+        toast.success(
+          nextGroupId ? "Mesaj grubu atandi" : "Mesaj grubu kaldirildi",
+          { duration: 1400, position: "top-right" },
+        )
         return true
       } catch (error) {
         toast.error("Mesaj grubu atanamadi (API/Server kontrol edin).")
@@ -2790,6 +2813,7 @@ const handleEldoradoNoteSave = useCallback(
           }
           return next
         })
+        toast.success("Mesaj sablonu eklendi", { duration: 1200, position: "top-right" })
         return true
       } catch (error) {
         toast.error("Mesaj sablonu eklenemedi (API/Server kontrol edin).")
@@ -2819,6 +2843,7 @@ const handleEldoradoNoteSave = useCallback(
           }
           return next
         })
+        toast.success("Mesaj sablonu eklendi", { duration: 1200, position: "top-right" })
         return true
       } catch (error) {
         toast.error("Mesaj sablonu eklenemedi (API/Server kontrol edin).")
@@ -2850,6 +2875,7 @@ const handleEldoradoNoteSave = useCallback(
           }
           return next
         })
+        toast.success("Mesaj sablonu kaldirildi", { duration: 1200, position: "top-right" })
         return true
       } catch (error) {
         toast.error("Mesaj sablonu kaldirilamadi (API/Server kontrol edin).")
@@ -2879,6 +2905,7 @@ const handleEldoradoNoteSave = useCallback(
           }
           return next
         })
+        toast.success("Mesaj sablonu kaldirildi", { duration: 1200, position: "top-right" })
         return true
       } catch (error) {
         toast.error("Mesaj sablonu kaldirilamadi (API/Server kontrol edin).")
