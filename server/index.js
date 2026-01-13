@@ -289,6 +289,7 @@ const loadEldoradoStore = async () => {
     stockGroups,
     stockAssignments,
     stockEnabled,
+    offerPriceRows,
     offerNotes,
     noteGroups,
     noteAssignments,
@@ -302,6 +303,7 @@ const loadEldoradoStore = async () => {
     prisma.eldoradoStockGroup.findMany({ orderBy: { createdAt: "asc" } }),
     prisma.eldoradoStockGroupAssignment.findMany(),
     prisma.eldoradoStockEnabled.findMany(),
+    prisma.eldoradoOfferPrice.findMany(),
     prisma.eldoradoOfferNote.findMany(),
     prisma.eldoradoNoteGroup.findMany({ orderBy: { createdAt: "asc" } }),
     prisma.eldoradoNoteGroupAssignment.findMany(),
@@ -324,6 +326,16 @@ const loadEldoradoStore = async () => {
   stockEnabled.forEach((entry) => {
     if (!entry?.offerId) return
     stockEnabledByOffer[entry.offerId] = Boolean(entry.enabled)
+  })
+
+  const offerPrices = {}
+  offerPriceRows.forEach((entry) => {
+    if (!entry?.offerId) return
+    offerPrices[entry.offerId] = {
+      base: entry.base ?? null,
+      percent: entry.percent ?? null,
+      result: entry.result ?? null,
+    }
   })
 
   const notesByOffer = {}
@@ -384,6 +396,7 @@ const loadEldoradoStore = async () => {
     })),
     stockGroupAssignments,
     stockEnabledByOffer,
+    offerPrices,
     notesByOffer,
     noteGroups: noteGroups.map((group) => ({
       id: group.id,
@@ -1993,6 +2006,39 @@ app.post("/api/eldorado/offers/:id/star", async (req, res) => {
   }
 
   res.json({ offerId, starred })
+})
+
+app.post("/api/eldorado/offers/:id/price", async (req, res) => {
+  const offerId = String(req.params.id ?? "").trim()
+  if (!offerId) {
+    res.status(400).json({ error: "offerId is required" })
+    return
+  }
+
+  const baseRaw = req.body?.base
+  const percentRaw = req.body?.percent
+  const resultRaw = req.body?.result
+  const base = Number(baseRaw)
+  const percent = Number(percentRaw)
+  const result = Number(resultRaw)
+
+  if (!Number.isFinite(base) || !Number.isFinite(percent) || !Number.isFinite(result)) {
+    res.status(400).json({ error: "invalid_price_payload" })
+    return
+  }
+
+  const saved = await prisma.eldoradoOfferPrice.upsert({
+    where: { offerId },
+    update: { base, percent, result },
+    create: { offerId, base, percent, result },
+  })
+
+  res.json({
+    offerId: saved.offerId,
+    base: saved.base ?? null,
+    percent: saved.percent ?? null,
+    result: saved.result ?? null,
+  })
 })
 
 app.post("/api/eldorado/stock-groups", async (req, res) => {

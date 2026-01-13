@@ -140,6 +140,7 @@ export default function ProductsTab({
   messageTemplatesByOffer = {},
   templates = [],
   stockEnabledByOffer = {},
+  savedPricesByOffer: savedPricesByOfferProp = {},
   starredOffers = {},
   onLoadKeys,
   onAddKeys,
@@ -164,6 +165,7 @@ export default function ProductsTab({
   onRemoveMessageGroupTemplate,
   onRemoveMessageTemplate,
   onToggleStock,
+  onSavePrice,
   onToggleOfferStar,
   onRefreshOffer,
   canAddKeys = false,
@@ -204,7 +206,11 @@ export default function ProductsTab({
   const [confirmMessageTemplateDelete, setConfirmMessageTemplateDelete] = useState(null)
   const [priceEnabledByOffer, setPriceEnabledByOffer] = useState({})
   const [priceDrafts, setPriceDrafts] = useState({})
-  const [savedPricesByOffer, setSavedPricesByOffer] = useState({})
+  const [savedPricesByOffer, setSavedPricesByOffer] = useState(
+    savedPricesByOfferProp && typeof savedPricesByOfferProp === "object"
+      ? savedPricesByOfferProp
+      : {},
+  )
   const [keyFadeById, setKeyFadeById] = useState({})
   const [noteGroupFlashByOffer, setNoteGroupFlashByOffer] = useState({})
   const [selectFlashByKey, setSelectFlashByKey] = useState({})
@@ -213,6 +219,10 @@ export default function ProductsTab({
   const prevNoteGroupAssignments = useRef(noteGroupAssignments)
   const prevGroupAssignments = useRef(groupAssignments)
   const prevMessageGroupAssignments = useRef(messageGroupAssignments)
+  useEffect(() => {
+    if (!savedPricesByOfferProp || typeof savedPricesByOfferProp !== "object") return
+    setSavedPricesByOffer(savedPricesByOfferProp)
+  }, [savedPricesByOfferProp])
   const canManageGroups = typeof canManageGroupsProp === "boolean" ? canManageGroupsProp : canAddKeys
   const canManageNotes =
     typeof canManageNotesProp === "boolean"
@@ -454,9 +464,13 @@ export default function ProductsTab({
       },
     }))
   }
-  const handlePriceSave = (offerId, base, percent, result) => {
+  const handlePriceSave = async (offerId, base, percent, result) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
+    if (typeof onSavePrice === "function") {
+      const ok = await onSavePrice(normalizedId, base, percent, result)
+      if (!ok) return
+    }
     setSavedPricesByOffer((prev) => ({
       ...prev,
       [normalizedId]: {

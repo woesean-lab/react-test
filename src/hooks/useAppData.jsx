@@ -172,6 +172,7 @@ export default function useAppData() {
   const [eldoradoMessageGroupTemplates, setEldoradoMessageGroupTemplates] = useState({})
   const [eldoradoMessageTemplatesByOffer, setEldoradoMessageTemplatesByOffer] = useState({})
   const [eldoradoStockEnabledByOffer, setEldoradoStockEnabledByOffer] = useState({})
+  const [eldoradoOfferPrices, setEldoradoOfferPrices] = useState({})
   const [eldoradoStarredOffers, setEldoradoStarredOffers] = useState({})
   const [eldoradoLogs, setEldoradoLogs] = useState([])
   const [isEldoradoLogsLoading, setIsEldoradoLogsLoading] = useState(false)
@@ -434,6 +435,9 @@ export default function useAppData() {
           data?.stockEnabledByOffer && typeof data.stockEnabledByOffer === "object"
             ? data.stockEnabledByOffer
             : {},
+        )
+        setEldoradoOfferPrices(
+          data?.offerPrices && typeof data.offerPrices === "object" ? data.offerPrices : {},
         )
       } catch (error) {
         if (error?.name === "AbortError") return
@@ -2581,6 +2585,43 @@ const handleEldoradoNoteSave = useCallback(
         return true
       } catch (error) {
         toast.error("Stok durumu kaydedilemedi (API/Server kontrol edin).")
+        return false
+      }
+    },
+    [apiFetch, readApiError],
+  )
+
+  const handleEldoradoOfferPriceSave = useCallback(
+    async (offerId, base, percent, result) => {
+      const normalizedOfferId = String(offerId ?? "").trim()
+      if (!normalizedOfferId) return false
+      try {
+        const res = await apiFetch(`/api/eldorado/offers/${normalizedOfferId}/price`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ base, percent, result }),
+        })
+        if (!res.ok) {
+          const detail = await readApiError(res)
+          throw new Error(detail || "api_error")
+        }
+        const payload = await res.json()
+        setEldoradoOfferPrices((prev) => ({
+          ...prev,
+          [normalizedOfferId]: {
+            base: payload?.base ?? base,
+            percent: payload?.percent ?? percent,
+            result: payload?.result ?? result,
+          },
+        }))
+        return true
+      } catch (error) {
+        const detail = String(error?.message || "").trim()
+        toast.error(
+          detail
+            ? `Fiyat kaydedilemedi (${detail}).`
+            : "Fiyat kaydedilemedi (API/Server kontrol edin).",
+        )
         return false
       }
     },
@@ -5154,6 +5195,7 @@ const handleEldoradoNoteSave = useCallback(
     eldoradoMessageGroupTemplates,
     eldoradoMessageTemplatesByOffer,
     eldoradoStockEnabledByOffer,
+    eldoradoOfferPrices,
     eldoradoStarredOffers,
     isEldoradoLoading,
     isEldoradoRefreshing,
@@ -5182,6 +5224,7 @@ const handleEldoradoNoteSave = useCallback(
     refreshEldoradoOffer,
     handleEldoradoNoteSave,
     handleEldoradoStockToggle,
+    handleEldoradoOfferPriceSave,
     handleEldoradoOfferStarToggle,
     products,
     productSearch,
