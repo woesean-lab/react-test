@@ -1254,22 +1254,26 @@ export default function ProductsTab({
                               </div>
                             )}
                           </div>
-                          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.12em]">
+                          <div className="mt-1 space-y-1 text-[9px] font-semibold uppercase tracking-[0.12em]">
                             <span className="text-accent-200">{categoryLabel}</span>
-                            {groupName && (
-                              <span className="inline-flex items-center rounded-md border border-sky-300/30 bg-sky-500/10 px-1.5 py-0.5 text-sky-100">
-                                Stok: {groupName}
-                              </span>
-                            )}
-                            {noteGroupName && (
-                              <span className="inline-flex items-center rounded-md border border-emerald-300/30 bg-emerald-500/10 px-1.5 py-0.5 text-emerald-100">
-                                Not: {noteGroupName}
-                              </span>
-                            )}
-                            {messageGroupName && (
-                              <span className="inline-flex items-center rounded-md border border-indigo-300/30 bg-indigo-500/10 px-1.5 py-0.5 text-indigo-100">
-                                Mesaj: {messageGroupName}
-                              </span>
+                            {(groupName || noteGroupName || messageGroupName) && (
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                {groupName && (
+                                  <span className="inline-flex items-center rounded-md border border-sky-300/30 bg-sky-500/10 px-1.5 py-0.5 text-sky-100">
+                                    Stok: {groupName}
+                                  </span>
+                                )}
+                                {noteGroupName && (
+                                  <span className="inline-flex items-center rounded-md border border-emerald-300/30 bg-emerald-500/10 px-1.5 py-0.5 text-emerald-100">
+                                    Not: {noteGroupName}
+                                  </span>
+                                )}
+                                {messageGroupName && (
+                                  <span className="inline-flex items-center rounded-md border border-indigo-300/30 bg-indigo-500/10 px-1.5 py-0.5 text-indigo-100">
+                                    Mesaj: {messageGroupName}
+                                  </span>
+                                )}
+                              </div>
                             )}
                           </div>
                         </div>
