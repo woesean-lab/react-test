@@ -40,6 +40,16 @@ if (!process.env.PLAYWRIGHT_BROWSERS_PATH) {
   process.env.PLAYWRIGHT_BROWSERS_PATH = DEFAULT_BROWSERS_PATH
 }
 
+const logScrapePlan = () => {
+  const pagesHint = USE_TOTAL_PAGES ? `total_pages=${TOTAL_PAGES}` : `max_pages=${MAX_PAGES}`
+  console.log(
+    `[eldorado] plan urls=${SCRAPE_URLS.length} selector="${TITLE_SELECTOR}" ${pagesHint}`,
+  )
+  SCRAPE_URLS.forEach((url, index) => {
+    console.log(`[eldorado] plan[${index + 1}/${SCRAPE_URLS.length}] ${url}`)
+  })
+}
+
 const normalizeHref = (href) => {
   if (!href) return ""
   const raw = String(href).trim()
@@ -214,6 +224,7 @@ const scrapeCategory = async (startUrl) => {
   const page = await browser.newPage()
   const scraped = []
   const categoryHint = extractCategoryFromUrl(startUrl)
+  const startTime = Date.now()
 
   let pageIndex = 1
   let emptyPages = 0
@@ -273,10 +284,15 @@ const scrapeCategory = async (startUrl) => {
   }
 
   await browser.close()
+  const elapsed = Math.round((Date.now() - startTime) / 1000)
+  console.log(
+    `[eldorado] done category=${categoryHint || "unknown"} items=${scraped.length} time=${elapsed}s`,
+  )
   return scraped
 }
 
 const scrapeAllPages = async () => {
+  logScrapePlan()
   const all = []
   for (const url of SCRAPE_URLS) {
     const items = await scrapeCategory(url)
