@@ -23,7 +23,7 @@
   const tasks = ownedTaskStats || taskStats || { total: 0, todo: 0, doing: 0, done: 0 }
   const openCount = Array.isArray(openProblems) ? openProblems.length : 0
   const resolvedCount = Array.isArray(resolvedProblems) ? resolvedProblems.length : 0
-  const userName = activeUser?.username || "KullanÄ±cÄ±"
+  const userName = activeUser?.username || "Kullanıcı"
   const userRole = activeUser?.role?.name || "Personel"
   const permissionCount = Array.isArray(activeUser?.role?.permissions)
     ? activeUser.role.permissions.length
@@ -52,26 +52,26 @@
   const attentionItems = [
     canViewTasks && {
       id: "focus-tasks",
-      text: `TamamlanmasÄ± gereken ${tasks.todo} gÃ¶reviniz var.`,
+      text: `Tamamlanması gereken ${tasks.todo} göreviniz var.`,
       accent: "bg-sky-400",
     },
     canViewProblems && {
       id: "focus-problems",
-      text: `Ã‡Ã¶zÃ¼lmesi gereken ${openCount} problemli mÃ¼ÅŸteri var.`,
+      text: `Çözülmesi gereken ${openCount} problemli müşteri var.`,
       accent: "bg-rose-400",
     },
   ].filter(Boolean)
   const activityItems = [
     canViewSales && {
       id: "activity-sales",
-      label: "SatÄ±ÅŸ giriÅŸi",
+      label: "Satış girişi",
       value: activity.salesCount,
       hint: `Toplam ${activity.salesTotal}`,
       accent: "bg-emerald-400",
     },
     canViewTasks && {
       id: "activity-tasks",
-      label: "GÃ¶rev gÃ¼ncellemesi",
+      label: "Görev güncellemesi",
       value: activity.tasksUpdated,
       hint: "Son 24 saat",
       accent: "bg-sky-400",
@@ -80,7 +80,7 @@
       id: "activity-problems",
       label: "Yeni problem",
       value: activity.problemsOpened,
-      hint: `Ã‡Ã¶zÃ¼len ${activity.problemsResolved}`,
+      hint: `Çözülen ${activity.problemsResolved}`,
       accent: "bg-rose-400",
     },
   ].filter(Boolean)
@@ -89,22 +89,22 @@
   const kpiItems = [
     canViewSales && {
       id: "sales",
-      label: "Son 7 gÃ¼n satÄ±ÅŸ",
+      label: "Son 7 gün satış",
       value: summary.last7Total,
-      subLabel: "DÃ¼n",
+      subLabel: "Dün",
       subValue: summary.yesterdayTotal,
       accent: "bg-emerald-400",
     },
     canViewTasks && {
       id: "tasks",
-      label: "Aktif gÃ¶rev",
+      label: "Aktif görev",
       value: activeTaskCount,
       hint: `${tasks.todo} bekleyen`,
       accent: "bg-sky-400",
     },
     canViewProblems && {
       id: "problems",
-      label: "Problemli mÃ¼ÅŸteri",
+      label: "Problemli müşteri",
       value: openCount,
       hint: openCount > 0 ? "Takipte" : "Temiz",
       accent: "bg-rose-400",
@@ -128,23 +128,23 @@
   const fallbackKpis = [
     {
       id: "modules",
-      label: "EriÅŸim modÃ¼lÃ¼",
+      label: "Erişim modülü",
       value: moduleCount,
-      hint: "GÃ¶rÃ¼nÃ¼r sekmeler",
+      hint: "Görünür sekmeler",
       accent: "bg-slate-400",
     },
     {
       id: "permissions",
       label: "Yetki seviyesi",
       value: permissionCount,
-      hint: "Rol kapsamÄ±nda",
+      hint: "Rol kapsamında",
       accent: "bg-slate-400",
     },
     {
       id: "resolved",
-      label: "Ã‡Ã¶zÃ¼len problem",
+      label: "Çözülen problem",
       value: resolvedCount,
-      hint: "Takip kaydÄ±",
+      hint: "Takip kaydı",
       accent: "bg-slate-400",
     },
   ]
@@ -152,35 +152,35 @@
   const actionItems = [
     canViewTasks && {
       id: "act-tasks",
-      label: "GÃ¶revleri planla",
+      label: "Görevleri planla",
       detail: "Yeni aksiyon ekle",
       tab: "tasks",
       accent: "bg-sky-400",
     },
     canViewSales && {
       id: "act-sales",
-      label: "SatÄ±ÅŸ giriÅŸi",
-      detail: "Yeni kayÄ±t ekle",
+      label: "Satış girişi",
+      detail: "Yeni kayıt ekle",
       tab: "sales",
       accent: "bg-emerald-400",
     },
     canViewProblems && {
       id: "act-problems",
-      label: "Problemli mÃ¼ÅŸteriler",
-      detail: "KayÄ±tlarÄ± gÃ¼ncelle",
+      label: "Problemli müşteriler",
+      detail: "Kayıtları güncelle",
       tab: "problems",
       accent: "bg-rose-400",
     },    canViewMessages && {
       id: "act-messages",
-      label: "ÅablonlarÄ± yÃ¶net",
+      label: "Şablonları yönet",
       detail: "Mesaj havuzu",
       tab: "messages",
       accent: "bg-indigo-400",
     },
     canViewLists && {
       id: "act-lists",
-      label: "Listeleri aÃ§",
-      detail: "KatÄ±lÄ±mlarÄ± gÃ¼ncelle",
+      label: "Listeleri aç",
+      detail: "Katılımları güncelle",
       tab: "lists",
       accent: "bg-slate-400",
     },
@@ -195,11 +195,11 @@
         <div className="relative flex flex-col gap-4 sm:gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div className="max-w-xl">
             <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.3em] text-accent-200">
-              Ä°ÅŸ YÃ¶netim Paneli
+              İş Yönetim Paneli
             </span>
-            <h1 className="mt-3 font-display text-2xl font-semibold text-white sm:text-3xl">AkÄ±ÅŸ</h1>
+            <h1 className="mt-3 font-display text-2xl font-semibold text-white sm:text-3xl">Akış</h1>
             <p className="mt-2 text-sm text-slate-200/80">
-              Merhaba {userName}, bugÃ¼nkÃ¼ operasyonlarÄ±nÄ± tek bakÄ±ÅŸta yÃ¶netebilirsin.
+              Merhaba {userName}, bugünkü operasyonlarını tek bakışta yönetebilirsin.
             </p>
           </div>
           <div className="flex flex-wrap items-stretch gap-3">
@@ -221,8 +221,8 @@
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
                 Durum stabil
               </div>
-              <div className="mt-2 text-xs text-slate-400">EriÅŸim modÃ¼lÃ¼: {moduleCount}</div>
-              <div className="mt-1 text-xs text-slate-400">Ã‡Ã¶zÃ¼len problem: {resolvedCount}</div>
+              <div className="mt-2 text-xs text-slate-400">Erişim modülü: {moduleCount}</div>
+              <div className="mt-1 text-xs text-slate-400">Çözülen problem: {resolvedCount}</div>
             </div>
           </div>
         </div>
@@ -232,17 +232,17 @@
         <div className={`${panelClass} bg-ink-900/55`}>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">HatÄ±rlatÄ±cÄ±lar</p>
-              <p className="mt-1 text-sm text-slate-300">BugÃ¼n Ã¶nceliklendirilmesi gerekenler.</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Hatırlatıcılar</p>
+              <p className="mt-1 text-sm text-slate-300">Bugün önceliklendirilmesi gerekenler.</p>
             </div>
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
-              CanlÄ±
+              Canlı
             </span>
           </div>
           <div className="mt-4 space-y-2">
             {attentionItems.length === 0 ? (
               <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-400">
-                BugÃ¼n kritik iÅŸ bulunamadÄ±.
+                Bugün kritik iş bulunamadı.
               </div>
             ) : (
               attentionItems.map((item) => (
@@ -283,16 +283,16 @@
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Aksiyonlar</p>
-                <p className="mt-1 text-sm text-slate-300">Ä°ÅŸ akÄ±ÅŸÄ±nÄ± hÄ±zlandÄ±r.</p>
+                <p className="mt-1 text-sm text-slate-300">İş akışını hızlandır.</p>
               </div>
               <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
-                {actionItems.length} iÅŸ
+                {actionItems.length} iş
               </span>
             </div>
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
               {actionItems.length === 0 ? (
                 <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-4 text-sm text-slate-400 sm:col-span-2">
-                  Aksiyon bulunamadÄ±.
+                  Aksiyon bulunamadı.
                 </div>
               ) : (
                 actionItems.map((action) => (
@@ -355,6 +355,8 @@
     </div>
   )
 }
+
+
 
 
 

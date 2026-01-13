@@ -1049,7 +1049,7 @@ export default function useAppData() {
       } catch (error) {
         if (error?.name === "AbortError") return
         console.warn("Could not load sales data", error)
-        toast.error("Sat��lar al�namad� (API/DB kontrol edin).")
+        toast.error("Satışlar alınamadı (API/DB kontrol edin).")
         setSales([])
       } finally {
         setIsSalesLoading(false)
@@ -1290,7 +1290,7 @@ export default function useAppData() {
 
   const getTaskDueLabel = (task) => {
     if (task.dueType === "today") return "Bug\u00fcn"
-    if (task.dueType === "none") return "S�resiz"
+    if (task.dueType === "none") return "Süresiz"
     if (task.dueType === "repeat") {
       const labels = getRepeatDayLabels(task.repeatDays)
       const todayTag = isTaskDueToday(task) ? " (Bug\u00fcn)" : ""
@@ -1323,7 +1323,7 @@ export default function useAppData() {
       return
     }
     if (!Number.isFinite(amount) || !Number.isInteger(amount) || amount <= 0) {
-      toast.error("Sat�� adedi girin.")
+      toast.error("Satış adedi girin.")
       return
     }
     try {
@@ -1341,10 +1341,10 @@ export default function useAppData() {
         return [...next, saved]
       })
       setSalesForm((prev) => ({ ...prev, amount: "" }))
-      toast.success("Sat�� kaydedildi")
+      toast.success("Satış kaydedildi")
     } catch (error) {
       console.error(error)
-      toast.error("Sat�� kaydedilemedi (API/DB kontrol edin).")
+      toast.error("Satış kaydedilemedi (API/DB kontrol edin).")
     }
   }
 
@@ -1361,20 +1361,20 @@ export default function useAppData() {
       return false
     }
     if (!Number.isFinite(amount) || !Number.isInteger(amount) || amount <= 0) {
-      toast.error("Sat�� adedi girin.")
+      toast.error("Satış adedi girin.")
       return false
     }
     if (sales.some((sale) => sale.id !== saleId && String(sale?.date ?? "").trim() === date)) {
-      toast.error("Ayn� tarih zaten var.")
+      toast.error("Aynı tarih zaten var.")
       return false
     }
     const exists = sales.some((sale) => sale.id === saleId)
     if (!exists) {
-      toast.error("Kay�t bulunamad�.")
+      toast.error("Kayıt bulunamadı.")
       return false
     }
     setSales((prev) => prev.map((sale) => (sale.id === saleId ? { ...sale, date, amount } : sale)))
-    toast.success("Sat�� g�ncellendi")
+    toast.success("Satış güncellendi")
     return true
   }
 
@@ -1452,7 +1452,7 @@ export default function useAppData() {
         }))
       } catch (error) {
         console.warn("Task comments fetch failed", error)
-        toast.error("Yorumlar al�namad� (API/DB kontrol edin).")
+        toast.error("Yorumlar alınamadı (API/DB kontrol edin).")
       }
     },
     [apiFetch],
@@ -1472,7 +1472,7 @@ export default function useAppData() {
     const trimmed = (text ?? "").trim()
     const cleanImages = Array.isArray(images) ? images.filter(Boolean) : []
     if (!trimmed && cleanImages.length === 0) {
-      toast.error("Yorum veya g�rsel ekleyin.")
+      toast.error("Yorum veya görsel ekleyin.")
       return null
     }
     try {
@@ -5309,6 +5309,7 @@ const handleEldoradoNoteSave = useCallback(
     handleDetailNoteScroll
   }
 }
+
 
 
 
