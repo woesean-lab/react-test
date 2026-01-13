@@ -1205,36 +1205,17 @@ export default function ProductsTab({
                           }`}
                         >
                           <div className="flex min-h-[36px] flex-wrap items-center gap-2">
-                            {href && canViewLinks ? (
-                              <a
-                                href={href}
-                                target="_blank"
-                                rel="noreferrer"
-                                onClick={(event) => event.stopPropagation()}
-                                onContextMenu={(event) => event.stopPropagation()}
-                                className={`min-w-0 flex-1 break-words font-display text-[13px] font-semibold leading-snug text-white underline decoration-transparent decoration-2 underline-offset-4 transition hover:decoration-accent-400 sm:text-sm ${
-                                  isMissing
-                                    ? "text-orange-50"
-                                    : isOutOfStock
-                                      ? "text-rose-50"
-                                      : "text-white"
-                                }`}
-                              >
-                                {name}
-                              </a>
-                            ) : (
-                              <span
-                                className={`min-w-0 flex-1 break-words font-display text-[13px] font-semibold leading-snug text-white sm:text-sm ${
-                                  isMissing
-                                    ? "text-orange-50"
-                                    : isOutOfStock
-                                      ? "text-rose-50"
-                                      : "text-white"
-                                }`}
-                              >
-                                {name}
-                              </span>
-                            )}
+                            <span
+                              className={`min-w-0 flex-1 break-words font-display text-[13px] font-semibold leading-snug text-white sm:text-sm ${
+                                isMissing
+                                  ? "text-orange-50"
+                                  : isOutOfStock
+                                    ? "text-rose-50"
+                                    : "text-white"
+                              }`}
+                            >
+                              {name}
+                            </span>
                             {(isStockEnabled || isMissing) && (
                               <div className="flex shrink-0 flex-nowrap items-center gap-2">
                                 {isStockEnabled && (
