@@ -1858,24 +1858,22 @@ export default function ProductsTab({
                                         className="h-9 rounded-lg border border-white/10 bg-ink-900/60 px-3 text-[12px] text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                                       />
                                     </label>
-                                    <div className="flex flex-col gap-3">
-                                      <label className="flex flex-col gap-2 text-[10px] font-semibold text-slate-300">
-                                        Yüzdelik
-                                        <input
-                                          type="text"
-                                          value={priceDraft.percent}
-                                          onChange={(event) =>
-                                            handlePriceDraftChange(offerId, "percent", event.target.value)
-                                          }
-                                          placeholder="%"
-                                          className="h-9 rounded-lg border border-white/10 bg-ink-900/60 px-3 text-[12px] text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                                        />
-                                      </label>
-                                      <div className="flex flex-col gap-2 text-[10px] font-semibold text-slate-300">
-                                        Sonuç
-                                        <div className="flex h-9 items-center rounded-lg border border-accent-400/40 bg-accent-500/10 px-3 text-[12px] font-semibold text-accent-50">
-                                          {priceResult === "" ? "-" : priceResult.toFixed(2)}
-                                        </div>
+                                    <label className="flex flex-col gap-2 text-[10px] font-semibold text-slate-300">
+                                      Yüzdelik
+                                      <input
+                                        type="text"
+                                        value={priceDraft.percent}
+                                        onChange={(event) =>
+                                          handlePriceDraftChange(offerId, "percent", event.target.value)
+                                        }
+                                        placeholder="%"
+                                        className="h-9 rounded-lg border border-white/10 bg-ink-900/60 px-3 text-[12px] text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                                      />
+                                    </label>
+                                    <div className="flex flex-col gap-2 text-[10px] font-semibold text-slate-300">
+                                      Sonuç
+                                      <div className="flex h-9 items-center rounded-lg border border-accent-400/40 bg-accent-500/10 px-3 text-[12px] font-semibold text-accent-50">
+                                        {priceResult === "" ? "-" : priceResult.toFixed(2)}
                                       </div>
                                     </div>
                                   </div>
@@ -1897,25 +1895,6 @@ export default function ProductsTab({
                                       }
                                       disabled={priceResult === "" || !offerId}
                                       className="h-8 rounded-lg border border-emerald-300/60 bg-emerald-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 shadow-glow transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-60"
-                                    >
-                                      KAYDET
-                                    </button>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                                    <button
-                                      type="button"
-                                      onClick={() =>
-                                        handlePriceSave(
-                                          offerId,
-                                          baseNumber,
-                                          percentNumber,
-                                          priceResult === "" ? 0 : priceResult,
-                                        )
-                                      }
-                                      disabled={priceResult === "" || !offerId}
-                                      className="rounded-lg border border-emerald-300/60 bg-emerald-500/15 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.2em] text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                                     >
                                       KAYDET
                                     </button>
@@ -2414,7 +2393,7 @@ export default function ProductsTab({
                           <div className="self-start rounded-2xl border border-white/10 bg-white/5 p-4 shadow-card">
                               <div>
                                 {messageGroupMessages.length === 0 ? (
-                                  <div className="text-xs text-slate-400">
+                                  <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
                                     {messageGroupId
                                       ? "Bu grupta mesaj yok."
                                       : "Bağımsız mesaj yok."}
@@ -2533,7 +2512,6 @@ export default function ProductsTab({
     </div>
   )
 }
-
 
 
 
