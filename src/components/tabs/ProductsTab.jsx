@@ -1175,9 +1175,6 @@ export default function ProductsTab({
                     : independentMessages
                   const messageGroupLabel =
                     messageGroupName || (messageGroupMessages.length > 0 ? "Bağımsız" : "Yok")
-                  const stockGroupBadge = groupName || "Bağımsız"
-                  const noteGroupBadge = noteGroupName || (storedNote ? "Bağımsız" : "Yok")
-                  const messageGroupBadge = messageGroupLabel
                   const canDeleteMessageItem = messageGroupId
                     ? typeof onRemoveMessageGroupTemplate === "function"
                     : typeof onRemoveMessageTemplate === "function"
@@ -1257,19 +1254,25 @@ export default function ProductsTab({
                               </div>
                             )}
                           </div>
-                          <div className="mt-1 flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[0.14em]">
-                            <span className="inline-flex items-center rounded-full border border-accent-400/40 bg-accent-500/10 px-2 py-0.5 text-[9px] text-accent-100">
+                          <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[9px] font-semibold uppercase tracking-[0.12em]">
+                            <span className="inline-flex items-center rounded-md border border-accent-400/40 bg-accent-500/10 px-1.5 py-0.5 text-accent-100">
                               Kategori: {categoryLabel}
                             </span>
-                            <span className="inline-flex items-center rounded-full border border-sky-300/30 bg-sky-500/10 px-2 py-0.5 text-[9px] text-sky-100">
-                              Stok grubu: {stockGroupBadge}
-                            </span>
-                            <span className="inline-flex items-center rounded-full border border-emerald-300/30 bg-emerald-500/10 px-2 py-0.5 text-[9px] text-emerald-100">
-                              Not grubu: {noteGroupBadge}
-                            </span>
-                            <span className="inline-flex items-center rounded-full border border-indigo-300/30 bg-indigo-500/10 px-2 py-0.5 text-[9px] text-indigo-100">
-                              Mesaj grubu: {messageGroupBadge}
-                            </span>
+                            {groupName && (
+                              <span className="inline-flex items-center rounded-md border border-sky-300/30 bg-sky-500/10 px-1.5 py-0.5 text-sky-100">
+                                Stok: {groupName}
+                              </span>
+                            )}
+                            {noteGroupName && (
+                              <span className="inline-flex items-center rounded-md border border-emerald-300/30 bg-emerald-500/10 px-1.5 py-0.5 text-emerald-100">
+                                Not: {noteGroupName}
+                              </span>
+                            )}
+                            {messageGroupName && (
+                              <span className="inline-flex items-center rounded-md border border-indigo-300/30 bg-indigo-500/10 px-1.5 py-0.5 text-indigo-100">
+                                Mesaj: {messageGroupName}
+                              </span>
+                            )}
                           </div>
                         </div>
                         <div className="flex flex-wrap items-stretch gap-1.5">
