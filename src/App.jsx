@@ -352,6 +352,7 @@ function App() {
   const prevTabRef = useRef(activeTab)
   const manualDirectionRef = useRef(false)
   const [tabSlideDirection, setTabSlideDirection] = useState("forward")
+  const requestedTabRef = useRef(null)
   const hasMountedRef = useRef(false)
   const userInitial = (activeUser?.username || "?").trim().charAt(0).toUpperCase() || "?"
   const userName = activeUser?.username ?? ""
@@ -377,6 +378,19 @@ function App() {
   useEffect(() => {
     hasMountedRef.current = true
   }, [])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    if (!requestedTabRef.current) {
+      const params = new URLSearchParams(window.location.search)
+      requestedTabRef.current = params.get("tab")
+    }
+    const requestedTab = requestedTabRef.current
+    if (requestedTab && tabOrder.includes(requestedTab)) {
+      setActiveTab(requestedTab)
+      requestedTabRef.current = null
+    }
+  }, [setActiveTab, tabOrder])
 
   const canViewDashboard = isAuthed
   const canViewMessages = hasPermission(PERMISSIONS.messagesView)
@@ -529,6 +543,32 @@ function App() {
     setTabSlideDirection(direction)
     setActiveTab(nextTab)
     setIsTabMenuOpen(false)
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href)
+      url.searchParams.set("tab", nextTab)
+      window.history.replaceState(null, "", url.toString())
+    }
+  }
+
+  const handleTabLinkClick = (event, tabKey) => {
+    if (
+      event.button !== 0 ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.shiftKey ||
+      event.altKey
+    ) {
+      return
+    }
+    event.preventDefault()
+    handleTabSwitch(tabKey)
+  }
+
+  const getTabHref = (tabKey) => {
+    if (typeof window === "undefined") return "#"
+    const url = new URL(window.location.href)
+    url.searchParams.set("tab", tabKey)
+    return url.toString()
   }
 
   useEffect(() => {
@@ -728,14 +768,14 @@ function App() {
                   <div className="flex items-center gap-2 whitespace-nowrap pr-2">
                     <span className="hidden h-7 w-px bg-white/10 sm:block" />
                   {nonAdminTabs.map((item) => (
-                      <button
+                      <a
                         key={item.key}
-                        type="button"
-                        onClick={() => handleTabSwitch(item.key)}
+                        href={getTabHref(item.key)}
+                        onClick={(event) => handleTabLinkClick(event, item.key)}
                         className={getTabButtonClass(item.key, "desktop")}
                       >
                         {item.label}
-                      </button>
+                      </a>
                     ))}
                   </div>
                 </div>
@@ -743,9 +783,9 @@ function App() {
 
               <div className="ml-auto flex items-center gap-2">
                 {canViewAdmin && (
-                  <button
-                    type="button"
-                    onClick={() => handleTabSwitch("admin")}
+                  <a
+                    href={getTabHref("admin")}
+                    onClick={(event) => handleTabLinkClick(event, "admin")}
                     className={`inline-flex items-center gap-1.5 rounded-2xl px-3.5 py-2 text-sm font-semibold transition ${
                       activeTab === "admin"
                         ? "bg-accent-500/20 text-accent-50 shadow-glow"
@@ -754,7 +794,7 @@ function App() {
                   >
                     <span className="h-2 w-2 rounded-full bg-accent-400 shadow-glow" />
                     Admin
-                  </button>
+                  </a>
                 )}
                 {themeToggleButton}
                 <div className="relative" ref={userMenuRef}>
@@ -831,14 +871,14 @@ function App() {
             <div id="mobile-tab-menu" className="mt-2 sm:hidden">
               <div className="space-y-2 rounded-2xl border border-white/10 bg-ink-900/95 p-3 shadow-card">
                 {nonAdminTabs.map((item) => (
-                  <button
+                  <a
                     key={item.key}
-                    type="button"
-                    onClick={() => handleTabSwitch(item.key)}
+                    href={getTabHref(item.key)}
+                    onClick={(event) => handleTabLinkClick(event, item.key)}
                     className={getTabButtonClass(item.key, "mobile")}
                   >
                     {item.label}
-                  </button>
+                  </a>
                 ))}
               </div>
             </div>
