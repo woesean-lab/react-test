@@ -1870,19 +1870,8 @@ export default function ProductsTab({
                                         className="h-9 rounded-lg border border-white/10 bg-ink-900/60 px-3 text-[12px] text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
                                       />
                                     </label>
-                                    <div className="flex flex-col gap-2 text-[10px] font-semibold text-slate-300">
-                                      Sonuç
-                                      <div className="flex h-9 items-center rounded-lg border border-accent-400/40 bg-accent-500/10 px-3 text-[12px] font-semibold text-accent-50">
-                                        {priceResult === "" ? "-" : priceResult.toFixed(2)}
-                                      </div>
-                                    </div>
                                   </div>
                                   <div className="flex flex-wrap items-center justify-between gap-3">
-                                    {savedPricesByOffer?.[offerId]?.result !== undefined && (
-                                      <div className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-                                        Kayıtlı: {savedPricesByOffer[offerId].result}
-                                      </div>
-                                    )}
                                     <button
                                       type="button"
                                       onClick={() =>
