@@ -290,6 +290,7 @@ const loadEldoradoStore = async () => {
     stockAssignments,
     stockEnabled,
     offerPriceRows,
+    offerPriceEnabledRows,
     offerNotes,
     noteGroups,
     noteAssignments,
@@ -304,6 +305,7 @@ const loadEldoradoStore = async () => {
     prisma.eldoradoStockGroupAssignment.findMany(),
     prisma.eldoradoStockEnabled.findMany(),
     prisma.eldoradoOfferPrice.findMany(),
+    prisma.eldoradoOfferPriceEnabled.findMany(),
     prisma.eldoradoOfferNote.findMany(),
     prisma.eldoradoNoteGroup.findMany({ orderBy: { createdAt: "asc" } }),
     prisma.eldoradoNoteGroupAssignment.findMany(),
@@ -336,6 +338,12 @@ const loadEldoradoStore = async () => {
       percent: entry.percent ?? null,
       result: entry.result ?? null,
     }
+  })
+
+  const offerPriceEnabledByOffer = {}
+  offerPriceEnabledRows.forEach((entry) => {
+    if (!entry?.offerId) return
+    offerPriceEnabledByOffer[entry.offerId] = Boolean(entry.enabled)
   })
 
   const notesByOffer = {}
@@ -396,6 +404,7 @@ const loadEldoradoStore = async () => {
     })),
     stockGroupAssignments,
     stockEnabledByOffer,
+    offerPriceEnabledByOffer,
     offerPrices,
     notesByOffer,
     noteGroups: noteGroups.map((group) => ({
@@ -2039,6 +2048,28 @@ app.post("/api/eldorado/offers/:id/price", async (req, res) => {
     percent: saved.percent ?? null,
     result: saved.result ?? null,
   })
+})
+
+app.post("/api/eldorado/offers/:id/price-enabled", async (req, res) => {
+  const offerId = String(req.params.id ?? "").trim()
+  if (!offerId) {
+    res.status(400).json({ error: "offerId is required" })
+    return
+  }
+
+  const enabledRaw = req.body?.enabled
+  const enabled =
+    typeof enabledRaw === "boolean"
+      ? enabledRaw
+      : String(enabledRaw).toLowerCase() === "true"
+
+  const saved = await prisma.eldoradoOfferPriceEnabled.upsert({
+    where: { offerId },
+    update: { enabled },
+    create: { offerId, enabled },
+  })
+
+  res.json({ offerId: saved.offerId, enabled: Boolean(saved.enabled) })
 })
 
 app.post("/api/eldorado/stock-groups", async (req, res) => {

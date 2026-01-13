@@ -173,6 +173,7 @@ export default function useAppData() {
   const [eldoradoMessageTemplatesByOffer, setEldoradoMessageTemplatesByOffer] = useState({})
   const [eldoradoStockEnabledByOffer, setEldoradoStockEnabledByOffer] = useState({})
   const [eldoradoOfferPrices, setEldoradoOfferPrices] = useState({})
+  const [eldoradoOfferPriceEnabledByOffer, setEldoradoOfferPriceEnabledByOffer] = useState({})
   const [eldoradoStarredOffers, setEldoradoStarredOffers] = useState({})
   const [eldoradoLogs, setEldoradoLogs] = useState([])
   const [isEldoradoLogsLoading, setIsEldoradoLogsLoading] = useState(false)
@@ -438,6 +439,11 @@ export default function useAppData() {
         )
         setEldoradoOfferPrices(
           data?.offerPrices && typeof data.offerPrices === "object" ? data.offerPrices : {},
+        )
+        setEldoradoOfferPriceEnabledByOffer(
+          data?.offerPriceEnabledByOffer && typeof data.offerPriceEnabledByOffer === "object"
+            ? data.offerPriceEnabledByOffer
+            : {},
         )
       } catch (error) {
         if (error?.name === "AbortError") return
@@ -2621,6 +2627,40 @@ const handleEldoradoNoteSave = useCallback(
           detail
             ? `Fiyat kaydedilemedi (${detail}).`
             : "Fiyat kaydedilemedi (API/Server kontrol edin).",
+        )
+        return false
+      }
+    },
+    [apiFetch, readApiError],
+  )
+
+  const handleEldoradoOfferPriceToggle = useCallback(
+    async (offerId, enabled) => {
+      const normalizedOfferId = String(offerId ?? "").trim()
+      if (!normalizedOfferId) return false
+      const nextEnabled = Boolean(enabled)
+      try {
+        const res = await apiFetch(`/api/eldorado/offers/${normalizedOfferId}/price-enabled`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ enabled: nextEnabled }),
+        })
+        if (!res.ok) {
+          const detail = await readApiError(res)
+          throw new Error(detail || "api_error")
+        }
+        const payload = await res.json()
+        setEldoradoOfferPriceEnabledByOffer((prev) => ({
+          ...prev,
+          [normalizedOfferId]: Boolean(payload?.enabled),
+        }))
+        return true
+      } catch (error) {
+        const detail = String(error?.message || "").trim()
+        toast.error(
+          detail
+            ? `Fiyat durumu kaydedilemedi (${detail}).`
+            : "Fiyat durumu kaydedilemedi (API/Server kontrol edin).",
         )
         return false
       }
@@ -5196,6 +5236,7 @@ const handleEldoradoNoteSave = useCallback(
     eldoradoMessageTemplatesByOffer,
     eldoradoStockEnabledByOffer,
     eldoradoOfferPrices,
+    eldoradoOfferPriceEnabledByOffer,
     eldoradoStarredOffers,
     isEldoradoLoading,
     isEldoradoRefreshing,
@@ -5225,6 +5266,7 @@ const handleEldoradoNoteSave = useCallback(
     handleEldoradoNoteSave,
     handleEldoradoStockToggle,
     handleEldoradoOfferPriceSave,
+    handleEldoradoOfferPriceToggle,
     handleEldoradoOfferStarToggle,
     products,
     productSearch,

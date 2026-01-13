@@ -189,6 +189,7 @@ function App() {
     eldoradoMessageTemplatesByOffer,
     eldoradoStockEnabledByOffer,
     eldoradoOfferPrices,
+    eldoradoOfferPriceEnabledByOffer,
     eldoradoStarredOffers,
     isEldoradoRefreshing,
     refreshEldoradoCatalog,
@@ -216,6 +217,7 @@ function App() {
     handleEldoradoNoteSave,
     handleEldoradoStockToggle,
     handleEldoradoOfferPriceSave,
+    handleEldoradoOfferPriceToggle,
     handleEldoradoOfferStarToggle,
     refreshEldoradoOffer,
     templates,
@@ -1052,6 +1054,7 @@ function App() {
               templates={templates}
               stockEnabledByOffer={eldoradoStockEnabledByOffer}
               savedPricesByOffer={eldoradoOfferPrices}
+              priceEnabledByOffer={eldoradoOfferPriceEnabledByOffer}
               starredOffers={eldoradoStarredOffers}
               onLoadKeys={loadEldoradoKeys}
               onAddKeys={handleEldoradoKeysAdd}
@@ -1077,6 +1080,7 @@ function App() {
               onSaveNote={handleEldoradoNoteSave}
               onToggleStock={handleEldoradoStockToggle}
               onSavePrice={handleEldoradoOfferPriceSave}
+              onTogglePrice={handleEldoradoOfferPriceToggle}
               onToggleOfferStar={handleEldoradoOfferStarToggle}
               onRefreshOffer={refreshEldoradoOffer}
               canAddKeys={canAddProductStocks}

@@ -140,6 +140,7 @@ export default function ProductsTab({
   messageTemplatesByOffer = {},
   templates = [],
   stockEnabledByOffer = {},
+  priceEnabledByOffer: priceEnabledByOfferProp = {},
   savedPricesByOffer: savedPricesByOfferProp = {},
   starredOffers = {},
   onLoadKeys,
@@ -166,6 +167,7 @@ export default function ProductsTab({
   onRemoveMessageTemplate,
   onToggleStock,
   onSavePrice,
+  onTogglePrice,
   onToggleOfferStar,
   onRefreshOffer,
   canAddKeys = false,
@@ -204,7 +206,11 @@ export default function ProductsTab({
   const [refreshingOffers, setRefreshingOffers] = useState({})
   const [confirmMessageGroupDelete, setConfirmMessageGroupDelete] = useState(null)
   const [confirmMessageTemplateDelete, setConfirmMessageTemplateDelete] = useState(null)
-  const [priceEnabledByOffer, setPriceEnabledByOffer] = useState({})
+  const [priceEnabledByOffer, setPriceEnabledByOffer] = useState(
+    priceEnabledByOfferProp && typeof priceEnabledByOfferProp === "object"
+      ? priceEnabledByOfferProp
+      : {},
+  )
   const [priceDrafts, setPriceDrafts] = useState({})
   const [savedPricesByOffer, setSavedPricesByOffer] = useState(
     savedPricesByOfferProp && typeof savedPricesByOfferProp === "object"
@@ -223,6 +229,10 @@ export default function ProductsTab({
     if (!savedPricesByOfferProp || typeof savedPricesByOfferProp !== "object") return
     setSavedPricesByOffer(savedPricesByOfferProp)
   }, [savedPricesByOfferProp])
+  useEffect(() => {
+    if (!priceEnabledByOfferProp || typeof priceEnabledByOfferProp !== "object") return
+    setPriceEnabledByOffer(priceEnabledByOfferProp)
+  }, [priceEnabledByOfferProp])
   useEffect(() => {
     if (!savedPricesByOfferProp || typeof savedPricesByOfferProp !== "object") return
     setPriceDrafts((prev) => {
@@ -464,10 +474,15 @@ export default function ProductsTab({
       handleStockModalClose()
     }
   }
-  const handlePriceToggle = (offerId) => {
+  const handlePriceToggle = async (offerId) => {
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
-    setPriceEnabledByOffer((prev) => ({ ...prev, [normalizedId]: !prev[normalizedId] }))
+    const nextEnabled = !priceEnabledByOffer?.[normalizedId]
+    if (typeof onTogglePrice === "function") {
+      const ok = await onTogglePrice(normalizedId, nextEnabled)
+      if (!ok) return
+    }
+    setPriceEnabledByOffer((prev) => ({ ...prev, [normalizedId]: nextEnabled }))
   }
   const handlePriceDraftChange = (offerId, field, value) => {
     const normalizedId = String(offerId ?? "").trim()
