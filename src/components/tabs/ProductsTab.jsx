@@ -1843,7 +1843,7 @@ export default function ProductsTab({
                                 </div>
                                 <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)]">
                                   <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                                    <label className="text-[10px] font-semibold uppercase tracking-wide text-slate-300">Fiyat gir</label>
+                                    <label className="text-[10px] font-semibold text-slate-300">Fiyat gir</label>
                                     <div className="mt-2 flex flex-wrap items-center gap-2">
                                       <input
                                         type="text"
@@ -1874,7 +1874,7 @@ export default function ProductsTab({
                                     </div>
                                   </div>
                                   <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                                    <label className="text-[10px] font-semibold uppercase tracking-wide text-slate-300">{"Y\u00fczdelik"}</label>
+                                    <label className="text-[10px] font-semibold text-slate-300">{"Y\u00fczdelik"}</label>
                                     <div className="mt-2 space-y-2">
                                       <div className="flex flex-wrap items-center gap-2">
                                         <input
@@ -1888,7 +1888,7 @@ export default function ProductsTab({
                                         />
                                       </div>
                                       <div className="flex items-center justify-between gap-3 rounded-md border border-accent-400/40 bg-accent-500/10 px-3 py-2 text-[12px] font-semibold text-accent-50">
-                                        <span className="text-[10px] font-semibold uppercase tracking-wide text-accent-100/80">
+                                        <span className="text-[10px] font-semibold text-accent-100/80">
                                           {"Sonu\u00e7"}
                                         </span>
                                         <span>{priceResult === "" ? "-" : priceResult.toFixed(2)}</span>
