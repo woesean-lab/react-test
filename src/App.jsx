@@ -395,6 +395,47 @@ function App() {
     PERMISSIONS.productsStar,
     PERMISSIONS.productsManage,
   ])
+  const productSummary = useMemo(() => {
+    const items = Array.isArray(eldoradoCatalog?.items) ? eldoradoCatalog.items : []
+    const topups = Array.isArray(eldoradoCatalog?.topups) ? eldoradoCatalog.topups : []
+    const allProducts = [...items, ...topups]
+    const summary = {
+      total: allProducts.length,
+      stockEnabled: 0,
+      outOfStock: 0,
+    }
+    allProducts.forEach((product) => {
+      const offerId = String(product?.id ?? "").trim()
+      const isStockEnabled = Boolean(eldoradoStockEnabledByOffer?.[offerId])
+      if (isStockEnabled) {
+        summary.stockEnabled += 1
+      }
+      if (!isStockEnabled) return
+      const keyList = Array.isArray(eldoradoKeysByOffer?.[offerId]) ? eldoradoKeysByOffer[offerId] : []
+      const usedCountFromKeys = keyList.reduce(
+        (acc, item) => acc + (item?.status === "used" ? 1 : 0),
+        0,
+      )
+      const availableCountFromKeys = keyList.reduce(
+        (acc, item) => acc + (item?.status !== "used" ? 1 : 0),
+        0,
+      )
+      const stockCountRaw = Number(product?.stockCount)
+      const stockUsedRaw = Number(product?.stockUsedCount)
+      const stockTotalRaw = Number(product?.stockTotalCount)
+      const rawTotalCount = Number.isFinite(stockTotalRaw) ? stockTotalRaw : keyList.length
+      const rawUsedCount = Number.isFinite(stockUsedRaw) ? stockUsedRaw : usedCountFromKeys
+      const rawAvailableCount = Number.isFinite(stockCountRaw)
+        ? stockCountRaw
+        : Math.max(0, rawTotalCount - rawUsedCount)
+      const hasLoadedKeys = Object.prototype.hasOwnProperty.call(eldoradoKeysByOffer, offerId)
+      const availableCount = hasLoadedKeys ? availableCountFromKeys : rawAvailableCount
+      if (Math.max(0, availableCount) === 0) {
+        summary.outOfStock += 1
+      }
+    })
+    return summary
+  }, [eldoradoCatalog, eldoradoKeysByOffer, eldoradoStockEnabledByOffer])
   const canManageRoles = hasAnyPermission([PERMISSIONS.adminRolesManage, PERMISSIONS.adminManage])
   const canManageUsers = hasAnyPermission([PERMISSIONS.adminUsersManage, PERMISSIONS.adminManage])
   const canViewAdmin = canManageRoles || canManageUsers
@@ -799,6 +840,7 @@ function App() {
               ownedTaskStats={ownedTaskStats}
               salesSummary={salesSummary}
               listCountText={listCountText}
+              productSummary={productSummary}
                 openProblems={openProblems}
                 resolvedProblems={resolvedProblems}
                 recentActivity={recentActivity}
@@ -806,6 +848,7 @@ function App() {
                 canViewTasks={canViewTasks}
                 canViewSales={canViewSales}
                 canViewProblems={canViewProblems}
+                canViewProducts={canViewProducts}
                 canViewLists={canViewLists}
                 onNavigate={handleTabSwitch}
               />
