@@ -379,19 +379,6 @@ function App() {
     hasMountedRef.current = true
   }, [])
 
-  useEffect(() => {
-    if (typeof window === "undefined") return
-    if (!requestedTabRef.current) {
-      const params = new URLSearchParams(window.location.search)
-      requestedTabRef.current = params.get("tab")
-    }
-    const requestedTab = requestedTabRef.current
-    if (requestedTab && tabOrder.includes(requestedTab)) {
-      setActiveTab(requestedTab)
-      requestedTabRef.current = null
-    }
-  }, [setActiveTab, tabOrder])
-
   const canViewDashboard = isAuthed
   const canViewMessages = hasPermission(PERMISSIONS.messagesView)
   const canCreateMessages = hasAnyPermission([PERMISSIONS.messagesCreate, PERMISSIONS.messagesEdit])
@@ -532,6 +519,19 @@ function App() {
   const visibleTabs = useMemo(() => tabItems.filter((item) => item.canView), [tabItems])
   const nonAdminTabs = useMemo(() => visibleTabs.filter((item) => item.key !== "admin"), [visibleTabs])
   const tabOrder = useMemo(() => visibleTabs.map((item) => item.key), [visibleTabs])
+
+  useEffect(() => {
+    if (typeof window === "undefined") return
+    if (!requestedTabRef.current) {
+      const params = new URLSearchParams(window.location.search)
+      requestedTabRef.current = params.get("tab")
+    }
+    const requestedTab = requestedTabRef.current
+    if (requestedTab && tabOrder.includes(requestedTab)) {
+      setActiveTab(requestedTab)
+      requestedTabRef.current = null
+    }
+  }, [setActiveTab, tabOrder])
 
   const handleTabSwitch = (nextTab) => {
     if (nextTab === activeTab) return
