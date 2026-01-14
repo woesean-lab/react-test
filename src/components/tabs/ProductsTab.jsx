@@ -171,6 +171,7 @@ export default function ProductsTab({
   onToggleOfferStar,
   onRefreshOffer,
   canManagePrices: canManagePricesProp,
+  canViewPriceDetails: canViewPriceDetailsProp,
   canAddKeys = false,
   canDeleteKeys = false,
   canCopyKeys = false,
@@ -266,6 +267,8 @@ export default function ProductsTab({
         (typeof onAddMessageGroupTemplate === "function" || typeof onAddMessageTemplate === "function")
   const canManagePrices =
     typeof canManagePricesProp === "boolean" ? canManagePricesProp : canAddKeys
+  const canViewPriceDetails =
+    typeof canViewPriceDetailsProp === "boolean" ? canViewPriceDetailsProp : canManagePrices
   const canDeleteMessageGroup =
     canManageMessages && typeof onDeleteMessageGroup === "function"
   const canRemoveMessageTemplate =
@@ -1926,29 +1929,31 @@ export default function ProductsTab({
                                       </button>
                                     </div>
                                   </div>
-                                  <div className="rounded-lg border border-white/10 bg-white/5 p-3">
-                                    <label className="text-[10px] font-semibold text-slate-300">{"Y\u00fczdelik"}</label>
-                                    <div className="mt-2 space-y-2">
-                                      <div className="flex flex-wrap items-center gap-2">
-                                        <input
-                                          type="text"
-                                          value={priceDraft.percent}
-                                          onChange={(event) =>
-                                            handlePriceDraftChange(offerId, "percent", event.target.value)
-                                          }
-                                          placeholder="%"
-                                          disabled={!canManagePrices}
-                                          className="min-w-[120px] flex-1 rounded-md border border-white/10 bg-ink-900/60 px-3 py-2 text-[12px] text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                                        />
-                                      </div>
-                                      <div className="flex items-center justify-between gap-3 rounded-md border border-accent-400/40 bg-accent-500/10 px-3 py-2 text-[12px] font-semibold text-accent-50">
-                                        <span className="text-[10px] font-semibold text-accent-100/80">
-                                          {"Sonu\u00e7"}
-                                        </span>
-                                        <span>{priceResult === "" ? "-" : priceResult.toFixed(2)}</span>
+                                  {canViewPriceDetails && (
+                                    <div className="rounded-lg border border-white/10 bg-white/5 p-3">
+                                      <label className="text-[10px] font-semibold text-slate-300">{"Y\u00fczdelik"}</label>
+                                      <div className="mt-2 space-y-2">
+                                        <div className="flex flex-wrap items-center gap-2">
+                                          <input
+                                            type="text"
+                                            value={priceDraft.percent}
+                                            onChange={(event) =>
+                                              handlePriceDraftChange(offerId, "percent", event.target.value)
+                                            }
+                                            placeholder="%"
+                                            disabled={!canManagePrices}
+                                            className="min-w-[120px] flex-1 rounded-md border border-white/10 bg-ink-900/60 px-3 py-2 text-[12px] text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+                                          />
+                                        </div>
+                                        <div className="flex items-center justify-between gap-3 rounded-md border border-accent-400/40 bg-accent-500/10 px-3 py-2 text-[12px] font-semibold text-accent-50">
+                                          <span className="text-[10px] font-semibold text-accent-100/80">
+                                            {"Sonu\u00e7"}
+                                          </span>
+                                          <span>{priceResult === "" ? "-" : priceResult.toFixed(2)}</span>
+                                        </div>
                                       </div>
                                     </div>
-                                  </div>
+                                  )}
                                 </div>
                               </div>
                             )}
