@@ -1366,22 +1366,21 @@ export default function ProductsTab({
                               </div>
                             )}
                           </div>
-                          <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[10px] text-slate-300">
-                            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-0.5">
-                              <span className="text-slate-400">Kategori:</span>
-                              <span className="font-semibold text-slate-100">{categoryLabel}</span>
+                          <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px] text-slate-400">
+                            <span>
+                              <span className="text-slate-500">Kategori:</span> {categoryLabel}
                             </span>
-                            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-0.5">
-                              <span className="text-slate-400">Stok:</span>
-                              <span className="font-semibold text-slate-100">{stockMetaLabel}</span>
+                            <span className="text-slate-600">·</span>
+                            <span>
+                              <span className="text-slate-500">Stok:</span> {stockMetaLabel}
                             </span>
-                            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-0.5">
-                              <span className="text-slate-400">Not:</span>
-                              <span className="font-semibold text-slate-100">{noteMetaLabel}</span>
+                            <span className="text-slate-600">·</span>
+                            <span>
+                              <span className="text-slate-500">Not:</span> {noteMetaLabel}
                             </span>
-                            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2 py-0.5">
-                              <span className="text-slate-400">Mesaj:</span>
-                              <span className="font-semibold text-slate-100">{messageMetaLabel}</span>
+                            <span className="text-slate-600">·</span>
+                            <span>
+                              <span className="text-slate-500">Mesaj:</span> {messageMetaLabel}
                             </span>
                           </div>
                         </div>
