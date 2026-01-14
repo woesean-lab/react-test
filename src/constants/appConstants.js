@@ -114,6 +114,7 @@ export const PERMISSIONS = {
   tasksEdit: "tasks.edit",
   salesView: "sales.view",
   salesCreate: "sales.create",
+  salesAnalyticsView: "sales.analytics.view",
   problemsView: "problems.view",
   problemsCreate: "problems.create",
   problemsResolve: "problems.resolve",
@@ -181,6 +182,7 @@ export const PERMISSION_GROUPS = [
     items: [
       { id: PERMISSIONS.salesView, label: "Goruntule" },
       { id: PERMISSIONS.salesCreate, label: "Satis ekle" },
+      { id: PERMISSIONS.salesAnalyticsView, label: "Grafik gor" },
     ],
   },
   {

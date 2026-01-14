@@ -62,6 +62,7 @@ export default function SalesTab({
   isLoading,
   panelClass,
   canCreate,
+  canViewAnalytics = true,
   salesSummary,
   salesChartData,
   salesRange,
@@ -73,7 +74,7 @@ export default function SalesTab({
 }) {
   const isSalesTabLoading = isLoading
 
-  if (isSalesTabLoading) {
+  if (isSalesTabLoading && canViewAnalytics) {
     return <SalesSkeleton panelClass={panelClass} />
   }
 
@@ -298,6 +299,75 @@ export default function SalesTab({
       minDeviation,
     }
   }, [salesList])
+
+  const entryCard = canCreate ? (
+    <div className={`${panelClass} relative overflow-hidden bg-ink-800/60`}>
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_120%_at_100%_0%,rgba(34,197,94,0.14),transparent)]" />
+      <div className="flex items-center justify-between">
+        <div>
+          <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
+            Satış girişi
+          </p>
+          <p className="text-sm text-slate-400">Tarih ve satış adetini ekle.</p>
+        </div>
+        <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
+          Kayıt: {summary.count}
+        </span>
+      </div>
+
+      <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-slate-200" htmlFor="sales-date">
+            Tarih
+          </label>
+          <input
+            id="sales-date"
+            type="date"
+            value={salesForm.date}
+            onChange={(e) => setSalesForm((prev) => ({ ...prev, date: e.target.value }))}
+            className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-slate-200" htmlFor="sales-amount">
+            Satış adedi
+          </label>
+          <input
+            id="sales-amount"
+            type="number"
+            min="1"
+            step="1"
+            value={salesForm.amount}
+            onChange={(e) => setSalesForm((prev) => ({ ...prev, amount: e.target.value }))}
+            placeholder="Örn: 42"
+            className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
+          />
+        </div>
+
+        <div className="flex flex-wrap gap-3">
+          <button
+            type="button"
+            onClick={handleSaleAdd}
+            className="flex-1 min-w-[140px] rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
+          >
+            Kaydet
+          </button>
+          <button
+            type="button"
+            onClick={() => setSalesForm((prev) => ({ ...prev, amount: "" }))}
+            className="min-w-[110px] rounded-lg border border-white/10 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
+          >
+            Temizle
+          </button>
+        </div>
+      </div>
+    </div>
+  ) : null
+
+  if (!canViewAnalytics) {
+    return <div className="space-y-6">{entryCard}</div>
+  }
 
   return (
     <div className="space-y-6">
@@ -556,72 +626,7 @@ export default function SalesTab({
           </div>
         </div>
 
-        <div className="space-y-6">
-          {canCreate && (
-          <div className={`${panelClass} relative overflow-hidden bg-ink-800/60`}>
-            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_120%_at_100%_0%,rgba(34,197,94,0.14),transparent)]" />
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">
-                  Satış girişi
-                </p>
-                <p className="text-sm text-slate-400">Tarih ve satış adetini ekle.</p>
-              </div>
-              <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
-                Kayıt: {summary.count}
-              </span>
-            </div>
-
-            <div className="mt-4 space-y-4 rounded-xl border border-white/10 bg-ink-900/70 p-4 shadow-inner">
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-200" htmlFor="sales-date">
-                  Tarih
-                </label>
-                <input
-                  id="sales-date"
-                  type="date"
-                  value={salesForm.date}
-                  onChange={(e) => setSalesForm((prev) => ({ ...prev, date: e.target.value }))}
-                  className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-slate-200" htmlFor="sales-amount">
-                  Satış adedi
-                </label>
-                <input
-                  id="sales-amount"
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={salesForm.amount}
-                  onChange={(e) => setSalesForm((prev) => ({ ...prev, amount: e.target.value }))}
-                  placeholder="Örn: 42"
-                  className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30"
-                />
-              </div>
-
-              <div className="flex flex-wrap gap-3">
-                <button
-                  type="button"
-                  onClick={handleSaleAdd}
-                  className="flex-1 min-w-[140px] rounded-lg border border-accent-400/70 bg-accent-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-accent-50 shadow-glow transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/25"
-                >
-                  Kaydet
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setSalesForm((prev) => ({ ...prev, amount: "" }))}
-                  className="min-w-[110px] rounded-lg border border-white/10 px-4 py-2.5 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-accent-400 hover:text-accent-100"
-                >
-                  Temizle
-                </button>
-              </div>
-            </div>
-          </div>
-          )}
-        </div>
+        <div className="space-y-6">{entryCard}</div>
       </div>
     </div>
   )

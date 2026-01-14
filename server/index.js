@@ -59,6 +59,7 @@ const DEFAULT_ADMIN_PERMISSIONS = [
   "tasks.delete",
   "sales.view",
   "sales.create",
+  "sales.analytics.view",
   "problems.view",
   "problems.create",
   "problems.resolve",

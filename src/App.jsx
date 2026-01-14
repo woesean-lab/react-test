@@ -337,6 +337,10 @@ function App() {
     PERMISSIONS.adminManage,
   ])
   const canCreateSales = isAuthed && hasAnyPermission([PERMISSIONS.salesCreate, PERMISSIONS.adminManage])
+  const canViewSalesAnalytics = isAuthed && hasAnyPermission([
+    PERMISSIONS.salesAnalyticsView,
+    PERMISSIONS.adminManage,
+  ])
   const canViewProblems = hasPermission(PERMISSIONS.problemsView)
   const canCreateProblems = hasAnyPermission([PERMISSIONS.problemsCreate, PERMISSIONS.problemsManage])
   const canResolveProblems = hasAnyPermission([PERMISSIONS.problemsResolve, PERMISSIONS.problemsManage])
@@ -973,6 +977,7 @@ function App() {
               salesChartData={salesChartData}
               salesRange={salesRange}
               setSalesRange={setSalesRange}
+              canViewAnalytics={canViewSalesAnalytics}
               salesForm={salesForm}
               setSalesForm={setSalesForm}
               handleSaleAdd={handleSaleAdd}
