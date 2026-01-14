@@ -172,6 +172,7 @@ export default function ProductsTab({
   onRefreshOffer,
   canManagePrices: canManagePricesProp,
   canViewPriceDetails: canViewPriceDetailsProp,
+  canTogglePrice: canTogglePriceProp,
   canAddKeys = false,
   canDeleteKeys = false,
   canCopyKeys = false,
@@ -269,6 +270,8 @@ export default function ProductsTab({
     typeof canManagePricesProp === "boolean" ? canManagePricesProp : canAddKeys
   const canViewPriceDetails =
     typeof canViewPriceDetailsProp === "boolean" ? canViewPriceDetailsProp : canManagePrices
+  const canTogglePrice =
+    typeof canTogglePriceProp === "boolean" ? canTogglePriceProp : canManagePrices
   const canDeleteMessageGroup =
     canManageMessages && typeof onDeleteMessageGroup === "function"
   const canRemoveMessageTemplate =
@@ -481,7 +484,7 @@ export default function ProductsTab({
     }
   }
   const handlePriceToggle = async (offerId) => {
-    if (!canManagePrices) return
+    if (!canTogglePrice) return
     const normalizedId = String(offerId ?? "").trim()
     if (!normalizedId) return
     const nextEnabled = !priceEnabledByOffer?.[normalizedId]
@@ -1411,9 +1414,9 @@ export default function ProductsTab({
                             <button
                               type="button"
                               onClick={() => handlePriceToggle(offerId)}
-                              disabled={!offerId || !canManagePrices}
+                              disabled={!offerId || !canTogglePrice}
                               className={`relative inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-200/80 transition hover:bg-white/10 hover:text-white ${
-                                !offerId || !canManagePrices ? "cursor-not-allowed opacity-60" : ""
+                                !offerId || !canTogglePrice ? "cursor-not-allowed opacity-60" : ""
                               }`}
                               aria-label="Fiyat aç/kapat"
                               title={isPriceEnabled ? "Fiyat açık" : "Fiyat kapalı"}
