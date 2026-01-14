@@ -1267,6 +1267,17 @@ export default function ProductsTab({
                     : independentMessages
                   const messageGroupLabel =
                     messageGroupName || (messageGroupMessages.length > 0 ? "Bağımsız" : "Yok")
+                  const stockMetaLabel = groupName
+                    ? `Grup: ${groupName}`
+                    : isStockEnabled
+                      ? "Bireysel"
+                      : "Kapali"
+                  const noteMetaLabel = noteGroupName
+                    ? `Grup: ${noteGroupName}`
+                    : storedNote
+                      ? "Kayitli"
+                      : "Yok"
+                  const messageMetaLabel = messageGroupLabel
                   const priceDraft = priceDrafts[offerId] ?? { base: "", percent: "" }
                   const baseValue = String(priceDraft.base ?? "").replace(",", ".")
                   const percentValue = String(priceDraft.percent ?? "").replace(",", ".")
@@ -1355,33 +1366,84 @@ export default function ProductsTab({
                               </div>
                             )}
                           </div>
-                          <div className="mt-2 flex flex-wrap items-center gap-2 text-[10px] text-slate-400">
-                            <span className="text-[10px] font-semibold text-slate-300">
-                              {categoryLabel}
+                          <div className="mt-2 flex flex-wrap items-center gap-2">
+                            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[10px] text-slate-200">
+                              <svg
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                                className="h-3 w-3 text-slate-400"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M20 12V7a2 2 0 0 0-2-2h-5" />
+                                <path d="M4 12v5a2 2 0 0 0 2 2h5" />
+                                <path d="m12 4 8 8-8 8-8-8Z" />
+                              </svg>
+                              <span className="font-semibold uppercase tracking-[0.18em] text-slate-400">Kategori</span>
+                              <span className="rounded-full bg-ink-900/70 px-2 py-0.5 text-[10px] font-semibold text-slate-100">
+                                {categoryLabel}
+                              </span>
                             </span>
-                            {(groupName || noteGroupName || messageGroupName) && (
-                              <span className="text-slate-500">•</span>
-                            )}
-                            <div className="flex flex-wrap items-center gap-2">
-                              {groupName && (
-                                <span className="inline-flex items-center gap-1 text-[9px] text-slate-300">
-                                  <span className="h-1 w-1 rounded-full bg-slate-500" />
-                                  Stok {groupName}
-                                </span>
-                              )}
-                              {noteGroupName && (
-                                <span className="inline-flex items-center gap-1 text-[9px] text-slate-300">
-                                  <span className="h-1 w-1 rounded-full bg-slate-500" />
-                                  Not {noteGroupName}
-                                </span>
-                              )}
-                              {messageGroupName && (
-                                <span className="inline-flex items-center gap-1 text-[9px] text-slate-300">
-                                  <span className="h-1 w-1 rounded-full bg-slate-500" />
-                                  Mesaj {messageGroupName}
-                                </span>
-                              )}
-                            </div>
+                            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/30 bg-emerald-500/10 px-2.5 py-1 text-[10px] text-emerald-50">
+                              <svg
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                                className="h-3 w-3 text-emerald-200"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="m7 9 5 3 5-3" />
+                                <path d="m7 13 5 3 5-3" />
+                                <path d="M5 6h14v12H5z" />
+                              </svg>
+                              <span className="font-semibold uppercase tracking-[0.18em] text-emerald-100/80">Stok</span>
+                              <span className="rounded-full bg-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-50">
+                                {stockMetaLabel}
+                              </span>
+                            </span>
+                            <span className="inline-flex items-center gap-2 rounded-full border border-amber-300/30 bg-amber-500/10 px-2.5 py-1 text-[10px] text-amber-50">
+                              <svg
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                                className="h-3 w-3 text-amber-200"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" />
+                                <path d="M14 3v6h6" />
+                              </svg>
+                              <span className="font-semibold uppercase tracking-[0.18em] text-amber-100/80">Not</span>
+                              <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] font-semibold text-amber-50">
+                                {noteMetaLabel}
+                              </span>
+                            </span>
+                            <span className="inline-flex items-center gap-2 rounded-full border border-sky-300/30 bg-sky-500/10 px-2.5 py-1 text-[10px] text-sky-50">
+                              <svg
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                                className="h-3 w-3 text-sky-200"
+                                fill="none"
+                                stroke="currentColor"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              >
+                                <path d="M4 5h16v10H7l-3 3Z" />
+                              </svg>
+                              <span className="font-semibold uppercase tracking-[0.18em] text-sky-100/80">Mesaj</span>
+                              <span className="rounded-full bg-sky-500/20 px-2 py-0.5 text-[10px] font-semibold text-sky-50">
+                                {messageMetaLabel}
+                              </span>
+                            </span>
                           </div>
                         </div>
                         <div className="flex flex-wrap items-stretch gap-1.5">
