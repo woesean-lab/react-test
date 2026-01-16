@@ -1664,7 +1664,7 @@ export default function ProductsTab({
                           {activePanel !== "inventory" && (
                           <div className={`grid items-start gap-3 ${isStockEnabled ? "lg:grid-cols-2" : ""}`}>
                             {isStockEnabled && activePanel === "stock-group" && (
-                              <div className="rounded-2xl rounded-t-none border border-white/10 bg-[#141826] p-5 shadow-card -mt-1 lg:col-span-2 animate-panelFade">
+                              <div className="rounded-2xl rounded-t-none border border-white/10 bg-[#141826] p-5 shadow-card -mt-2 lg:col-span-2 animate-panelFade">
                                 {isOfferRefreshing && (
                                   <div className="space-y-3">
                                     <SkeletonBlock className="h-4 w-24 rounded-lg" />
