@@ -2153,7 +2153,7 @@ export default function ProductsTab({
                                           <button
                                             type="button"
                                             onClick={() => handleBulkCopy(offerId, true)}
-                                            className="rounded-md border border-amber-300/60 bg-amber-500/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-amber-50 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/20"
+                                            className="rounded-md border border-amber-300/60 bg-amber-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-amber-50 h-8 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/20"
                                           >
                                             Kopyala + kullan?ld?
                                           </button>
@@ -2565,7 +2565,6 @@ export default function ProductsTab({
     </div>
   )
 }
-
 
 
 
