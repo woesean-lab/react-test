@@ -1674,7 +1674,7 @@ export default function ProductsTab({
                                 )}
                                 {!isOfferRefreshing && (
                                   <>
-                                <div className="mt-4 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)]">
+                                <div className="mt-2 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)]">
                                   <div className="rounded-xl border border-white/10 bg-ink-900/50 p-4">
                                     <label className="text-[12px] font-semibold text-slate-100">Stok grubu</label>
                                     <div
@@ -2565,7 +2565,6 @@ export default function ProductsTab({
     </div>
   )
 }
-
 
 
 
