@@ -1221,14 +1221,15 @@ export default function ProductsTab({
                   const noteInputValue = noteDraftValue !== undefined ? noteDraftValue : storedNote
                   const noteHasChanges = String(noteInputValue ?? "").trim() !== storedNote
                   const noteGroupDraftValue = noteGroupDrafts[offerId] ?? ""
-                  const availablePanels = isStockEnabled
-                    ? ["note", "messages", "stock"]
-                    : ["note", "messages"]
+                  const availablePanels = ["inventory", "note", "messages"]
+                  if (isStockEnabled) {
+                    availablePanels.push("stock-group")
+                  }
                   const isPriceEnabled = Boolean(priceEnabledByOffer?.[offerId])
                   if (isPriceEnabled) {
                     availablePanels.push("price")
                   }
-                  const tabCount = 2 + (isStockEnabled ? 1 : 0) + (isPriceEnabled ? 1 : 0)
+                  const tabCount = availablePanels.length
                   const storedPanel = activePanelByOffer[offerId]
                   const activePanel =
                     storedPanel === "none"
@@ -1389,7 +1390,7 @@ export default function ProductsTab({
                                 <path d="M6.4 6.4a8 8 0 1 0 11.2 0" />
                               </svg>
                             </button>
-                            <button
+                              <button
                               type="button"
                               onClick={() => handlePriceToggle(offerId)}
                               disabled={!offerId || !canTogglePrice}
@@ -1418,7 +1419,7 @@ export default function ProductsTab({
                                 <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7H14a3.5 3.5 0 0 1 0 7H6" />
                               </svg>
                             </button>
-                            <button
+                              <button
                               type="button"
                               onClick={() => toggleStarred(offerId)}
                               disabled={!offerId || !canStarOffers}
@@ -1441,7 +1442,7 @@ export default function ProductsTab({
                                 <path d="m12 2 3.1 6.3 7 .9-5 4.9 1.2 7-6.3-3.3-6.3 3.3 1.2-7-5-4.9 7-.9z" />
                               </svg>
                             </button>
-                            <button
+                              <button
                               type="button"
                               onClick={() => handleOfferRefresh(offerId)}
                               disabled={!offerId || isKeysLoading || !isStockEnabled || isOfferRefreshing}
@@ -1555,9 +1556,24 @@ export default function ProductsTab({
                         <div className="mt-4 space-y-4 border-t border-white/10 pt-4">
                           <div className="rounded-2xl rounded-b-none border border-white/10 bg-white/5 p-3 pb-2 shadow-card">
                             <div
-                              className={`grid gap-2 ${tabCount === 4 ? "sm:grid-cols-4" : tabCount === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
+                              className={`grid gap-2 ${tabCount === 5 ? "sm:grid-cols-5" : tabCount === 4 ? "sm:grid-cols-4" : tabCount === 3 ? "sm:grid-cols-3" : "sm:grid-cols-2"}`}
                               role="tablist"
                             >
+                              <button
+                                type="button"
+                                onClick={() => setActivePanel(offerId, "inventory")}
+                                className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left text-[12px] font-semibold transition ${
+                                  activePanel === "inventory"
+                                    ? "border-accent-400/70 bg-ink-900/70 text-slate-100 shadow-card"
+                                    : "border-white/10 bg-ink-900/40 text-slate-300 hover:border-white/20 hover:bg-ink-900/60"
+                                }`}
+                                aria-pressed={activePanel === "inventory"}
+                              >
+                                <span>Stok</span>
+                                <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-slate-200">
+                                  {availableCount} / {usedCount}
+                                </span>
+                              </button>
                               <button
                                 type="button"
                                 onClick={() => setActivePanel(offerId, "note")}
@@ -1591,13 +1607,13 @@ export default function ProductsTab({
                               {isStockEnabled && (
                                 <button
                                   type="button"
-                                  onClick={() => setActivePanel(offerId, "stock")}
+                                  onClick={() => setActivePanel(offerId, "stock-group")}
                                   className={`flex items-center justify-between gap-2 rounded-xl border px-3 py-2 text-left text-[12px] font-semibold transition ${
-                                    activePanel === "stock"
+                                    activePanel === "stock-group"
                                       ? "border-accent-400/70 bg-ink-900/70 text-slate-100 shadow-card"
                                       : "border-white/10 bg-ink-900/40 text-slate-300 hover:border-white/20 hover:bg-ink-900/60"
                                   }`}
-                                  aria-pressed={activePanel === "stock"}
+                                  aria-pressed={activePanel === "stock-group"}
                                 >
                                   <span>Stok grubu</span>
                                   <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[10px] font-semibold text-slate-200">
@@ -1625,7 +1641,7 @@ export default function ProductsTab({
                             </div>
                           </div>
                           <div className={`grid items-start gap-3 ${isStockEnabled ? "lg:grid-cols-2" : ""}`}>
-                            {isStockEnabled && activePanel === "stock" && (
+                            {isStockEnabled && activePanel === "stock-group" && (
                               <div className="rounded-2xl rounded-t-none border border-white/10 bg-[#161a25] p-4 pt-5 shadow-card -mt-2 lg:col-span-2 animate-panelFade">
                                 {isOfferRefreshing && (
                                   <div className="space-y-3">
@@ -2076,6 +2092,7 @@ export default function ProductsTab({
                               </div>
                             )}
                           </div>
+                          {activePanel === "inventory" && (
                           <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.6fr)]">
                           <div className="space-y-4">
                             {isOfferRefreshing ? (
@@ -2193,7 +2210,7 @@ export default function ProductsTab({
                                                 >
                                                   KAYDET
                                                 </button>
-                                                <button
+                              <button
                                                   type="button"
                                                   onClick={() => handleKeyEditCancel(item.id)}
                                                   disabled={isSaving}
@@ -2335,7 +2352,7 @@ export default function ProductsTab({
                                                 >
                                                   KAYDET
                                                 </button>
-                                                <button
+                              <button
                                                   type="button"
                                                   onClick={() => handleKeyEditCancel(item.id)}
                                                   disabled={isSaving}
@@ -2528,6 +2545,9 @@ export default function ProductsTab({
     </div>
   )
 }
+
+
+
 
 
 
