@@ -1664,7 +1664,7 @@ export default function ProductsTab({
                           {activePanel !== "inventory" && (
                           <div className={`grid items-start gap-3 ${isStockEnabled ? "lg:grid-cols-2" : ""}`}>
                             {isStockEnabled && activePanel === "stock-group" && (
-                              <div className="rounded-2xl rounded-t-none border border-white/10 bg-[#141826] p-5 shadow-card -mt-2 lg:col-span-2 animate-panelFade">
+                              <div className="rounded-2xl rounded-t-none border border-white/10 bg-[#141826] p-5 shadow-card -mt-1 lg:col-span-2 animate-panelFade">
                                 {isOfferRefreshing && (
                                   <div className="space-y-3">
                                     <SkeletonBlock className="h-4 w-24 rounded-lg" />
@@ -1674,11 +1674,11 @@ export default function ProductsTab({
                                 )}
                                 {!isOfferRefreshing && (
                                   <>
-                                <div className="mt-2 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)]">
+                                <div className="mt-1 grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)]">
                                   <div className="rounded-xl border border-white/10 bg-ink-900/50 p-4">
                                     <label className="text-[12px] font-semibold text-slate-100">Stok grubu</label>
                                     <div
-                                      className={`mt-2 flex flex-wrap items-center gap-2 ${
+                                      className={`mt-1 flex flex-wrap items-center gap-2 ${
                                         selectFlashByKey[`${offerId}:stock-group`] ? "animate-noteSwap" : ""
                                       }`}
                                     >
@@ -1744,7 +1744,7 @@ export default function ProductsTab({
                                   {canManageGroups && (
                                     <div className="rounded-xl border border-white/10 bg-ink-900/50 p-4">
                                       <label className="text-[12px] font-semibold text-slate-100">Yeni grup</label>
-                                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                                      <div className="mt-1 flex flex-wrap items-center gap-2">
                                         <input
                                           type="text"
                                           value={groupDraftValue}
@@ -1770,7 +1770,7 @@ export default function ProductsTab({
                               </div>
                             )}
                             {activePanel === "messages" && (
-                              <div className="rounded-2xl rounded-t-none border border-white/10 bg-[#141826] p-5 shadow-card -mt-2 lg:col-span-2 animate-panelFade">
+                              <div className="rounded-2xl rounded-t-none border border-white/10 bg-[#141826] p-5 shadow-card -mt-1 lg:col-span-2 animate-panelFade">
                                 {isOfferRefreshing ? (
                                   <div className="space-y-3">
                                     <SkeletonBlock className="h-4 w-28 rounded-lg" />
@@ -1783,7 +1783,7 @@ export default function ProductsTab({
                                   <div className="rounded-xl border border-white/10 bg-ink-900/50 p-4">
                                     <label className="text-[12px] font-semibold text-slate-100">Mesaj grubu</label>
                                     <div
-                                      className={`mt-2 flex flex-wrap items-center gap-2 ${
+                                      className={`mt-1 flex flex-wrap items-center gap-2 ${
                                         selectFlashByKey[`${offerId}:message-group`] ? "animate-noteSwap" : ""
                                       }`}
                                     >
@@ -1845,7 +1845,7 @@ export default function ProductsTab({
                                         </button>
                                       )}
                                     </div>
-                                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                                    <div className="mt-1 flex flex-wrap items-center gap-2">
                                       <input
                                         type="text"
                                         value={messageGroupDraftValue}
@@ -1866,7 +1866,7 @@ export default function ProductsTab({
                                   </div>
                                   <div className="rounded-xl border border-white/10 bg-ink-900/50 p-4">
                                     <label className="text-[12px] font-semibold text-slate-100">Mesaj şablonu</label>
-                                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                                    <div className="mt-1 flex flex-wrap items-center gap-2">
                                       <input
                                         type="text"
                                         list={`message-template-${offerId}`}
@@ -1891,7 +1891,7 @@ export default function ProductsTab({
                                         EKLE
                                       </button>
                                     </div>
-                                    <p className="mt-2 text-[10px] text-slate-500">Şablon ekledikçe kopyalama listesinde görünür.</p>
+                                    <p className="mt-1 text-[10px] text-slate-500">Şablon ekledikçe kopyalama listesinde görünür.</p>
                                   </div>
                                 </div>
                                   </>
@@ -1899,11 +1899,11 @@ export default function ProductsTab({
                               </div>
                             )}
                             {activePanel === "price" && isPriceEnabled && (
-                              <div className="rounded-2xl rounded-t-none border border-white/10 bg-[#141826] p-5 shadow-card -mt-2 lg:col-span-2 animate-panelFade">
-                                <div className="mt-3 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)]">
+                              <div className="rounded-2xl rounded-t-none border border-white/10 bg-[#141826] p-5 shadow-card -mt-1 lg:col-span-2 animate-panelFade">
+                                <div className="mt-1 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)]">
                                   <div className="rounded-lg border border-white/10 bg-ink-900/50 p-4">
                                     <label className="text-[12px] font-semibold text-slate-100">Fiyat gir</label>
-                                    <div className="mt-2 flex flex-wrap items-center gap-2">
+                                    <div className="mt-1 flex flex-wrap items-center gap-2">
                                       <input
                                         type="text"
                                         value={priceDraft.base}
@@ -1936,7 +1936,7 @@ export default function ProductsTab({
                                   {canViewPriceDetails && (
                                     <div className="rounded-lg border border-white/10 bg-ink-900/50 p-4">
                                       <label className="text-[12px] font-semibold text-slate-100">{"Y\u00fczdelik"}</label>
-                                      <div className="mt-2 space-y-2">
+                                      <div className="mt-1 space-y-2">
                                         <div className="flex flex-wrap items-center gap-2">
                                           <input
                                             type="text"
