@@ -1770,7 +1770,7 @@ export default function ProductsTab({
                               </div>
                             )}
                             {activePanel === "messages" && (
-                              <div className="rounded-2xl rounded-t-none border border-white/10 bg-[#141826] p-5 shadow-card -mt-1 lg:col-span-2 animate-panelFade">
+                              <div className="rounded-2xl rounded-t-none border border-white/10 bg-[#141826] p-5 shadow-card -mt-2 lg:col-span-2 animate-panelFade">
                                 {isOfferRefreshing ? (
                                   <div className="space-y-3">
                                     <SkeletonBlock className="h-4 w-28 rounded-lg" />
@@ -1899,7 +1899,7 @@ export default function ProductsTab({
                               </div>
                             )}
                             {activePanel === "price" && isPriceEnabled && (
-                              <div className="rounded-2xl rounded-t-none border border-white/10 bg-[#141826] p-5 shadow-card -mt-1 lg:col-span-2 animate-panelFade">
+                              <div className="rounded-2xl rounded-t-none border border-white/10 bg-[#141826] p-5 shadow-card -mt-2 lg:col-span-2 animate-panelFade">
                                 <div className="mt-1 grid gap-3 lg:grid-cols-[minmax(0,1fr)_minmax(0,0.7fr)]">
                                   <div className="rounded-lg border border-white/10 bg-ink-900/50 p-4">
                                     <label className="text-[12px] font-semibold text-slate-100">Fiyat gir</label>
