@@ -2131,7 +2131,7 @@ export default function ProductsTab({
                                 </div>
                               )}
                               {!isKeysLoading && availableKeys.length > 0 && (
-                                <div className="space-y-4 rounded-2xl bg-ink-900/50 p-4 shadow-card">
+                                <div className="space-y-4 rounded-2xl bg-ink-900/50 p-4">
                                   {canCopyKeys && (
                                     <div className="flex flex-wrap items-center justify-between gap-3">
                                       <span className="text-[13px] font-semibold text-slate-100">Stoklar</span>
@@ -2292,7 +2292,7 @@ export default function ProductsTab({
                                 </div>
                               )}
                               {!isKeysLoading && usedKeys.length > 0 && (
-                                <div className="space-y-4 rounded-2xl bg-ink-900/50 p-4 shadow-card">
+                                <div className="space-y-4 rounded-2xl bg-ink-900/50 p-4">
                                   <div className="flex flex-wrap items-center justify-between gap-3">
                                     <span className="text-[13px] font-semibold text-slate-100">Kullanılan Stoklar</span>
                                     <div className="flex flex-wrap items-center gap-2">
@@ -2440,7 +2440,7 @@ export default function ProductsTab({
                               </div>
                             )}
                             </div>
-                          <div className="self-start rounded-2xl bg-ink-900/50 p-4 shadow-card">
+                          <div className="self-start rounded-2xl bg-ink-900/50 p-4">
                               <div>
                                 {messageGroupMessages.length === 0 ? (
                                   <div className="text-xs text-slate-400">
@@ -2565,7 +2565,6 @@ export default function ProductsTab({
     </div>
   )
 }
-
 
 
 
