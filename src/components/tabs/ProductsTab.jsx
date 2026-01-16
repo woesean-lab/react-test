@@ -1691,7 +1691,7 @@ export default function ProductsTab({
                                           }))
                                         }
                                         disabled={!canManageGroups}
-                                        className="min-w-[160px] flex-1 appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 h-10 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                                        className="min-w-[160px] flex-1 appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 h-9 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
                                       >
                                         <option value="">Bağımsız</option>
                                         {groups.map((groupOption) => (
@@ -1712,7 +1712,7 @@ export default function ProductsTab({
                                               triggerSelectFlash(offerId, "stock-group")
                                             }
                                           }
-                                          className="rounded-lg border border-amber-300/60 bg-amber-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-amber-50 h-8 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
+                                          className="rounded-lg border border-amber-300/60 bg-amber-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-amber-50 h-9 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
                                         >
                                           KALDIR
                                         </button>
@@ -1725,7 +1725,7 @@ export default function ProductsTab({
                                             triggerSelectFlash(offerId, "stock-group")
                                           }}
                                           disabled={!isGroupSelectionDirty}
-                                          className="rounded-lg border border-emerald-300/60 bg-emerald-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 h-8 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                                          className="rounded-lg border border-emerald-300/60 bg-emerald-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 h-9 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                                         >
                                           KAYDET
                                         </button>
@@ -1734,7 +1734,7 @@ export default function ProductsTab({
                                         <button
                                           type="button"
                                           onClick={() => handleGroupDelete(offerId, groupId)}
-                                          className="rounded-lg border border-rose-300/60 bg-rose-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-rose-50 h-8 transition hover:-translate-y-0.5 hover:border-rose-200 hover:bg-rose-500/25"
+                                          className="rounded-lg border border-rose-300/60 bg-rose-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-rose-50 h-9 transition hover:-translate-y-0.5 hover:border-rose-200 hover:bg-rose-500/25"
                                         >
                                           {confirmGroupDelete === groupId ? "ONAYLA" : "SİL"}
                                         </button>
@@ -1751,13 +1751,13 @@ export default function ProductsTab({
                                           onChange={(event) => handleGroupDraftChange(offerId, event.target.value)}
                                           placeholder="Yeni grup adı"
                                           disabled={!canManageGroups}
-                                          className="min-w-[160px] flex-1 rounded-lg border border-white/10 bg-ink-900/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                                          className="min-w-[160px] flex-1 rounded-lg border border-white/10 bg-ink-900/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 h-9 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
                                         />
                                         <button
                                           type="button"
                                           onClick={() => handleGroupCreate(offerId)}
                                           disabled={!canManageGroups || !groupDraftValue.trim()}
-                                          className="rounded-md border border-sky-300/60 bg-sky-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-sky-50 h-8 transition hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                                          className="rounded-md border border-sky-300/60 bg-sky-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-sky-50 h-9 transition hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                                         >
                                           OLUŞTUR
                                         </button>
@@ -1796,7 +1796,7 @@ export default function ProductsTab({
                                           }))
                                         }
                                         disabled={!canManageMessages}
-                                        className="min-w-[160px] flex-1 appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 h-10 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                                        className="min-w-[160px] flex-1 appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 h-9 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
                                       >
                                         <option value="">Bağımsız</option>
                                         {messageGroups.map((group) => (
@@ -1817,7 +1817,7 @@ export default function ProductsTab({
                                               triggerSelectFlash(offerId, "message-group")
                                             }
                                           }
-                                          className="rounded-lg border border-amber-300/60 bg-amber-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-amber-50 h-8 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
+                                          className="rounded-lg border border-amber-300/60 bg-amber-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-amber-50 h-9 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
                                         >
                                           KALDIR
                                         </button>
@@ -1830,7 +1830,7 @@ export default function ProductsTab({
                                             triggerSelectFlash(offerId, "message-group")
                                           }}
                                           disabled={!isMessageGroupSelectionDirty}
-                                          className="rounded-lg border border-emerald-300/60 bg-emerald-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 h-8 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                                          className="rounded-lg border border-emerald-300/60 bg-emerald-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 h-9 transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                                         >
                                           KAYDET
                                         </button>
@@ -1839,7 +1839,7 @@ export default function ProductsTab({
                                         <button
                                           type="button"
                                           onClick={() => handleMessageGroupDelete(messageGroupId)}
-                                          className="rounded-lg border border-rose-300/60 bg-rose-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-rose-50 h-8 transition hover:-translate-y-0.5 hover:border-rose-200 hover:bg-rose-500/25"
+                                          className="rounded-lg border border-rose-300/60 bg-rose-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-rose-50 h-9 transition hover:-translate-y-0.5 hover:border-rose-200 hover:bg-rose-500/25"
                                         >
                                           {confirmMessageGroupDelete === messageGroupId ? "ONAYLA" : "SİL"}
                                         </button>
@@ -1852,13 +1852,13 @@ export default function ProductsTab({
                                         onChange={(event) => handleMessageGroupDraftChange(offerId, event.target.value)}
                                         placeholder="Yeni grup adı"
                                         disabled={!canManageMessages}
-                                        className="min-w-[160px] flex-1 rounded-lg border border-white/10 bg-ink-900/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                                        className="min-w-[160px] flex-1 rounded-lg border border-white/10 bg-ink-900/60 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 h-9 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
                                       />
                                       <button
                                         type="button"
                                         onClick={() => handleMessageGroupCreate(offerId)}
                                         disabled={!canManageMessages || !messageGroupDraftValue.trim()}
-                                        className="rounded-md border border-sky-300/60 bg-sky-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-sky-50 h-8 transition hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                                        className="rounded-md border border-sky-300/60 bg-sky-500/15 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-sky-50 h-9 transition hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                                       >
                                         OLUŞTUR
                                       </button>
@@ -1874,7 +1874,7 @@ export default function ProductsTab({
                                         onChange={(event) => handleMessageTemplateDraftChange(offerId, event.target.value)}
                                         placeholder={templates.length === 0 ? "Şablon yok" : "Şablon seç"}
                                         disabled={!canManageMessages || templates.length === 0}
-                                        className="min-w-[220px] flex-1 appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 h-10 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
+                                        className="min-w-[220px] flex-1 appearance-none rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 h-9 placeholder:text-slate-500 focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 disabled:cursor-not-allowed disabled:opacity-60"
                                         style={{ appearance: "none", WebkitAppearance: "none" }}
                                       />
                                       <datalist id={`message-template-${offerId}`}>
@@ -1886,7 +1886,7 @@ export default function ProductsTab({
                                         type="button"
                                         onClick={() => handleMessageTemplateAdd(offerId)}
                                         disabled={!canManageMessages || !isMessageTemplateValid}
-                                        className="rounded-lg border border-sky-300/60 bg-sky-500/15 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-sky-50 h-8 transition hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-500/25 disabled:cursor-not-allowed disabled:opacity-60"
+                                        className="rounded-lg border border-sky-300/60 bg-sky-500/15 px-4 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-sky-50 h-9 transition hover:-translate-y-0.5 hover:border-sky-200 hover:bg-sky-500/25 disabled:cursor-not-allowed disabled:opacity-60"
                                       >
                                         EKLE
                                       </button>
@@ -2044,7 +2044,7 @@ export default function ProductsTab({
                                                     triggerSelectFlash(offerId, "note-group")
                                                   }
                                                 }
-                                                className="rounded-md border border-amber-300/50 bg-amber-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-amber-50 transition hover:border-amber-200 hover:bg-amber-500/20"
+                                                className="rounded-md border border-amber-300/50 bg-amber-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-amber-50 h-9 transition hover:border-amber-200 hover:bg-amber-500/20"
                                               >
                                                 KALDIR
                                               </button>
@@ -2054,7 +2054,7 @@ export default function ProductsTab({
                                                 type="button"
                                                 onClick={() => handleNoteGroupDelete(noteGroupId)}
                                                 disabled={!canManageNotes}
-                                                className="rounded-md border border-rose-300/50 bg-rose-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-rose-50 transition hover:border-rose-200 hover:bg-rose-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                                                className="rounded-md border border-rose-300/50 bg-rose-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-rose-50 h-9 transition hover:border-rose-200 hover:bg-rose-500/20 disabled:cursor-not-allowed disabled:opacity-60"
                                               >
                                                 {confirmNoteGroupDelete === noteGroupId ? "ONAYLA" : "SİL"}
                                               </button>
@@ -2067,7 +2067,7 @@ export default function ProductsTab({
                                                   triggerSelectFlash(offerId, "note-group")
                                                 }}
                                                 disabled={!isNoteGroupSelectionDirty}
-                                                className="rounded-md border border-emerald-300/50 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 transition hover:border-emerald-200 hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                                                className="rounded-md border border-emerald-300/50 bg-emerald-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-emerald-50 h-9 transition hover:border-emerald-200 hover:bg-emerald-500/20 disabled:cursor-not-allowed disabled:opacity-60"
                                               >
                                                 KAYDET
                                               </button>
@@ -2092,7 +2092,7 @@ export default function ProductsTab({
                                                 type="button"
                                                 onClick={() => handleNoteGroupCreate(offerId)}
                                                 disabled={!canManageNotes || !noteGroupDraftValue.trim()}
-                                                className="rounded-md border border-sky-300/50 bg-sky-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-sky-50 transition hover:border-sky-200 hover:bg-sky-500/20 disabled:cursor-not-allowed disabled:opacity-60"
+                                                className="rounded-md border border-sky-300/50 bg-sky-500/10 px-3 py-1.5 text-[11px] font-semibold uppercase tracking-wide text-sky-50 h-9 transition hover:border-sky-200 hover:bg-sky-500/20 disabled:cursor-not-allowed disabled:opacity-60"
                                               >
                                                 OLUŞTUR
                                               </button>
