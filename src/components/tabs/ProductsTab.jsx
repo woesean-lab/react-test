@@ -1589,7 +1589,7 @@ export default function ProductsTab({
                               >
                                 <span>Ürün notu</span>
                                 <span
-                                  className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
+                                  className={`max-w-[220px] whitespace-normal break-words rounded-full border px-2 py-0.5 text-left text-[10px] font-semibold leading-snug ${
                                     activePanel === "note"
                                       ? "border-accent-400/60 bg-accent-500/10 text-accent-100"
                                       : "border-white/10 bg-white/5 text-slate-300 group-hover:text-slate-200"
@@ -1610,7 +1610,7 @@ export default function ProductsTab({
                               >
                                 <span>Mesaj grubu</span>
                                 <span
-                                  className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
+                                  className={`max-w-[220px] whitespace-normal break-words rounded-full border px-2 py-0.5 text-left text-[10px] font-semibold leading-snug ${
                                     activePanel === "messages"
                                       ? "border-accent-400/60 bg-accent-500/10 text-accent-100"
                                       : "border-white/10 bg-white/5 text-slate-300 group-hover:text-slate-200"
@@ -1632,7 +1632,7 @@ export default function ProductsTab({
                                 >
                                   <span>Stok grubu</span>
                                   <span
-                                    className={`rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
+                                    className={`max-w-[220px] whitespace-normal break-words rounded-full border px-2 py-0.5 text-left text-[10px] font-semibold leading-snug ${
                                       activePanel === "stock-group"
                                         ? "border-accent-400/60 bg-accent-500/10 text-accent-100"
                                         : "border-white/10 bg-white/5 text-slate-300 group-hover:text-slate-200"
@@ -2565,6 +2565,7 @@ export default function ProductsTab({
     </div>
   )
 }
+
 
 
 
