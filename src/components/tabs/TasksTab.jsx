@@ -1,4 +1,4 @@
-﻿import { useState } from "react"
+﻿import { useEffect, useState } from "react"
 
 function SkeletonBlock({ className = "" }) {
   return <div className={`animate-pulse rounded-lg bg-white/10 ${className}`} />
@@ -95,6 +95,37 @@ export default function TasksTab({
   const [expandedTaskId, setExpandedTaskId] = useState(null)
   const [viewMode, setViewMode] = useState("list")
   const [hideStaffTasks, setHideStaffTasks] = useState(false)
+
+  useEffect(() => {
+    try {
+      const storedHideStaff = localStorage.getItem("tasks.hideStaff")
+      if (storedHideStaff !== null) {
+        setHideStaffTasks(storedHideStaff === "true")
+      }
+      const storedViewMode = localStorage.getItem("tasks.viewMode")
+      if (storedViewMode === "board" || storedViewMode === "list") {
+        setViewMode(storedViewMode)
+      }
+    } catch {
+      // Ignore storage errors (e.g. private mode).
+    }
+  }, [])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("tasks.hideStaff", String(hideStaffTasks))
+    } catch {
+      // Ignore storage errors (e.g. private mode).
+    }
+  }, [hideStaffTasks])
+
+  useEffect(() => {
+    try {
+      localStorage.setItem("tasks.viewMode", viewMode)
+    } catch {
+      // Ignore storage errors (e.g. private mode).
+    }
+  }, [viewMode])
 
   const shouldShowTask = (task) => {
     if (!hideStaffTasks) {
@@ -773,6 +804,9 @@ export default function TasksTab({
     </div>
   )
 }
+
+
+
 
 
 
