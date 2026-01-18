@@ -473,39 +473,30 @@ export default function TasksTab({
                                 onClick={() =>
                                   setExpandedTaskId((prev) => (prev === task.id ? null : task.id))
                                 }
-                                className={`rounded-xl border border-white/10 bg-ink-800/70 p-3 transition hover:border-accent-300/40 hover:bg-ink-800/80 ${
+                                className={`rounded-lg border border-white/10 bg-ink-800/70 px-3 py-2 transition hover:border-accent-300/40 hover:bg-ink-800/80 ${
                                   isExpanded ? "shadow-glow" : ""
                                 }`}
                               >
-                                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
-                                  <div className="space-y-1">
-                                    <p className="text-sm font-semibold text-slate-100">{task.title}</p>
+                                <div className="flex flex-wrap items-center justify-between gap-2">
+                                  <div className="min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <p className="truncate text-sm font-semibold text-slate-100">{task.title}</p>
+                                      {task.owner && (
+                                        <span
+                                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                                            isOwner
+                                              ? "bg-accent-500/20 text-accent-50"
+                                              : "bg-white/5 text-slate-300"
+                                          }`}
+                                        >
+                                          @{task.owner}
+                                        </span>
+                                      )}
+                                    </div>
                                     {task.note && (
-                                      <p
-                                        className="text-xs text-slate-400 break-words"
-                                        style={{
-                                          display: "-webkit-box",
-                                          WebkitLineClamp: 2,
-                                          WebkitBoxOrient: "vertical",
-                                          overflow: "hidden",
-                                          overflowWrap: "anywhere",
-                                          wordBreak: "break-word",
-                                        }}
-                                        title={task.note}
-                                      >
+                                      <p className="truncate text-xs text-slate-400" title={task.note}>
                                         {task.note}
                                       </p>
-                                    )}
-                                    {task.owner && (
-                                      <span
-                                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                                          isOwner
-                                            ? "bg-accent-500/20 text-accent-50"
-                                            : "bg-white/5 text-slate-300"
-                                        }`}
-                                      >
-                                        @{task.owner}
-                                      </span>
                                     )}
                                   </div>
                                   <span
