@@ -162,30 +162,30 @@ export default function TasksTab({
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center justify-end gap-2">
-                  <div className="inline-flex h-[32px] rounded-full border border-white/10 bg-ink-900/70 p-[1px] text-xs">
+                  <div className="flex flex-wrap items-center gap-1 rounded-full border border-white/10 bg-ink-900/60 p-1">
                     <button
                       type="button"
                       onClick={() => setViewMode("board")}
-                      className={`h-[30px] rounded-full px-3 font-semibold transition ${
+                      className={`rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] transition ${
                         viewMode === "board"
-                          ? "bg-accent-500/30 text-accent-50 shadow-glow"
-                          : "text-slate-300 hover:text-white"
-                    }`}
-                  >
-                    Pano
-                  </button>
+                          ? "bg-accent-400 text-ink-900 shadow-glow"
+                          : "text-slate-300 hover:bg-white/5 hover:text-white"
+                      }`}
+                    >
+                      Pano
+                    </button>
                     <button
                       type="button"
                       onClick={() => setViewMode("list")}
-                      className={`h-[30px] rounded-full px-3 font-semibold transition ${
+                      className={`rounded-full px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] transition ${
                         viewMode === "list"
-                          ? "bg-accent-500/30 text-accent-50 shadow-glow"
-                          : "text-slate-300 hover:text-white"
-                    }`}
-                  >
-                    Liste
-                  </button>
-                </div>
+                          ? "bg-accent-400 text-ink-900 shadow-glow"
+                          : "text-slate-300 hover:bg-white/5 hover:text-white"
+                      }`}
+                    >
+                      Liste
+                    </button>
+                  </div>
                   <label className="inline-flex h-[34px] items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-[1px] text-xs text-slate-200">
                     <input
                       type="checkbox"
