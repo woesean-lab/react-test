@@ -404,7 +404,6 @@ export default function TasksTab({
                     })}
                   </div>
                 </div>
-              ))}
             </div>
             ) : (
               <div className="mt-6 space-y-4">
