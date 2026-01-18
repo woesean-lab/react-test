@@ -447,7 +447,21 @@ export default function TasksTab({
                   return (
                     <div
                       key={status}
-                      className="rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner"
+                      onDragOver={canProgressTasks ? (event) => handleTaskDragOver(event, status) : undefined}
+                      onDrop={canProgressTasks ? (event) => handleTaskDrop(event, status) : undefined}
+                      onDragLeave={
+                        canProgressTasks
+                          ? () =>
+                            setTaskDragState((prev) =>
+                              prev.overStatus === status ? { ...prev, overStatus: null } : prev,
+                            )
+                          : undefined
+                      }
+                      className={`rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner transition ${
+                        taskDragState.overStatus === status
+                          ? "border-accent-400/60 ring-2 ring-accent-400/30"
+                          : ""
+                      }`}
                     >
                       <div className="flex items-center justify-between">
                         <div>
@@ -470,6 +484,11 @@ export default function TasksTab({
                             return (
                               <div
                                 key={task.id}
+                                draggable={canProgressTasks}
+                                onDragStart={
+                                  canProgressTasks ? (event) => handleTaskDragStart(event, task.id) : undefined
+                                }
+                                onDragEnd={canProgressTasks ? handleTaskDragEnd : undefined}
                                 onClick={() =>
                                   setExpandedTaskId((prev) => (prev === task.id ? null : task.id))
                                 }
