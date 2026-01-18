@@ -2291,7 +2291,7 @@ export default function ProductsTab({
                                   </div>
                                 </div>
                               )}
-                              {!isKeysLoading && usedKeys.length > 0 && (
+                              {(
                                 <div className="space-y-4 rounded-2xl border border-white/10 bg-ink-900/50 p-4">
                                   <div className="flex flex-wrap items-center justify-between gap-3">
                                     <span className="text-[12px] font-semibold text-slate-100">Kullanılan Stoklar</span>
@@ -2565,6 +2565,7 @@ export default function ProductsTab({
     </div>
   )
 }
+
 
 
 
