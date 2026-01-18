@@ -33,7 +33,7 @@ function TasksSkeleton({ panelClass }) {
                   <SkeletonBlock className="mt-2 h-2 w-16 rounded-full" />
                   <SkeletonBlock className="mt-4 h-20 w-full rounded-xl" />
                 </div>
-              ))}
+              })}
             </div>
           </div>
         </div>
@@ -93,6 +93,24 @@ export default function TasksTab({
 }) {
   const isTasksTabLoading = isLoading
   const [expandedTaskId, setExpandedTaskId] = useState(null)
+  const [viewMode, setViewMode] = useState("list")
+  const [hideStaffTasks, setHideStaffTasks] = useState(false)
+
+  const shouldShowTask = (task) => {
+    if (!hideStaffTasks) {
+      return true
+    }
+    if (!activeUser?.username) {
+      return true
+    }
+    if (!task.owner) {
+      return true
+    }
+    return task.owner === activeUser.username
+  }
+
+  const getVisibleTasks = (status) =>
+    Array.isArray(taskGroups?.[status]) ? taskGroups[status].filter(shouldShowTask) : []
 
   if (isTasksTabLoading) {
     return <TasksSkeleton panelClass={panelClass} />
@@ -113,13 +131,50 @@ export default function TasksTab({
               Not ve tarih ile gorevlerini takipe al. Hepsi lokal tutulur.
             </p>
           </div>
-          <div className="flex flex-wrap gap-2">
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-              Toplam: {taskCountText}
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
-              Acik: {taskStats.todo + taskStats.doing}
-            </span>
+          <div className="flex flex-col gap-2 sm:items-end">
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
+                Toplam: {taskCountText}
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-accent-200">
+                Acik: {taskStats.todo + taskStats.doing}
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex rounded-full border border-white/10 bg-white/5 p-1 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setViewMode("board")}
+                  className={`rounded-full px-3 py-1 font-semibold transition ${
+                    viewMode === "board"
+                      ? "bg-accent-500/30 text-accent-50 shadow-glow"
+                      : "text-slate-300 hover:text-white"
+                  }`}
+                >
+                  Pano
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setViewMode("list")}
+                  className={`rounded-full px-3 py-1 font-semibold transition ${
+                    viewMode === "list"
+                      ? "bg-accent-500/30 text-accent-50 shadow-glow"
+                      : "text-slate-300 hover:text-white"
+                  }`}
+                >
+                  Liste
+                </button>
+              </div>
+              <label className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+                <input
+                  type="checkbox"
+                  checked={hideStaffTasks}
+                  onChange={(event) => setHideStaffTasks(event.target.checked)}
+                  className="h-4 w-4 rounded border-white/30 bg-ink-900 text-accent-400 focus:ring-accent-400/40"
+                />
+                {"Personel g\u00f6revlerini gizle"}
+              </label>
+            </div>
           </div>
         </div>
       </header>
@@ -132,16 +187,17 @@ export default function TasksTab({
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">{"G\u00f6rev panosu"}</p>
                 <p className="text-sm text-slate-400">Kartlari surukleyip yeni duruma birak.</p>
               </div>
-              <div className="flex flex-wrap gap-2">
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
-                  Tamamlanan: {taskStats.done}
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
-                  Devam: {taskStats.doing}
-                </span>
-              </div>
+            <div className="flex flex-wrap gap-2">
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+                Tamamlanan: {taskStats.done}
+              </span>
+              <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+                Devam: {taskStats.doing}
+              </span>
             </div>
+          </div>
 
+            {viewMode === "board" ? (
             <div className="mt-6 grid gap-4 md:grid-cols-3">
               {isTasksTabLoading
                 ? Array.from({ length: 3 }).map((_, idx) => (
@@ -170,41 +226,43 @@ export default function TasksTab({
                     </div>
                   </div>
                 ))
-                : Object.entries(taskStatusMeta).map(([status, meta]) => (
-                <div
-                  key={status}
-                  onDragOver={canProgressTasks ? (event) => handleTaskDragOver(event, status) : undefined}
-                  onDrop={canProgressTasks ? (event) => handleTaskDrop(event, status) : undefined}
-                  onDragLeave={
-                    canProgressTasks
-                      ? () =>
-                        setTaskDragState((prev) =>
-                          prev.overStatus === status ? { ...prev, overStatus: null } : prev,
-                        )
-                      : undefined
-                  }
-                  className={`flex h-full flex-col gap-4 rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner transition ${
-                    taskDragState.overStatus === status
-                      ? "border-accent-400/60 ring-2 ring-accent-400/30"
-                      : ""
-                  }`}
-                >
+                : Object.entries(taskStatusMeta).map(([status, meta]) => {
+                const visibleTasks = getVisibleTasks(status)
+                return (
+                  <div
+                    key={status}
+                    onDragOver={canProgressTasks ? (event) => handleTaskDragOver(event, status) : undefined}
+                    onDrop={canProgressTasks ? (event) => handleTaskDrop(event, status) : undefined}
+                    onDragLeave={
+                      canProgressTasks
+                        ? () =>
+                          setTaskDragState((prev) =>
+                            prev.overStatus === status ? { ...prev, overStatus: null } : prev,
+                          )
+                        : undefined
+                    }
+                    className={`flex h-full flex-col gap-4 rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner transition ${
+                      taskDragState.overStatus === status
+                        ? "border-accent-400/60 ring-2 ring-accent-400/30"
+                        : ""
+                    }`}
+                  >
                   <div className="flex items-center justify-between">
                     <div>
                       <p className={`text-sm font-semibold uppercase tracking-[0.24em] ${meta.accent}`}>{meta.label}</p>
                       <p className="text-xs text-slate-400">{meta.helper}</p>
                     </div>
                     <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${meta.badge}`}>
-                      {taskGroups[status].length}
+                      {visibleTasks.length}
                     </span>
                   </div>
                   <div className="space-y-3">
-                    {taskGroups[status].length === 0 && (
+                    {visibleTasks.length === 0 && (
                       <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-400">
                         Bu kolon bos.
                       </div>
                     )}
-                    {taskGroups[status].map((task) => {
+                    {visibleTasks.map((task) => {
                       const isOwner = activeUser?.username && task.owner === activeUser.username
                       const isExpanded = expandedTaskId === task.id
                       return (
@@ -348,9 +406,166 @@ export default function TasksTab({
                 </div>
               ))}
             </div>
+            ) : (
+              <div className="mt-6 space-y-4">
+                {Object.entries(taskStatusMeta).map(([status, meta]) => {
+                  const visibleTasks = getVisibleTasks(status)
+                  return (
+                    <div
+                      key={status}
+                      className="rounded-2xl border border-white/10 bg-ink-900/70 p-4 shadow-inner"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className={`text-sm font-semibold uppercase tracking-[0.24em] ${meta.accent}`}>{meta.label}</p>
+                          <p className="text-xs text-slate-400">{meta.helper}</p>
+                        </div>
+                        <span className={`rounded-full border px-2.5 py-1 text-[11px] font-semibold ${meta.badge}`}>
+                          {visibleTasks.length}
+                        </span>
+                      </div>
+                      <div className="mt-4 space-y-2">
+                        {visibleTasks.length === 0 ? (
+                          <div className="rounded-lg border border-white/10 bg-white/5 px-3 py-2 text-xs text-slate-400">
+                            {"Bu listede g\u00f6rev yok."}
+                          </div>
+                        ) : (
+                          visibleTasks.map((task) => {
+                            const isOwner = activeUser?.username && task.owner === activeUser.username
+                            const isExpanded = expandedTaskId === task.id
+                            return (
+                              <div
+                                key={task.id}
+                                onClick={() =>
+                                  setExpandedTaskId((prev) => (prev === task.id ? null : task.id))
+                                }
+                                className={`rounded-xl border border-white/10 bg-ink-800/70 p-3 transition hover:border-accent-300/40 hover:bg-ink-800/80 ${
+                                  isExpanded ? "shadow-glow" : ""
+                                }`}
+                              >
+                                <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-between">
+                                  <div className="space-y-1">
+                                    <p className="text-sm font-semibold text-slate-100">{task.title}</p>
+                                    {task.note && (
+                                      <p
+                                        className="text-xs text-slate-400 break-words"
+                                        style={{
+                                          display: "-webkit-box",
+                                          WebkitLineClamp: 2,
+                                          WebkitBoxOrient: "vertical",
+                                          overflow: "hidden",
+                                          overflowWrap: "anywhere",
+                                          wordBreak: "break-word",
+                                        }}
+                                        title={task.note}
+                                      >
+                                        {task.note}
+                                      </p>
+                                    )}
+                                    {task.owner && (
+                                      <span
+                                        className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                                          isOwner
+                                            ? "bg-accent-500/20 text-accent-50"
+                                            : "bg-white/5 text-slate-300"
+                                        }`}
+                                      >
+                                        @{task.owner}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <span
+                                    className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs ${
+                                      isTaskDueToday(task)
+                                        ? "bg-rose-500/15 text-rose-100"
+                                        : "bg-white/5 text-slate-300"
+                                    }`}
+                                  >
+                                    {"Biti\u015f:"} {getTaskDueLabel(task)}
+                                  </span>
+                                </div>
+                                {isExpanded && (
+                                  <div className="mt-3 flex flex-wrap gap-2">
+                                    {canProgressTasks && status !== "done" && (
+                                      <button
+                                        type="button"
+                                        onClick={(event) => {
+                                          event.stopPropagation()
+                                          handleTaskAdvance(task.id)
+                                        }}
+                                        className="rounded-lg border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50"
+                                      >
+                                        {status === "todo" ? "Ba\u015flat" : "Tamamla"}
+                                      </button>
+                                    )}
+                                    <button
+                                      type="button"
+                                      onClick={(event) => {
+                                        event.stopPropagation()
+                                        openTaskDetail(task)
+                                      }}
+                                      className="rounded-lg border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50"
+                                    >
+                                      Detay
+                                    </button>
+                                    {(canUpdateTasks || canProgressTasks || canDeleteTasks) && (
+                                      <>
+                                        {canUpdateTasks && (
+                                          <button
+                                            type="button"
+                                            onClick={(event) => {
+                                              event.stopPropagation()
+                                              openTaskEdit(task)
+                                            }}
+                                            className="rounded-lg border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50"
+                                          >
+                                            {"D\u00fczenle"}
+                                          </button>
+                                        )}
+                                        {canProgressTasks && status === "done" && (
+                                          <button
+                                            type="button"
+                                            onClick={(event) => {
+                                              event.stopPropagation()
+                                              handleTaskReopen(task.id)
+                                            }}
+                                            className="rounded-lg border border-amber-300/70 bg-amber-500/15 px-3 py-1 text-[11px] font-semibold uppercase tracking-wide text-amber-50 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
+                                          >
+                                            Geri al
+                                          </button>
+                                        )}
+                                        {canDeleteTasks && (
+                                          <button
+                                            type="button"
+                                            onClick={(event) => {
+                                              event.stopPropagation()
+                                              handleTaskDeleteWithConfirm(task.id)
+                                            }}
+                                            className={`rounded-lg border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide transition ${
+                                              confirmTaskDelete === task.id
+                                                ? "border-rose-300 bg-rose-500/25 text-rose-50"
+                                                : "border-rose-400/60 bg-rose-500/10 text-rose-100 hover:border-rose-300 hover:bg-rose-500/20"
+                                            }`}
+                                          >
+                                            {confirmTaskDelete === task.id ? "Emin misin?" : "Sil"}
+                                          </button>
+                                        )}
+                                      </>
+                                    )}
+                                  </div>
+                                )}
+                              </div>
+                            )
+                          })
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
           </div>
         </div>
-
         <div className="space-y-6">
           {canCreateTasks && (
           <div className={`${panelClass} bg-ink-900/70`}>
@@ -555,6 +770,10 @@ export default function TasksTab({
     </div>
   )
 }
+
+
+
+
 
 
 
