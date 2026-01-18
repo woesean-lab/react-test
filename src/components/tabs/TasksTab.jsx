@@ -492,31 +492,40 @@ export default function TasksTab({
                                 onClick={() =>
                                   setExpandedTaskId((prev) => (prev === task.id ? null : task.id))
                                 }
-                                className={`rounded-lg border border-white/10 bg-ink-800/70 px-3 py-2 transition hover:border-accent-300/40 hover:bg-ink-800/80 cursor-grab active:cursor-grabbing ${
+                                className={`group rounded-xl border border-white/10 bg-ink-900/60 px-3 py-2.5 transition hover:border-accent-300/40 hover:bg-ink-900/70 cursor-grab active:cursor-grabbing ${
                                   isExpanded ? "shadow-glow" : ""
                                 }`}
                               >
-                                <div className="flex flex-wrap items-center justify-between gap-2">
-                                  <div className="min-w-0">
-                                    <div className="flex items-center gap-2">
-                                      <p className="truncate text-sm font-semibold text-slate-100">{task.title}</p>
-                                      {task.owner && (
-                                        <span
-                                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                                            isOwner
-                                              ? "bg-accent-500/20 text-accent-50"
-                                              : "bg-white/5 text-slate-300"
-                                          }`}
-                                        >
-                                          @{task.owner}
-                                        </span>
+                                <div className="flex flex-wrap items-start justify-between gap-3">
+                                  <div className="flex min-w-0 flex-1 items-start gap-3">
+                                    <span
+                                      className={`mt-1 h-2.5 w-2.5 rounded-full ${
+                                        isTaskDueToday(task) ? "bg-rose-400" : "bg-emerald-300/70"
+                                      }`}
+                                    />
+                                    <div className="min-w-0">
+                                      <div className="flex flex-wrap items-center gap-2">
+                                        <p className="truncate text-sm font-semibold text-slate-100">
+                                          {task.title}
+                                        </p>
+                                        {task.owner && (
+                                          <span
+                                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                                              isOwner
+                                                ? "bg-accent-500/20 text-accent-50"
+                                                : "bg-white/5 text-slate-300"
+                                            }`}
+                                          >
+                                            @{task.owner}
+                                          </span>
+                                        )}
+                                      </div>
+                                      {task.note && (
+                                        <p className="mt-0.5 truncate text-xs text-slate-400" title={task.note}>
+                                          {task.note}
+                                        </p>
                                       )}
                                     </div>
-                                    {task.note && (
-                                      <p className="truncate text-xs text-slate-400" title={task.note}>
-                                        {task.note}
-                                      </p>
-                                    )}
                                   </div>
                                   <span
                                     className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs ${
@@ -529,7 +538,7 @@ export default function TasksTab({
                                   </span>
                                 </div>
                                 {isExpanded && (
-                                  <div className="mt-3 flex flex-wrap gap-2">
+                                  <div className="mt-3 flex flex-wrap gap-2 border-t border-white/10 pt-2">
                                     {canProgressTasks && status !== "done" && (
                                       <button
                                         type="button"
