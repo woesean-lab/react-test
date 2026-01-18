@@ -492,7 +492,7 @@ export default function TasksTab({
                                 onClick={() =>
                                   setExpandedTaskId((prev) => (prev === task.id ? null : task.id))
                                 }
-                                className={`rounded-lg border border-white/10 bg-ink-800/70 px-3 py-2 transition hover:border-accent-300/40 hover:bg-ink-800/80 ${
+                                className={`rounded-lg border border-white/10 bg-ink-800/70 px-3 py-2 transition hover:border-accent-300/40 hover:bg-ink-800/80 cursor-grab active:cursor-grabbing ${
                                   isExpanded ? "shadow-glow" : ""
                                 }`}
                               >
