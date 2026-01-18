@@ -152,8 +152,16 @@ export default function TasksTab({
                 <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">{"G\u00f6rev panosu"}</p>
                 <p className="text-sm text-slate-400">Kartlari surukleyip yeni duruma birak.</p>
               </div>
-              <div className="space-y-2">
-                <div className="flex flex-wrap items-center gap-2">
+              <div className="space-y-2 text-right">
+                <div className="flex flex-wrap items-center justify-end gap-2">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+                    Tamamlanan: {taskStats.done}
+                  </span>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
+                    Devam: {taskStats.doing}
+                  </span>
+                </div>
+                <div className="flex flex-wrap items-center justify-end gap-2">
                   <div className="inline-flex h-8 rounded-full border border-white/10 bg-white/5 p-1 text-xs">
                     <button
                       type="button"
@@ -187,14 +195,6 @@ export default function TasksTab({
                     />
                     {"Personel g\u00f6revlerini gizle"}
                   </label>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
-                    Tamamlanan: {taskStats.done}
-                  </span>
-                  <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs text-slate-200">
-                    Devam: {taskStats.doing}
-                  </span>
                 </div>
               </div>
             </div>
