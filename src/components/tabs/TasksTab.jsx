@@ -162,31 +162,31 @@ export default function TasksTab({
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center justify-end gap-2">
-                  <div className="inline-flex h-8 rounded-full border border-white/10 bg-white/5 p-1 text-xs">
-                    <button
-                      type="button"
-                      onClick={() => setViewMode("board")}
-                      className={`h-6 rounded-full px-3 font-semibold transition ${
-                        viewMode === "board"
-                          ? "bg-accent-500/30 text-accent-50 shadow-glow"
-                          : "text-slate-300 hover:text-white"
-                      }`}
-                    >
-                      Pano
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setViewMode("list")}
-                      className={`h-6 rounded-full px-3 font-semibold transition ${
-                        viewMode === "list"
-                          ? "bg-accent-500/30 text-accent-50 shadow-glow"
-                          : "text-slate-300 hover:text-white"
-                      }`}
-                    >
-                      Liste
-                    </button>
-                  </div>
-                  <label className="inline-flex h-8 items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 text-xs text-slate-200">
+                <div className="inline-flex h-[34px] rounded-full border border-white/10 bg-white/5 p-1 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("board")}
+                    className={`h-[30px] rounded-full px-3 font-semibold transition ${
+                      viewMode === "board"
+                        ? "bg-accent-500/30 text-accent-50 shadow-glow"
+                        : "text-slate-300 hover:text-white"
+                    }`}
+                  >
+                    Pano
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setViewMode("list")}
+                    className={`h-[30px] rounded-full px-3 font-semibold transition ${
+                      viewMode === "list"
+                        ? "bg-accent-500/30 text-accent-50 shadow-glow"
+                        : "text-slate-300 hover:text-white"
+                    }`}
+                  >
+                    Liste
+                  </button>
+                </div>
+                <label className="inline-flex h-[34px] items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 text-xs text-slate-200">
                     <input
                       type="checkbox"
                       checked={hideStaffTasks}
