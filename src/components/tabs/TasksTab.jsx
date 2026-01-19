@@ -473,7 +473,7 @@ export default function TasksTab({
                         </span>
                       </div>
                       <div className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-ink-900/60">
-                        <div className="hidden grid-cols-[minmax(0,1.6fr)_minmax(0,0.7fr)_minmax(0,0.7fr)_minmax(0,0.6fr)_minmax(0,0.8fr)] gap-4 border-b border-white/10 bg-ink-900/70 px-3 py-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 sm:grid">
+                        <div className="hidden grid-cols-[minmax(0,1.6fr)_minmax(0,0.7fr)_minmax(0,0.7fr)_minmax(0,0.6fr)_minmax(0,0.8fr)] gap-4 border-b border-white/10 bg-ink-900/70 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 sm:grid">
                           <span>Görev</span>
                           <span>Sorumlu</span>
                           <span>Bitiş</span>
@@ -500,22 +500,22 @@ export default function TasksTab({
                                     onClick={() =>
                                       setExpandedTaskId((prev) => (prev === task.id ? null : task.id))
                                     }
-                                    className={`group flex flex-col gap-2 px-3 py-3 transition hover:bg-ink-900/70 cursor-grab active:cursor-grabbing sm:grid sm:grid-cols-[minmax(0,1.6fr)_minmax(0,0.7fr)_minmax(0,0.7fr)_minmax(0,0.6fr)_minmax(0,0.8fr)] sm:items-center sm:gap-4 ${
+                                    className={`group flex flex-col gap-1.5 px-3 py-2 transition hover:bg-ink-900/70 cursor-grab active:cursor-grabbing sm:grid sm:grid-cols-[minmax(0,1.6fr)_minmax(0,0.7fr)_minmax(0,0.7fr)_minmax(0,0.6fr)_minmax(0,0.8fr)] sm:items-center sm:gap-4 ${
                                       isExpanded ? "bg-ink-900/70" : "bg-transparent"
                                     }`}
                                   >
                                     <div className="min-w-0">
                                       <div className="flex flex-wrap items-center gap-2">
-                                        <p className="truncate text-sm font-semibold text-slate-100">
+                                        <p className="truncate text-[13px] font-semibold text-slate-100">
                                           {task.title}
                                         </p>
                                       </div>
                                       {task.note && (
                                         <p
-                                          className="mt-1 text-xs text-slate-400"
+                                          className="mt-1 text-[11px] text-slate-400"
                                           style={{
                                             display: "-webkit-box",
-                                            WebkitLineClamp: 2,
+                                            WebkitLineClamp: 1,
                                             WebkitBoxOrient: "vertical",
                                             overflow: "hidden",
                                             overflowWrap: "anywhere",
@@ -527,11 +527,11 @@ export default function TasksTab({
                                         </p>
                                       )}
                                     </div>
-                                    <div className="text-xs text-slate-300 sm:text-[11px]">
+                                    <div className="text-[11px] text-slate-300">
                                       {task.owner ? `@${task.owner}` : "-"}
                                     </div>
                                     <span
-                                      className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs ${
+                                      className={`inline-flex items-center rounded-md px-2 py-0.5 text-[11px] ${
                                         isTaskDueToday(task)
                                           ? "bg-rose-500/15 text-rose-100"
                                           : "bg-white/5 text-slate-300"
@@ -539,10 +539,10 @@ export default function TasksTab({
                                     >
                                       {getTaskDueLabel(task)}
                                     </span>
-                                    <span className={`inline-flex items-center justify-center rounded-full border px-2.5 py-1 text-[11px] font-semibold ${meta.badge}`}>
+                                    <span className={`inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-[11px] font-semibold ${meta.badge}`}>
                                       {meta.label}
                                     </span>
-                                    <div className="flex flex-wrap items-center gap-2 text-[11px] font-semibold uppercase tracking-wide">
+                                    <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide sm:flex-nowrap">
                                       {canProgressTasks && status !== "done" && (
                                         <button
                                           type="button"
@@ -550,7 +550,7 @@ export default function TasksTab({
                                             event.stopPropagation()
                                             handleTaskAdvance(task.id)
                                           }}
-                                          className="rounded-md border border-white/15 bg-white/5 px-2.5 py-1 text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50"
+                                          className="rounded-md border border-white/15 bg-white/5 px-2 py-0.5 text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50"
                                         >
                                           {status === "todo" ? "Başlat" : "Tamamla"}
                                         </button>
@@ -561,7 +561,7 @@ export default function TasksTab({
                                           event.stopPropagation()
                                           openTaskDetail(task)
                                         }}
-                                        className="rounded-md border border-white/15 bg-white/5 px-2.5 py-1 text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50"
+                                        className="rounded-md border border-white/15 bg-white/5 px-2 py-0.5 text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50"
                                       >
                                         Detay
                                       </button>
@@ -572,7 +572,7 @@ export default function TasksTab({
                                             event.stopPropagation()
                                             openTaskEdit(task)
                                           }}
-                                          className="rounded-md border border-white/15 bg-white/5 px-2.5 py-1 text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50"
+                                          className="rounded-md border border-white/15 bg-white/5 px-2 py-0.5 text-slate-200 transition hover:-translate-y-0.5 hover:border-accent-300 hover:bg-accent-500/10 hover:text-accent-50"
                                         >
                                           Düzenle
                                         </button>
@@ -584,7 +584,7 @@ export default function TasksTab({
                                             event.stopPropagation()
                                             handleTaskReopen(task.id)
                                           }}
-                                          className="rounded-md border border-amber-300/70 bg-amber-500/15 px-2.5 py-1 text-amber-50 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
+                                          className="rounded-md border border-amber-300/70 bg-amber-500/15 px-2 py-0.5 text-amber-50 transition hover:-translate-y-0.5 hover:border-amber-200 hover:bg-amber-500/25"
                                         >
                                           Geri al
                                         </button>
@@ -596,7 +596,7 @@ export default function TasksTab({
                                             event.stopPropagation()
                                             handleTaskDeleteWithConfirm(task.id)
                                           }}
-                                          className={`rounded-md border px-2.5 py-1 transition ${
+                                          className={`rounded-md border px-2 py-0.5 transition ${
                                             confirmTaskDelete === task.id
                                               ? "border-rose-300 bg-rose-500/25 text-rose-50"
                                               : "border-rose-400/60 bg-rose-500/10 text-rose-100 hover:border-rose-300 hover:bg-rose-500/20"
