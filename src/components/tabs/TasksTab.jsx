@@ -296,6 +296,7 @@ export default function TasksTab({
                           )}
                           {visibleTasks.map((task) => {
                             const isOwner = activeUser?.username && task.owner === activeUser.username
+                            const isExpanded = true
                             return (
                               <div
                                 key={task.id}
@@ -304,9 +305,6 @@ export default function TasksTab({
                                   canProgressTasks ? (event) => handleTaskDragStart(event, task.id) : undefined
                                 }
                                 onDragEnd={canProgressTasks ? handleTaskDragEnd : undefined}
-                                onClick={() =>
-                                  setExpandedTaskId((prev) => (prev === task.id ? null : task.id))
-                                }
                                 className={`flex flex-col gap-3 rounded-xl border p-3 shadow-inner transition hover:shadow-glow cursor-grab ${
                                   isOwner
                                     ? status === "todo"
