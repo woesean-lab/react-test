@@ -219,6 +219,7 @@ function App() {
     handleEldoradoOfferPriceSave,
     handleEldoradoOfferPriceToggle,
     handleEldoradoOfferStarToggle,
+    handleEldoradoOfferDelete,
     refreshEldoradoOffer,
     templates,
     isProblemsTabLoading,
@@ -415,6 +416,7 @@ function App() {
     PERMISSIONS.productsStar,
     PERMISSIONS.productsManage,
   ])
+  const canDeleteOffers = hasAnyPermission([PERMISSIONS.productsManage])
   const productSummary = useMemo(() => {
     const items = Array.isArray(eldoradoCatalog?.items) ? eldoradoCatalog.items : []
     const topups = Array.isArray(eldoradoCatalog?.topups) ? eldoradoCatalog.topups : []
@@ -1100,6 +1102,7 @@ function App() {
               onSavePrice={handleEldoradoOfferPriceSave}
               onTogglePrice={handleEldoradoOfferPriceToggle}
               onToggleOfferStar={handleEldoradoOfferStarToggle}
+              onDeleteOffer={handleEldoradoOfferDelete}
               onRefreshOffer={refreshEldoradoOffer}
               canAddKeys={canAddProductStocks}
               canDeleteKeys={canDeleteProductStocks}
@@ -1116,6 +1119,7 @@ function App() {
               canToggleCard={canToggleProductCard}
               canViewLinks={canViewProductLinks}
               canStarOffers={canStarProducts}
+              canDeleteOffers={canDeleteOffers}
             />
           </div>
         )}

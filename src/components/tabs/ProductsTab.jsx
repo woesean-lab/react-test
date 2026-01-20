@@ -169,6 +169,7 @@ export default function ProductsTab({
   onSavePrice,
   onTogglePrice,
   onToggleOfferStar,
+  onDeleteOffer,
   onRefreshOffer,
   canManagePrices: canManagePricesProp,
   canViewPriceDetails: canViewPriceDetailsProp,
@@ -185,6 +186,7 @@ export default function ProductsTab({
   canToggleCard: canToggleCardProp,
   canViewLinks = false,
   canStarOffers: canStarOffersProp,
+  canDeleteOffers = false,
 }) {
   const [query, setQuery] = useState("")
   const [openOffers, setOpenOffers] = useState({})
@@ -209,6 +211,7 @@ export default function ProductsTab({
   const [refreshingOffers, setRefreshingOffers] = useState({})
   const [confirmMessageGroupDelete, setConfirmMessageGroupDelete] = useState(null)
   const [confirmMessageTemplateDelete, setConfirmMessageTemplateDelete] = useState(null)
+  const [confirmOfferDelete, setConfirmOfferDelete] = useState(null)
   const [priceEnabledByOffer, setPriceEnabledByOffer] = useState(
     priceEnabledByOfferProp && typeof priceEnabledByOfferProp === "object"
       ? priceEnabledByOfferProp
@@ -871,6 +874,25 @@ export default function ProductsTab({
       setRefreshingOffers((prev) => ({ ...prev, [normalizedId]: false }))
     }
   }
+  const handleOfferDeleteWithConfirm = async (offerId) => {
+    if (!canDeleteOffers || typeof onDeleteOffer !== "function") return
+    const normalizedId = String(offerId ?? "").trim()
+    if (!normalizedId) return
+    if (confirmOfferDelete === normalizedId) {
+      setConfirmOfferDelete(null)
+      const ok = await onDeleteOffer(normalizedId)
+      if (ok) {
+        setOpenOffers((prev) => {
+          const next = { ...prev }
+          delete next[normalizedId]
+          return next
+        })
+      }
+      return
+    }
+    setConfirmOfferDelete(normalizedId)
+    toast("Silmek icin tekrar tikla", { duration: 1400, position: "top-right" })
+  }
   useEffect(() => {
     if (!categories.some((category) => category.key === activeCategoryKey)) {
       setActiveCategoryKey(categories[0]?.key ?? "items")
@@ -1476,6 +1498,35 @@ export default function ProductsTab({
                                 <path d="M4 4v4h4" />
                               </svg>
                             </button>
+                            {canDeleteOffers && (
+                              <button
+                                type="button"
+                                onClick={() => handleOfferDeleteWithConfirm(offerId)}
+                                disabled={!offerId}
+                                className={`inline-flex h-7 w-7 items-center justify-center rounded-md text-slate-200/80 transition hover:bg-white/10 hover:text-white ${
+                                  !offerId ? "cursor-not-allowed opacity-60" : ""
+                                } ${confirmOfferDelete === offerId ? "bg-rose-500/20 text-rose-100" : ""}`}
+                                aria-label="Urun sil"
+                                title={confirmOfferDelete === offerId ? "Onayla" : "Sil"}
+                              >
+                                <svg
+                                  viewBox="0 0 24 24"
+                                  aria-hidden="true"
+                                  className="h-4 w-4"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                >
+                                  <path d="M3 6h18" />
+                                  <path d="M8 6V4h8v2" />
+                                  <path d="M6 6l1 14h10l1-14" />
+                                  <path d="M10 10v6" />
+                                  <path d="M14 10v6" />
+                                </svg>
+                              </button>
+                            )}
                             {href && canViewLinks && (
                               <a
                                 href={href}
@@ -2565,6 +2616,7 @@ export default function ProductsTab({
     </div>
   )
 }
+
 
 
 

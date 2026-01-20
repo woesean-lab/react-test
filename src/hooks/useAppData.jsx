@@ -2732,6 +2732,108 @@ const handleEldoradoNoteSave = useCallback(
     [apiFetch, eldoradoStarredOffers, readApiError],
   )
 
+  const handleEldoradoOfferDelete = useCallback(
+    async (offerId) => {
+      const normalizedOfferId = String(offerId ?? "").trim()
+      if (!normalizedOfferId) return false
+      try {
+        const res = await apiFetch(`/api/eldorado/offers/${normalizedOfferId}`, {
+          method: "DELETE",
+        })
+        if (!res.ok) {
+          const detail = await readApiError(res)
+          throw new Error(detail || "api_error")
+        }
+
+        setEldoradoCatalog((prev) => {
+          if (!prev) return prev
+          return {
+            ...prev,
+            items: Array.isArray(prev.items)
+              ? prev.items.filter((offer) => String(offer?.id ?? "") !== normalizedOfferId)
+              : [],
+            topups: Array.isArray(prev.topups)
+              ? prev.topups.filter((offer) => String(offer?.id ?? "") !== normalizedOfferId)
+              : [],
+          }
+        })
+        setEldoradoKeysByOffer((prev) => {
+          const next = { ...prev }
+          delete next[normalizedOfferId]
+          return next
+        })
+        setEldoradoKeysLoading((prev) => {
+          const next = { ...prev }
+          delete next[normalizedOfferId]
+          return next
+        })
+        setEldoradoKeysSaving((prev) => {
+          const next = { ...prev }
+          delete next[normalizedOfferId]
+          return next
+        })
+        setEldoradoKeysDeleting((prev) => {
+          const next = { ...prev }
+          delete next[normalizedOfferId]
+          return next
+        })
+        setEldoradoGroupAssignments((prev) => {
+          const next = { ...prev }
+          delete next[normalizedOfferId]
+          return next
+        })
+        setEldoradoNotesByOffer((prev) => {
+          const next = { ...prev }
+          delete next[normalizedOfferId]
+          return next
+        })
+        setEldoradoNoteGroupAssignments((prev) => {
+          const next = { ...prev }
+          delete next[normalizedOfferId]
+          return next
+        })
+        setEldoradoMessageGroupAssignments((prev) => {
+          const next = { ...prev }
+          delete next[normalizedOfferId]
+          return next
+        })
+        setEldoradoMessageTemplatesByOffer((prev) => {
+          const next = { ...prev }
+          delete next[normalizedOfferId]
+          return next
+        })
+        setEldoradoStockEnabledByOffer((prev) => {
+          const next = { ...prev }
+          delete next[normalizedOfferId]
+          return next
+        })
+        setEldoradoOfferPrices((prev) => {
+          const next = { ...prev }
+          delete next[normalizedOfferId]
+          return next
+        })
+        setEldoradoOfferPriceEnabledByOffer((prev) => {
+          const next = { ...prev }
+          delete next[normalizedOfferId]
+          return next
+        })
+        setEldoradoStarredOffers((prev) => {
+          const next = { ...prev }
+          delete next[normalizedOfferId]
+          return next
+        })
+
+        toast.success("Urun silindi", { duration: 1500, position: "top-right" })
+        return true
+      } catch (error) {
+        console.error(error)
+        toast.error("Urun silinemedi (API/DB kontrol edin).")
+        return false
+      }
+    },
+    [apiFetch, readApiError],
+  )
+
   const handleEldoradoNoteGroupCreate = useCallback(
     async (name) => {
       const trimmed = String(name ?? "").trim()
@@ -5268,6 +5370,7 @@ const handleEldoradoNoteSave = useCallback(
     handleEldoradoOfferPriceSave,
     handleEldoradoOfferPriceToggle,
     handleEldoradoOfferStarToggle,
+    handleEldoradoOfferDelete,
     products,
     productSearch,
     setProductSearch,

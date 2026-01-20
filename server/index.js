@@ -2076,6 +2076,36 @@ app.post("/api/eldorado/offers/:id/price-enabled", async (req, res) => {
   res.json({ offerId: saved.offerId, enabled: Boolean(saved.enabled) })
 })
 
+app.delete("/api/eldorado/offers/:id", async (req, res) => {
+  const offerId = String(req.params.id ?? "").trim()
+  if (!offerId) {
+    res.status(400).json({ error: "offerId is required" })
+    return
+  }
+
+  const offer = await prisma.eldoradoOffer.findUnique({ where: { id: offerId } })
+  if (!offer) {
+    res.status(404).json({ error: "offer not found" })
+    return
+  }
+
+  await prisma.$transaction([
+    prisma.eldoradoKey.deleteMany({ where: { offerId } }),
+    prisma.eldoradoStockEnabled.deleteMany({ where: { offerId } }),
+    prisma.eldoradoOfferPrice.deleteMany({ where: { offerId } }),
+    prisma.eldoradoOfferPriceEnabled.deleteMany({ where: { offerId } }),
+    prisma.eldoradoOfferNote.deleteMany({ where: { offerId } }),
+    prisma.eldoradoStockGroupAssignment.deleteMany({ where: { offerId } }),
+    prisma.eldoradoNoteGroupAssignment.deleteMany({ where: { offerId } }),
+    prisma.eldoradoMessageGroupAssignment.deleteMany({ where: { offerId } }),
+    prisma.eldoradoMessageTemplate.deleteMany({ where: { offerId } }),
+    prisma.eldoradoOfferStar.deleteMany({ where: { offerId } }),
+    prisma.eldoradoOffer.delete({ where: { id: offerId } }),
+  ])
+
+  res.json({ ok: true, offerId })
+})
+
 app.post("/api/eldorado/stock-groups", async (req, res) => {
   const name = String(req.body?.name ?? "").trim()
   if (!name) {
