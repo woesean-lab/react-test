@@ -296,7 +296,6 @@ export default function TasksTab({
                           )}
                           {visibleTasks.map((task) => {
                             const isOwner = activeUser?.username && task.owner === activeUser.username
-                            const isExpanded = expandedTaskId === task.id
                             return (
                               <div
                                 key={task.id}
