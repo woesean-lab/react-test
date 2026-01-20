@@ -472,7 +472,7 @@ export default function TasksTab({
                         </span>
                       </div>
                       <div className="mt-4 overflow-hidden rounded-xl border border-white/10 bg-ink-900/60">
-                        <div className="hidden grid-cols-[minmax(0,1.6fr)_minmax(0,0.7fr)_minmax(0,0.7fr)_minmax(0,0.6fr)_minmax(0,0.8fr)] gap-4 border-b border-white/10 bg-ink-900/70 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 sm:grid">
+                        <div className="hidden grid-cols-[minmax(0,1.6fr)_minmax(0,0.7fr)_minmax(0,0.7fr)_minmax(0,0.6fr)_minmax(0,1fr)] gap-4 border-b border-white/10 bg-ink-900/70 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400 sm:grid">
                           <span>Görev</span>
                           <span>Sorumlu</span>
                           <span>Bitiş</span>
@@ -495,7 +495,7 @@ export default function TasksTab({
                                       canProgressTasks ? (event) => handleTaskDragStart(event, task.id) : undefined
                                     }
                                     onDragEnd={canProgressTasks ? handleTaskDragEnd : undefined}
-                                    className="group flex flex-col gap-1.5 px-3 py-2 transition hover:bg-ink-900/70 cursor-grab active:cursor-grabbing sm:grid sm:grid-cols-[minmax(0,1.6fr)_minmax(0,0.7fr)_minmax(0,0.7fr)_minmax(0,0.6fr)_minmax(0,0.8fr)] sm:items-center sm:gap-4"
+                                    className="group flex flex-col gap-1.5 px-3 py-2 transition hover:bg-ink-900/70 cursor-grab active:cursor-grabbing sm:grid sm:grid-cols-[minmax(0,1.6fr)_minmax(0,0.7fr)_minmax(0,0.7fr)_minmax(0,0.6fr)_minmax(0,1fr)] sm:items-center sm:gap-4"
                                   >
                                     <div className="min-w-0">
                                       <div className="flex flex-wrap items-center gap-2">
@@ -535,7 +535,7 @@ export default function TasksTab({
                                     <span className={`inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-[11px] font-semibold ${meta.badge}`}>
                                       {meta.label}
                                     </span>
-                                    <div className="flex flex-wrap items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wide sm:flex-nowrap">
+                                    <div className="flex flex-wrap items-center justify-start gap-1 text-[10px] font-semibold uppercase tracking-wide">
                                       {canProgressTasks && status !== "done" && (
                                         <button
                                           type="button"
