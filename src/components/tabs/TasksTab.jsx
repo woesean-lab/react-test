@@ -608,12 +608,8 @@ export default function TasksTab({
                                     </div>
                                   </div>
                                   {isExpanded && (
-                                    <div className="px-3 pb-3 text-xs text-slate-300">
-                                      {task.note ? (
-                                        <p className="whitespace-pre-wrap">{task.note}</p>
-                                      ) : (
-                                        <p className="text-slate-400">Not yok.</p>
-                                      )}
+                                    <div className="px-3 pb-3 text-xs text-slate-400">
+                                      {"Detaylari gormek icin Detay'a tikla."}
                                     </div>
                                   )}
                                 </div>
