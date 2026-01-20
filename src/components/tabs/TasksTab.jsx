@@ -92,7 +92,6 @@ export default function TasksTab({
   focusTask,
 }) {
   const isTasksTabLoading = isLoading
-  const [expandedTaskId, setExpandedTaskId] = useState(null)
   const [viewMode, setViewMode] = useState("list")
   const [hideStaffTasks, setHideStaffTasks] = useState(false)
 
@@ -488,7 +487,6 @@ export default function TasksTab({
                           <div className="divide-y divide-white/10">
                             {visibleTasks.map((task) => {
                               const isOwner = activeUser?.username && task.owner === activeUser.username
-                              const isExpanded = expandedTaskId === task.id
                               return (
                                 <div key={task.id}>
                                   <div
@@ -497,12 +495,7 @@ export default function TasksTab({
                                       canProgressTasks ? (event) => handleTaskDragStart(event, task.id) : undefined
                                     }
                                     onDragEnd={canProgressTasks ? handleTaskDragEnd : undefined}
-                                    onClick={() =>
-                                      setExpandedTaskId((prev) => (prev === task.id ? null : task.id))
-                                    }
-                                    className={`group flex flex-col gap-1.5 px-3 py-2 transition hover:bg-ink-900/70 cursor-grab active:cursor-grabbing sm:grid sm:grid-cols-[minmax(0,1.6fr)_minmax(0,0.7fr)_minmax(0,0.7fr)_minmax(0,0.6fr)_minmax(0,0.8fr)] sm:items-center sm:gap-4 ${
-                                      isExpanded ? "bg-ink-900/70" : "bg-transparent"
-                                    }`}
+                                    className="group flex flex-col gap-1.5 px-3 py-2 transition hover:bg-ink-900/70 cursor-grab active:cursor-grabbing sm:grid sm:grid-cols-[minmax(0,1.6fr)_minmax(0,0.7fr)_minmax(0,0.7fr)_minmax(0,0.6fr)_minmax(0,0.8fr)] sm:items-center sm:gap-4"
                                   >
                                     <div className="min-w-0">
                                       <div className="flex flex-wrap items-center gap-2">
@@ -607,11 +600,6 @@ export default function TasksTab({
                                       )}
                                     </div>
                                   </div>
-                                  {isExpanded && (
-                                    <div className="px-3 pb-3 text-xs text-slate-400">
-                                      {"Detaylari gormek icin Detay'a tikla."}
-                                    </div>
-                                  )}
                                 </div>
                               )
                             })}
