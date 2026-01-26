@@ -303,6 +303,29 @@ export default function MessagesTab({
                     placeholder="Sablon ara"
                     className="w-full min-w-0 bg-transparent text-sm text-slate-100 placeholder:text-slate-500 focus:outline-none"
                   />
+                  {templateQuery && (
+                    <button
+                      type="button"
+                      onClick={() => setTemplateQuery("")}
+                      className="inline-flex h-6 w-6 items-center justify-center rounded-full border border-white/10 bg-white/5 text-slate-300 transition hover:border-white/20 hover:bg-white/10 hover:text-white"
+                      title="Temizle"
+                      aria-label="Temizle"
+                    >
+                      <svg
+                        aria-hidden="true"
+                        viewBox="0 0 24 24"
+                        className="h-3.5 w-3.5"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <line x1="6" y1="6" x2="18" y2="18" />
+                        <line x1="18" y1="6" x2="6" y2="18" />
+                      </svg>
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -574,3 +597,5 @@ export default function MessagesTab({
     </div>
   )
 }
+
+
