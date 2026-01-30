@@ -49,7 +49,7 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
               Otomasyon
             </span>
             <h1 className="font-display text-2xl font-semibold text-white sm:text-3xl">
-              Akış Planlama
+              Otomasyon
             </h1>
             <p className="max-w-2xl text-sm text-slate-200/80">
               DB bağlantısı gelene kadar otomasyon fikirlerini taslak olarak topla.
