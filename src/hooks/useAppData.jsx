@@ -237,7 +237,7 @@ export default function useAppData() {
   const canManageRoles = hasAnyPermission([PERMISSIONS.adminRolesManage, PERMISSIONS.adminManage])
   const canManageUsers = hasAnyPermission([PERMISSIONS.adminUsersManage, PERMISSIONS.adminManage])
   const canManageAdmin = canManageRoles || canManageUsers
-  const canViewAutomation = isAuthed
+  const canViewAutomation = hasPermission(PERMISSIONS.automationView)
   const canViewSales = isAuthed && hasAnyPermission([
     PERMISSIONS.salesView,
     PERMISSIONS.salesCreate,
@@ -249,11 +249,11 @@ export default function useAppData() {
     if (isAuthed) tabs.push("dashboard")
     if (permissions.includes(PERMISSIONS.messagesView)) tabs.push("messages")
     if (permissions.includes(PERMISSIONS.tasksView)) tabs.push("tasks")
-    if (canViewAutomation) tabs.push("automation")
     if (canViewSales) tabs.push("sales")
     if (permissions.includes(PERMISSIONS.problemsView)) tabs.push("problems")
     if (permissions.includes(PERMISSIONS.listsView)) tabs.push("lists")
     if (canViewProductsTab) tabs.push("products")
+    if (canViewAutomation) tabs.push("automation")
     if (canManageAdmin) tabs.push("admin")
     return tabs
   }, [permissions, canManageAdmin, canViewAutomation, canViewSales, canViewProductsTab, isAuthed])

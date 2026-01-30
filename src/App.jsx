@@ -321,7 +321,7 @@ function App() {
   }, [])
 
   const canViewDashboard = isAuthed
-  const canViewAutomation = isAuthed
+  const canViewAutomation = hasPermission(PERMISSIONS.automationView)
   const canViewMessages = hasPermission(PERMISSIONS.messagesView)
   const canCreateMessages = hasAnyPermission([PERMISSIONS.messagesCreate, PERMISSIONS.messagesEdit])
   const canEditMessages = hasAnyPermission([PERMISSIONS.messagesTemplateEdit, PERMISSIONS.messagesEdit])
@@ -468,11 +468,11 @@ function App() {
     () => [
       { key: "messages", label: "Mesaj", canView: canViewMessages },
       { key: "tasks", label: "G\u00f6rev", canView: canViewTasks },
-      { key: "automation", label: "Otomasyon", canView: canViewAutomation },
       { key: "sales", label: "Satış", canView: canViewSales },
       { key: "problems", label: "Problem", canView: canViewProblems },
       { key: "lists", label: "Liste", canView: canViewLists },
       { key: "products", label: "Ürünler", canView: canViewProducts },
+      { key: "automation", label: "Otomasyon", canView: canViewAutomation },
       { key: "admin", label: "Admin", canView: canViewAdmin },
     ],
     [

@@ -83,6 +83,7 @@ export const STOCK_STATUS = {
 }
 
 export const PERMISSIONS = {
+  automationView: "automation.view",
   productsView: "products.view",
   productsStockAdd: "products.stock.add",
   productsStockEdit: "products.stock.edit",
@@ -133,6 +134,10 @@ export const PERMISSIONS = {
 }
 
 export const PERMISSION_GROUPS = [
+  {
+    title: "Otomasyon",
+    items: [{ id: PERMISSIONS.automationView, label: "Goruntule" }],
+  },
   {
     title: "Urunler",
     items: [
