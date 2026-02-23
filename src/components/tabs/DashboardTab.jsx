@@ -258,33 +258,6 @@
             )}
           </div>
 
-          <div className="mt-4 rounded-2xl border border-white/10 bg-ink-900/70 p-4">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Operasyon Notları</p>
-              <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-300">
-                Günlük
-              </span>
-            </div>
-            <div className="mt-3 grid gap-3 text-sm text-slate-200 sm:grid-cols-2">
-              <div className="rounded-xl border border-white/10 bg-ink-900/80 px-3 py-2">
-                <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Odak</p>
-                <p className="mt-1 text-sm text-slate-200">Siparişleri sıraya göre yürüt, süre aşımını sıfırla.</p>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-ink-900/80 px-3 py-2">
-                <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">İletişim</p>
-                <p className="mt-1 text-sm text-slate-200">Kısa ve profesyonel yanıt ver, şablonları kullan.</p>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-ink-900/80 px-3 py-2">
-                <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Kontrol</p>
-                <p className="mt-1 text-sm text-slate-200">Teslimat öncesi stok ve ürün notunu doğrula.</p>
-              </div>
-              <div className="rounded-xl border border-white/10 bg-ink-900/80 px-3 py-2">
-                <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Disiplin</p>
-                <p className="mt-1 text-sm text-slate-200">Yetki dışı işlem yapma, gecikmeyi not düş.</p>
-              </div>
-            </div>
-          </div>
-
           <div className="mt-4 grid gap-3 sm:grid-cols-2">
             {kpisToShow.map((item) => (
               <div key={item.id} className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 shadow-inner">
@@ -304,6 +277,33 @@
                 )}
               </div>
             ))}
+          </div>
+        </div>
+
+        <div className={`${panelClass} bg-ink-900/55`}>
+          <div className="flex items-center justify-between">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Operasyon Notları</p>
+            <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-300">
+              Günlük
+            </span>
+          </div>
+          <div className="mt-3 grid gap-3 text-sm text-slate-200 sm:grid-cols-2">
+            <div className="rounded-xl border border-white/10 bg-ink-900/80 px-3 py-2">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Odak</p>
+              <p className="mt-1 text-sm text-slate-200">Siparişleri sıraya göre yürüt, süre aşımını sıfırla.</p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-ink-900/80 px-3 py-2">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">İletişim</p>
+              <p className="mt-1 text-sm text-slate-200">Kısa ve profesyonel yanıt ver, şablonları kullan.</p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-ink-900/80 px-3 py-2">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Kontrol</p>
+              <p className="mt-1 text-sm text-slate-200">Teslimat öncesi stok ve ürün notunu doğrula.</p>
+            </div>
+            <div className="rounded-xl border border-white/10 bg-ink-900/80 px-3 py-2">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Disiplin</p>
+              <p className="mt-1 text-sm text-slate-200">Yetki dışı işlem yapma, gecikmeyi not düş.</p>
+            </div>
           </div>
         </div>
 
