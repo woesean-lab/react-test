@@ -257,82 +257,85 @@
               ))
             )}
           </div>
-          <div className="mt-4 rounded-2xl border border-white/10 bg-ink-900/70 p-4">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Kurallar</p>
-              <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-300">
-                Operasyon
-              </span>
+          <div className="mt-4 overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-900/95 to-ink-800 p-4 shadow-card">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">Komut Paneli</p>
+                <h3 className="mt-2 font-display text-xl font-semibold text-white">Kurallar</h3>
+                <p className="mt-1 text-sm text-slate-300">
+                  Aşağıdaki kurallar, operasyonun hızını ve güvenliğini korumak için standarttır.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
+                  Uygula
+                </span>
+                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-rose-200">
+                  Sapma yok
+                </span>
+              </div>
             </div>
-            <div className="mt-4 space-y-2 text-sm text-slate-200">
-              <details className="group rounded-2xl border border-white/10 bg-ink-900/70 p-3">
-                <summary className="flex cursor-pointer items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-300">
-                  <span>Teslim Süresi</span>
-                  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] text-slate-300 transition group-open:text-emerald-200">
-                    Kritik
-                  </span>
-                </summary>
-                <div className="mt-3 space-y-2 text-sm text-slate-300">
-                  <p>Maksimum teslim süresi 20 dakikadır; süre aşımı kabul edilmez.</p>
-                  <p>Anında teslim ürünlerde hedef 5 dakika, 10 dakikayı geçen sipariş gecikme sayılır.</p>
-                  <p>
-                    Bilgi gerektiren ürünlerde süre, müşteri gerekli bilgiyi gönderdiği anda başlar ve sipariş en geç
-                    10 dakika içinde tamamlanır.
-                  </p>
-                  <p>Siparişler geliş sırasına göre işlenir; yoğunluk gerekçe değildir.</p>
-                </div>
-              </details>
 
-              <details className="group rounded-2xl border border-white/10 bg-ink-900/70 p-3">
-                <summary className="flex cursor-pointer items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-300">
-                  <span>Müşteri İletişimi</span>
-                  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] text-slate-300 transition group-open:text-sky-200">
-                    İletişim
-                  </span>
-                </summary>
-                <div className="mt-3 space-y-2 text-sm text-slate-300">
-                  <p>Müşteri ile yalnızca işlem odaklı, kısa ve profesyonel iletişim kurulur.</p>
-                  <p>Samimi/kişisel sohbet edilmez; tartışmaya girilmez ve duygusal cevap verilmez.</p>
-                  <p>Küfür, argo ve aşağılayıcı ifade kesinlikle kullanılmaz.</p>
-                  <p>
-                    Yönetim Paneli’ndeki hazır şablonlar kullanılır. Teslimatı uzun sürecek ürünlerde uygun bilgilendirme
-                    şablonu gönderilir.
+            <div className="mt-4 grid gap-3 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+              <div className="space-y-3">
+                <div className="rounded-2xl border border-white/10 bg-ink-900/80 p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                    Teslim Süresi
                   </p>
-                  <p>
-                    Çözülemeyen veya yetki dışı durumlarda müşteriye bilgilendirme yapılır ve kullanıcı Problemli
-                    Müşteriler bölümüne not olarak eklenir.
+                  <ul className="mt-3 space-y-2 text-sm text-slate-200">
+                    <li>
+                      <span className="font-semibold text-emerald-200">20 dk</span> üst sınırdır; süre aşımı kabul edilmez.
+                    </li>
+                    <li>
+                      Anında teslim ürünlerde hedef <span className="font-semibold text-emerald-200">5 dk</span>,
+                      <span className="font-semibold text-rose-200"> 10 dk+</span> gecikme sayılır.
+                    </li>
+                    <li>
+                      Bilgi gerektiren ürünlerde süre, müşteri bilgiyi gönderdiği anda başlar ve
+                      <span className="font-semibold text-emerald-200"> 10 dk</span> içinde tamamlanır.
+                    </li>
+                    <li>Siparişler geliş sırasına göre işlenir; yoğunluk gerekçe değildir.</li>
+                  </ul>
+                </div>
+
+                <div className="rounded-2xl border border-white/10 bg-ink-900/80 p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                    Ürün Teslimat Süreci
                   </p>
+                  <ul className="mt-3 space-y-2 text-sm text-slate-200">
+                    <li>Ürün adı panelde aranır, ürün notu eksiksiz uygulanır.</li>
+                    <li>Stok kontrolü yapılır; eksik/hatalı stokta işlem durdurulur.</li>
+                    <li>Notta olmayan durumda teslimat yapılmaz, yetkili bilgilendirilir.</li>
+                  </ul>
                 </div>
-              </details>
+              </div>
 
-              <details className="group rounded-2xl border border-white/10 bg-ink-900/70 p-3">
-                <summary className="flex cursor-pointer items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-300">
-                  <span>Ürün Teslimat Süreci</span>
-                  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] text-slate-300 transition group-open:text-amber-200">
-                    Operasyon
-                  </span>
-                </summary>
-                <div className="mt-3 space-y-2 text-sm text-slate-300">
-                  <p>Ürün adı panelde aranır; ürün notundaki teslimat yönergeleri eksiksiz uygulanır.</p>
-                  <p>Teslimat öncesi stok kontrolü yapılır, eksik/hatalı stokta işlem durdurulur.</p>
-                  <p>Yönergede belirtilmeyen durumlarda teslimat yapılmaz, yetkili bilgilendirilir.</p>
+              <div className="space-y-3">
+                <div className="rounded-2xl border border-white/10 bg-ink-900/80 p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                    Müşteri İletişimi
+                  </p>
+                  <ul className="mt-3 space-y-2 text-sm text-slate-200">
+                    <li>Kısa, profesyonel, işlem odaklı iletişim.</li>
+                    <li>Samimi/kişisel sohbet yok; tartışmaya girilmez.</li>
+                    <li>Küfür, argo, aşağılayıcı ifade kesinlikle kullanılmaz.</li>
+                    <li>Hazır şablonlar kullanılır, manuel mesaj zorunlu olmadıkça yok.</li>
+                    <li>Yetki dışı durumlarda bilgilendirme + Problemli Müşteriler notu.</li>
+                  </ul>
                 </div>
-              </details>
 
-              <details className="group rounded-2xl border border-white/10 bg-ink-900/70 p-3">
-                <summary className="flex cursor-pointer items-center justify-between gap-3 text-xs font-semibold uppercase tracking-[0.22em] text-slate-300">
-                  <span>Görev ve Disiplin</span>
-                  <span className="rounded-full border border-white/10 bg-white/5 px-2 py-0.5 text-[9px] text-slate-300 transition group-open:text-rose-200">
-                    Sorumluluk
-                  </span>
-                </summary>
-                <div className="mt-3 space-y-2 text-sm text-slate-300">
-                  <p>Günlük görevler panelden atanır, boş zamanlarda tamamlanır.</p>
-                  <p>Teslim tarihine uyulması zorunludur; gecikmeler açıklama gerektirir.</p>
-                  <p>Yetki dışında indirim/telafi/ek ürün yapılamaz.</p>
-                  <p>Müşteri verileri üçüncü kişilerle paylaşılamaz.</p>
+                <div className="rounded-2xl border border-white/10 bg-ink-900/80 p-4">
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-slate-400">
+                    Görev ve Disiplin
+                  </p>
+                  <ul className="mt-3 space-y-2 text-sm text-slate-200">
+                    <li>Görevler panelden atanır, boş zamanlarda tamamlanır.</li>
+                    <li>Teslim tarihine uyulur; gecikmeler açıklama gerektirir.</li>
+                    <li>Yetki dışında indirim/telafi/ek ürün yapılamaz.</li>
+                    <li>Müşteri verileri üçüncü kişilerle paylaşılamaz.</li>
+                  </ul>
                 </div>
-              </details>
+              </div>
             </div>
           </div>
 
