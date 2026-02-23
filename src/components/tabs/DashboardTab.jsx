@@ -351,6 +351,81 @@
               )}
             </div>
           </div>
+
+          <div className={`${panelClass} bg-ink-900/55`}>
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Kurallar</p>
+              <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-300">
+                Operasyon
+              </span>
+            </div>
+            <div className="mt-3 max-h-[360px] space-y-4 overflow-auto pr-1 text-sm text-slate-200">
+              <div className="space-y-2 rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                  1. Teslim Süresi
+                </p>
+                <p>1.1 Maksimum teslim süresi 20 dakikadır. Süre aşımı kabul edilemez.</p>
+                <p>1.2 Anında teslim ürünlerde hedef süre 5 dakikadır; 10 dakikayı geçen sipariş gecikme sayılır.</p>
+                <p>
+                  1.3 Bilgi gerektiren ürünlerde süre, müşteri gerekli bilgiyi gönderdiği anda başlar. Sipariş mevcut
+                  işlem sırasına dahil edilir ve en geç 10 dakika içinde tamamlanır.
+                </p>
+                <p>1.4 Siparişler geliş sırasına göre işlenir; yoğunluk teslim süresinin aşılması için gerekçe değildir.</p>
+              </div>
+
+              <div className="space-y-2 rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                  2. Müşteri İletişimi
+                </p>
+                <p>2.1 Müşteri ile yalnızca işlem odaklı, kısa ve profesyonel iletişim kurulur.</p>
+                <p>2.2 Samimi, kişisel veya konu dışı sohbet edilmez; tartışmaya girilmez ve duygusal cevap verilmez.</p>
+                <p>2.3 Küfür, argo ve aşağılayıcı ifade kesinlikle kullanılmaz.</p>
+                <p>
+                  2.4 Yönetim Paneli’nde tanımlı hazır mesaj şablonları kullanılır. Teslimatı uzun sürecek ürünlerde uygun
+                  bilgilendirme şablonu gönderilir. Zorunlu durumlar dışında manuel ve standart dışı mesaj yazılmaz.
+                </p>
+                <p>
+                  2.5 Çözülemeyen veya yetki dışı durumlarda müşteriye “konu ilgili ekibe iletildi / geri dönüş
+                  sağlanacaktır” mesajı gönderilir. Kullanıcının ismi kopyalanarak Yönetim Paneli’ndeki “Problemli
+                  Müşteriler” bölümüne yaşanan sorun not olarak eklenir.
+                </p>
+              </div>
+
+              <div className="space-y-2 rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                  3. Ürün Teslimat Süreci
+                </p>
+                <p>
+                  3.1 Gelen siparişin ürün adı kopyalanır, Yönetim Paneli’nde “Ürünler” bölümünde aratılır ve ürün notunda
+                  yer alan teslimat yönergeleri eksiksiz uygulanır. Teslimat öncesi stok kontrolü yapılır. Eksik veya
+                  hatalı stok tespit edilirse işlem durdurulur ve yetkiliye bildirilir. Ürün notu kontrol edilmeden
+                  teslimat yapılmaz; yönergede belirtilmeyen bir durum varsa işlem durdurularak yetkiliye bildirilir.
+                </p>
+              </div>
+
+              <div className="space-y-2 rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                  4. Görev Yönetimi
+                </p>
+                <p>4.1 Günlük görevler Yönetim Paneli’ndeki “Görevler” bölümünden atanır ve boş zamanlarda tamamlanır.</p>
+                <p>
+                  4.2 Görevlerde belirtilen teslim tarihine uyulması zorunludur; gecikmeler açıklama gerektirir.
+                </p>
+              </div>
+
+              <div className="space-y-2 rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3">
+                <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">
+                  5. Genel Operasyon Disiplini
+                </p>
+                <p>
+                  5.1 Personel yetkisi dışında indirim, telafi, ek ürün veya özel işlem yapamaz.
+                </p>
+                <p>
+                  5.2 Yönetim paneli ve satış paneli bilgileri ve müşteri verileri üçüncü kişilerle paylaşılamaz.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
