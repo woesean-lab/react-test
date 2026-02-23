@@ -282,27 +282,69 @@
 
         <div className={`${panelClass} bg-ink-900/55`}>
           <div className="flex items-center justify-between">
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Operasyon Notları</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">Kurallar</p>
             <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-[0.2em] text-slate-300">
-              Günlük
+              Operasyon
             </span>
           </div>
           <div className="mt-3 grid gap-3 text-sm text-slate-200 sm:grid-cols-2">
             <div className="rounded-xl border border-white/10 bg-ink-900/80 px-3 py-2">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Odak</p>
-              <p className="mt-1 text-sm text-slate-200">Siparişleri sıraya göre yürüt, süre aşımını sıfırla.</p>
+              <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">1. Teslim Süresi</p>
+              <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-slate-300">
+                <li>Maksimum teslim süresi 20 dakikadır. Süre aşımı kabul edilemez.</li>
+                <li>Anında teslim ürünlerde hedef süre 5 dakikadır; 10 dakikayı geçen sipariş gecikme sayılır.</li>
+                <li>
+                  Bilgi gerektiren ürünlerde süre, müşteri gerekli bilgiyi gönderdiği anda başlar. Sipariş mevcut işlem
+                  sırasına dahil edilir ve en geç 10 dakika içinde tamamlanır.
+                </li>
+                <li>Siparişler geliş sırasına göre işlenir; yoğunluk teslim süresinin aşılması için gerekçe değildir.</li>
+              </ul>
             </div>
             <div className="rounded-xl border border-white/10 bg-ink-900/80 px-3 py-2">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">İletişim</p>
-              <p className="mt-1 text-sm text-slate-200">Kısa ve profesyonel yanıt ver, şablonları kullan.</p>
+              <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">2. Müşteri İletişimi</p>
+              <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-slate-300">
+                <li>Müşteri ile yalnızca işlem odaklı, kısa ve profesyonel iletişim kurulur.</li>
+                <li>Samimi, kişisel veya konu dışı sohbet edilmez; tartışmaya girilmez ve duygusal cevap verilmez.</li>
+                <li>Küfür, argo ve aşağılayıcı ifade kesinlikle kullanılmaz.</li>
+                <li>
+                  Yönetim Paneli’nde tanımlı hazır mesaj şablonları kullanılır. Teslimatı uzun sürecek ürünlerde uygun
+                  bilgilendirme şablonu gönderilir. Zorunlu durumlar dışında manuel ve standart dışı mesaj yazılmaz.
+                </li>
+                <li>
+                  Çözülemeyen veya yetki dışı durumlarda müşteriye “konu ilgili ekibe iletildi / geri dönüş
+                  sağlanacaktır” mesajı gönderilir. Kullanıcının ismi kopyalanarak Yönetim Paneli’ndeki “Problemli
+                  Müşteriler” bölümüne yaşanan sorun not olarak eklenir.
+                </li>
+              </ul>
             </div>
             <div className="rounded-xl border border-white/10 bg-ink-900/80 px-3 py-2">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Kontrol</p>
-              <p className="mt-1 text-sm text-slate-200">Teslimat öncesi stok ve ürün notunu doğrula.</p>
+              <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">3. Ürün Teslimat Süreci</p>
+              <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-slate-300">
+                <li>
+                  Gelen siparişin ürün adı kopyalanır, Yönetim Paneli’nde “Ürünler” bölümünde aratılır ve ürün notunda
+                  yer alan teslimat yönergeleri eksiksiz uygulanır.
+                </li>
+                <li>
+                  Teslimat öncesi stok kontrolü yapılır. Eksik veya hatalı stok tespit edilirse işlem durdurulur ve
+                  yetkiliye bildirilir.
+                </li>
+                <li>
+                  Ürün notu kontrol edilmeden teslimat yapılmaz; yönergede belirtilmeyen bir durum varsa işlem
+                  durdurularak yetkiliye bildirilir.
+                </li>
+              </ul>
             </div>
             <div className="rounded-xl border border-white/10 bg-ink-900/80 px-3 py-2">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">Disiplin</p>
-              <p className="mt-1 text-sm text-slate-200">Yetki dışı işlem yapma, gecikmeyi not düş.</p>
+              <p className="text-[10px] uppercase tracking-[0.22em] text-slate-400">4. Görev Yönetimi</p>
+              <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-slate-300">
+                <li>Günlük görevler Yönetim Paneli’ndeki “Görevler” bölümünden atanır ve boş zamanlarda tamamlanır.</li>
+                <li>Görevlerde belirtilen teslim tarihine uyulması zorunludur; gecikmeler açıklama gerektirir.</li>
+              </ul>
+              <p className="mt-3 text-[10px] uppercase tracking-[0.22em] text-slate-400">5. Genel Operasyon Disiplini</p>
+              <ul className="mt-2 list-disc space-y-1 pl-4 text-sm text-slate-300">
+                <li>Personel yetkisi dışında indirim, telafi, ek ürün veya özel işlem yapamaz.</li>
+                <li>Yönetim paneli ve satış paneli bilgileri ve müşteri verileri üçüncü kişilerle paylaşılamaz.</li>
+              </ul>
             </div>
           </div>
         </div>
