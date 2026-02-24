@@ -28,11 +28,7 @@ const currency = (value) => {
   return amount.toLocaleString("tr-TR")
 }
 
-const seedRecords = [
-  { id: "acc-1", date: "2026-02-10", available: 12000, pending: 4200, note: "Gecen hafta" },
-  { id: "acc-2", date: "2026-02-11", available: 13450, pending: 3800, note: "" },
-  { id: "acc-3", date: "2026-02-12", available: 12800, pending: 5200, note: "Para cekimi" },
-]
+const seedRecords = []
 
 export default function AccountingTab({ panelClass, isLoading }) {
   const [records, setRecords] = useState(seedRecords)
@@ -383,5 +379,3 @@ export default function AccountingTab({ panelClass, isLoading }) {
     </div>
   )
 }
-
-
