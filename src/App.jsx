@@ -14,7 +14,6 @@ import DashboardTab from "./components/tabs/DashboardTab"
 import AdminTab from "./components/tabs/AdminTab"
 import ProductsTab from "./components/tabs/ProductsTab"
 import AutomationTab from "./components/tabs/AutomationTab"
-import AccountingTab from "./components/tabs/AccountingTab"
 import useAppData from "./hooks/useAppData"
 import { PERMISSIONS } from "./constants/appConstants"
 
@@ -87,7 +86,6 @@ function App() {
     setSelectedCategory,
     isTasksTabLoading,
     isAutomationTabLoading,
-    isAccountingTabLoading,
     taskCountText,
     taskStats,
     ownedTaskStats,
@@ -324,7 +322,6 @@ function App() {
 
   const canViewDashboard = isAuthed
   const canViewAutomation = hasPermission(PERMISSIONS.automationView)
-  const canViewAccounting = hasPermission(PERMISSIONS.accountingView)
   const canViewMessages = hasPermission(PERMISSIONS.messagesView)
   const canCreateMessages = hasAnyPermission([PERMISSIONS.messagesCreate, PERMISSIONS.messagesEdit])
   const canEditMessages = hasAnyPermission([PERMISSIONS.messagesTemplateEdit, PERMISSIONS.messagesEdit])
@@ -475,7 +472,6 @@ function App() {
       { key: "problems", label: "Problem", canView: canViewProblems },
       { key: "lists", label: "Liste", canView: canViewLists },
       { key: "products", label: "Ürünler", canView: canViewProducts },
-      { key: "accounting", label: "Muhasebe", canView: canViewAccounting },
       { key: "automation", label: "Otomasyon", canView: canViewAutomation },
       { key: "admin", label: "Admin", canView: canViewAdmin },
     ],
@@ -485,7 +481,6 @@ function App() {
       canViewLists,
       canViewMessages,
       canViewAutomation,
-      canViewAccounting,
       canViewProblems,
       canViewSales,
       canViewProducts,
@@ -983,12 +978,6 @@ function App() {
         {activeTab === "automation" && canViewAutomation && (
           <div className={getTabSlideClass("automation")}>
             <AutomationTab panelClass={panelClass} isLoading={isAutomationTabLoading} />
-          </div>
-        )}
-
-        {activeTab === "accounting" && canViewAccounting && (
-          <div className={getTabSlideClass("accounting")}>
-            <AccountingTab panelClass={panelClass} isLoading={isAccountingTabLoading} />
           </div>
         )}
 
