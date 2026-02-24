@@ -229,43 +229,51 @@ export default function AccountingTab({ panelClass, isLoading }) {
                       </p>
                       <p className="text-sm text-slate-400">Mevcut ve bekleyen bakiyeler.</p>
                     </div>
+                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-slate-200">
+                      {recent.length} kayit
+                    </span>
                   </div>
 
-                  <div className="mt-4 space-y-3">
+                  <div className="mt-4 overflow-hidden rounded-2xl border border-white/10 bg-ink-900/70">
+                    <div className="grid grid-cols-[110px_1fr_120px] gap-3 border-b border-white/10 px-4 py-3 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                      <span>Tarih</span>
+                      <span>Bakiye</span>
+                      <span className="text-right">Gun farki</span>
+                    </div>
                     {recent.length === 0 ? (
-                      <div className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-400">
-                        Kayit bulunamadi.
-                      </div>
+                      <div className="px-4 py-4 text-sm text-slate-400">Kayit bulunamadi.</div>
                     ) : (
-                      recent.map((item, index) => {
-                        const prev = recent[index + 1]
-                        const itemAvailableDiff = prev ? item.available - prev.available : 0
-                        const itemPendingDiff = prev ? item.pending - prev.pending : 0
-                        return (
-                          <div
-                            key={item.id}
-                            className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3"
-                          >
-                            <div>
-                              <p className="text-sm font-semibold text-slate-100">{formatDate(item.date)}</p>
-                              <p className="text-xs text-slate-400">
-                                Mevcut: $ {currency(item.available)} · Bekleyen: $ {currency(item.pending)}
-                              </p>
-                              {item.note ? (
-                                <p className="mt-1 text-[11px] text-slate-500">{item.note}</p>
-                              ) : null}
+                      <div className="divide-y divide-white/5">
+                        {recent.map((item, index) => {
+                          const prev = recent[index + 1]
+                          const itemAvailableDiff = prev ? item.available - prev.available : 0
+                          const itemPendingDiff = prev ? item.pending - prev.pending : 0
+                          return (
+                            <div key={item.id} className="grid grid-cols-[110px_1fr_120px] gap-3 px-4 py-3">
+                              <div className="text-sm font-semibold text-slate-100">{formatDate(item.date)}</div>
+                              <div>
+                                <div className="text-sm text-slate-200">
+                                  Mevcut: <span className="font-semibold">$ {currency(item.available)}</span>
+                                </div>
+                                <div className="text-xs text-slate-400">
+                                  Bekleyen: $ {currency(item.pending)}
+                                </div>
+                                {item.note ? (
+                                  <div className="mt-1 text-[11px] text-slate-500">{item.note}</div>
+                                ) : null}
+                              </div>
+                              <div className="text-right">
+                                <div className="text-sm font-semibold text-emerald-200">
+                                  {itemAvailableDiff >= 0 ? "+" : "-"}$ {currency(Math.abs(itemAvailableDiff))}
+                                </div>
+                                <div className="text-[11px] text-rose-200">
+                                  {itemPendingDiff >= 0 ? "+" : "-"}$ {currency(Math.abs(itemPendingDiff))}
+                                </div>
+                              </div>
                             </div>
-                            <div className="text-right">
-                              <p className="text-sm font-semibold text-emerald-200">
-                                {itemAvailableDiff >= 0 ? "+" : "-"}$ {currency(Math.abs(itemAvailableDiff))}
-                              </p>
-                              <p className="text-[11px] text-rose-200">
-                                {itemPendingDiff >= 0 ? "+" : "-"}$ {currency(Math.abs(itemPendingDiff))}
-                              </p>
-                            </div>
-                          </div>
-                        )
-                      })
+                          )
+                        })}
+                      </div>
                     )}
                   </div>
                 </div>
