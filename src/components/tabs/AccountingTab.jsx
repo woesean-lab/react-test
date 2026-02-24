@@ -140,7 +140,7 @@ export default function AccountingTab({ panelClass, isLoading }) {
 
         return (
           <>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60 p-4 shadow-card">
                 <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_120%_at_20%_0%,rgba(16,185,129,0.2),transparent)]" />
                 <div className="relative">
@@ -148,7 +148,10 @@ export default function AccountingTab({ panelClass, isLoading }) {
                     Mevcut bakiye
                   </p>
                   <p className="mt-2 text-3xl font-semibold text-white">$ {currency(latest?.available ?? 0)}</p>
-                  <p className="mt-1 text-xs text-slate-400">{latest ? formatDate(latest.date) : "Kayit yok"}</p>
+                  <p className="mt-1 text-xs text-slate-400">
+                    {latest ? formatDate(latest.date) : "Kayit yok"} ·{" "}
+                    {availableDiff >= 0 ? "+" : "-"}$ {currency(Math.abs(availableDiff))}
+                  </p>
                 </div>
               </div>
               <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60 p-4 shadow-card">
@@ -158,20 +161,8 @@ export default function AccountingTab({ panelClass, isLoading }) {
                     Bekleyen bakiye
                   </p>
                   <p className="mt-2 text-3xl font-semibold text-white">$ {currency(latest?.pending ?? 0)}</p>
-                  <p className="mt-1 text-xs text-slate-400">{latest ? "Guncel" : "Kayit yok"}</p>
-                </div>
-              </div>
-              <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-ink-900/60 p-4 shadow-card">
-                <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(80%_120%_at_20%_0%,rgba(59,130,246,0.2),transparent)]" />
-                <div className="relative">
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-slate-400">
-                    Gun farki
-                  </p>
-                  <p className="mt-2 text-3xl font-semibold text-white">
-                    {availableDiff >= 0 ? "+" : "-"}$ {currency(Math.abs(availableDiff))}
-                  </p>
                   <p className="mt-1 text-xs text-slate-400">
-                    Bekleyen: {pendingDiff >= 0 ? "+" : "-"}$ {currency(Math.abs(pendingDiff))}
+                    {latest ? "Guncel" : "Kayit yok"} · {pendingDiff >= 0 ? "+" : "-"}$ {currency(Math.abs(pendingDiff))}
                   </p>
                 </div>
               </div>
@@ -339,36 +330,6 @@ export default function AccountingTab({ panelClass, isLoading }) {
                     >
                       Kaydet
                     </button>
-                  </div>
-                </div>
-
-                <div className={`${panelClass} bg-ink-900/60`}>
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm font-semibold uppercase tracking-[0.24em] text-slate-300/80">Ozet</p>
-                    <span className="rounded-full bg-white/10 px-3 py-1 text-xs text-slate-200">Son kayit</span>
-                  </div>
-                  <div className="mt-3 space-y-3">
-                    <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-200">
-                      Mevcut: <span className="text-emerald-200">$ {currency(latest?.available ?? 0)}</span>
-                    </div>
-                    <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-200">
-                      Bekleyen: <span className="text-rose-200">$ {currency(latest?.pending ?? 0)}</span>
-                    </div>
-                  </div>
-                  <div className="mt-4 space-y-2">
-                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-400">Gunluk degisim</p>
-                    <div className="flex items-center justify-between rounded-xl border border-white/10 bg-ink-900/70 px-3 py-2 text-xs text-slate-200">
-                      <span>Mevcut fark</span>
-                      <span className={availableDiff >= 0 ? "text-emerald-200" : "text-rose-200"}>
-                        {availableDiff >= 0 ? "+" : "-"}$ {currency(Math.abs(availableDiff))}
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between rounded-xl border border-white/10 bg-ink-900/70 px-3 py-2 text-xs text-slate-200">
-                      <span>Bekleyen fark</span>
-                      <span className={pendingDiff >= 0 ? "text-emerald-200" : "text-rose-200"}>
-                        {pendingDiff >= 0 ? "+" : "-"}$ {currency(Math.abs(pendingDiff))}
-                      </span>
-                    </div>
                   </div>
                 </div>
               </div>
