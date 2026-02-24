@@ -1,4 +1,4 @@
-import { useState } from "react"
+﻿import { useState } from "react"
 
 const todayKey = () => {
   const now = new Date()
@@ -184,7 +184,7 @@ export default function AccountingTab({ panelClass, isLoading }) {
                           <div>
                             <p className="text-sm font-semibold text-slate-100">{formatDate(item.date)}</p>
                             <p className="text-xs text-slate-400">
-                              Mevcut: TL {currency(item.available)} � Bekleyen: TL {currency(item.pending)}
+                              Mevcut: TL {currency(item.available)} · Bekleyen: TL {currency(item.pending)}
                             </p>
                             {item.note ? (
                               <p className="mt-1 text-[11px] text-slate-500">{item.note}</p>
@@ -304,3 +304,4 @@ export default function AccountingTab({ panelClass, isLoading }) {
     </div>
   )
 }
+
