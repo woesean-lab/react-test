@@ -118,7 +118,7 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                 id="ws-url"
                 type="text"
                 placeholder="wss://ornek.com/ws"
-                className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500"
+                className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
               />
               <button
                 type="button"
