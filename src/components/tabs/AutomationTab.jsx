@@ -7,7 +7,8 @@ function SkeletonBlock({ className = "" }) {
 
 function AutomationSkeleton({ panelClass }) {
   return (
-    <div className="space-y-6">
+    <>
+      <div className="space-y-6">
       <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-4 shadow-card sm:p-6">
         <SkeletonBlock className="h-4 w-28 rounded-full" />
         <SkeletonBlock className="mt-4 h-8 w-52" />
@@ -390,44 +391,44 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
           </div>
         </div>
       </div>
-    </div>
-    {isConfirmOpen ? (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-950/70 px-4 backdrop-blur-sm">
-        <div className="w-full max-w-md rounded-2xl border border-white/10 bg-ink-900/95 p-5 shadow-card">
-          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-            Onay
-          </p>
-          <p className="mt-2 text-base font-semibold text-white">Otomasyon calistirilsin mi?</p>
-          <p className="mt-2 text-sm text-slate-300">
-            {automations.find((item) => item.id === confirmRunId)?.title ?? ""}
-          </p>
-          <div className="mt-4 flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => {
-                const selected = automations.find((item) => item.id === confirmRunId)
-                setIsConfirmOpen(false)
-                setConfirmRunId("")
-                if (!selected) return
-                runAutomation(selected)
-              }}
-              className="flex-1 rounded-lg border border-emerald-400/70 bg-emerald-500/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/30"
-            >
-              Evet, calistir
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setIsConfirmOpen(false)
-                setConfirmRunId("")
-              }}
-              className="flex-1 rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-white/20 hover:text-white"
-            >
-              Iptal
-            </button>
+      {isConfirmOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-950/70 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-ink-900/95 p-5 shadow-card">
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+              Onay
+            </p>
+            <p className="mt-2 text-base font-semibold text-white">Otomasyon calistirilsin mi?</p>
+            <p className="mt-2 text-sm text-slate-300">
+              {automations.find((item) => item.id === confirmRunId)?.title ?? ""}
+            </p>
+            <div className="mt-4 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const selected = automations.find((item) => item.id === confirmRunId)
+                  setIsConfirmOpen(false)
+                  setConfirmRunId("")
+                  if (!selected) return
+                  runAutomation(selected)
+                }}
+                className="flex-1 rounded-lg border border-emerald-400/70 bg-emerald-500/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/30"
+              >
+                Evet, calistir
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setIsConfirmOpen(false)
+                  setConfirmRunId("")
+                }}
+                className="flex-1 rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-white/20 hover:text-white"
+              >
+                Iptal
+              </button>
+            </div>
           </div>
         </div>
-      </div>
-    ) : null}
+      ) : null}
+    </>
   )
 }
