@@ -155,7 +155,7 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
               </button>
             </div>
 
-            <div className="mt-4 rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-4 text-sm text-slate-300">
+            <div className="mt-3 rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-300">
               <div className="flex items-center justify-between">
                 <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                   Cikti
@@ -164,13 +164,13 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                   {lastRunId ? "Son calistirildi" : "Beklemede"}
                 </span>
               </div>
-              <div className="mt-3 space-y-2">
+              <div className="mt-2 space-y-2">
                 {runLog.length === 0 ? (
-                  <div className="rounded-xl border border-dashed border-white/10 bg-ink-900 px-4 py-6 text-center text-xs text-slate-500">
+                  <div className="rounded-xl border border-dashed border-white/10 bg-ink-900 px-4 py-4 text-center text-xs text-slate-500">
                     Cikti alani
                   </div>
                 ) : (
-                  runLog.slice(0, 6).map((entry) => (
+                  runLog.slice(0, 4).map((entry) => (
                     <div
                       key={entry.id}
                       className="flex items-center justify-between rounded-xl border border-white/10 bg-ink-900 px-4 py-2 text-xs text-slate-200"
