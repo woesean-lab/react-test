@@ -1,3 +1,5 @@
+import { useState } from "react"
+
 function SkeletonBlock({ className = "" }) {
   return <div className={`animate-pulse rounded-lg bg-white/10 ${className}`} />
 }
@@ -36,6 +38,13 @@ function AutomationSkeleton({ panelClass }) {
 }
 
 export default function AutomationTab({ panelClass, isLoading = false }) {
+  const [automations, setAutomations] = useState([
+    { id: "auto-1", title: "Siparis onay otomasyonu", template: "/templates/order-confirm" },
+    { id: "auto-2", title: "Stok kontrol zinciri", template: "/templates/stock-check" },
+    { id: "auto-3", title: "Problem eskalasyonu", template: "/templates/problem-escalation" },
+  ])
+  const [automationForm, setAutomationForm] = useState({ title: "", template: "" })
+
   if (isLoading) {
     return <AutomationSkeleton panelClass={panelClass} />
   }
@@ -81,9 +90,11 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
             <div className="mt-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
               <select className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20">
                 <option>Otomasyon sec</option>
-                <option>Siparis onay otomasyonu</option>
-                <option>Stok kontrol zinciri</option>
-                <option>Problem eskalasyonu</option>
+                {automations.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.title}
+                  </option>
+                ))}
               </select>
               <button
                 type="button"
@@ -151,6 +162,10 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                 id="automation-title"
                 type="text"
                 placeholder="Otomasyon basligi"
+                value={automationForm.title}
+                onChange={(event) =>
+                  setAutomationForm((prev) => ({ ...prev, title: event.target.value }))
+                }
                 className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
               />
               <label className="text-xs font-semibold text-slate-300" htmlFor="automation-template">
@@ -160,10 +175,24 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                 id="automation-template"
                 type="text"
                 placeholder="/templates/..."
+                value={automationForm.template}
+                onChange={(event) =>
+                  setAutomationForm((prev) => ({ ...prev, template: event.target.value }))
+                }
                 className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
               />
               <button
                 type="button"
+                onClick={() => {
+                  const title = automationForm.title.trim()
+                  const template = automationForm.template.trim()
+                  if (!title || !template) return
+                  setAutomations((prev) => [
+                    { id: `auto-${Date.now()}`, title, template },
+                    ...prev,
+                  ])
+                  setAutomationForm({ title: "", template: "" })
+                }}
                 className="w-full rounded-xl border border-emerald-400/70 bg-emerald-500/20 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/30"
               >
                 Kaydet
