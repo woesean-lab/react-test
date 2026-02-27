@@ -130,18 +130,38 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
           </div>
 
           <div className={`${panelClass} bg-ink-900/60`}>
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-                Durum
-              </p>
-              <span className="rounded-full border border-sky-400/40 bg-sky-500/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-sky-200">
-                Hazirlik
-              </span>
-            </div>
-            <p className="mt-2 text-sm text-slate-300">
-              Bu sekme yalnizca arayuz taslagi. Backend baglantisi talep edildiginde
-              is kurallari ve tetikleyiciler eklenecek.
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+              Yeni Otomasyon Ekle
             </p>
+            <p className="mt-2 text-sm text-slate-300">
+              Baslik ve kullanilacak template yolunu belirt.
+            </p>
+            <div className="mt-4 space-y-3">
+              <label className="text-xs font-semibold text-slate-300" htmlFor="automation-title">
+                Otomasyon basligi
+              </label>
+              <input
+                id="automation-title"
+                type="text"
+                placeholder="Otomasyon basligi"
+                className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
+              />
+              <label className="text-xs font-semibold text-slate-300" htmlFor="automation-template">
+                /templates
+              </label>
+              <input
+                id="automation-template"
+                type="text"
+                placeholder="/templates/..."
+                className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
+              />
+              <button
+                type="button"
+                className="w-full rounded-lg border border-emerald-400/70 bg-emerald-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-emerald-50 shadow-glow transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/25"
+              >
+                Kaydet
+              </button>
+            </div>
           </div>
         </div>
       </div>
