@@ -9,33 +9,37 @@ function AutomationSkeleton({ panelClass }) {
   return (
     <>
       <div className="space-y-6">
-      <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-4 shadow-card sm:p-6">
-        <SkeletonBlock className="h-4 w-28 rounded-full" />
-        <SkeletonBlock className="mt-4 h-8 w-52" />
-        <SkeletonBlock className="mt-3 h-4 w-2/3" />
-      </div>
-      <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-        <div className={`${panelClass} bg-ink-900/60`}>
-          <SkeletonBlock className="h-3 w-24 rounded-full" />
-          <SkeletonBlock className="mt-3 h-4 w-44" />
-          <div className="mt-4 space-y-2">
-            {Array.from({ length: 3 }).map((_, idx) => (
-              <SkeletonBlock key={`automation-skeleton-${idx}`} className="h-16 w-full rounded-2xl" />
-            ))}
+        <div className="overflow-hidden rounded-3xl border border-white/10 bg-white/5 p-4 shadow-card sm:p-6">
+          <SkeletonBlock className="h-4 w-28 rounded-full" />
+          <SkeletonBlock className="mt-4 h-8 w-52" />
+          <SkeletonBlock className="mt-3 h-4 w-2/3" />
+        </div>
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
+          <div className={`${panelClass} bg-ink-900/60`}>
+            <SkeletonBlock className="h-3 w-24 rounded-full" />
+            <SkeletonBlock className="mt-3 h-4 w-44" />
+            <div className="mt-4 space-y-2">
+              {Array.from({ length: 3 }).map((_, idx) => (
+                <SkeletonBlock
+                  key={`automation-skeleton-${idx}`}
+                  className="h-16 w-full rounded-2xl"
+                />
+              ))}
+            </div>
+          </div>
+          <div className="space-y-4">
+            <div className={`${panelClass} bg-ink-900/60`}>
+              <SkeletonBlock className="h-3 w-20 rounded-full" />
+              <SkeletonBlock className="mt-3 h-16 w-full rounded-2xl" />
+            </div>
+            <div className={`${panelClass} bg-ink-900/60`}>
+              <SkeletonBlock className="h-3 w-16 rounded-full" />
+              <SkeletonBlock className="mt-3 h-12 w-full rounded-2xl" />
+            </div>
           </div>
         </div>
-        <div className="space-y-4">
-          <div className={`${panelClass} bg-ink-900/60`}>
-            <SkeletonBlock className="h-3 w-20 rounded-full" />
-            <SkeletonBlock className="mt-3 h-16 w-full rounded-2xl" />
-          </div>
-          <div className={`${panelClass} bg-ink-900/60`}>
-            <SkeletonBlock className="h-3 w-16 rounded-full" />
-            <SkeletonBlock className="mt-3 h-12 w-full rounded-2xl" />
-          </div>
-        </div>
       </div>
-    </div>
+    </>
   )
 }
 
