@@ -68,37 +68,32 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-                Yakinda
+                Otomasyon Calistir
               </p>
-              <p className="mt-1 text-sm text-slate-300">Planlanan otomasyon bloklari.</p>
+              <p className="mt-1 text-sm text-slate-300">Eklenen otomasyonu secip calistir.</p>
             </div>
             <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
-              Taslak
+              Hazir
             </span>
           </div>
-          <div className="mt-4 space-y-3">
-            {[
-              {
-                title: "Siparis onay otomasyonu",
-                detail: "Yeni satis girisi oldugunda otomatik takip notu olustur.",
-              },
-              {
-                title: "Stok kontrol zinciri",
-                detail: "Stok azaldiginda bildirim ve alternatif tedarik listesi goster.",
-              },
-              {
-                title: "Problem eskalasyonu",
-                detail: "Problem 24 saat icinde kapanmazsa yoneticiyi uyar.",
-              },
-            ].map((item) => (
-              <div
-                key={item.title}
-                className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-200"
-              >
-                <p className="text-sm font-semibold text-white">{item.title}</p>
-                <p className="mt-1 text-xs text-slate-400">{item.detail}</p>
-              </div>
-            ))}
+
+          <div className="mt-4 flex flex-wrap items-center gap-3">
+            <select className="flex-1 rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100">
+              <option>Otomasyon sec</option>
+              <option>Siparis onay otomasyonu</option>
+              <option>Stok kontrol zinciri</option>
+              <option>Problem eskalasyonu</option>
+            </select>
+            <button
+              type="button"
+              className="rounded-lg border border-emerald-400/70 bg-emerald-500/15 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-50 shadow-glow transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/25"
+            >
+              Calistir
+            </button>
+          </div>
+
+          <div className="mt-4 rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-300">
+            Cikti alani
           </div>
         </div>
 
