@@ -1,4 +1,5 @@
 import { useState } from "react"
+import { toast } from "react-hot-toast"
 
 function SkeletonBlock({ className = "" }) {
   return <div className={`animate-pulse rounded-lg bg-white/10 ${className}`} />
@@ -51,6 +52,11 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
   const [isRunning, setIsRunning] = useState(false)
   const [lastRunId, setLastRunId] = useState("")
   const [templateWarning, setTemplateWarning] = useState("")
+  const toastStyle = {
+    background: "rgba(15, 23, 42, 0.92)",
+    color: "#e2e8f0",
+    border: "1px solid rgba(148, 163, 184, 0.2)",
+  }
 
   const filteredAutomations = automations
 
@@ -123,6 +129,7 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                   })
                   setIsRunning(true)
                   setLastRunId(selectedAutomationId)
+                  toast("Otomasyon baslatildi", { style: toastStyle, position: "top-right" })
                   setRunLog((prev) => [
                     {
                       id: `log-${Date.now()}`,
@@ -146,6 +153,7 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                       },
                       ...prev,
                     ])
+                    toast.success("Otomasyon tamamlandi", { style: toastStyle, position: "top-right" })
                     setIsRunning(false)
                   }, 1200)
                 }}
@@ -170,7 +178,7 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                     Cikti alani
                   </div>
                 ) : (
-                  runLog.slice(0, 4).map((entry) => (
+                  runLog.slice(0, 10).map((entry) => (
                     <div
                       key={entry.id}
                       className="flex items-center justify-between rounded-xl border border-white/10 bg-ink-900 px-4 py-2 text-xs text-slate-200"
@@ -268,6 +276,10 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                   if (!title || !template) return
                   if (!template.startsWith("/templates/")) {
                     setTemplateWarning("Template yolu /templates/ ile baslamali.")
+                    toast.error("Template yolu /templates/ ile baslamali.", {
+                      style: toastStyle,
+                      position: "top-right",
+                    })
                     return
                   }
                   setTemplateWarning("")
@@ -276,6 +288,7 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                     ...prev,
                   ])
                   setAutomationForm({ title: "", template: "" })
+                  toast.success("Otomasyon eklendi", { style: toastStyle, position: "top-right" })
                 }}
                 className="w-full rounded-xl border border-emerald-400/70 bg-emerald-500/20 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/30"
               >
@@ -337,28 +350,33 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                     onClick={() => {
                       const title = editingDraft.title.trim()
                       const template = editingDraft.template.trim()
-                      if (!editingId || !title || !template) return
-                      setAutomations((prev) =>
-                        prev.map((entry) =>
-                          entry.id === editingId ? { ...entry, title, template } : entry,
-                        ),
-                      )
-                    }}
-                    className="flex-1 rounded-lg border border-emerald-400/70 bg-emerald-500/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/30"
-                  >
-                    Kaydet
+                    if (!editingId || !title || !template) return
+                    setAutomations((prev) =>
+                      prev.map((entry) =>
+                        entry.id === editingId ? { ...entry, title, template } : entry,
+                      ),
+                    )
+                    toast.success("Otomasyon guncellendi", {
+                      style: toastStyle,
+                      position: "top-right",
+                    })
+                  }}
+                  className="flex-1 rounded-lg border border-emerald-400/70 bg-emerald-500/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/30"
+                >
+                  Kaydet
                   </button>
                   <button
                     type="button"
-                    onClick={() => {
-                      if (!editingId) return
-                      setAutomations((prev) => prev.filter((entry) => entry.id !== editingId))
-                      setEditingId("")
-                      setEditingDraft({ title: "", template: "" })
-                    }}
-                    className="flex-1 rounded-lg border border-rose-400/40 bg-rose-500/10 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-rose-100 transition hover:border-rose-400/70 hover:bg-rose-500/20"
-                  >
-                    Sil
+                  onClick={() => {
+                    if (!editingId) return
+                    setAutomations((prev) => prev.filter((entry) => entry.id !== editingId))
+                    setEditingId("")
+                    setEditingDraft({ title: "", template: "" })
+                    toast("Otomasyon silindi", { style: toastStyle, position: "top-right" })
+                  }}
+                  className="flex-1 rounded-lg border border-rose-400/40 bg-rose-500/10 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-rose-100 transition hover:border-rose-400/70 hover:bg-rose-500/20"
+                >
+                  Sil
                   </button>
                 </div>
               </div>
