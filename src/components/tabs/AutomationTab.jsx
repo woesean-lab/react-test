@@ -44,7 +44,7 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
     { id: "auto-3", title: "Problem eskalasyonu", template: "/templates/problem-escalation" },
   ])
   const [automationForm, setAutomationForm] = useState({ title: "", template: "" })
-  const [editingId, setEditingId] = useState(null)
+  const [editingId, setEditingId] = useState("")
   const [editingDraft, setEditingDraft] = useState({ title: "", template: "" })
 
   if (isLoading) {
@@ -205,108 +205,82 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
           <div className={`${panelClass} bg-ink-900/60`}>
             <div className="flex items-center justify-between">
               <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-                Otomasyon Duzenle
+                Duzenle / Sil
               </p>
               <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
                 {automations.length} kayit
               </span>
             </div>
-            <p className="mt-2 text-sm text-slate-300">
-              Var olan otomasyonlari duzenle veya sil.
-            </p>
+            <p className="mt-2 text-sm text-slate-300">Basit duzenleme ve silme alani.</p>
             <div className="mt-4 space-y-3">
-              {automations.length === 0 ? (
-                <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-400">
-                  Kayit bulunamadi.
-                </div>
-              ) : (
-                automations.map((item) => {
-                  const isEditing = editingId === item.id
-                  return (
-                    <div
-                      key={item.id}
-                      className="rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3"
-                    >
-                      {isEditing ? (
-                        <div className="space-y-3">
-                          <input
-                            type="text"
-                            value={editingDraft.title}
-                            onChange={(event) =>
-                              setEditingDraft((prev) => ({ ...prev, title: event.target.value }))
-                            }
-                            placeholder="Otomasyon basligi"
-                            className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
-                          />
-                          <input
-                            type="text"
-                            value={editingDraft.template}
-                            onChange={(event) =>
-                              setEditingDraft((prev) => ({ ...prev, template: event.target.value }))
-                            }
-                            placeholder="/templates/..."
-                            className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
-                          />
-                          <div className="flex flex-wrap gap-2">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                const title = editingDraft.title.trim()
-                                const template = editingDraft.template.trim()
-                                if (!title || !template) return
-                                setAutomations((prev) =>
-                                  prev.map((entry) =>
-                                    entry.id === item.id ? { ...entry, title, template } : entry,
-                                  ),
-                                )
-                                setEditingId(null)
-                              }}
-                              className="flex-1 rounded-lg border border-emerald-400/70 bg-emerald-500/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/30"
-                            >
-                              Kaydet
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => setEditingId(null)}
-                              className="flex-1 rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-white/20 hover:text-white"
-                            >
-                              Vazgec
-                            </button>
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex flex-wrap items-center justify-between gap-3">
-                          <div>
-                            <p className="text-sm font-semibold text-slate-100">{item.title}</p>
-                            <p className="text-xs text-slate-400">{item.template}</p>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setEditingId(item.id)
-                                setEditingDraft({ title: item.title, template: item.template })
-                              }}
-                              className="rounded-lg border border-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-white/20 hover:text-white"
-                            >
-                              Duzenle
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setAutomations((prev) => prev.filter((entry) => entry.id !== item.id))
-                              }
-                              className="rounded-lg border border-rose-400/40 bg-rose-500/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-wide text-rose-100 transition hover:border-rose-400/70 hover:bg-rose-500/20"
-                            >
-                              Sil
-                            </button>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  )
-                })
-              )}
+              <select
+                value={editingId}
+                onChange={(event) => {
+                  const value = event.target.value
+                  setEditingId(value)
+                  const selected = automations.find((entry) => entry.id === value)
+                  setEditingDraft({
+                    title: selected?.title ?? "",
+                    template: selected?.template ?? "",
+                  })
+                }}
+                className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
+              >
+                <option value="">Otomasyon sec</option>
+                {automations.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.title}
+                  </option>
+                ))}
+              </select>
+              <input
+                type="text"
+                value={editingDraft.title}
+                onChange={(event) =>
+                  setEditingDraft((prev) => ({ ...prev, title: event.target.value }))
+                }
+                placeholder="Otomasyon basligi"
+                className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
+              />
+              <input
+                type="text"
+                value={editingDraft.template}
+                onChange={(event) =>
+                  setEditingDraft((prev) => ({ ...prev, template: event.target.value }))
+                }
+                placeholder="/templates/..."
+                className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
+              />
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const title = editingDraft.title.trim()
+                    const template = editingDraft.template.trim()
+                    if (!editingId || !title || !template) return
+                    setAutomations((prev) =>
+                      prev.map((entry) =>
+                        entry.id === editingId ? { ...entry, title, template } : entry,
+                      ),
+                    )
+                  }}
+                  className="flex-1 rounded-lg border border-emerald-400/70 bg-emerald-500/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/30"
+                >
+                  Kaydet
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (!editingId) return
+                    setAutomations((prev) => prev.filter((entry) => entry.id !== editingId))
+                    setEditingId("")
+                    setEditingDraft({ title: "", template: "" })
+                  }}
+                  className="flex-1 rounded-lg border border-rose-400/40 bg-rose-500/10 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-rose-100 transition hover:border-rose-400/70 hover:bg-rose-500/20"
+                >
+                  Sil
+                </button>
+              </div>
             </div>
           </div>
         </div>
