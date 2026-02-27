@@ -110,7 +110,8 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
   }
 
   return (
-    <div className="space-y-6">
+    <>
+      <div className="space-y-6">
       <header className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-ink-900 via-ink-800 to-ink-700 p-4 shadow-card sm:p-6">
         <div className="flex flex-col gap-3 sm:gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-1.5 sm:space-y-2">
@@ -361,33 +362,33 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                     onClick={() => {
                       const title = editingDraft.title.trim()
                       const template = editingDraft.template.trim()
-                    if (!editingId || !title || !template) return
-                    setAutomations((prev) =>
-                      prev.map((entry) =>
-                        entry.id === editingId ? { ...entry, title, template } : entry,
-                      ),
-                    )
-                    toast.success("Otomasyon guncellendi", {
-                      style: toastStyle,
-                      position: "top-right",
-                    })
-                  }}
-                  className="flex-1 rounded-lg border border-emerald-400/70 bg-emerald-500/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/30"
-                >
-                  Kaydet
+                      if (!editingId || !title || !template) return
+                      setAutomations((prev) =>
+                        prev.map((entry) =>
+                          entry.id === editingId ? { ...entry, title, template } : entry,
+                        ),
+                      )
+                      toast.success("Otomasyon guncellendi", {
+                        style: toastStyle,
+                        position: "top-right",
+                      })
+                    }}
+                    className="flex-1 rounded-lg border border-emerald-400/70 bg-emerald-500/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/30"
+                  >
+                    Kaydet
                   </button>
                   <button
                     type="button"
-                  onClick={() => {
-                    if (!editingId) return
-                    setAutomations((prev) => prev.filter((entry) => entry.id !== editingId))
-                    setEditingId("")
-                    setEditingDraft({ title: "", template: "" })
-                    toast("Otomasyon silindi", { style: toastStyle, position: "top-right" })
-                  }}
-                  className="flex-1 rounded-lg border border-rose-400/40 bg-rose-500/10 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-rose-100 transition hover:border-rose-400/70 hover:bg-rose-500/20"
-                >
-                  Sil
+                    onClick={() => {
+                      if (!editingId) return
+                      setAutomations((prev) => prev.filter((entry) => entry.id !== editingId))
+                      setEditingId("")
+                      setEditingDraft({ title: "", template: "" })
+                      toast("Otomasyon silindi", { style: toastStyle, position: "top-right" })
+                    }}
+                    className="flex-1 rounded-lg border border-rose-400/40 bg-rose-500/10 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-rose-100 transition hover:border-rose-400/70 hover:bg-rose-500/20"
+                  >
+                    Sil
                   </button>
                 </div>
               </div>
@@ -395,10 +396,10 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
           </div>
         </div>
       </div>
-      </div>
-      {isConfirmOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-950/70 px-4 backdrop-blur-sm">
-          <div className="w-full max-w-md rounded-2xl border border-white/10 bg-ink-900/95 p-5 shadow-card">
+    </div>
+    {isConfirmOpen ? (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-950/70 px-4 backdrop-blur-sm">
+        <div className="w-full max-w-md rounded-2xl border border-white/10 bg-ink-900/95 p-5 shadow-card">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
               Onay
             </p>
