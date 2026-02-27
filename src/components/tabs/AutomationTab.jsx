@@ -64,41 +64,56 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
       </header>
 
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)]">
-        <div className={`${panelClass} bg-ink-900/60`}>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-                Otomasyon Calistir
-              </p>
-              <p className="mt-1 text-sm text-slate-300">Eklenen otomasyonu secip calistir.</p>
+        <div className={`${panelClass} relative overflow-hidden bg-ink-900/60`}>
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(110%_140%_at_0%_0%,rgba(59,130,246,0.18),transparent)]" />
+          <div className="pointer-events-none absolute -right-24 -top-24 h-56 w-56 rounded-full bg-emerald-500/10 blur-3xl" />
+          <div className="relative">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-400">
+                  Otomasyon Calistir
+                </p>
+                <p className="mt-1 text-sm text-slate-300">Eklenen otomasyonu secip calistir.</p>
+              </div>
+              <span className="rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
+                Hazir
+              </span>
             </div>
-            <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
-              Hazir
-            </span>
-          </div>
 
-          <div className="mt-4 flex flex-wrap items-center gap-3">
-            <select className="flex-1 rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100">
-              <option>Otomasyon sec</option>
-              <option>Siparis onay otomasyonu</option>
-              <option>Stok kontrol zinciri</option>
-              <option>Problem eskalasyonu</option>
-            </select>
-            <button
-              type="button"
-              className="rounded-lg border border-emerald-400/70 bg-emerald-500/15 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-50 shadow-glow transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/25"
-            >
-              Calistir
-            </button>
-          </div>
+            <div className="mt-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
+              <select className="w-full rounded-xl border border-white/10 bg-ink-950/60 px-4 py-2.5 text-sm text-slate-100 shadow-inner transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20">
+                <option>Otomasyon sec</option>
+                <option>Siparis onay otomasyonu</option>
+                <option>Stok kontrol zinciri</option>
+                <option>Problem eskalasyonu</option>
+              </select>
+              <button
+                type="button"
+                className="rounded-xl border border-emerald-400/70 bg-emerald-500/20 px-5 py-2.5 text-xs font-semibold uppercase tracking-wide text-emerald-50 shadow-glow transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/30"
+              >
+                Calistir
+              </button>
+            </div>
 
-          <div className="mt-4 rounded-2xl border border-white/10 bg-ink-900/70 px-4 py-3 text-sm text-slate-300">
-            Cikti alani
+            <div className="mt-4 rounded-2xl border border-white/10 bg-ink-950/60 px-4 py-4 text-sm text-slate-300 shadow-inner">
+              <div className="flex items-center justify-between">
+                <span className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
+                  Cikti
+                </span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                  Beklemede
+                </span>
+              </div>
+              <div className="mt-3 rounded-xl border border-dashed border-white/10 bg-ink-900/40 px-4 py-6 text-center text-xs text-slate-500">
+                Cikti alani
+              </div>
+            </div>
           </div>
         </div>
 
         <div className="space-y-4">
-          <div className={`${panelClass} bg-ink-900/60`}>
+          <div className={`${panelClass} relative overflow-hidden bg-ink-900/60`}>
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_160%_at_100%_0%,rgba(34,197,94,0.12),transparent)]" />
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
               Websocket Baglanti Ayarlari
             </p>
@@ -113,18 +128,19 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                 id="ws-url"
                 type="text"
                 placeholder="wss://ornek.com/ws"
-                className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
+                className="w-full rounded-xl border border-white/10 bg-ink-950/60 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
               />
               <button
                 type="button"
-                className="w-full rounded-lg border border-emerald-400/70 bg-emerald-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-emerald-50 shadow-glow transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/25"
+                className="w-full rounded-xl border border-emerald-400/70 bg-emerald-500/20 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-emerald-50 shadow-glow transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/30"
               >
                 Kaydet
               </button>
             </div>
           </div>
 
-          <div className={`${panelClass} bg-ink-900/60`}>
+          <div className={`${panelClass} relative overflow-hidden bg-ink-900/60`}>
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(120%_140%_at_0%_0%,rgba(14,165,233,0.12),transparent)]" />
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
               Yeni Otomasyon Ekle
             </p>
@@ -139,7 +155,7 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                 id="automation-title"
                 type="text"
                 placeholder="Otomasyon basligi"
-                className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
+                className="w-full rounded-xl border border-white/10 bg-ink-950/60 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
               />
               <label className="text-xs font-semibold text-slate-300" htmlFor="automation-template">
                 /templates
@@ -148,11 +164,11 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                 id="automation-template"
                 type="text"
                 placeholder="/templates/..."
-                className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
+                className="w-full rounded-xl border border-white/10 bg-ink-950/60 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
               />
               <button
                 type="button"
-                className="w-full rounded-lg border border-emerald-400/70 bg-emerald-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-emerald-50 shadow-glow transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/25"
+                className="w-full rounded-xl border border-emerald-400/70 bg-emerald-500/20 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-emerald-50 shadow-glow transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/30"
               >
                 Kaydet
               </button>
