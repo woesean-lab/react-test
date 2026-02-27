@@ -52,6 +52,8 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
   const [isRunning, setIsRunning] = useState(false)
   const [lastRunId, setLastRunId] = useState("")
   const [templateWarning, setTemplateWarning] = useState("")
+  const [confirmRunId, setConfirmRunId] = useState("")
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false)
   const toastStyle = {
     background: "rgba(15, 23, 42, 0.92)",
     color: "#e2e8f0",
@@ -59,6 +61,44 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
   }
 
   const filteredAutomations = automations
+
+  const runAutomation = (selected) => {
+    if (!selected) return
+    const now = new Date()
+    const time = now.toLocaleTimeString("tr-TR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    })
+    setIsRunning(true)
+    setLastRunId(selected.id)
+    toast("Otomasyon baslatildi", { style: toastStyle, position: "top-right" })
+    setRunLog((prev) => [
+      {
+        id: `log-${Date.now()}`,
+        time,
+        status: "running",
+        message: `${selected.title} calisiyor...`,
+      },
+      ...prev,
+    ])
+    window.setTimeout(() => {
+      const doneTime = new Date().toLocaleTimeString("tr-TR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+      setRunLog((prev) => [
+        {
+          id: `log-${Date.now()}-done`,
+          time: doneTime,
+          status: "success",
+          message: `${selected.title} tamamlandi.`,
+        },
+        ...prev,
+      ])
+      toast.success("Otomasyon tamamlandi", { style: toastStyle, position: "top-right" })
+      setIsRunning(false)
+    }, 1200)
+  }
 
   if (isLoading) {
     return <AutomationSkeleton panelClass={panelClass} />
@@ -120,46 +160,8 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                 disabled={!selectedAutomationId || isRunning}
                 onClick={() => {
                   if (!selectedAutomationId || isRunning) return
-                  const selected = automations.find((item) => item.id === selectedAutomationId)
-                  if (!selected) return
-                  const confirmed = window.confirm(
-                    `"${selected.title}" otomasyonunu calistirmak istiyor musun?`,
-                  )
-                  if (!confirmed) return
-                  const now = new Date()
-                  const time = now.toLocaleTimeString("tr-TR", {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })
-                  setIsRunning(true)
-                  setLastRunId(selectedAutomationId)
-                  toast("Otomasyon baslatildi", { style: toastStyle, position: "top-right" })
-                  setRunLog((prev) => [
-                    {
-                      id: `log-${Date.now()}`,
-                      time,
-                      status: "running",
-                      message: `${selected.title} calisiyor...`,
-                    },
-                    ...prev,
-                  ])
-                  window.setTimeout(() => {
-                    const doneTime = new Date().toLocaleTimeString("tr-TR", {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })
-                    setRunLog((prev) => [
-                      {
-                        id: `log-${Date.now()}-done`,
-                        time: doneTime,
-                        status: "success",
-                        message: `${selected.title} tamamlandi.`,
-                      },
-                      ...prev,
-                    ])
-                    toast.success("Otomasyon tamamlandi", { style: toastStyle, position: "top-right" })
-                    setIsRunning(false)
-                  }, 1200)
+                  setConfirmRunId(selectedAutomationId)
+                  setIsConfirmOpen(true)
                 }}
                 className="rounded-xl border border-emerald-400/70 bg-emerald-500/20 px-5 py-2.5 text-xs font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/30"
               >
@@ -389,5 +391,43 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
         </div>
       </div>
     </div>
+    {isConfirmOpen ? (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink-950/70 px-4 backdrop-blur-sm">
+        <div className="w-full max-w-md rounded-2xl border border-white/10 bg-ink-900/95 p-5 shadow-card">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+            Onay
+          </p>
+          <p className="mt-2 text-base font-semibold text-white">Otomasyon calistirilsin mi?</p>
+          <p className="mt-2 text-sm text-slate-300">
+            {automations.find((item) => item.id === confirmRunId)?.title ?? ""}
+          </p>
+          <div className="mt-4 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                const selected = automations.find((item) => item.id === confirmRunId)
+                setIsConfirmOpen(false)
+                setConfirmRunId("")
+                if (!selected) return
+                runAutomation(selected)
+              }}
+              className="flex-1 rounded-lg border border-emerald-400/70 bg-emerald-500/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/30"
+            >
+              Evet, calistir
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setIsConfirmOpen(false)
+                setConfirmRunId("")
+              }}
+              className="flex-1 rounded-lg border border-white/10 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-slate-200 transition hover:border-white/20 hover:text-white"
+            >
+              Iptal
+            </button>
+          </div>
+        </div>
+      </div>
+    ) : null}
   )
 }
