@@ -105,26 +105,28 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
         <div className="space-y-4">
           <div className={`${panelClass} bg-ink-900/60`}>
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-              Notlar
+              Websocket Baglanti Ayarlari
             </p>
             <p className="mt-2 text-sm text-slate-300">
-              DB baglantisi eklenince bu alandan kural setleri kaydedilecek. Simdilik
-              ekip icinde alinacak kararlar icin bu listeyi kullanabilirsin.
+              Otomasyon bildirimleri icin websocket sunucu adresini gir.
             </p>
-            <ul className="mt-4 space-y-2 text-xs text-slate-400">
-              <li className="flex items-start gap-2">
-                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-sky-400" />
-                Tetikleyici: satis girisi, stok seviyesi, problem durumu.
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-sky-400" />
-                Aksiyon: mesaj gonderme, gorev olusturma, bildirim gosterme.
-              </li>
-              <li className="flex items-start gap-2">
-                <span className="mt-1 h-1.5 w-1.5 rounded-full bg-sky-400" />
-                Hedef: is akisini otomatiklestirip manuel adimlari azaltmak.
-              </li>
-            </ul>
+            <div className="mt-4 space-y-3">
+              <label className="text-xs font-semibold text-slate-300" htmlFor="ws-url">
+                Websocket URL
+              </label>
+              <input
+                id="ws-url"
+                type="text"
+                placeholder="wss://ornek.com/ws"
+                className="w-full rounded-lg border border-white/10 bg-ink-900 px-3 py-2 text-sm text-slate-100 placeholder:text-slate-500"
+              />
+              <button
+                type="button"
+                className="w-full rounded-lg border border-emerald-400/70 bg-emerald-500/15 px-4 py-2.5 text-center text-xs font-semibold uppercase tracking-wide text-emerald-50 shadow-glow transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/25"
+              >
+                Kaydet
+              </button>
+            </div>
           </div>
 
           <div className={`${panelClass} bg-ink-900/60`}>
