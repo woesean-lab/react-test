@@ -50,17 +50,9 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
   const [runLog, setRunLog] = useState([])
   const [isRunning, setIsRunning] = useState(false)
   const [lastRunId, setLastRunId] = useState("")
-  const [automationFilter, setAutomationFilter] = useState("")
   const [templateWarning, setTemplateWarning] = useState("")
 
-  const filteredAutomations = automations.filter((item) => {
-    const q = automationFilter.trim().toLowerCase()
-    if (!q) return true
-    return (
-      item.title.toLowerCase().includes(q) ||
-      item.template.toLowerCase().includes(q)
-    )
-  })
+  const filteredAutomations = automations
 
   if (isLoading) {
     return <AutomationSkeleton panelClass={panelClass} />
@@ -290,93 +282,85 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                 Kaydet
               </button>
             </div>
-          </div>
-
-          <div className={`${panelClass} bg-ink-900/60`}>
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
-                Duzenle / Sil
-              </p>
-              <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
-                {automations.length} kayit
-              </span>
-            </div>
-            <p className="mt-2 text-sm text-slate-300">Basit duzenleme ve silme alani.</p>
-            <div className="mt-4 space-y-3">
-              <input
-                type="text"
-                value={automationFilter}
-                onChange={(event) => setAutomationFilter(event.target.value)}
-                placeholder="Ara (baslik veya template)"
-                className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
-              />
-              <select
-                value={editingId}
-                onChange={(event) => {
-                  const value = event.target.value
-                  setEditingId(value)
-                  const selected = automations.find((entry) => entry.id === value)
-                  setEditingDraft({
-                    title: selected?.title ?? "",
-                    template: selected?.template ?? "",
-                  })
-                }}
-                className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
-              >
-                <option value="">Otomasyon sec</option>
-                {filteredAutomations.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.title}
-                  </option>
-                ))}
-              </select>
-              <input
-                type="text"
-                value={editingDraft.title}
-                onChange={(event) =>
-                  setEditingDraft((prev) => ({ ...prev, title: event.target.value }))
-                }
-                placeholder="Otomasyon basligi"
-                className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
-              />
-              <input
-                type="text"
-                value={editingDraft.template}
-                onChange={(event) =>
-                  setEditingDraft((prev) => ({ ...prev, template: event.target.value }))
-                }
-                placeholder="/templates/..."
-                className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
-              />
-              <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const title = editingDraft.title.trim()
-                    const template = editingDraft.template.trim()
-                    if (!editingId || !title || !template) return
-                    setAutomations((prev) =>
-                      prev.map((entry) =>
-                        entry.id === editingId ? { ...entry, title, template } : entry,
-                      ),
-                    )
+            <div className="mt-6 border-t border-white/10 pt-4">
+              <div className="flex items-center justify-between">
+                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-400">
+                  Duzenle / Sil
+                </p>
+                <span className="rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-300">
+                  {automations.length} kayit
+                </span>
+              </div>
+              <p className="mt-2 text-sm text-slate-300">Basit duzenleme ve silme alani.</p>
+              <div className="mt-4 space-y-3">
+                <select
+                  value={editingId}
+                  onChange={(event) => {
+                    const value = event.target.value
+                    setEditingId(value)
+                    const selected = automations.find((entry) => entry.id === value)
+                    setEditingDraft({
+                      title: selected?.title ?? "",
+                      template: selected?.template ?? "",
+                    })
                   }}
-                  className="flex-1 rounded-lg border border-emerald-400/70 bg-emerald-500/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/30"
+                  className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
                 >
-                  Kaydet
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!editingId) return
-                    setAutomations((prev) => prev.filter((entry) => entry.id !== editingId))
-                    setEditingId("")
-                    setEditingDraft({ title: "", template: "" })
-                  }}
-                  className="flex-1 rounded-lg border border-rose-400/40 bg-rose-500/10 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-rose-100 transition hover:border-rose-400/70 hover:bg-rose-500/20"
-                >
-                  Sil
-                </button>
+                  <option value="">Otomasyon sec</option>
+                  {filteredAutomations.map((item) => (
+                    <option key={item.id} value={item.id}>
+                      {item.title}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  type="text"
+                  value={editingDraft.title}
+                  onChange={(event) =>
+                    setEditingDraft((prev) => ({ ...prev, title: event.target.value }))
+                  }
+                  placeholder="Otomasyon basligi"
+                  className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
+                />
+                <input
+                  type="text"
+                  value={editingDraft.template}
+                  onChange={(event) =>
+                    setEditingDraft((prev) => ({ ...prev, template: event.target.value }))
+                  }
+                  placeholder="/templates/..."
+                  className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
+                />
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const title = editingDraft.title.trim()
+                      const template = editingDraft.template.trim()
+                      if (!editingId || !title || !template) return
+                      setAutomations((prev) =>
+                        prev.map((entry) =>
+                          entry.id === editingId ? { ...entry, title, template } : entry,
+                        ),
+                      )
+                    }}
+                    className="flex-1 rounded-lg border border-emerald-400/70 bg-emerald-500/20 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/30"
+                  >
+                    Kaydet
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!editingId) return
+                      setAutomations((prev) => prev.filter((entry) => entry.id !== editingId))
+                      setEditingId("")
+                      setEditingDraft({ title: "", template: "" })
+                    }}
+                    className="flex-1 rounded-lg border border-rose-400/40 bg-rose-500/10 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-rose-100 transition hover:border-rose-400/70 hover:bg-rose-500/20"
+                  >
+                    Sil
+                  </button>
+                </div>
               </div>
             </div>
           </div>
