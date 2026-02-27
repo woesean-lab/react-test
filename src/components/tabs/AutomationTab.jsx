@@ -122,6 +122,10 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                   if (!selectedAutomationId || isRunning) return
                   const selected = automations.find((item) => item.id === selectedAutomationId)
                   if (!selected) return
+                  const confirmed = window.confirm(
+                    `"${selected.title}" otomasyonunu calistirmak istiyor musun?`,
+                  )
+                  if (!confirmed) return
                   const now = new Date()
                   const time = now.toLocaleTimeString("tr-TR", {
                     hour: "2-digit",
