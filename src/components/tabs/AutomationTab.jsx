@@ -46,6 +46,21 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
   const [automationForm, setAutomationForm] = useState({ title: "", template: "" })
   const [editingId, setEditingId] = useState("")
   const [editingDraft, setEditingDraft] = useState({ title: "", template: "" })
+  const [selectedAutomationId, setSelectedAutomationId] = useState("")
+  const [runLog, setRunLog] = useState([])
+  const [isRunning, setIsRunning] = useState(false)
+  const [lastRunId, setLastRunId] = useState("")
+  const [automationFilter, setAutomationFilter] = useState("")
+  const [templateWarning, setTemplateWarning] = useState("")
+
+  const filteredAutomations = automations.filter((item) => {
+    const q = automationFilter.trim().toLowerCase()
+    if (!q) return true
+    return (
+      item.title.toLowerCase().includes(q) ||
+      item.template.toLowerCase().includes(q)
+    )
+  })
 
   if (isLoading) {
     return <AutomationSkeleton panelClass={panelClass} />
@@ -90,9 +105,13 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
             </div>
 
             <div className="mt-5 grid gap-3 lg:grid-cols-[minmax(0,1fr)_auto]">
-              <select className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20">
-                <option>Otomasyon sec</option>
-                {automations.map((item) => (
+              <select
+                value={selectedAutomationId}
+                onChange={(event) => setSelectedAutomationId(event.target.value)}
+                className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
+              >
+                <option value="">Otomasyon sec</option>
+                {filteredAutomations.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.title}
                   </option>
@@ -100,9 +119,47 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
               </select>
               <button
                 type="button"
+                disabled={!selectedAutomationId || isRunning}
+                onClick={() => {
+                  if (!selectedAutomationId || isRunning) return
+                  const selected = automations.find((item) => item.id === selectedAutomationId)
+                  if (!selected) return
+                  const now = new Date()
+                  const time = now.toLocaleTimeString("tr-TR", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })
+                  setIsRunning(true)
+                  setLastRunId(selectedAutomationId)
+                  setRunLog((prev) => [
+                    {
+                      id: `log-${Date.now()}`,
+                      time,
+                      status: "running",
+                      message: `${selected.title} calisiyor...`,
+                    },
+                    ...prev,
+                  ])
+                  window.setTimeout(() => {
+                    const doneTime = new Date().toLocaleTimeString("tr-TR", {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                    setRunLog((prev) => [
+                      {
+                        id: `log-${Date.now()}-done`,
+                        time: doneTime,
+                        status: "success",
+                        message: `${selected.title} tamamlandi.`,
+                      },
+                      ...prev,
+                    ])
+                    setIsRunning(false)
+                  }, 1200)
+                }}
                 className="rounded-xl border border-emerald-400/70 bg-emerald-500/20 px-5 py-2.5 text-xs font-semibold uppercase tracking-wide text-emerald-50 transition hover:-translate-y-0.5 hover:border-emerald-300 hover:bg-emerald-500/30"
               >
-                Calistir
+                {isRunning ? "Calisiyor..." : "Calistir"}
               </button>
             </div>
 
@@ -112,11 +169,34 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                   Cikti
                 </span>
                 <span className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">
-                  Beklemede
+                  {lastRunId ? "Son calistirildi" : "Beklemede"}
                 </span>
               </div>
-              <div className="mt-3 rounded-xl border border-dashed border-white/10 bg-ink-900 px-4 py-6 text-center text-xs text-slate-500">
-                Cikti alani
+              <div className="mt-3 space-y-2">
+                {runLog.length === 0 ? (
+                  <div className="rounded-xl border border-dashed border-white/10 bg-ink-900 px-4 py-6 text-center text-xs text-slate-500">
+                    Cikti alani
+                  </div>
+                ) : (
+                  runLog.slice(0, 6).map((entry) => (
+                    <div
+                      key={entry.id}
+                      className="flex items-center justify-between rounded-xl border border-white/10 bg-ink-900 px-4 py-2 text-xs text-slate-200"
+                    >
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`h-2 w-2 rounded-full ${
+                            entry.status === "success"
+                              ? "bg-emerald-400"
+                              : "bg-amber-400"
+                          }`}
+                        />
+                        <span>{entry.message}</span>
+                      </div>
+                      <span className="text-[10px] text-slate-500">{entry.time}</span>
+                    </div>
+                  ))
+                )}
               </div>
             </div>
           </div>
@@ -183,12 +263,22 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                 }
                 className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
               />
+              {templateWarning ? (
+                <div className="rounded-lg border border-amber-400/30 bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
+                  {templateWarning}
+                </div>
+              ) : null}
               <button
                 type="button"
                 onClick={() => {
                   const title = automationForm.title.trim()
                   const template = automationForm.template.trim()
                   if (!title || !template) return
+                  if (!template.startsWith("/templates/")) {
+                    setTemplateWarning("Template yolu /templates/ ile baslamali.")
+                    return
+                  }
+                  setTemplateWarning("")
                   setAutomations((prev) => [
                     { id: `auto-${Date.now()}`, title, template },
                     ...prev,
@@ -213,6 +303,13 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
             </div>
             <p className="mt-2 text-sm text-slate-300">Basit duzenleme ve silme alani.</p>
             <div className="mt-4 space-y-3">
+              <input
+                type="text"
+                value={automationFilter}
+                onChange={(event) => setAutomationFilter(event.target.value)}
+                placeholder="Ara (baslik veya template)"
+                className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 placeholder:text-slate-500 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
+              />
               <select
                 value={editingId}
                 onChange={(event) => {
@@ -227,7 +324,7 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                 className="w-full rounded-xl border border-white/10 bg-ink-900 px-4 py-2.5 text-sm text-slate-100 transition focus:border-accent-400 focus:outline-none focus:ring-2 focus:ring-accent-500/30 hover:border-white/20"
               >
                 <option value="">Otomasyon sec</option>
-                {automations.map((item) => (
+                {filteredAutomations.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.title}
                   </option>
