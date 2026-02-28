@@ -228,27 +228,36 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                     Cikti alani
                   </div>
                 ) : (
-                  <div className="space-y-2">
-                    {runLog.slice(0, 10).map((entry) => (
-                      <div
-                        key={entry.id}
-                        className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3"
-                      >
-                        <div className="flex items-center justify-between">
+                  <div className="relative pl-5">
+                    <div className="absolute left-2 top-1 bottom-1 w-px bg-white/10" />
+                    <div className="space-y-4">
+                      {runLog.slice(0, 10).map((entry) => (
+                        <div key={entry.id} className="relative">
                           <span
-                            className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] ${
+                            className={`absolute -left-1.5 top-1.5 h-3 w-3 rounded-full border ${
                               entry.status === "success"
-                                ? "border border-emerald-400/40 bg-emerald-500/10 text-emerald-200"
-                                : "border border-amber-400/40 bg-amber-500/10 text-amber-200"
+                                ? "border-emerald-400/60 bg-emerald-400"
+                                : "border-amber-400/60 bg-amber-400"
                             }`}
-                          >
-                            {entry.status === "success" ? "Tamamlandi" : "Calisiyor"}
-                          </span>
-                          <span className="text-[10px] text-slate-500">{entry.time}</span>
+                          />
+                          <div className="rounded-xl border border-white/10 bg-ink-900/70 px-4 py-3">
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] uppercase tracking-[0.2em] text-slate-500">
+                                {entry.time}
+                              </span>
+                              <span
+                                className={`text-[10px] font-semibold uppercase tracking-[0.2em] ${
+                                  entry.status === "success" ? "text-emerald-200" : "text-amber-200"
+                                }`}
+                              >
+                                {entry.status === "success" ? "Tamamlandi" : "Calisiyor"}
+                              </span>
+                            </div>
+                            <p className="mt-2 text-sm text-slate-100">{entry.message}</p>
+                          </div>
                         </div>
-                        <p className="mt-2 text-sm text-slate-100">{entry.message}</p>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 )}
               </div>
