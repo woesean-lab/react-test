@@ -222,23 +222,27 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                   {lastRunId ? "Son calistirildi" : "Beklemede"}
                 </span>
               </div>
-              <div className="mt-2 rounded-xl border border-white/10 bg-ink-950/75 px-4 py-3 font-mono text-[11px] text-slate-300 shadow-inner">
+              <div className="mt-2 rounded-xl border border-white/10 bg-ink-900/60 px-4 py-3 text-sm text-slate-300 shadow-inner">
                 {runLog.length === 0 ? (
-                  <div className="text-slate-500">$ no-output</div>
+                  <div className="rounded-xl border border-dashed border-white/10 bg-ink-900/50 px-4 py-4 text-center text-xs text-slate-500">
+                    Cikti alani
+                  </div>
                 ) : (
-                  <div className="space-y-1">
+                  <div className="space-y-2">
                     {runLog.slice(0, 10).map((entry) => (
-                      <div key={entry.id} className="flex items-start gap-2">
-                        <span className="text-slate-500">[{entry.time}]</span>
-                        <span
-                          className={
-                            entry.status === "success" ? "text-emerald-300" : "text-amber-300"
-                          }
-                        >
-                          {entry.status === "success" ? "OK" : "RUN"}
-                        </span>
-                        <span className="text-slate-200">$</span>
-                        <span className="text-slate-200">{entry.message}</span>
+                      <div
+                        key={entry.id}
+                        className="flex items-center justify-between rounded-xl border border-white/10 bg-ink-900/70 px-4 py-2 text-xs text-slate-200"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`h-2 w-2 rounded-full ${
+                              entry.status === "success" ? "bg-emerald-400" : "bg-amber-400"
+                            }`}
+                          />
+                          <span>{entry.message}</span>
+                        </div>
+                        <span className="text-[10px] text-slate-500">{entry.time}</span>
                       </div>
                     ))}
                   </div>
