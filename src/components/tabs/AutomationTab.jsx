@@ -222,7 +222,7 @@ export default function AutomationTab({ panelClass, isLoading = false }) {
                   {lastRunId ? "Son calistirildi" : "Beklemede"}
                 </span>
               </div>
-              <div className="mt-2 rounded-xl border border-white/10 bg-ink-950/60 px-4 py-3 font-mono text-[11px] text-slate-300 shadow-inner">
+              <div className="mt-2 rounded-xl border border-white/10 bg-ink-950/75 px-4 py-3 font-mono text-[11px] text-slate-300 shadow-inner">
                 {runLog.length === 0 ? (
                   <div className="text-slate-500">
                     $ no-output
